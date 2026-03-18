@@ -22,8 +22,7 @@ The KI Hub repository is a community-driven collection of custom agents, instruc
 ├── workflows/        # Agentic Workflows (.md files for GitHub Actions automation)
 ├── plugins/          # Installable plugin packages (folders with plugin.json)
 ├── docs/             # Documentation for different resource types
-├── eng/              # Build and automation scripts
-└── scripts/          # Utility scripts
+└── eng/              # Build and automation scripts
 ```
 
 ## Setup Commands
@@ -166,16 +165,12 @@ npm run skill:validate
 
 # Build and verify README generation
 npm run build
-
-# Fix line endings (required before committing)
-bash scripts/fix-line-endings.sh
 ```
 
 Before committing:
 - Ensure all markdown front matter is correctly formatted
 - Verify file names follow the lower-case-with-hyphens convention
 - Run `npm run build` to update the README
-- **Always run `bash scripts/fix-line-endings.sh`** to normalize line endings (CRLF → LF)
 - Check that your new resource appears correctly in the README
 
 ## Code Style Guidelines
@@ -187,7 +182,7 @@ Before committing:
 - Use lower-case file names with hyphens as separators
 
 ### JavaScript/Node.js Scripts
-- Located in `eng/` and `scripts/` directories
+- Located in `eng/` directory
 - Follow Node.js ES module conventions (`.mjs` extension)
 - Use clear, descriptive function and variable names
 
@@ -195,22 +190,20 @@ Before committing:
 
 When creating a pull request:
 
-> **Important:** All pull requests should target the **`staged`** branch, not `main`.
+> **Important:** All pull requests should target the **`main`** branch.
 
 1. **README updates**: New files should automatically be added to the README when you run `npm run build`
 2. **Front matter validation**: Ensure all markdown files have the required front matter fields
 3. **File naming**: Verify all new files follow the lower-case-with-hyphens naming convention
 4. **Build check**: Run `npm run build` before committing to verify README generation
-5. **Line endings**: **Always run `bash scripts/fix-line-endings.sh`** to normalize line endings to LF (Unix-style)
-6. **Description**: Provide a clear description of what your agent/instruction does
-7. **Testing**: If adding a plugin, run `npm run plugin:validate` to ensure validity
+5. **Description**: Provide a clear description of what your agent/instruction does
+6. **Testing**: If adding a plugin, run `npm run plugin:validate` to ensure validity
 
 ### Pre-commit Checklist
 
 Before submitting your PR, ensure you have:
 - [ ] Run `npm install` (or `npm ci`) to install dependencies
 - [ ] Run `npm run build` to generate the updated README.md
-- [ ] Run `bash scripts/fix-line-endings.sh` to normalize line endings
 - [ ] Verified that all new files have proper front matter
 - [ ] Tested that your contribution works with GitHub Copilot
 - [ ] Checked that file names follow the naming convention
@@ -281,7 +274,10 @@ This is a community-driven project. Contributions are welcome! Please see:
 
 ## MCP Server
 
-The repository includes an MCP (Model Context Protocol) Server for searching and installing resources directly from this repository. Docker is required to run the server.
+The repository includes support for MCP (Model Context Protocol) servers.
+
+- The `github-agentic-workflows` server (`gh aw mcp-server`) runs through the GitHub CLI extension and does **not** require Docker.
+- Some third-party MCP servers referenced by specific agents may use Docker-based launch commands and require Docker on developer machines.
 
 ## License
 

@@ -2,7 +2,7 @@ name: Validate README.md
 
 on:
   pull_request:
-    branches: [staged]
+    branches: [main]
     types: [opened, synchronize, reopened]
     paths:
       - "instructions/**"
@@ -33,10 +33,13 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Validate plugins
         run: npm run plugin:validate
+
+      - name: Validate skills
+        run: npm run skill:validate
 
       - name: Update README.md
         run: npm start

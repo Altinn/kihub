@@ -2,7 +2,7 @@ name: Check Plugin Structure
 
 on:
   pull_request:
-    branches: [staged]
+    branches: [main]
     paths:
       - "plugins/**"
 
@@ -56,8 +56,7 @@ jobs:
                   if (files.length > 0) {
                     errors.push(
                       `${pluginPath}/${subdir}/ contains ${files.length} file(s): ${files.join(', ')}. ` +
-                      `Plugin directories on staged should only contain .github/plugin/plugin.json and README.md. ` +
-                      `Agent, command, and skill files are materialized automatically during publish to main.`
+                      `Plugin directories should only contain .github/plugin/plugin.json and README.md.`
                     );
                   }
                 }
@@ -82,11 +81,11 @@ jobs:
               const body = [
                 '⚠️ **Materialized files or symlinks detected in plugin directories**',
                 '',
-                'Plugin directories on the `staged` branch should only contain:',
+                'Plugin directories should only contain:',
                 '- `.github/plugin/plugin.json` (metadata)',
                 '- `README.md`',
                 '',
-                'Agent, command, and skill files are copied in automatically when publishing to `main`.',
+                'Agent, command, and skill files should not be committed under plugin directories.',
                 '',
                 '**Issues found:**',
                 ...errors.map(e => `- ${e}`),
@@ -95,16 +94,7 @@ jobs:
                 '',
                 '### How to fix',
                 '',
-                'It looks like your branch may be based on `main` (which contains materialized files). Here are two options:',
-                '',
-                '**Option 1: Rebase onto `staged`** (recommended if you have few commits)',
-                '```bash',
-                `git fetch origin staged`,
-                `git rebase --onto origin/staged origin/main ${prBranch}`,
-                `git push --force-with-lease`,
-                '```',
-                '',
-                '**Option 2: Remove the extra files manually**',
+                '**Remove the extra files manually**',
                 '```bash',
                 '# Remove materialized files from plugin directories',
                 'find plugins/ -mindepth 2 -maxdepth 2 -type d \\( -name agents -o -name commands -o -name skills \\) -exec rm -rf {} +',
@@ -123,7 +113,7 @@ jobs:
                 body
               });
 
-              core.setFailed('Plugin directories contain materialized files or symlinks that should not be on staged');
+              core.setFailed('Plugin directories contain materialized files or symlinks that should not be committed');
             } else {
               console.log('✅ All plugin directories are clean');
             }
