@@ -1,0 +1,24 @@
+{
+  "name": "gem-team",
+  "description": "A modular multi-agent team for complex project execution with DAG-based planning, parallel execution, TDD verification, and automated testing with energetic team lead.",
+  "version": "1.2.1",
+  "author": {
+    "name": "Awesome Copilot Community"
+  },
+  "repository": "https://github.com/github/awesome-copilot",
+  "license": "MIT",
+  "keywords": [
+    "multi-agent",
+    "orchestration",
+    "dag-planning",
+    "parallel-execution",
+    "tdd",
+    "verification",
+    "automation",
+    "security",
+    "prd"
+  ],
+  "agents": [
+    "./agents"
+  ]
+}
