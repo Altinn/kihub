@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <!-- Canvas Background (White) -->
+  <rect width="100%" height="100%" fill="#FFFFFF" />
+
+  <!-- BACKGROUND LANDSCAPE & SKY -->
+  <g>
+    <!-- Left Abstract Mountain -->
+    <polygon points="-20,150 250,350 -20,350" fill="#1E2734" />
+    
+    <!-- Right Abstract Mountain -->
+    <polygon points="820,100 500,350 820,350" fill="#1E2734" />
+
+    <!-- Massive Golden Sun (Centered) -->
+    <circle cx="400" cy="350" r="220" fill="#E59E29" />
+
+    <!-- Coral Red Ground / Horizon -->
+    <rect x="0" y="350" width="800" height="250" fill="#F05D61" />
+  </g>
+
+  <!-- CLOUDS (Bright Blue) -->
+  <g fill="#1A85FF">
+    <!-- Top Left Cloud -->
+    <rect x="60" y="70" width="160" height="40" rx="20" />
+    <circle cx="100" cy="60" r="30" />
+    <circle cx="160" cy="50" r="45" />
+
+    <!-- Right Cloud Cluster -->
+    <rect x="600" y="90" width="150" height="40" rx="20" />
+    <circle cx="640" cy="75" r="35" />
+    <circle cx="700" cy="85" r="30" />
+  </g>
+
+  <!-- FOREGROUND: THE AI AGENT -->
+  <g>
+    <!-- Agent Body Base -->
+    <path d="M 230,600 C 230,450 300,420 400,420 C 500,420 570,450 570,600 Z" fill="#1E2734" />
+
+    <!-- Left Arm (Pointing / Guiding the first node) -->
+    <!-- Cream Outline -->
+    <path d="M 270,460 Q 150,440 220,340" fill="none" stroke="#FFE5E0" stroke-width="36" stroke-linecap="round" />
+    <!-- Dark Blue Arm -->
+    <path d="M 270,460 Q 150,440 220,340" fill="none" stroke="#1E2734" stroke-width="30" stroke-linecap="round" />
+    <!-- Pointing Hand details -->
+    <circle cx="220" cy="340" r="15" fill="#1E2734" />
+
+    <!-- Right Arm (Actively holding the workflow connector plug) -->
+    <!-- Cream Outline -->
+    <path d="M 530,460 Q 660,440 560,285" fill="none" stroke="#FFE5E0" stroke-width="36" stroke-linecap="round" />
+    <!-- Dark Blue Arm -->
+    <path d="M 530,460 Q 660,440 560,285" fill="none" stroke="#1E2734" stroke-width="30" stroke-linecap="round" />
+    <!-- Hand Base -->
+    <circle cx="560" cy="285" r="15" fill="#1E2734" />
+
+    <!-- Agent Head (Floating, focused on the connection) -->
+    <rect x="320" y="140" width="160" height="120" rx="45" fill="#1E2734" stroke="#FFE5E0" stroke-width="4" />
+    
+    <!-- Center Antenna -->
+    <line x1="400" y1="140" x2="400" y2="80" stroke="#1E2734" stroke-width="8" stroke-linecap="round" />
+    <circle cx="400" cy="80" r="12" fill="#F05D61" />
+    <circle cx="400" cy="80" r="4" fill="#FFFFFF" />
+
+    <!-- Bright Blue Visor -->
+    <rect x="350" y="175" width="100" height="55" rx="20" fill="#1A85FF" />
+    
+    <!-- Smiling Face Details (Looking Right towards the action) -->
+    <!-- Left eye -->
+    <path d="M 380,195 Q 388,185 396,195" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" />
+    <!-- Right eye -->
+    <path d="M 415,195 Q 423,185 431,195" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" />
+    <!-- Smile -->
+    <path d="M 390,210 Q 408,230 425,210" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" />
+  </g>
+
+  <!-- THE WORKFLOW NODES & EDGES -->
+  <g>
+    <!-- Edge 1 (Completed Connection: Node 1 -> Node 2) -->
+    <path d="M 200,285 C 270,285 270,465 340,465" fill="none" stroke="#1A85FF" stroke-width="8" stroke-dasharray="14, 14" stroke-linecap="round" />
+    <!-- Data particle traveling on Edge 1 -->
+    <circle cx="270" cy="375" r="6" fill="#FFFFFF" />
+
+    <!-- Edge 2 (Active Connection: Node 2 -> Agent's Hand) -->
+    <path d="M 460,465 C 500,465 520,285 560,285" fill="none" stroke="#E59E29" stroke-width="8" stroke-dasharray="14, 14" stroke-linecap="round" />
+    
+    <!-- The Plug in Agent's Hand -->
+    <rect x="550" y="270" width="24" height="30" rx="6" fill="#1E2734" stroke="#E59E29" stroke-width="4" />
+    <line x1="574" y1="285" x2="585" y2="285" stroke="#E59E29" stroke-width="6" stroke-linecap="round" />
+
+    <!-- NODE 1: Trigger / Input (Left) -->
+    <rect x="80" y="240" width="120" height="90" rx="20" fill="#1E2734" stroke="#FFE5E0" stroke-width="4" />
+    <circle cx="200" cy="285" r="8" fill="#1A85FF" /> <!-- Output Port -->
+    <!-- Lightning Icon -->
+    <polygon points="120,270 135,255 145,255 130,280 145,280 125,305 130,290 115,290" fill="#1A85FF" />
+    <!-- Code Lines -->
+    <rect x="155" y="265" width="30" height="6" rx="3" fill="#FFFFFF" opacity="0.8" />
+    <rect x="155" y="280" width="20" height="6" rx="3" fill="#FFFFFF" opacity="0.5" />
+
+    <!-- NODE 2: Processing / AI Model (Center Bottom) -->
+    <!-- This sits slightly in front of the Agent's belly -->
+    <rect x="340" y="420" width="120" height="90" rx="20" fill="#1E2734" stroke="#FFE5E0" stroke-width="4" />
+    <circle cx="340" cy="465" r="8" fill="#1A85FF" /> <!-- Input Port -->
+    <circle cx="460" cy="465" r="8" fill="#E59E29" /> <!-- Output Port -->
+    <!-- Sync / Process Icon -->
+    <path d="M 370,455 A 15,15 0 0,1 395,450 M 395,475 A 15,15 0 0,1 370,470" fill="none" stroke="#F05D61" stroke-width="4" stroke-linecap="round" />
+    <polygon points="395,445 402,450 395,455" fill="#F05D61" />
+    <polygon points="370,480 363,475 370,470" fill="#F05D61" />
+    <!-- Code Lines -->
+    <rect x="410" y="445" width="35" height="6" rx="3" fill="#FFFFFF" opacity="0.8" />
+    <rect x="410" y="460" width="25" height="6" rx="3" fill="#FFFFFF" opacity="0.8" />
+    <rect x="410" y="475" width="30" height="6" rx="3" fill="#FFFFFF" opacity="0.5" />
+
+    <!-- NODE 3: Output / Action (Right) -->
+    <rect x="600" y="240" width="120" height="90" rx="20" fill="#1E2734" stroke="#FFE5E0" stroke-width="4" />
+    <!-- Unconnected Input Port (Waiting for the Agent) -->
+    <circle cx="600" cy="285" r="10" fill="none" stroke="#E59E29" stroke-width="4" stroke-dasharray="4, 4" />
+    <!-- Golden Star Icon -->
+    <polygon points="640,260 645,272 658,272 648,280 651,292 640,285 629,292 632,280 622,272 635,272" fill="#E59E29" />
+    <!-- Code Lines -->
+    <rect x="670" y="265" width="35" height="6" rx="3" fill="#FFFFFF" opacity="0.8" />
+    <rect x="670" y="280" width="20" height="6" rx="3" fill="#FFFFFF" opacity="0.5" />
+  </g>
+
+  <!-- AMBIENT WORKFLOW PARTICLES (Indicating processing activity) -->
+  <g fill="#FFFFFF">
+    <circle cx="320" cy="420" r="3" />
+    <circle cx="480" cy="430" r="4" />
+    <circle cx="590" cy="270" r="3" />
+    <circle cx="100" cy="220" r="4" fill="#1A85FF" />
+    <circle cx="680" cy="220" r="5" fill="#E59E29" />
+  </g>
+
+</svg>

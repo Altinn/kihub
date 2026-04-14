@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <!-- Canvas Background (White) -->
+  <rect width="100%" height="100%" fill="#FFFFFF" />
+
+  <!-- BACKGROUND LANDSCAPE -->
+  <g>
+    <!-- Left Abstract Mountain -->
+    <polygon points="0,100 300,350 0,350" fill="#1E2734" />
+    
+    <!-- Right Abstract Mountain -->
+    <polygon points="800,180 400,350 800,350" fill="#1E2734" />
+
+    <!-- Massive Golden Sun -->
+    <circle cx="250" cy="350" r="220" fill="#E59E29" />
+
+    <!-- Coral Red Ground / Horizon -->
+    <rect x="0" y="350" width="800" height="250" fill="#F05D61" />
+  </g>
+
+  <!-- CLOUDS (Bright Blue) -->
+  <g fill="#1A85FF">
+    <!-- Top Left Cloud -->
+    <rect x="50" y="80" width="140" height="40" rx="20" />
+    <circle cx="100" cy="70" r="30" />
+    
+    <!-- Top Right Cloud -->
+    <rect x="550" y="60" width="120" height="30" rx="15" />
+    <circle cx="580" cy="55" r="20" />
+  </g>
+
+  <!-- FLOATING INSTRUCTION / CODE PANEL -->
+  <g transform="rotate(4, 150, 100)">
+    <!-- Terminal Background -->
+    <rect x="60" y="50" width="170" height="110" rx="15" fill="#1E2734" stroke="#FFE5E0" stroke-width="4" />
+    
+    <!-- Terminal Window Buttons -->
+    <circle cx="85" cy="75" r="6" fill="#F05D61" />
+    <circle cx="105" cy="75" r="6" fill="#E59E29" />
+    <circle cx="125" cy="75" r="6" fill="#1A85FF" />
+    
+    <!-- "Code / Step" Lines -->
+    <rect x="85" y="100" width="110" height="8" rx="4" fill="#FFFFFF" />
+    <rect x="85" y="120" width="80" height="8" rx="4" fill="#FFFFFF" />
+    <rect x="85" y="140" width="50" height="8" rx="4" fill="#FFFFFF" />
+  </g>
+
+  <!-- THE MAP / BLUEPRINT -->
+  <g transform="rotate(-6, 350, 280)">
+    <!-- Map Base Document -->
+    <rect x="150" y="130" width="400" height="300" rx="20" fill="#FFFFFF" stroke="#1E2734" stroke-width="12" />
+    
+    <!-- Subtle Blueprint Grid / Folds -->
+    <line x1="283" y1="130" x2="283" y2="430" stroke="#1E2734" stroke-width="4" opacity="0.1" />
+    <line x1="416" y1="130" x2="416" y2="430" stroke="#1E2734" stroke-width="4" opacity="0.1" />
+    <line x1="150" y1="230" x2="550" y2="230" stroke="#1E2734" stroke-width="4" opacity="0.1" />
+    <line x1="150" y1="330" x2="550" y2="330" stroke="#1E2734" stroke-width="4" opacity="0.1" />
+
+    <!-- Instruction Text Blocks on the Map -->
+    <rect x="180" y="160" width="80" height="12" rx="6" fill="#1E2734" opacity="0.15" />
+    <rect x="180" y="180" width="120" height="12" rx="6" fill="#1E2734" opacity="0.15" />
+    <rect x="360" y="380" width="100" height="12" rx="6" fill="#1E2734" opacity="0.15" />
+    <rect x="360" y="400" width="60" height="12" rx="6" fill="#1E2734" opacity="0.15" />
+
+    <!-- Compass Motif in corner -->
+    <circle cx="480" cy="370" r="25" fill="none" stroke="#1E2734" stroke-width="4" opacity="0.15" />
+    <polygon points="480,335 488,370 480,405 472,370" fill="#F05D61" opacity="0.8" />
+    <polygon points="445,370 480,362 515,370 480,378" fill="#1A85FF" opacity="0.8" />
+
+    <!-- Dashed Instruction Path -->
+    <path d="M 220,350 C 220,250 320,300 380,220 C 440,140 500,180 500,180" fill="none" stroke="#1A85FF" stroke-width="14" stroke-linecap="round" stroke-dasharray="18, 22" />
+    
+    <!-- Start Node -->
+    <circle cx="220" cy="350" r="18" fill="#1E2734" />
+    <circle cx="220" cy="350" r="6" fill="#FFFFFF" />
+
+    <!-- Destination Pin -->
+    <g transform="translate(500, 180)">
+      <path d="M 0,0 C -20,-25 -30,-45 -30,-65 C -30,-85 -15,-100 0,-100 C 15,-100 30,-85 30,-65 C 30,-45 20,-25 0,0 Z" fill="#F05D61" stroke="#1E2734" stroke-width="8" stroke-linejoin="round" />
+      <circle cx="0" cy="-65" r="14" fill="#FFFFFF" />
+      <circle cx="0" cy="-65" r="6" fill="#1E2734" />
+    </g>
+  </g>
+
+  <!-- MAGIC DESTINATION SPARKLES -->
+  <g fill="#E59E29">
+    <path d="M 520,110 Q 520,125 505,125 Q 520,125 520,140 Q 520,125 535,125 Q 520,125 520,110 Z" />
+    <path d="M 570,160 Q 570,170 560,170 Q 570,170 570,180 Q 570,170 580,170 Q 570,170 570,160 Z" />
+  </g>
+
+  <!-- THE FRIENDLY AI AGENT (Right side, pointing at instructions) -->
+  <g>
+    <!-- Agent Body Base -->
+    <path d="M 520,600 C 520,450 620,320 750,320 L 800,320 L 800,600 Z" fill="#1E2734" />
+
+    <!-- Agent Head -->
+    <rect x="620" y="200" width="130" height="110" rx="40" fill="#1E2734" stroke="#FFE5E0" stroke-width="4" />
+    
+    <!-- Antenna -->
+    <line x1="685" y1="200" x2="685" y2="150" stroke="#1E2734" stroke-width="8" stroke-linecap="round" />
+    <circle cx="685" cy="150" r="10" fill="#1A85FF" />
+    <circle cx="685" cy="150" r="3" fill="#FFFFFF" />
+
+    <!-- Visor (Looking slightly left) -->
+    <rect x="635" y="235" width="70" height="45" rx="18" fill="#1A85FF" />
+    
+    <!-- Friendly Face in Visor -->
+    <!-- Happy eye -->
+    <path d="M 650,250 Q 660,265 670,250" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" />
+    <!-- Happy smile corner -->
+    <path d="M 645,265 Q 660,280 675,265" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+
+    <!-- AGENT'S POINTING ARM -->
+    <!-- Cream Outline for body separation -->
+    <path d="M 600,450 Q 480,500 400,340" fill="none" stroke="#FFE5E0" stroke-width="44" stroke-linecap="round" />
+    <!-- Solid Dark Blue Arm -->
+    <path d="M 600,450 Q 480,500 400,340" fill="none" stroke="#1E2734" stroke-width="36" stroke-linecap="round" />
+    
+    <!-- Hand / Fist Pointing -->
+    <circle cx="400" cy="340" r="25" fill="#1E2734" />
+    <path d="M 405,335 L 340,270" fill="none" stroke="#1E2734" stroke-width="18" stroke-linecap="round" />
+    <!-- Small cream highlight to define the thumb on the hand -->
+    <path d="M 390,360 Q 380,345 395,330" fill="none" stroke="#FFE5E0" stroke-width="4" stroke-linecap="round" />
+  </g>
+
+</svg>

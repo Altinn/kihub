@@ -5,14 +5,14 @@ import Modal from '../components/Modal.astro';
 const base = import.meta.env.BASE_URL;
 
 const cards = [
-  { id: 'agents', title: 'Agents', desc: 'Custom agents', countId: 'agents', countText: 'skills', color: '#5650a3', lightColor: '#a19ef4' },
-  { id: 'instructions', title: 'Instructions', desc: 'Coding standards', countId: 'instructions', countText: 'instructions', color: '#9c3f59', lightColor: '#d96a7d' },
-  { id: 'skills', title: 'Skills', desc: 'Self-contained instructions', countId: 'skills', countText: 'skills', color: '#1d8c4c', lightColor: '#70d696' },
-  { id: 'hooks', title: 'Hooks', desc: 'Automated workflows', countId: 'hooks', countText: 'hooks', color: '#da761a', lightColor: '#ffb471' },
-  { id: 'workflows', title: 'Workflows', desc: 'AI-powered automations', countId: 'workflows', countText: 'workflows', color: '#7a7a13', lightColor: '#c3c355' },
-  { id: 'plugins', title: 'Plugins', desc: 'Curated plugins', countId: 'plugins', countText: 'plugins', color: '#2f8196', lightColor: '#71daeb' },
-  { id: 'tools', title: 'Tools', desc: 'MCP servers', countId: 'tools', countText: 'tools', color: '#5650a3', lightColor: '#a19ef4' },
-  { id: 'learning-hub', title: 'Learning Hub', desc: 'Articles and guides', countId: null, countText: 'articles', color: '#9c3f59', lightColor: '#d96a7d' },
+  { id: 'agents', title: 'Agents', desc: 'Custom agents', countId: 'agents', countText: 'skills', color: '#5650a3', lightColor: '#a19ef4', image: 'images/agents.svg' },
+  { id: 'instructions', title: 'Instructions', desc: 'Coding standards', countId: 'instructions', countText: 'instructions', color: '#9c3f59', lightColor: '#d96a7d', image: 'images/instructions.svg' },
+  { id: 'skills', title: 'Skills', desc: 'Self-contained instructions', countId: 'skills', countText: 'skills', color: '#1d8c4c', lightColor: '#70d696', image: 'images/skills.svg' },
+  { id: 'hooks', title: 'Hooks', desc: 'Automated workflows', countId: 'hooks', countText: 'hooks', color: '#da761a', lightColor: '#ffb471', image: 'images/hooks.svg' },
+  { id: 'workflows', title: 'Workflows', desc: 'AI-powered automations', countId: 'workflows', countText: 'workflows', color: '#7a7a13', lightColor: '#c3c355', image: 'images/workflows.svg' },
+  { id: 'plugins', title: 'Plugins', desc: 'Curated plugins', countId: 'plugins', countText: 'plugins', color: '#2f8196', lightColor: '#71daeb', image: 'images/plugins.svg' },
+  { id: 'tools', title: 'Tools', desc: 'MCP servers', countId: 'tools', countText: 'tools', color: '#5650a3', lightColor: '#a19ef4', image: 'images/tools.svg' },
+  { id: 'learning-hub', title: 'Learning Hub', desc: 'Articles and guides', countId: null, countText: 'articles', color: '#9c3f59', lightColor: '#d96a7d', image: 'images/learninghub.svg' },
 ];
 ---
 
@@ -33,19 +33,17 @@ const cards = [
     <!-- Hero Section -->
     <section class="v2-hero" aria-labelledby="hero-heading">
       <div class="v2-hero-content">
-        <h1 id="hero-heading">Let's connect people<br/>to bring ideas to life</h1>
+        <h1 id="hero-heading">Explore our growing hub for<br/>Agents, Skills & Instructions</h1>
         <p class="v2-hero-subtitle">
           DigDirs community-contributed agents, instructions, and skills to enhance your AI native experience
         </p>
-        
-        <div class="v2-hero-pill">AI content Generation ...</div>
         
         <div class="v2-hero-search">
           <label for="global-search" class="sr-only">Search all resources</label>
           <input
             type="text"
             id="global-search"
-            placeholder="Search for any service..."
+            placeholder="Search for any agent, skill, instruction..."
             autocomplete="off"
           />
           <button class="v2-search-btn" aria-label="Search">
@@ -60,15 +58,15 @@ const cards = [
       
       <div class="v2-hero-graphics">
         <div class="v2-circle v2-circle-1">
-          <img src="https://placehold.co/400x400/D68F98/ffffff?text=Creator" alt="Content Creator placeholder"/>
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400&h=400" alt="Content Creator"/>
           <span class="v2-circle-label">Content Creator</span>
         </div>
         <div class="v2-circle v2-circle-2">
-          <img src="https://placehold.co/400x400/8FA2D6/ffffff?text=Executive" alt="Executive placeholder"/>
+          <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400&h=400" alt="Executive"/>
           <span class="v2-circle-label">Executive</span>
         </div>
         <div class="v2-circle v2-circle-3">
-          <img src="https://placehold.co/400x400/8FD6A2/ffffff?text=Designer" alt="Designer placeholder"/>
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400&h=400" alt="Designer"/>
           <span class="v2-circle-label">Designer</span>
         </div>
       </div>
@@ -80,7 +78,7 @@ const cards = [
         {cards.map(card => (
           <a href={`${base}${card.id}/`} class="v2-card" id={`card-${card.id}`} style={`background-color: ${card.color};`}>
             <div class="v2-card-image-wrap" style={`background-color: ${card.lightColor};`}>
-               <img src={`https://placehold.co/400x300/${card.lightColor.replace('#','')}/ffffff?text=${card.title}`} alt={`${card.title} graphic`} />
+               <img src={card.image ? `${base}${card.image}` : `https://placehold.co/400x300/${card.lightColor.replace('#','')}/ffffff?text=${card.title}`} alt={`${card.title} graphic`} />
             </div>
             <div class="v2-card-content">
               <h3>{card.title}</h3>
@@ -351,10 +349,10 @@ const cards = [
   }
 
   .v2-card h3 {
-    font-size: 0.95rem !important;
-    font-weight: 500 !important;
-    margin: 0 0 0.25rem 0 !important;
-    line-height: 1.3 !important;
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+    margin: 0 0 0.5rem 0 !important;
+    line-height: 1.1 !important;
     color: #fff !important;
   }
 

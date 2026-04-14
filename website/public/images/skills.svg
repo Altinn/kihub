@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <!-- Canvas Background (White) -->
+  <rect width="100%" height="100%" fill="#FFFFFF" />
+
+  <!-- BACKGROUND LANDSCAPE -->
+  <g>
+    <!-- Left Abstract Mountain -->
+    <polygon points="0,150 250,350 0,350" fill="#1E2734" />
+    
+    <!-- Right Abstract Mountain -->
+    <polygon points="800,100 500,350 800,350" fill="#1E2734" />
+
+    <!-- Massive Golden Sun -->
+    <circle cx="400" cy="350" r="220" fill="#E59E29" />
+
+    <!-- Coral Red Ground / Horizon -->
+    <rect x="0" y="350" width="800" height="250" fill="#F05D61" />
+  </g>
+
+  <!-- CLOUDS (Bright Blue) -->
+  <g fill="#1A85FF">
+    <!-- Left Cloud Cluster -->
+    <rect x="60" y="120" width="160" height="40" rx="20" />
+    <circle cx="100" cy="110" r="30" />
+    <circle cx="160" cy="100" r="45" />
+
+    <!-- Right Cloud Cluster -->
+    <rect x="600" y="90" width="150" height="40" rx="20" />
+    <circle cx="640" cy="75" r="35" />
+    <circle cx="700" cy="85" r="30" />
+  </g>
+
+  <!-- THE SKILLS ARC (Dashed connection line) -->
+  <path d="M 180,240 C 240,80 560,80 620,240" fill="none" stroke="#1E2734" stroke-width="4" stroke-dasharray="12, 12" opacity="0.4" />
+
+  <!-- SKILL NODES / BADGES -->
+  <g>
+    <!-- Node 1: Logic & Processing (Gear) -->
+    <circle cx="180" cy="240" r="40" fill="#1A85FF" stroke="#FFFFFF" stroke-width="6" />
+    <g transform="translate(180, 240)">
+      <path d="M 0,-20 L 0,20 M -20,0 L 20,0 M -14,-14 L 14,14 M -14,14 L 14,-14" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" />
+      <circle cx="0" cy="0" r="14" fill="none" stroke="#FFFFFF" stroke-width="6" />
+      <circle cx="0" cy="0" r="9" fill="#1A85FF" />
+    </g>
+
+    <!-- Node 2: Speed & Execution (Lightning) -->
+    <circle cx="290" cy="140" r="45" fill="#E59E29" stroke="#FFFFFF" stroke-width="6" />
+    <g transform="translate(290, 140)">
+      <polygon points="6,-20 -15,4 2,4 -6,20 15,-4 -2,-4" fill="#FFFFFF" />
+    </g>
+
+    <!-- Node 3: Connectivity & Data (Network Graph) -->
+    <circle cx="510" cy="140" r="45" fill="#F05D61" stroke="#FFFFFF" stroke-width="6" />
+    <g transform="translate(510, 140)">
+      <line x1="-14" y1="-12" x2="14" y2="-5" stroke="#FFFFFF" stroke-width="4" />
+      <line x1="-14" y1="-12" x2="0" y2="16" stroke="#FFFFFF" stroke-width="4" />
+      <line x1="14" y1="-5" x2="0" y2="16" stroke="#FFFFFF" stroke-width="4" />
+      <circle cx="-14" cy="-12" r="7" fill="#FFFFFF" />
+      <circle cx="14" cy="-5" r="6" fill="#FFFFFF" />
+      <circle cx="0" cy="16" r="9" fill="#FFFFFF" />
+    </g>
+
+    <!-- Node 4: Generative Creativity (Sparkles) -->
+    <circle cx="620" cy="240" r="40" fill="#1A85FF" stroke="#FFFFFF" stroke-width="6" />
+    <g transform="translate(620, 240)">
+      <path d="M -5,-22 Q -5,0 15,0 Q -5,0 -5,22 Q -5,0 -25,0 Q -5,0 -5,-22 Z" fill="#FFFFFF" />
+      <path d="M 12,-16 Q 12,-6 22,-6 Q 12,-6 12,4 Q 12,-6 2,-6 Q 12,-6 12,-16 Z" fill="#FFFFFF" />
+    </g>
+  </g>
+
+  <!-- FOREGROUND: THE FRIENDLY AI AGENT -->
+  <g>
+    <!-- Agent Body Base -->
+    <path d="M 230,600 C 230,450 300,420 400,420 C 500,420 570,450 570,600 Z" fill="#1E2734" />
+
+    <!-- Left Arm (Reaching up to support the skills arc) -->
+    <!-- Cream Outline for Arm Separation -->
+    <path d="M 280,480 Q 150,440 180,330" fill="none" stroke="#FFE5E0" stroke-width="36" stroke-linecap="round" />
+    <!-- Solid Dark Blue Arm -->
+    <path d="M 280,480 Q 150,440 180,330" fill="none" stroke="#1E2734" stroke-width="30" stroke-linecap="round" />
+
+    <!-- Right Arm (Reaching up to support the skills arc) -->
+    <!-- Cream Outline for Arm Separation -->
+    <path d="M 520,480 Q 650,440 620,330" fill="none" stroke="#FFE5E0" stroke-width="36" stroke-linecap="round" />
+    <!-- Solid Dark Blue Arm -->
+    <path d="M 520,480 Q 650,440 620,330" fill="none" stroke="#1E2734" stroke-width="30" stroke-linecap="round" />
+
+    <!-- Agent Head -->
+    <rect x="320" y="260" width="160" height="120" rx="45" fill="#1E2734" stroke="#FFE5E0" stroke-width="4" />
+    
+    <!-- Center Antenna -->
+    <line x1="400" y1="260" x2="400" y2="200" stroke="#1E2734" stroke-width="8" stroke-linecap="round" />
+    <circle cx="400" cy="200" r="12" fill="#F05D61" />
+    <circle cx="400" cy="200" r="4" fill="#FFFFFF" /> <!-- little shine -->
+
+    <!-- Bright Blue Visor -->
+    <rect x="350" y="295" width="100" height="55" rx="20" fill="#1A85FF" />
+    
+    <!-- Smiling Face Details (White paths) -->
+    <!-- Confident/Happy left eye ^ -->
+    <path d="M 375,315 Q 382,305 390,315" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" />
+    <!-- Confident/Happy right eye ^ -->
+    <path d="M 410,315 Q 417,305 425,315" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" />
+    <!-- Big digital smile -->
+    <path d="M 380,325 Q 400,345 420,325" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" />
+  </g>
+
+  <!-- Ambient Floating Data Particles -->
+  <g fill="#1A85FF">
+    <circle cx="230" cy="180" r="4" />
+    <circle cx="580" cy="160" r="5" />
+    <circle cx="360" cy="100" r="4" fill="#FFFFFF" />
+    <circle cx="460" cy="110" r="3" fill="#FFFFFF" />
+  </g>
+
+</svg>

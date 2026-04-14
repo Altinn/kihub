@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <!-- Canvas Background (White) -->
+  <rect width="100%" height="100%" fill="#FFFFFF" />
+
+  <!-- BACKGROUND LANDSCAPE & SKY -->
+  <g>
+    <!-- Massive Golden Sun (Centered) -->
+    <circle cx="400" cy="350" r="220" fill="#E59E29" />
+
+    <!-- Left Abstract Mountain -->
+    <polygon points="-20,150 250,350 -20,350" fill="#1E2734" />
+    
+    <!-- Right Abstract Mountain -->
+    <polygon points="820,100 500,350 820,350" fill="#1E2734" />
+  </g>
+
+  <!-- CLOUDS (Bright Blue) -->
+  <g fill="#1A85FF">
+    <!-- Top Left Cloud -->
+    <rect x="60" y="70" width="160" height="40" rx="20" />
+    <circle cx="100" cy="60" r="30" />
+    <circle cx="160" cy="50" r="45" />
+
+    <!-- Right Cloud Cluster -->
+    <rect x="600" y="120" width="150" height="40" rx="20" />
+    <circle cx="640" cy="105" r="35" />
+    <circle cx="700" cy="115" r="30" />
+  </g>
+
+  <!-- THE WATER HORIZON -->
+  <g>
+    <!-- Bright Blue Water Body -->
+    <rect x="0" y="350" width="800" height="250" fill="#1A85FF" />
+    
+    <!-- Bold Horizon Line for separation -->
+    <line x1="0" y1="350" x2="800" y2="350" stroke="#1E2734" stroke-width="8" />
+  </g>
+
+  <!-- THE EVENT STREAM (Underwater Data Pipeline) -->
+  <g opacity="0.9">
+    <!-- Main dashed pipeline underwater -->
+    <path d="M 0,480 L 800,480" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-dasharray="16, 20" stroke-linecap="round" opacity="0.4" />
+    
+    <!-- Unhooked/Passive Events swimming by -->
+    <circle cx="150" cy="480" r="14" fill="#1E2734" />
+    <circle cx="280" cy="480" r="10" fill="#FFFFFF" />
+    <circle cx="620" cy="480" r="16" fill="#F05D61" stroke="#FFFFFF" stroke-width="4" />
+    <circle cx="750" cy="480" r="12" fill="#1E2734" />
+    
+    <!-- Motion lines for the underwater stream -->
+    <path d="M 120,450 L 160,450 M 580,510 L 640,510" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity="0.4" />
+  </g>
+
+  <!-- THE JUMP (Data fish leaving the water) -->
+  <g>
+    <!-- Dashed connection line from water to payload -->
+    <line x1="460" y1="350" x2="460" y2="290" stroke="#E59E29" stroke-width="6" stroke-dasharray="8, 8" stroke-linecap="round" />
+    
+    <!-- Surface Splash -->
+    <ellipse cx="460" cy="350" rx="25" ry="6" fill="none" stroke="#FFFFFF" stroke-width="4" />
+    <path d="M 435,350 Q 445,320 455,350 M 485,350 Q 475,320 465,350" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+    <circle cx="430" cy="325" r="4" fill="#FFFFFF" />
+    <circle cx="490" cy="320" r="5" fill="#FFFFFF" />
+  </g>
+
+  <!-- THE HOOKED PAYLOAD (The "Fish") -->
+  <g>
+    <!-- The Golden Event Node right inside the hook -->
+    <circle cx="460" cy="260" r="28" fill="#E59E29" stroke="#FFFFFF" stroke-width="6" />
+    <circle cx="450" cy="250" r="6" fill="#FFFFFF" /> <!-- Inner shine -->
+  </g>
+
+  <!-- THE WEBHOOK (Dropping from the sky) -->
+  <g>
+    <!-- The Data Fishing Line dropping from the top -->
+    <line x1="360" y1="-10" x2="360" y2="100" stroke="#1E2734" stroke-width="8" stroke-dasharray="12, 12" />
+
+    <!-- Coral Red Outer Hook -->
+    <path d="M 360,100 L 360,260 C 360,340 460,340 460,260 L 460,180" fill="none" stroke="#F05D61" stroke-width="32" stroke-linecap="round" />
+    
+    <!-- Bright inner core line to give it a tech/energy feel -->
+    <path d="M 360,100 L 360,260 C 360,340 460,340 460,260 L 460,175" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" />
+    
+    <!-- Hook Barb pointing down/inwards -->
+    <path d="M 460,180 L 415,225" stroke="#F05D61" stroke-width="24" stroke-linecap="round" />
+    <path d="M 460,180 L 415,225" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" />
+  </g>
+
+  <!-- IMPACT SPARKLES (Where the hook snags the payload) -->
+  <g fill="#FFFFFF">
+    <circle cx="510" cy="220" r="5" />
+    <circle cx="530" cy="190" r="3" />
+    <circle cx="400" cy="190" r="4" />
+    <path d="M 500,240 L 520,230" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+    <path d="M 425,185 L 410,170" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+  </g>
+
+</svg>
