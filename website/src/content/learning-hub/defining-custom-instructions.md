@@ -134,11 +134,11 @@ When you work on a file matching the pattern, Copilot incorporates that instruct
 
 ## Real Examples from the Repository
 
-The awesome-copilot-hub repository includes over 120 instruction files demonstrating real-world patterns.
+The kihub repository includes over 120 instruction files demonstrating real-world patterns.
 
 ### Security Standards
 
-See [security-and-owasp.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/security-and-owasp.instructions.md) for comprehensive security guidance:
+See [security-and-owasp.instructions.md](https://github.com/Altinn/kihub/blob/main/instructions/security-and-owasp.instructions.md) for comprehensive security guidance:
 
 ```markdown
 ---
@@ -162,7 +162,7 @@ This instruction applies to all files (`applyTo: '**'`), ensuring security aware
 
 ### Framework-Specific Guidance
 
-See [reactjs.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/reactjs.instructions.md) for React-specific patterns:
+See [reactjs.instructions.md](https://github.com/Altinn/kihub/blob/main/instructions/reactjs.instructions.md) for React-specific patterns:
 
 ```markdown
 ---
@@ -186,7 +186,7 @@ This instruction targets only React component files, providing context-specific 
 
 ### Testing Standards
 
-See [playwright-typescript.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/playwright-typescript.instructions.md) for test automation patterns:
+See [playwright-typescript.instructions.md](https://github.com/Altinn/kihub/blob/main/instructions/playwright-typescript.instructions.md) for test automation patterns:
 
 ````markdown
 ---
@@ -257,7 +257,7 @@ try {
 
 **Q: How many instructions should I create?**
 
-A: Start with 3-5 core instructions covering your most important standards (naming, structure, security). Add more as patterns emerge. Having 10-20 instructions for a medium-sized project is reasonable. Awesome Copilot repository contains over 120 to demonstrate the range of possibilities.
+A: Start with 3-5 core instructions covering your most important standards (naming, structure, security). Add more as patterns emerge. Having 10-20 instructions for a medium-sized project is reasonable. DigDir KI HUB repository contains over 120 to demonstrate the range of possibilities.
 
 **Q: Do instructions slow down Copilot?**
 

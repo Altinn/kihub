@@ -1,6 +1,6 @@
 ---
 title: 'Agentic Workflows'
-description: 'Learn what GitHub Agentic Workflows are, how to use community workflows from Awesome Copilot, and how to contribute your own.'
+description: 'Learn what GitHub Agentic Workflows are, how to use community workflows from DigDir KI HUB, and how to contribute your own.'
 authors:
   - GitHub Copilot Learning Hub Team
 lastUpdated: 2026-02-27
@@ -20,7 +20,7 @@ prerequisites:
 
 Agentic Workflows are AI-powered repository automations that run coding agents in GitHub Actions. Written in markdown with natural language instructions, they let you automate tasks like issue triage, daily reports, and compliance checks — triggered by schedules, events, or slash commands.
 
-This article covers what agentic workflows are, how to install and use workflows from the Awesome Copilot community, and how to contribute your own.
+This article covers what agentic workflows are, how to install and use workflows from the DigDir KI HUB community, and how to contribute your own.
 
 ## What Are Agentic Workflows?
 
@@ -75,9 +75,9 @@ The **frontmatter** declares the workflow's triggers, permissions, and safe outp
 
 Agentic Workflows are ideal when you need **autonomous, event-driven automation** that goes beyond what static GitHub Actions can do — tasks that require reasoning, summarization, or context-aware decisions.
 
-## Using Workflows from Awesome Copilot
+## Using Workflows from DigDir KI HUB
 
-The [Awesome Copilot workflows page](../../workflows/) hosts a growing collection of community-contributed workflows. Here's how to install and use them.
+The [DigDir KI HUB workflows page](../../workflows/) hosts a growing collection of community-contributed workflows. Here's how to install and use them.
 
 ### Prerequisites
 
@@ -130,7 +130,7 @@ Sharing your workflows with the community helps others automate their repositori
 
 ### Step 1: Create the Workflow File
 
-Create a new `.md` file in the `workflows/` directory of the [Awesome Copilot repository](https://github.com/github/awesome-copilot). Use a descriptive, lowercase, hyphenated filename:
+Create a new `.md` file in the `workflows/` directory of the [DigDir KI HUB repository](https://github.com/Altinn/kihub). Use a descriptive, lowercase, hyphenated filename:
 
 ```
 workflows/my-new-workflow.md
@@ -211,8 +211,8 @@ gh aw compile --validate --no-emit workflows/my-new-workflow.md
 ## Learn More
 
 - **Official documentation**: [GitHub Agentic Workflows](https://gh.io/gh-aw) — full specification and reference
-- **Browse workflows**: [Awesome Copilot Workflows](../../workflows/) — community-contributed collection
-- **Contributing guide**: [CONTRIBUTING.md](https://github.com/github/awesome-copilot/blob/main/CONTRIBUTING.md#adding-agentic-workflows) — detailed contribution guidelines
+- **Browse workflows**: [DigDir KI HUB Workflows](../../workflows/) — community-contributed collection
+- **Contributing guide**: [CONTRIBUTING.md](https://github.com/Altinn/kihub/blob/main/CONTRIBUTING.md#adding-agentic-workflows) — detailed contribution guidelines
 - **Related**: [Automating with Hooks](../automating-with-hooks/) — deterministic automation for Copilot agent sessions
 - **Related**: [Using the Copilot Coding Agent](../using-copilot-coding-agent/) — the agent that powers agentic workflows
 

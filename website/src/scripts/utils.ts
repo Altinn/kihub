@@ -1,12 +1,12 @@
 import { getEmbeddedData as getEmbeddedPageData } from "./embedded-data";
 
 /**
- * Utility functions for the Awesome Copilot website
+ * Utility functions for the DigDir KI HUB website
  */
 
 const REPO_BASE_URL =
-  "https://raw.githubusercontent.com/github/awesome-copilot/main";
-const REPO_GITHUB_URL = "https://github.com/github/awesome-copilot/blob/main";
+  "https://raw.githubusercontent.com/Altinn/kihub/main";
+const REPO_GITHUB_URL = "https://github.com/Altinn/kihub/blob/main";
 
 // VS Code install URL configurations
 const VSCODE_INSTALL_CONFIG: Record<
@@ -14,15 +14,15 @@ const VSCODE_INSTALL_CONFIG: Record<
   { baseUrl: string; scheme: string }
 > = {
   instructions: {
-    baseUrl: "https://aka.ms/awesome-copilot/install/instructions",
+    baseUrl: "https://aka.ms/kihub/install/instructions",
     scheme: "chat-instructions",
   },
   instruction: {
-    baseUrl: "https://aka.ms/awesome-copilot/install/instructions",
+    baseUrl: "https://aka.ms/kihub/install/instructions",
     scheme: "chat-instructions",
   },
   agent: {
-    baseUrl: "https://aka.ms/awesome-copilot/install/agent",
+    baseUrl: "https://aka.ms/kihub/install/agent",
     scheme: "chat-agent",
   },
 };

@@ -4,7 +4,7 @@ import instructionsData from "../../public/data/instructions.json";
 import skillsData from "../../public/data/skills.json";
 
 // Base URL for absolute links (to raw GitHub content)
-const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/github/awesome-copilot/main";
+const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/Altinn/kihub/main";
 
 export const GET: APIRoute = () => {
   const agents = agentsData.items;
@@ -16,7 +16,7 @@ export const GET: APIRoute = () => {
   let content = "";
 
   // H1 header (required)
-  content += "# Awesome GitHub Copilot\n\n";
+  content += "# DigDir KI HUB\n\n";
 
   // Summary blockquote (optional but recommended)
   content +=
@@ -77,9 +77,9 @@ export const GET: APIRoute = () => {
 
   // Add repository information
   content += "## Repository\n\n";
-  content += "- **GitHub**: https://github.com/github/awesome-copilot\n";
+  content += "- **GitHub**: https://github.com/Altinn/kihub\n";
   content += "- **License**: MIT\n";
-  content += "- **Website**: https://awesome-copilot.github.com\n";
+  content += "- **Website**: https://altinn.github.io/kihub/\n";
 
   return new Response(content, {
     headers: { "Content-Type": "text/plain; charset=utf-8" },

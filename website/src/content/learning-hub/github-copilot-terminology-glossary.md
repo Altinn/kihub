@@ -14,7 +14,7 @@ relatedArticles:
   - ./copilot-configuration-basics.md
 ---
 
-New to GitHub Copilot customization? This glossary defines common terms you'll encounter while exploring agents, skills, instructions, and related concepts in the Awesome GitHub Copilot ecosystem.
+New to GitHub Copilot customization? This glossary defines common terms you'll encounter while exploring agents, skills, instructions, and related concepts in the DigDir KI HUB ecosystem.
 
 Use this page as a quick reference when reading articles in the Learning Hub or browsing the repository.
 
@@ -52,11 +52,11 @@ Previously, "chat mode" was an alternative term for [Agent](#agent) that describ
 
 ### Collection
 
-**Note**: Collections are a concept specific to the Awesome GitHub Copilot repository and are not part of standard GitHub Copilot terminology.
+**Note**: Collections are a concept specific to the DigDir KI HUB repository and are not part of standard GitHub Copilot terminology.
 
 A curated grouping of related skills, instructions, and agents organized around a specific theme or workflow. Collections are defined in YAML files (`*.collection.yml`) in the `collections/` directory and help users discover related customizations together.
 
-**Example**: The "Awesome Copilot" collection bundles meta-skills for discovering and generating GitHub Copilot customizations.
+**Example**: The "DigDir KI HUB" collection bundles meta-skills for discovering and generating GitHub Copilot customizations.
 
 **Learn more**: [What are Agents, Skills, and Instructions](../what-are-agents-skills-instructions/)
 
@@ -64,7 +64,7 @@ A curated grouping of related skills, instructions, and agents organized around 
 
 ### Custom Agent
 
-See [Agent](#agent). The term "custom" emphasizes that these are user-defined configurations rather than GitHub Copilot's default behavior. Custom agents can be created by anyone and shared via repositories like Awesome GitHub Copilot.
+See [Agent](#agent). The term "custom" emphasizes that these are user-defined configurations rather than GitHub Copilot's default behavior. Custom agents can be created by anyone and shared via repositories like DigDir KI HUB.
 
 ---
 
@@ -217,7 +217,7 @@ The autonomous GitHub Copilot agent that works on issues in a cloud environment 
 
 An installable package that extends GitHub Copilot CLI with a bundled set of agents, skills, hooks, MCP server configurations, and LSP integrations. Plugins provide a way to distribute and share custom capabilities across projects and teams, with versioning, discovery, and one-command installation via marketplaces.
 
-**Example**: Installing `database-data-management@awesome-copilot` to get a database specialist agent, migration skills, and schema validation hooks in a single command.
+**Example**: Installing `database-data-management@kihub` to get a database specialist agent, migration skills, and schema validation hooks in a single command.
 
 **When to use**: When you want to share a curated set of Copilot capabilities across multiple projects or team members, or when you want to install community-contributed tooling without manually copying files.
 
@@ -245,4 +245,4 @@ tools: ['codebase', 'terminalCommand', 'github']
 
 ---
 
-**Have a term you'd like to see added?** Contributions are welcome! See our [Contributing Guidelines](https://github.com/github/awesome-copilot/blob/main/CONTRIBUTING.md) for how to suggest additions to this glossary.
+**Have a term you'd like to see added?** Contributions are welcome! See our [Contributing Guidelines](https://github.com/Altinn/kihub/blob/main/CONTRIBUTING.md) for how to suggest additions to this glossary.

@@ -137,8 +137,8 @@ async function createPlugin() {
       description,
       version: "1.0.0",
       keywords,
-      author: { name: "Awesome Copilot Community" },
-      repository: "https://github.com/github/awesome-copilot",
+      author: { name: "DigDir KI HUB Community" },
+      repository: "https://github.com/Altinn/kihub",
       license: "MIT",
     };
 
@@ -155,7 +155,7 @@ ${description}
 ## Installation
 
 \`\`\`bash
-copilot plugin install ${pluginId}@awesome-copilot
+copilot plugin install ${pluginId}@kihub
 \`\`\`
 
 ## What's Included
@@ -164,7 +164,7 @@ _Add your plugin contents here._
 
 ## Source
 
-This plugin is part of [Awesome Copilot](https://github.com/github/awesome-copilot).
+This plugin is part of [DigDir KI HUB](https://github.com/Altinn/kihub).
 
 ## License
 

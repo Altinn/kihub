@@ -233,7 +233,7 @@ function renderRecipeCard(
           `
               : ""
           }
-          <a href="https://github.com/github/awesome-copilot/blob/main/${escapeHtml(
+          <a href="https://github.com/Altinn/kihub/blob/main/${escapeHtml(
             variant.doc
           )}"
              class="btn btn-secondary btn-small" target="_blank" rel="noopener">

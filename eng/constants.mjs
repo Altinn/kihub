@@ -29,7 +29,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md#adding-instructions) for guidelines on 
 
 Curated plugins of related agents and skills organized around specific themes, workflows, or use cases. Plugins can be installed directly via GitHub Copilot CLI or VS Code.
 
-> **Awesome Copilot is a default plugin marketplace** — no setup required in either Copilot CLI or VS Code.`,
+> **DigDir KI HUB is a default plugin marketplace** — no setup required in either Copilot CLI or VS Code.`,
 
   pluginsUsage: `### How to Contribute
 
@@ -44,8 +44,8 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md#adding-plugins) for guidelines on how t
 - Plugins make it easy to adopt comprehensive toolkits for particular scenarios
 
 **Find & Install in Copilot CLI:**
-- Browse the marketplace from within an interactive Copilot session: \\\`/plugin marketplace browse awesome-copilot\\\`
-- Install a plugin: \\\`copilot plugin install <plugin-name>@awesome-copilot\\\`
+- Browse the marketplace from within an interactive Copilot session: \\\`/plugin marketplace browse kihub\\\`
+- Install a plugin: \\\`copilot plugin install <plugin-name>@kihub\\\`
 
 **Find & Install in VS Code:**
 - Open the Extensions search view and type \\\`@agentPlugins\\\` to browse available plugins
@@ -180,12 +180,12 @@ const vscodeInsidersInstallImage =
   "https://img.shields.io/badge/VS_Code_Insiders-Install-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white";
 
 const repoBaseUrl =
-  "https://raw.githubusercontent.com/github/awesome-copilot/main";
+  "https://raw.githubusercontent.com/Altinn/kihub/main";
 
 const AKA_INSTALL_URLS = {
-  instructions: "https://aka.ms/awesome-copilot/install/instructions",
-  agent: "https://aka.ms/awesome-copilot/install/agent",
-  hook: "https://aka.ms/awesome-copilot/install/hook",
+  instructions: "https://aka.ms/kihub/install/instructions",
+  agent: "https://aka.ms/kihub/install/agent",
+  hook: "https://aka.ms/kihub/install/hook",
 };
 
 const ROOT_FOLDER = path.join(__dirname, "..");

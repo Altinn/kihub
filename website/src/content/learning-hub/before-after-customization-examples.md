@@ -328,7 +328,7 @@ resource "azurerm_storage_account" "data" {
 
 ### After: With Terraform Custom Agent
 
-Use a custom agent from the repository [`agents/terraform-azure-implement.agent.md`](https://github.com/github/awesome-copilot/blob/main/agents/terraform-azure-implement.agent.md) (click through to see full definition).
+Use a custom agent from the repository [`agents/terraform-azure-implement.agent.md`](https://github.com/Altinn/kihub/blob/main/agents/terraform-azure-implement.agent.md) (click through to see full definition).
 
 Now Copilot has access to a custom agent that enforces your organization's Terraform best practices for Azure.
 

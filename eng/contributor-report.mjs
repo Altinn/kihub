@@ -336,7 +336,7 @@ const getGitHubRepo = () => {
     console.debug('origin not found, using default', e?.message || e);
   }
 
-  return 'github/awesome-copilot';
+  return 'Altinn/kihub';
 };
 
 /**

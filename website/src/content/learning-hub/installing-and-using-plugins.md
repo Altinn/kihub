@@ -97,7 +97,7 @@ Plugins are especially valuable when you want to:
 Plugins are collected in **marketplaces** — registries you can browse and install from. Both Copilot CLI and VS Code come with two marketplaces registered by default — **no setup required**:
 
 - **`copilot-plugins`** — Official GitHub Copilot plugins
-- **`awesome-copilot`** — Community-contributed plugins from this repository
+- **`kihub`** — Community-contributed plugins from this repository
 
 ### Browsing in Copilot CLI
 
@@ -110,20 +110,20 @@ copilot plugin marketplace list
 Browse plugins in a specific marketplace:
 
 ```bash
-copilot plugin marketplace browse awesome-copilot
+copilot plugin marketplace browse kihub
 ```
 
 Or from within an interactive Copilot session:
 
 ```
-/plugin marketplace browse awesome-copilot
+/plugin marketplace browse kihub
 ```
 
 > **Tip**: You can also browse plugins on this site's [Plugins Directory](../../plugins/) to see descriptions, included agents, and skills before installing.
 
 ### Browsing in VS Code
 
-Because `awesome-copilot` is a default marketplace in VS Code, you can discover plugins without any configuration:
+Because `kihub` is a default marketplace in VS Code, you can discover plugins without any configuration:
 
 - Open the **Extensions** search view and type **`@agentPlugins`** to see all available plugins
 - Or open the **Command Palette** (`Ctrl+Shift+P` / `Cmd+Shift+P`) and run **Chat: Plugins**
@@ -149,13 +149,13 @@ copilot plugin marketplace add /path/to/local-marketplace
 Reference a plugin by name and marketplace:
 
 ```bash
-copilot plugin install database-data-management@awesome-copilot
+copilot plugin install database-data-management@kihub
 ```
 
 Or from an interactive session:
 
 ```
-/plugin install database-data-management@awesome-copilot
+/plugin install database-data-management@kihub
 ```
 
 ### From VS Code
@@ -195,16 +195,16 @@ You don't need to do any additional configuration after installing — the plugi
 
 ## Plugins from This Repository
 
-This repository (`awesome-copilot`) serves as both a collection of individual resources _and_ a plugin marketplace. You can use it in two ways:
+This repository (`kihub`) serves as both a collection of individual resources _and_ a plugin marketplace. You can use it in two ways:
 
 ### Install Individual Plugins
 
 Browse the [Plugins Directory](../../plugins/) and install specific plugins:
 
 ```bash
-copilot plugin install context-engineering@awesome-copilot
-copilot plugin install azure-cloud-development@awesome-copilot
-copilot plugin install frontend-web-dev@awesome-copilot
+copilot plugin install context-engineering@kihub
+copilot plugin install azure-cloud-development@kihub
+copilot plugin install frontend-web-dev@kihub
 ```
 
 Each plugin bundles related agents and skills around a specific theme or technology.

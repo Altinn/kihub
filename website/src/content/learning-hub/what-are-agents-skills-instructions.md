@@ -88,7 +88,7 @@ By combining all three, teams can achieve:
 ## Next steps
 
 - Explore the rest of the **Fundamentals** track for deeper dives on chat modes, collections, and MCP servers.
-- Browse the [Awesome Agents](../../agents/), [Skills](../../skills/), and [Instructions](../../instructions/) directories for inspiration.
+- Browse the [DigDir KI HUB Agents](../../agents/), [Skills](../../skills/), and [Instructions](../../instructions/) directories for inspiration.
 - Try generating your own artifacts, then add them to the repo to keep the Learning Hub evolving.
 
 ---

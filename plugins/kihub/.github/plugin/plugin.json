@@ -1,11 +1,11 @@
 {
-  "name": "awesome-copilot",
+  "name": "kihub",
   "description": "Meta prompts that help you discover and generate curated GitHub Copilot agents, instructions, prompts, and skills.",
   "version": "1.1.0",
   "author": {
-    "name": "Awesome Copilot Community"
+    "name": "DigDir KI HUB Community"
   },
-  "repository": "https://github.com/github/awesome-copilot",
+  "repository": "https://github.com/Altinn/kihub",
   "license": "MIT",
   "keywords": [
     "github-copilot",
@@ -18,8 +18,8 @@
     "./agents"
   ],
   "skills": [
-    "./skills/suggest-awesome-github-copilot-skills",
-    "./skills/suggest-awesome-github-copilot-instructions",
-    "./skills/suggest-awesome-github-copilot-agents"
+    "./skills/suggest-kihub-skills",
+    "./skills/suggest-kihub-instructions",
+    "./skills/suggest-kihub-agents"
   ]
 }

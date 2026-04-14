@@ -372,7 +372,7 @@ A: Repository-level Copilot configuration (such as `.github/agents/`, `.github/s
 
 **Q: Where should I put customizations that apply to all my projects?**
 
-A: Use user-level settings in your IDE for personal preferences that should apply everywhere. For customizations specific to a technology or framework (like React conventions), consider creating a collection in the awesome-copilot-hub repository that you can reference across multiple projects.
+A: Use user-level settings in your IDE for personal preferences that should apply everywhere. For customizations specific to a technology or framework (like React conventions), consider creating a collection in the kihub repository that you can reference across multiple projects.
 
 ## Next Steps
 

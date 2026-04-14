@@ -138,11 +138,11 @@ Include trigger keywords and contextual cues that help agents match the skill to
 
 ## Real Examples from the Repository
 
-The awesome-copilot repository includes skill folders demonstrating production patterns.
+The kihub repository includes skill folders demonstrating production patterns.
 
 ### Conventional Commits
 
-See [`skills/conventional-commit/SKILL.md`](https://github.com/github/awesome-copilot/tree/main/skills/conventional-commit) for automating commit messages:
+See [`skills/conventional-commit/SKILL.md`](https://github.com/Altinn/kihub/tree/main/skills/conventional-commit) for automating commit messages:
 
 ```markdown
 ---
@@ -178,7 +178,7 @@ This skill automates a repetitive task (writing commit messages) with a proven t
 
 ### Diagram Generation with Bundled Assets
 
-See [`skills/excalidraw-diagram-generator/`](https://github.com/github/awesome-copilot/tree/main/skills/excalidraw-diagram-generator) for a skill with rich bundled resources:
+See [`skills/excalidraw-diagram-generator/`](https://github.com/Altinn/kihub/tree/main/skills/excalidraw-diagram-generator) for a skill with rich bundled resources:
 
 ```
 excalidraw-diagram-generator/

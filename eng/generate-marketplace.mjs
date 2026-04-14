@@ -162,7 +162,7 @@ function generateMarketplace() {
 
   // Create marketplace.json structure
   const marketplace = {
-    name: "awesome-copilot",
+    name: "kihub",
     metadata: {
       description: "Community-driven collection of GitHub Copilot plugins, agents, prompts, and skills",
       version: "1.0.0",

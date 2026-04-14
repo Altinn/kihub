@@ -1,10 +1,10 @@
 # yaml-language-server: $schema=../../.schemas/tools.schema.json
-# Tools data for the Awesome GitHub Copilot website
+# Tools data for the DigDir KI HUB website
 # Each tool entry provides information for the tools page
 
 tools:
   - id: mcp-server
-    name: Awesome Copilot MCP Server
+    name: DigDir KI HUB MCP Server
     description: >-
       A Model Context Protocol (MCP) Server that provides prompts for searching and installing
       prompts, instructions, agents, and skills directly from this repository. Makes it easy
@@ -14,23 +14,23 @@ tools:
     requirements:
       - Docker installed and running
     links:
-      blog: https://developer.microsoft.com/blog/announcing-awesome-copilot-mcp-server
-      vscode: https://aka.ms/awesome-copilot/mcp/vscode
-      vscode-insiders: https://aka.ms/awesome-copilot/mcp/vscode-insiders
-      visual-studio: https://aka.ms/awesome-copilot/mcp/vs
+      blog: https://developer.microsoft.com/blog/announcing-kihub-mcp-server
+      vscode: https://aka.ms/kihub/mcp/vscode
+      vscode-insiders: https://aka.ms/kihub/mcp/vscode-insiders
+      visual-studio: https://aka.ms/kihub/mcp/vs
     configuration:
       type: json
       content: |
         {
           "servers": {
-            "awesome-copilot": {
+            "kihub": {
               "type": "stdio",
               "command": "docker",
               "args": [
                 "run",
                 "-i",
                 "--rm",
-                "ghcr.io/microsoft/mcp-dotnet-samples/awesome-copilot:latest"
+                "ghcr.io/microsoft/mcp-dotnet-samples/kihub:latest"
               ]
             }
           }
