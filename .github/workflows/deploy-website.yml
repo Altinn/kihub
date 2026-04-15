@@ -27,14 +27,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0  # Full history needed for git-based last updated dates
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
 
       - name: Install root dependencies
@@ -50,6 +50,9 @@ jobs:
       - name: Build Astro site
         run: npm run build
         working-directory: ./website
+
+      - name: Disable Jekyll on Pages artifact
+        run: touch ./website/dist/.nojekyll
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
