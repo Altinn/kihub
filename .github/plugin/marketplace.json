@@ -11,12 +11,6 @@
   },
   "plugins": [
     {
-      "name": "kihub",
-      "source": "kihub",
-      "description": "Meta prompts that help you discover and generate curated GitHub Copilot agents, instructions, prompts, and skills.",
-      "version": "1.1.0"
-    },
-    {
       "name": "azure",
       "description": "Microsoft Azure MCP Server and skills for cloud resource management, deployments, and Azure services. Manage your Azure infrastructure, monitor applications, and deploy resources directly from Copilot.",
       "version": "1.0.0",
@@ -121,6 +115,12 @@
         "repo": "dotnet/skills",
         "path": "plugins/dotnet-diag"
       }
+    },
+    {
+      "name": "kihub",
+      "source": "kihub",
+      "description": "Meta prompts that help you discover and generate curated GitHub Copilot agents, instructions, prompts, and skills.",
+      "version": "1.1.0"
     }
   ]
 }
