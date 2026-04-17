@@ -98,6 +98,8 @@ If a configurable element is missing, use the default value. When new or unexpec
 - Nest Comments = yes
 - Fetch List:
   - <https://peps.python.org/pep-0263/>
+  - react-best-practices.md
+
 
 ## Examples
 
