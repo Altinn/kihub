@@ -3,6 +3,8 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import Modal from '../components/Modal.astro';
 
 const base = import.meta.env.BASE_URL;
+const logoHref = 'https://github.com/Altinn/kihub';
+const logoSrc = `${base}images/Kitt_logo.svg`;
 
 const cards = [
   { id: 'agents', title: 'Agents', desc: 'Custom agents', countId: 'agents', countText: 'skills', color: '#5650a3', lightColor: '#a19ef4', image: 'images/agents.svg' },
@@ -32,6 +34,9 @@ const cards = [
   <div id="main-content" class="v2-main">
     <!-- Hero Section -->
     <section class="v2-hero" aria-labelledby="hero-heading">
+      <a href={logoHref} class="v2-hero-logo" aria-label="Open KI Hub repository" target="_blank" rel="noopener">
+        <img src={logoSrc} alt="KI Hub logo" width="32" height="32" />
+      </a>
       <div class="v2-hero-content">
         <h1 id="hero-heading">Explore our growing hub for<br/>Agents, Skills & Instructions</h1>
         <p class="v2-hero-subtitle">
@@ -131,6 +136,33 @@ const cards = [
     overflow: hidden;
     min-height: 480px;
     margin-bottom: 3rem;
+  }
+
+  .v2-hero-logo {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    width: 200px;
+    height: 200px;
+    display: grid;
+    place-items: center;
+    z-index: 20;
+    transition: transform 0.2s ease;
+  }
+
+  .v2-hero-logo:hover {
+    transform: translateY(-1px) scale(1.04);
+  }
+
+  .v2-hero-logo:focus-visible {
+    outline: 2px solid #111;
+    outline-offset: 2px;
+  }
+
+  .v2-hero-logo img {
+    width: 70%;
+    height: 70%;
+    object-fit: contain;
   }
 
   /* Diagonal divider for the hero right side background */
@@ -257,6 +289,20 @@ const cards = [
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  @media (max-width: 768px) {
+    .v2-hero-logo {
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 92px;
+      height: 92px;
+    }
+
+    .v2-hero-logo img {
+      width: 70%;
+      height: 70%;
+    }
   }
 
   .v2-circle-label {
