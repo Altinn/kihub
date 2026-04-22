@@ -14,15 +14,15 @@ const VSCODE_INSTALL_CONFIG: Record<
   { baseUrl: string; scheme: string }
 > = {
   instructions: {
-    baseUrl: "https://aka.ms/kihub/install/instructions",
+    baseUrl: "https://vscode.dev/redirect",
     scheme: "chat-instructions",
   },
   instruction: {
-    baseUrl: "https://aka.ms/kihub/install/instructions",
+    baseUrl: "https://vscode.dev/redirect",
     scheme: "chat-instructions",
   },
   agent: {
-    baseUrl: "https://aka.ms/kihub/install/agent",
+    baseUrl: "https://vscode.dev/redirect",
     scheme: "chat-agent",
   },
 };

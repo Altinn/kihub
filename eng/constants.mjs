@@ -182,10 +182,10 @@ const vscodeInsidersInstallImage =
 const repoBaseUrl =
   "https://raw.githubusercontent.com/Altinn/kihub/main";
 
-const AKA_INSTALL_URLS = {
-  instructions: "https://aka.ms/kihub/install/instructions",
-  agent: "https://aka.ms/kihub/install/agent",
-  hook: "https://aka.ms/kihub/install/hook",
+const VSCODE_INSTALL_REDIRECT_URLS = {
+  instructions: "https://vscode.dev/redirect",
+  agent: "https://vscode.dev/redirect",
+  hook: "https://vscode.dev/redirect",
 };
 
 const ROOT_FOLDER = path.join(__dirname, "..");
@@ -208,7 +208,7 @@ const DOCS_DIR = path.join(ROOT_FOLDER, "docs");
 
 export {
   AGENTS_DIR,
-  AKA_INSTALL_URLS,
+  VSCODE_INSTALL_REDIRECT_URLS,
   COOKBOOK_DIR,
   DOCS_DIR,
   HOOKS_DIR,

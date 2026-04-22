@@ -5,7 +5,7 @@ import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import {
     AGENTS_DIR,
-    AKA_INSTALL_URLS,
+  VSCODE_INSTALL_REDIRECT_URLS,
     DOCS_DIR,
     HOOKS_DIR,
     INSTRUCTIONS_DIR,
@@ -269,13 +269,16 @@ function formatTableCell(text) {
 }
 
 function makeBadges(link, type) {
-  const aka = AKA_INSTALL_URLS[type] || AKA_INSTALL_URLS.instructions;
+  const redirectBase =
+    VSCODE_INSTALL_REDIRECT_URLS[type] ||
+    VSCODE_INSTALL_REDIRECT_URLS.instructions;
+  const rawUrl = `${repoBaseUrl}/${link}`;
 
-  const vscodeUrl = `${aka}?url=${encodeURIComponent(
-    `vscode:chat-${type}/install?url=${repoBaseUrl}/${link}`
+  const vscodeUrl = `${redirectBase}?url=${encodeURIComponent(
+    `vscode:chat-${type}/install?url=${encodeURIComponent(rawUrl)}`
   )}`;
-  const insidersUrl = `${aka}?url=${encodeURIComponent(
-    `vscode-insiders:chat-${type}/install?url=${repoBaseUrl}/${link}`
+  const insidersUrl = `${redirectBase}?url=${encodeURIComponent(
+    `vscode-insiders:chat-${type}/install?url=${encodeURIComponent(rawUrl)}`
   )}`;
 
   return `[![Install in VS Code](${vscodeInstallImage})](${vscodeUrl})<br />[![Install in VS Code Insiders](${vscodeInsidersInstallImage})](${insidersUrl})`;
