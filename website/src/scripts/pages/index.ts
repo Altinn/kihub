@@ -102,7 +102,7 @@ export async function initHomepage(): Promise<void> {
               <span class="search-result-type">${getResourceIcon(item.type)}</span>
               <div>
                 <div class="search-result-title">${search.highlight(item.title, query)}</div>
-                <div class="search-result-description">${truncate(item.description, 60)}</div>
+                <div class="search-result-description">${escapeHtml(truncate(item.description, 60))}</div>
               </div>
             </button>
           `).join('');
