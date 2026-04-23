@@ -38,7 +38,6 @@
   "author": "GitHub",
   "license": "MIT",
   "devDependencies": {
-    "all-contributors-cli": "^3.1.1",
     "external-editor": "^1.1.0",
     "inquirer": "^13.4.2"
   },
