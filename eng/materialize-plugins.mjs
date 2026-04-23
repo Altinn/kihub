@@ -41,6 +41,16 @@ function resolveSource(relPath) {
   return null;
 }
 
+function overwriteExistingFileSync(filePath, content) {
+  const fd = fs.openSync(filePath, "r+");
+  try {
+    fs.ftruncateSync(fd, 0);
+    fs.writeFileSync(fd, content, "utf8");
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
 function materializePlugins() {
   console.log("Materializing plugin files...\n");
 
@@ -63,14 +73,15 @@ function materializePlugins() {
     const pluginPath = path.join(PLUGINS_DIR, dirName);
     const pluginJsonPath = path.join(pluginPath, ".github/plugin", "plugin.json");
 
-    if (!fs.existsSync(pluginJsonPath)) {
-      continue;
-    }
-
+    let pluginJsonContent;
     let metadata;
     try {
-      metadata = JSON.parse(fs.readFileSync(pluginJsonPath, "utf8"));
+      pluginJsonContent = fs.readFileSync(pluginJsonPath, "utf8");
+      metadata = JSON.parse(pluginJsonContent);
     } catch (err) {
+      if (err.code === "ENOENT") {
+        continue;
+      }
       console.error(`Error: Failed to parse ${pluginJsonPath}: ${err.message}`);
       errors++;
       continue;
@@ -140,7 +151,10 @@ function materializePlugins() {
     }
 
     if (changed) {
-      fs.writeFileSync(pluginJsonPath, JSON.stringify(rewritten, null, 2) + "\n", "utf8");
+      const rewrittenContent = JSON.stringify(rewritten, null, 2) + "\n";
+      if (rewrittenContent !== pluginJsonContent) {
+        overwriteExistingFileSync(pluginJsonPath, rewrittenContent);
+      }
     }
 
     const counts = [];
