@@ -7,6 +7,7 @@ import { getEmbeddedData as getEmbeddedPageData } from "./embedded-data";
 const REPO_BASE_URL =
   "https://raw.githubusercontent.com/Altinn/kihub/main";
 const REPO_GITHUB_URL = "https://github.com/Altinn/kihub/blob/main";
+const REPO_FILE_PATH_PATTERN = /^(?!\.{1,2}(?:\/|$))(?!\/)(?!.*\/\/)(?!.*(?:^|\/)\.{1,2}(?:\/|$))[A-Za-z0-9._/-]+$/;
 
 // VS Code install URL configurations
 const VSCODE_INSTALL_CONFIG: Record<
@@ -75,6 +76,24 @@ export interface ZipDownloadFile {
   path: string;
 }
 
+function normalizeRepoFilePath(filePath: string): string {
+  const normalizedPath = filePath.trim();
+
+  if (!REPO_FILE_PATH_PATTERN.test(normalizedPath)) {
+    throw new Error(`Invalid repository file path: ${filePath}`);
+  }
+
+  return normalizedPath;
+}
+
+function buildRawGitHubFileUrl(filePath: string): string {
+  return `${REPO_BASE_URL}/${normalizeRepoFilePath(filePath)}`;
+}
+
+function buildGitHubBlobUrl(filePath: string): string {
+  return `${REPO_GITHUB_URL}/${normalizeRepoFilePath(filePath)}`;
+}
+
 function triggerBlobDownload(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -100,7 +119,7 @@ export async function downloadZipBundle(
 
   const fetchPromises = files.map(async (file) => {
     try {
-      const response = await fetch(getRawGitHubUrl(file.path));
+      const response = await fetch(buildRawGitHubFileUrl(file.path));
       if (!response.ok) return null;
 
       return {
@@ -137,7 +156,7 @@ export async function fetchFileContent(
   filePath: string
 ): Promise<string | null> {
   try {
-    const response = await fetch(`${REPO_BASE_URL}/${filePath}`);
+    const response = await fetch(buildRawGitHubFileUrl(filePath));
     if (!response.ok) throw new Error(`Failed to fetch ${filePath}`);
     return await response.text();
   } catch (error) {
@@ -181,7 +200,7 @@ export function getVSCodeInstallUrl(
   const config = VSCODE_INSTALL_CONFIG[type];
   if (!config) return null;
 
-  const rawUrl = `${REPO_BASE_URL}/${filePath}`;
+  const rawUrl = buildRawGitHubFileUrl(filePath);
   const vscodeScheme = insiders ? "vscode-insiders" : "vscode";
   const innerUrl = `${vscodeScheme}:${
     config.scheme
@@ -194,14 +213,14 @@ export function getVSCodeInstallUrl(
  * Get GitHub URL for a file
  */
 export function getGitHubUrl(filePath: string): string {
-  return `${REPO_GITHUB_URL}/${filePath}`;
+  return buildGitHubBlobUrl(filePath);
 }
 
 /**
  * Get raw GitHub URL for a file (for fetching content)
  */
 export function getRawGitHubUrl(filePath: string): string {
-  return `${REPO_BASE_URL}/${filePath}`;
+  return buildRawGitHubFileUrl(filePath);
 }
 
 /**
@@ -209,7 +228,7 @@ export function getRawGitHubUrl(filePath: string): string {
  */
 export async function downloadFile(filePath: string): Promise<boolean> {
   try {
-    const response = await fetch(`${REPO_BASE_URL}/${filePath}`);
+    const response = await fetch(buildRawGitHubFileUrl(filePath));
     if (!response.ok) throw new Error("Failed to fetch file");
 
     const content = await response.text();
