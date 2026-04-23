@@ -120,6 +120,32 @@ function safeFileOperation(operation, filePath, defaultValue = null) {
   }
 }
 
+function readFileIfExists(filePath) {
+  try {
+    return {
+      exists: true,
+      content: fs.readFileSync(filePath, "utf8"),
+    };
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return {
+        exists: false,
+        content: null,
+      };
+    }
+    throw error;
+  }
+}
+
+function writeTextFileSync(filePath, content, flags) {
+  const fd = fs.openSync(filePath, flags);
+  try {
+    fs.writeFileSync(fd, content, "utf8");
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
 function extractTitle(filePath) {
   return safeFileOperation(
     () => {
@@ -874,17 +900,25 @@ function generateFeaturedPluginsSection(pluginsDir) {
 
 // Utility: write file only if content changed
 function writeFileIfChanged(filePath, content) {
-  const exists = fs.existsSync(filePath);
-  if (exists) {
-    const original = fs.readFileSync(filePath, "utf8");
-    if (original === content) {
-      console.log(
-        `${path.basename(filePath)} is already up to date. No changes needed.`
-      );
-      return;
-    }
+  const { exists, content: original } = readFileIfExists(filePath);
+  if (original === content) {
+    console.log(
+      `${path.basename(filePath)} is already up to date. No changes needed.`
+    );
+    return;
   }
-  fs.writeFileSync(filePath, content);
+
+  try {
+    writeTextFileSync(filePath, content, exists ? "w" : "wx");
+  } catch (error) {
+    if (!exists && error.code === "EEXIST") {
+      throw new Error(
+        `Refusing to overwrite ${filePath}: it was created while generating output.`
+      );
+    }
+    throw error;
+  }
+
   console.log(
     `${path.basename(filePath)} ${exists ? "updated" : "created"} successfully!`
   );
