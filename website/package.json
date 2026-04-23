@@ -22,10 +22,17 @@
     "@astrojs/starlight": "^0.38.3",
     "astro": "^6.1.9",
     "choices.js": "^11.1.0",
+    "devalue": "^5.7.1",
+    "form-data": "^4.0.5",
     "front-matter": "^4.0.2",
     "gray-matter": "^4.0.3",
     "jszip": "^3.10.1",
     "marked": "^17.0.4",
-    "shiki": "^3.23.0"
+    "qs": "^6.15.1",
+    "shiki": "^3.23.0",
+    "tmp": "^0.2.5",
+    "tough-cookie": "^6.0.1",
+    "uuid": "^14.0.0",
+    "yaml": "^2.8.3"
   }
 }
