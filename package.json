@@ -38,14 +38,23 @@
   "author": "GitHub",
   "license": "MIT",
   "devDependencies": {
-    "all-contributors-cli": "^6.26.1"
+    "external-editor": "^1.1.0",
+    "inquirer": "^13.4.2"
   },
   "overrides": {
     "lodash": "^4.18.0"
   },
   "dependencies": {
+    "devalue": "^5.7.1",
+    "form-data": "^4.0.5",
     "js-yaml": "^4.1.1",
+    "qs": "^6.15.1",
+    "tmp": "^0.2.5",
+    "tough-cookie": "^6.0.1",
+    "uuid": "^14.0.0",
     "vfile": "^6.0.3",
-    "vfile-matter": "^5.0.1"
+    "vfile-matter": "^5.0.1",
+    "yaml": "^2.8.3",
+    "yargs-parser": "^22.0.0"
   }
 }
