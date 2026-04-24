@@ -269,8 +269,8 @@ jobs:
   axe-pa11y:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with: { node-version: 20 }
       - run: npm ci
       - run: npm run build --if-present

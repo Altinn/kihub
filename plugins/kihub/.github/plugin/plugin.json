@@ -15,11 +15,9 @@
     "agents"
   ],
   "agents": [
-    "./agents"
+    "./agents/accessibility.md"
   ],
   "skills": [
-    "./skills/suggest-kihub-skills",
-    "./skills/suggest-kihub-instructions",
-    "./skills/suggest-kihub-agents"
+    "./skills/add-educational-comments/"
   ]
 }

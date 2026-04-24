@@ -25,4 +25,4 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md#adding-plugins) for guidelines on how t
 
 | Name | Description | Items | Tags |
 | ---- | ----------- | ----- | ---- |
-| [kihub](../plugins/kihub/README.md) | Meta prompts that help you discover and generate curated GitHub Copilot agents, instructions, prompts, and skills. | 4 items | github-copilot, discovery, meta, prompt-engineering, agents |
+| [kihub](../plugins/kihub/README.md) | Meta prompts that help you discover and generate curated GitHub Copilot agents, instructions, prompts, and skills. | 2 items | github-copilot, discovery, meta, prompt-engineering, agents |
