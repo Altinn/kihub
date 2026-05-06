@@ -41,3 +41,37 @@ tools:
       - search
       - install
 
+  - id: digdir-norwegian-law-mcp
+    name: Digdir Norwegian Law MCP
+    description: >-
+      A read-only Model Context Protocol (MCP) server for searching and citing current
+      Norwegian laws and central regulations from Lovdata publicData. The hosted MVP exposes
+      legal lookup tools through a streamable HTTP endpoint.
+    category: MCP Servers
+    requirements:
+      - MCP client with streamable HTTP support
+    features:
+      - Search current Norwegian laws and central regulations
+      - Retrieve documents and individual provisions
+      - Validate and format supported Norwegian legal citations
+      - Check whether documents and provisions exist in the current corpus
+    links:
+      documentation: https://github.com/adidahl/digdir-lovdata-mcp#readme
+      github: https://github.com/adidahl/digdir-lovdata-mcp
+    configuration:
+      type: json
+      content: |
+        {
+          "servers": {
+            "digdir-norwegian-law": {
+              "type": "http",
+              "url": "https://digdir-lovdata-d3ojbxudz-hiadidahl-3925s-projects.vercel.app/api/mcp"
+            }
+          }
+        }
+    tags:
+      - mcp
+      - http
+      - legal
+      - lovdata
+      - norway
