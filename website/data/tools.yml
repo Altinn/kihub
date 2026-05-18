@@ -75,3 +75,75 @@ tools:
       - legal
       - lovdata
       - norway
+
+  - id: digdir-local-transcriber
+    name: Digdir Local Transcriber
+    description: >-
+      Offline-first Electron desktop app for Norwegian Bokmål support and customer-service calls.
+      It records microphone and system/window audio, transcribes locally with whisper.cpp, cleans
+      noisy ASR output, infers caller and agent roles, summarizes locally with llama.cpp, stores
+      case history, and exports JSON. It can run fully offline after models and helpers are
+      downloaded; OpenAI mode is optional.
+    category: Desktop Apps
+    version: "v0.1.0"
+    type: desktop-app
+    license: Not specified
+    platforms:
+      - macos-arm64
+      - macos-x64
+      - windows-x64
+      - linux-x64
+    requirements:
+      - Microphone permission
+      - Screen/window capture permission for system or window audio
+      - First local setup downloads whisper.cpp, llama.cpp, Whisper model files, and GGUF summarization models
+    features:
+      - Desktop app for macOS, Windows, and Linux
+      - Records microphone and system/window audio
+      - Local transcription through whisper.cpp
+      - Local summarization through llama.cpp
+      - Optional OpenAI online mode
+      - Norwegian Bokmål prompt tuning
+      - Case history with editable case titles
+      - JSON export
+      - Model manager for Whisper and LLM downloads
+      - Progress UI for local LLM processing
+      - Privacy-friendly offline-first workflow
+    links:
+      release: https://github.com/adidahl/digdir-local-transcriber/releases/tag/v0.1.0
+      github: https://github.com/adidahl/digdir-local-transcriber
+    downloads:
+      - label: macOS Apple Silicon
+        platform: macos-arm64
+        url: https://github.com/adidahl/digdir-local-transcriber/releases/download/v0.1.0/Digdir-Local-Transcriber-0.1.0-mac-arm64.dmg
+      - label: macOS Intel
+        platform: macos-x64
+        url: https://github.com/adidahl/digdir-local-transcriber/releases/download/v0.1.0/Digdir-Local-Transcriber-0.1.0-mac-x64.dmg
+      - label: Windows x64
+        platform: windows-x64
+        url: https://github.com/adidahl/digdir-local-transcriber/releases/download/v0.1.0/Digdir-Local-Transcriber-0.1.0-windows-x64.exe
+      - label: Linux AppImage
+        platform: linux-appimage-x64
+        url: https://github.com/adidahl/digdir-local-transcriber/releases/download/v0.1.0/Digdir-Local-Transcriber-0.1.0-linux-x86_64.AppImage
+      - label: Linux DEB
+        platform: linux-deb-x64
+        url: https://github.com/adidahl/digdir-local-transcriber/releases/download/v0.1.0/Digdir-Local-Transcriber-0.1.0-linux-amd64.deb
+    privacy: Audio and transcripts stay local unless the user enables online OpenAI mode.
+    warnings:
+      - Builds are currently unsigned/not notarized, so macOS and Windows may show operating-system security warnings.
+      - Models are not bundled in the installer.
+      - No custom app icon yet; current builds use the default Electron icon.
+      - License is not currently specified in the repository.
+    tags:
+      - offline
+      - whisper-cpp
+      - llama-cpp
+      - norwegian
+      - electron
+      - desktop
+      - asr
+      - summarization
+      - audio
+      - transcription
+      - local-ai
+      - productivity

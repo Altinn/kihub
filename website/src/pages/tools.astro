@@ -12,9 +12,9 @@ const initialItems = toolsData.items.map((item) => ({
 }));
 ---
 
-<StarlightPage frontmatter={{ title: 'Tools', description: 'MCP servers and developer tools for GitHub Copilot', template: 'splash', prev: false, next: false, editUrl: false }}>
+<StarlightPage frontmatter={{ title: 'Tools', description: 'Apps, MCP servers, and developer tools for GitHub Copilot', template: 'splash', prev: false, next: false, editUrl: false }}>
   <div id="main-content">
-    <PageHeader title="🔧 Tools" description="MCP servers and developer tools for GitHub Copilot" />
+    <PageHeader title="🔧 Tools" description="Apps, MCP servers, and developer tools for GitHub Copilot" />
 
     <div class="page-content">
       <div class="container">
@@ -168,6 +168,12 @@ const initialItems = toolsData.items.map((item) => ({
       color: var(--color-purple-dark);
     }
 
+    .tool-badge.version {
+      background-color: var(--color-bg-secondary);
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+
     .tool-description {
       color: var(--color-text-secondary);
       font-size: 16px;
@@ -194,6 +200,12 @@ const initialItems = toolsData.items.map((item) => ({
 
     .tool-section li {
       margin-bottom: 8px;
+    }
+
+    .tool-note {
+      color: var(--color-text-muted);
+      margin: 0;
+      line-height: 1.6;
     }
 
     .tool-tags {

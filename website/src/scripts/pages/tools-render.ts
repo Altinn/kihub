@@ -7,6 +7,10 @@ export interface RenderableTool {
   description: string;
   category: string;
   featured: boolean;
+  version?: string | null;
+  type?: string | null;
+  license?: string | null;
+  platforms?: string[];
   requirements: string[];
   features: string[];
   links: {
@@ -17,9 +21,17 @@ export interface RenderableTool {
     github?: string;
     documentation?: string;
     marketplace?: string;
+    release?: string;
     npm?: string;
     pypi?: string;
   };
+  downloads?: Array<{
+    label: string;
+    platform?: string;
+    url: string;
+  }>;
+  privacy?: string | null;
+  warnings?: string[];
   configuration?: {
     type: string;
     content: string;
@@ -57,7 +69,9 @@ function getToolActionLink(
   if (!href) return "";
   return `<a href="${sanitizeToolUrl(
     href
-  )}" class="${className}" target="_blank" rel="noopener">${label}</a>`;
+  )}" class="${className}" target="_blank" rel="noopener">${escapeHtml(
+    label
+  )}</a>`;
 }
 
 export function renderToolsHtml(
@@ -87,6 +101,11 @@ export function renderToolsHtml(
       badges.push(
         `<span class="tool-badge category">${escapeHtml(tool.category)}</span>`
       );
+      if (tool.version) {
+        badges.push(
+          `<span class="tool-badge version">${escapeHtml(tool.version)}</span>`
+        );
+      }
 
       const features =
         tool.features && tool.features.length > 0
@@ -104,6 +123,38 @@ export function renderToolsHtml(
           <h3>Requirements</h3>
           <ul>${tool.requirements
             .map((requirement) => `<li>${escapeHtml(requirement)}</li>`)
+            .join("")}</ul>
+        </div>`
+          : "";
+
+      const platforms =
+        tool.platforms && tool.platforms.length > 0
+          ? `<div class="tool-section">
+          <h3>Platforms</h3>
+          <div class="tool-tags">
+          ${tool.platforms
+            .map(
+              (platform) =>
+                `<span class="tool-tag">${escapeHtml(platform)}</span>`
+            )
+            .join("")}
+          </div>
+        </div>`
+          : "";
+
+      const privacy = tool.privacy
+        ? `<div class="tool-section">
+          <h3>Privacy</h3>
+          <p class="tool-note">${formatMultilineText(tool.privacy)}</p>
+        </div>`
+        : "";
+
+      const warnings =
+        tool.warnings && tool.warnings.length > 0
+          ? `<div class="tool-section">
+          <h3>Notes</h3>
+          <ul>${tool.warnings
+            .map((warning) => `<li>${escapeHtml(warning)}</li>`)
             .join("")}</ul>
         </div>`
           : "";
@@ -135,7 +186,23 @@ export function renderToolsHtml(
         </div>`
         : "";
 
+      const releaseLabel = tool.version ? `Release ${tool.version}` : "Release";
+      const downloadActions =
+        tool.downloads && tool.downloads.length > 0
+          ? tool.downloads
+              .map((download) =>
+                getToolActionLink(
+                  download.url,
+                  download.label,
+                  "btn btn-outline"
+                )
+              )
+              .filter(Boolean)
+          : [];
+
       const actions = [
+        getToolActionLink(tool.links.release, releaseLabel, "btn btn-primary"),
+        ...downloadActions,
         getToolActionLink(tool.links.blog, "📖 Blog", "btn btn-secondary"),
         getToolActionLink(
           tool.links.marketplace,
@@ -188,6 +255,9 @@ export function renderToolsHtml(
         <p class="tool-description">${formatMultilineText(tool.description)}</p>
         ${features}
         ${requirements}
+        ${platforms}
+        ${privacy}
+        ${warnings}
         ${config}
         ${tags}
         ${actionsHtml}

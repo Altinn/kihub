@@ -12,6 +12,10 @@ export interface Tool extends SearchableItem {
   description: string;
   category: string;
   featured: boolean;
+  version?: string | null;
+  type?: string | null;
+  license?: string | null;
+  platforms?: string[];
   requirements: string[];
   features: string[];
   links: {
@@ -22,9 +26,17 @@ export interface Tool extends SearchableItem {
     github?: string;
     documentation?: string;
     marketplace?: string;
+    release?: string;
     npm?: string;
     pypi?: string;
   };
+  downloads?: Array<{
+    label: string;
+    platform?: string;
+    url: string;
+  }>;
+  privacy?: string | null;
+  warnings?: string[];
   configuration?: {
     type: string;
     content: string;

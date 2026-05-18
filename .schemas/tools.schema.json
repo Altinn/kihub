@@ -46,6 +46,37 @@
             "description": "Whether this tool is featured (shown first)",
             "default": false
           },
+          "version": {
+            "type": "string",
+            "description": "Current version of the tool",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "type": {
+            "type": "string",
+            "description": "Tool type, such as desktop-app, cli-tool, or mcp-server",
+            "pattern": "^[a-z0-9-]+$",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "license": {
+            "type": "string",
+            "description": "License for the tool",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "platforms": {
+            "type": "array",
+            "description": "Supported platforms",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "uniqueItems": true,
+            "maxItems": 15
+          },
           "requirements": {
             "type": "array",
             "description": "List of requirements to use this tool",
@@ -91,6 +122,11 @@
                 "description": "Link to VS Code or Visual Studio Marketplace",
                 "format": "uri"
               },
+              "release": {
+                "type": "string",
+                "description": "Link to the primary release or download page",
+                "format": "uri"
+              },
               "npm": {
                 "type": "string",
                 "description": "Link to npm package",
@@ -114,6 +150,52 @@
                 "description": "Visual Studio install link"
               }
             }
+          },
+          "downloads": {
+            "type": "array",
+            "description": "Platform-specific download links",
+            "items": {
+              "type": "object",
+              "required": ["label", "url"],
+              "additionalProperties": false,
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Human-readable download label",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "platform": {
+                  "type": "string",
+                  "description": "Machine-readable platform identifier",
+                  "pattern": "^[a-z0-9-]+$",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "url": {
+                  "type": "string",
+                  "description": "Direct download URL",
+                  "format": "uri"
+                }
+              }
+            },
+            "maxItems": 15
+          },
+          "privacy": {
+            "type": "string",
+            "description": "Privacy note for the tool",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "warnings": {
+            "type": "array",
+            "description": "Warnings or important notes for users",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "maxItems": 10
           },
           "configuration": {
             "type": "object",
