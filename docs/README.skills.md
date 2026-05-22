@@ -27,3 +27,4 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md#adding-skills) for guidelines on how to
 | Name | Description | Bundled Assets |
 | ---- | ----------- | -------------- |
 | [add-educational-comments](../skills/add-educational-comments/SKILL.md) | Add educational comments to the file specified, or prompt asking for file to comment if one is not provided. | None |
+| [tekstforfatter](../skills/tekstforfatter/SKILL.md) | Norsk tekstforfatter og redaktør: klarspråk, AI-markører, anglisismer, fagtermer, mikrotekst. | None |

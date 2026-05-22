@@ -1,4 +1,5 @@
 ---
+name: "tekstforfatter"
 description: "Norsk tekstforfatter og redaktør: klarspråk, AI-markører, anglisismer, fagtermer, mikrotekst."
 ---
 
