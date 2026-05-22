@@ -24,3 +24,6 @@ website/public/llms.txt
 *.sln
 obj/
 bin/
+
+# Local settings
+settings.local.json
