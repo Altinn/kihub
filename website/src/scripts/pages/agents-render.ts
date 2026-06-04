@@ -46,7 +46,7 @@ export function renderAgentsHtml(
 
   if (items.length === 0) {
     return `
-      <div class="empty-state">
+      <div class="ds-card empty-state" data-color="neutral">
         <h3>No agents found</h3>
         <p>Try a different search term or adjust filters</p>
       </div>
@@ -61,7 +61,7 @@ export function renderAgentsHtml(
           : escapeHtml(item.title);
 
       return `
-        <article class="resource-item" data-path="${escapeHtml(item.path)}" role="listitem">
+        <article class="ds-card resource-item" data-color="neutral" data-path="${escapeHtml(item.path)}" role="listitem">
           <button type="button" class="resource-preview">
             <div class="resource-info">
               <div class="resource-title">${titleHtml}</div>
@@ -71,7 +71,7 @@ export function renderAgentsHtml(
               <div class="resource-meta">
                 ${
                   item.model
-                    ? `<span class="resource-tag tag-model">${escapeHtml(
+                    ? `<span class="ds-tag resource-tag tag-model" data-color="accent">${escapeHtml(
                         item.model
                       )}</span>`
                     : ""
@@ -81,20 +81,20 @@ export function renderAgentsHtml(
                     ?.slice(0, 3)
                     .map(
                       (tool) =>
-                        `<span class="resource-tag">${escapeHtml(tool)}</span>`
+                        `<span class="ds-tag resource-tag" data-variant="outline">${escapeHtml(tool)}</span>`
                     )
                     .join("") || ""
                 }
                 ${
                   item.tools && item.tools.length > 3
-                    ? `<span class="resource-tag">+${
+                    ? `<span class="ds-tag resource-tag" data-variant="outline">+${
                         item.tools.length - 3
                       } more</span>`
                     : ""
                 }
                 ${
                   item.hasHandoffs
-                    ? `<span class="resource-tag tag-handoffs">handoffs</span>`
+                    ? `<span class="ds-tag resource-tag tag-handoffs" data-color="warning">handoffs</span>`
                     : ""
                 }
                 ${getLastUpdatedHtml(item.lastUpdated)}
@@ -106,7 +106,7 @@ export function renderAgentsHtml(
             ${getActionButtonsHtml(item.path, true)}
             <a href="${getGitHubUrl(
               item.path
-            )}" class="btn btn-secondary btn-small" target="_blank" onclick="event.stopPropagation()" title="View on GitHub">
+            )}" class="ds-button" data-variant="secondary" data-size="sm" target="_blank" onclick="event.stopPropagation()" title="View on GitHub">
               GitHub
             </a>
           </div>

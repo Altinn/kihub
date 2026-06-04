@@ -2,15 +2,14 @@
 // Modal component for viewing file contents
 ---
 
-<div
+<dialog
   id="file-modal"
-  class="modal hidden"
-  role="dialog"
+  class="ds-dialog modal hidden"
   aria-modal="true"
   aria-labelledby="modal-title"
 >
   <div class="modal-content">
-    <div class="modal-header">
+    <div class="ds-dialog__block modal-header">
       <div class="modal-header-top">
         <h3 id="modal-title">File</h3>
         <div class="modal-actions">
@@ -20,7 +19,8 @@
               <button
                 type="button"
                 id="modal-file-button"
-                class="btn btn-secondary modal-file-button"
+                class="ds-button modal-file-button"
+                data-variant="secondary"
                 aria-label="Select file to preview"
                 aria-haspopup="menu"
                 aria-expanded="false"
@@ -30,7 +30,8 @@
               <button
                 type="button"
                 id="modal-file-toggle"
-                class="btn btn-secondary modal-file-toggle"
+                class="ds-button modal-file-toggle"
+                data-variant="secondary"
                 aria-label="Open file menu"
                 aria-haspopup="menu"
                 aria-expanded="false"
@@ -47,12 +48,13 @@
                   ></path>
                 </svg>
               </button>
-              <div id="modal-file-menu" class="modal-file-menu" role="menu"></div>
+              <div id="modal-file-menu" class="ds-dropdown modal-file-menu" role="menu"></div>
             </div>
           </div>
           <button
             id="raw-btn"
-            class="btn btn-secondary hidden"
+            class="ds-button hidden"
+            data-variant="secondary"
             aria-label="View raw file"
           >
             <svg
@@ -70,7 +72,8 @@
           </button>
           <button
             id="render-btn"
-            class="btn btn-secondary"
+            class="ds-button"
+            data-variant="secondary"
             aria-label="Render file"
           >
             <svg
@@ -88,7 +91,8 @@
           </button>
           <button
             id="copy-btn"
-            class="btn btn-secondary"
+            class="ds-button"
+            data-variant="secondary"
             aria-label="Copy to clipboard"
           >
             <svg
@@ -109,7 +113,8 @@
           </button>
           <button
             id="download-btn"
-            class="btn btn-secondary"
+            class="ds-button"
+            data-variant="secondary"
             aria-label="Download file"
           >
             <svg
@@ -127,7 +132,8 @@
           </button>
           <button
             id="share-btn"
-            class="btn btn-secondary"
+            class="ds-button"
+            data-variant="secondary"
             aria-label="Copy link to clipboard"
           >
             <svg
@@ -150,7 +156,7 @@
           >
             <a
               id="install-btn-main"
-              class="btn btn-primary install-btn-main"
+              class="ds-button install-btn-main"
               target="_blank"
               rel="noopener"
             >
@@ -158,7 +164,7 @@
             </a>
             <button
               type="button"
-              class="btn btn-primary install-btn-toggle"
+              class="ds-button install-btn-toggle"
               aria-label="Install options"
               aria-expanded="false"
               aria-haspopup="true"
@@ -175,7 +181,7 @@
                 ></path>
               </svg>
             </button>
-            <div class="install-dropdown-menu" role="menu">
+            <div class="ds-dropdown install-dropdown-menu" role="menu">
               <a
                 id="install-vscode"
                 target="_blank"
@@ -196,7 +202,9 @@
           </div>
           <button
             id="close-modal"
-            class="btn btn-icon"
+            class="ds-button"
+            data-variant="tertiary"
+            data-icon
             aria-label="Close dialog"
           >
             <svg
@@ -214,8 +222,8 @@
         </div>
       </div>
     </div>
-    <div class="modal-body">
+    <div class="ds-dialog__block modal-body">
       <pre id="modal-content"><code /></pre>
     </div>
   </div>
-</div>
+</dialog>

@@ -173,7 +173,7 @@ export async function initSkillsPage(): Promise<void> {
   if (!data || !data.items) {
     if (list)
       list.innerHTML =
-        '<div class="empty-state"><h3>Failed to load data</h3></div>';
+        '<div class="ds-card empty-state" data-color="neutral"><h3>Failed to load data</h3></div>';
     return;
   }
 

@@ -1,44 +1,27 @@
-/* Brand color overrides for Starlight */
-/* Purple (#8534F3) and Orange (#FE4C25) theme */
-
-/* ── Dark theme (default) ─────────────────────────────────── */
+/* Designsystemet token bridge for Starlight */
 :root {
-  --sl-color-accent-low: #1a0d33;
-  --sl-color-accent: #8534f3;
-  --sl-color-accent-high: #c9a5fa;
-  --sl-color-text-accent: #c9a5fa;
+  --sl-color-accent-low: var(--ds-color-accent-surface-tinted);
+  --sl-color-accent: var(--ds-color-accent-base-default);
+  --sl-color-accent-high: var(--ds-color-accent-text-default);
+  --sl-color-text-accent: var(--ds-color-accent-text-subtle);
 
-  --sl-color-white: #f0f0f5;
-  --sl-color-gray-1: #d0d0da;
-  --sl-color-gray-2: #9898a6;
-  --sl-color-gray-3: #60607a;
-  --sl-color-gray-4: #30304a;
-  --sl-color-gray-5: #1a1a2e;
-  --sl-color-gray-6: #111120;
-  --sl-color-black: #0a0a0f;
-
-  --sl-font-system: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif;
-}
-
-/* ── Light theme ───────────────────────────────────────────── */
-/* Starlight inverts the gray scale for light mode.
-   Because our customCss is unlayered it overrides Starlight's layered
-   theme swap, so we must provide the inverted palette ourselves. */
-:root[data-theme="light"] {
-  --sl-color-accent-low: #f0e6ff;
-  --sl-color-accent: #6b21c8;
-  --sl-color-accent-high: #3b0d7a;
-  --sl-color-text-accent: #6b21c8;
-
-  --sl-color-white: #0a0a0f;
-  --sl-color-gray-1: #111120;
-  --sl-color-gray-2: #1a1a2e;
-  --sl-color-gray-3: #30304a;
-  --sl-color-gray-4: #60607a;
-  --sl-color-gray-5: #9898a6;
-  --sl-color-gray-6: #d0d0da;
-  --sl-color-black: #f0f0f5;
+  --sl-color-white: var(--ds-color-neutral-text-default);
+  --sl-color-gray-1: var(--ds-color-neutral-text-default);
+  --sl-color-gray-2: var(--ds-color-neutral-text-subtle);
+  --sl-color-gray-3: var(--ds-color-neutral-border-strong);
+  --sl-color-gray-4: var(--ds-color-neutral-border-default);
+  --sl-color-gray-5: var(--ds-color-neutral-surface-tinted);
+  --sl-color-gray-6: var(--ds-color-neutral-background-tinted);
+  --sl-color-black: var(--ds-color-neutral-background-default);
+  --sl-color-bg: var(--ds-color-neutral-background-default);
+  --sl-color-bg-nav: var(--ds-color-neutral-surface-default);
+  --sl-color-bg-sidebar: var(--ds-color-neutral-surface-default);
+  --sl-color-bg-inline-code: var(--ds-color-neutral-surface-tinted);
+  --sl-color-hairline: var(--ds-color-neutral-border-subtle);
+  --sl-color-hairline-light: var(--ds-color-neutral-border-subtle);
+  --sl-color-text: var(--ds-color-neutral-text-default);
+  --sl-color-text-invert: var(--ds-color-accent-base-contrast-default);
+  --sl-font-system: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* ── Sidebar readability ───────────────────────────────────── */
@@ -148,36 +131,39 @@ main:has(#main-content) > .content-panel:has(h1#_top) {
   display: inline-flex !important;
   width: auto !important;
   align-items: center;
-  padding: 0.2rem 0.625rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1.4;
+  min-height: var(--ds-size-8);
+  padding: 0 var(--ds-size-3);
+  border-radius: var(--ds-border-radius-full);
+  font-size: var(--ds-body-sm-font-size);
+  font-weight: var(--ds-font-weight-medium);
+  line-height: var(--ds-line-height-sm);
   cursor: pointer;
   user-select: none;
   transition: all 0.15s ease;
-  border: 1px solid var(--sl-color-gray-5);
-  color: var(--sl-color-gray-2);
-  background: transparent;
+  border: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+  color: var(--ds-color-neutral-text-default);
+  background: var(--ds-color-neutral-surface-tinted);
   text-transform: capitalize;
 }
 
 #starlight__search .pagefind-ui__filter-label:hover {
-  border-color: var(--sl-color-accent);
-  color: var(--sl-color-accent-high);
+  border-color: var(--ds-color-accent-border-default);
+  background: var(--ds-color-neutral-surface-hover);
+  color: var(--ds-color-neutral-text-default);
 }
 
 /* Keyboard focus ring for pill filters */
 #starlight__search .pagefind-ui__filter-checkbox:focus-visible + .pagefind-ui__filter-label {
-  outline: 2px solid var(--sl-color-accent);
-  outline-offset: 2px;
+  box-shadow: var(--dsc-focus-boxShadow);
+  outline: var(--dsc-focus-outline);
+  outline-offset: var(--ds-border-width-focus);
 }
 
 /* Active/checked pill state */
 #starlight__search .pagefind-ui__filter-checkbox:checked + .pagefind-ui__filter-label {
-  background: var(--sl-color-accent);
-  border-color: var(--sl-color-accent);
-  color: white;
+  background: var(--ds-color-accent-base-default);
+  border-color: var(--ds-color-accent-base-default);
+  color: var(--ds-color-accent-base-contrast-default);
 }
 
 #starlight__search .pagefind-ui__filter-checkbox:checked + .pagefind-ui__filter-label:hover {

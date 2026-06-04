@@ -64,12 +64,13 @@ function sanitizeToolUrl(url: string): string {
 function getToolActionLink(
   href: string | undefined,
   label: string,
-  className: string
+  variant: "primary" | "secondary" = "secondary"
 ): string {
   if (!href) return "";
+  const variantAttr = variant === "secondary" ? ' data-variant="secondary"' : "";
   return `<a href="${sanitizeToolUrl(
     href
-  )}" class="${className}" target="_blank" rel="noopener">${escapeHtml(
+  )}" class="ds-button"${variantAttr} data-size="sm" target="_blank" rel="noopener">${escapeHtml(
     label
   )}</a>`;
 }
@@ -85,7 +86,7 @@ export function renderToolsHtml(
 
   if (tools.length === 0) {
     return `
-      <div class="empty-state">
+      <div class="ds-card empty-state" data-color="neutral">
         <h3>No tools found</h3>
         <p>Try a different search term or adjust filters</p>
       </div>
@@ -96,14 +97,14 @@ export function renderToolsHtml(
     .map((tool) => {
       const badges: string[] = [];
       if (tool.featured) {
-        badges.push('<span class="tool-badge featured">Featured</span>');
+        badges.push('<span class="ds-tag tool-badge featured" data-color="accent">Featured</span>');
       }
       badges.push(
-        `<span class="tool-badge category">${escapeHtml(tool.category)}</span>`
+        `<span class="ds-tag tool-badge category" data-variant="outline">${escapeHtml(tool.category)}</span>`
       );
       if (tool.version) {
         badges.push(
-          `<span class="tool-badge version">${escapeHtml(tool.version)}</span>`
+          `<span class="ds-tag tool-badge version" data-variant="outline">${escapeHtml(tool.version)}</span>`
         );
       }
 
@@ -135,7 +136,7 @@ export function renderToolsHtml(
           ${tool.platforms
             .map(
               (platform) =>
-                `<span class="tool-tag">${escapeHtml(platform)}</span>`
+                `<span class="ds-tag tool-tag" data-variant="outline">${escapeHtml(platform)}</span>`
             )
             .join("")}
           </div>
@@ -163,7 +164,7 @@ export function renderToolsHtml(
         tool.tags && tool.tags.length > 0
           ? `<div class="tool-tags">
           ${tool.tags
-            .map((tag) => `<span class="tool-tag">${escapeHtml(tag)}</span>`)
+            .map((tag) => `<span class="ds-tag tool-tag" data-variant="outline">${escapeHtml(tag)}</span>`)
             .join("")}
         </div>`
           : "";
@@ -174,7 +175,7 @@ export function renderToolsHtml(
           <div class="tool-config-wrapper">
             <pre><code>${escapeHtml(tool.configuration.content)}</code></pre>
           </div>
-          <button class="copy-config-btn" data-config="${encodeURIComponent(
+          <button class="ds-button copy-config-btn" data-variant="secondary" data-size="sm" data-config="${encodeURIComponent(
             tool.configuration.content
           )}">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
@@ -194,43 +195,39 @@ export function renderToolsHtml(
                 getToolActionLink(
                   download.url,
                   download.label,
-                  "btn btn-outline"
+                  "secondary"
                 )
               )
               .filter(Boolean)
           : [];
 
       const actions = [
-        getToolActionLink(tool.links.release, releaseLabel, "btn btn-primary"),
+        getToolActionLink(tool.links.release, releaseLabel, "primary"),
         ...downloadActions,
-        getToolActionLink(tool.links.blog, "📖 Blog", "btn btn-secondary"),
+        getToolActionLink(tool.links.blog, "Blog"),
         getToolActionLink(
           tool.links.marketplace,
-          "🏪 Marketplace",
-          "btn btn-secondary"
+          "Marketplace"
         ),
-        getToolActionLink(tool.links.npm, "📦 npm", "btn btn-secondary"),
-        getToolActionLink(tool.links.pypi, "🐍 PyPI", "btn btn-secondary"),
+        getToolActionLink(tool.links.npm, "npm"),
+        getToolActionLink(tool.links.pypi, "PyPI"),
         getToolActionLink(
           tool.links.documentation,
-          "📚 Docs",
-          "btn btn-secondary"
+          "Docs"
         ),
-        getToolActionLink(tool.links.github, "GitHub", "btn btn-secondary"),
+        getToolActionLink(tool.links.github, "GitHub"),
         getToolActionLink(
           tool.links.vscode,
           "Install in VS Code",
-          "btn btn-primary"
+          "primary"
         ),
         getToolActionLink(
           tool.links["vscode-insiders"],
-          "VS Code Insiders",
-          "btn btn-outline"
+          "VS Code Insiders"
         ),
         getToolActionLink(
           tool.links["visual-studio"],
-          "Visual Studio",
-          "btn btn-outline"
+          "Visual Studio"
         ),
       ].filter(Boolean);
 
@@ -245,7 +242,7 @@ export function renderToolsHtml(
           : escapeHtml(tool.name);
 
       return `
-      <div class="tool-card">
+      <div class="ds-card tool-card" data-color="neutral">
         <div class="tool-header">
           <h2>${titleHtml}</h2>
           <div class="tool-badges">

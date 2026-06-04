@@ -61,7 +61,7 @@ export function renderCookbookSectionsHtml(
 ): string {
   if (matches.length === 0) {
     return `
-      <div class="empty-state">
+      <div class="ds-card empty-state" data-color="neutral">
         <h3>No Results Found</h3>
         <p>Try adjusting your search or filters.</p>
       </div>
@@ -97,7 +97,7 @@ function renderCookbookSection(
   const languageTabs = cookbook.languages
     .map(
       (language) => `
-    <button class="lang-tab${selectedLanguage === language.id ? " active" : ""}"
+    <button class="ds-chip lang-tab${selectedLanguage === language.id ? " active" : ""}"
             data-lang="${escapeHtml(language.id)}"
             title="${escapeHtml(language.name)}">
       ${escapeHtml(language.icon)}
@@ -138,7 +138,7 @@ function renderRecipeCard(
 ): string {
   const recipeKey = `${cookbook.id}-${recipe.id}`;
   const tags = recipe.tags
-    .map((tag) => `<span class="recipe-tag">${escapeHtml(tag)}</span>`)
+    .map((tag) => `<span class="ds-tag recipe-tag" data-variant="outline">${escapeHtml(tag)}</span>`)
     .join("");
   const titleHtml = highlightedName || escapeHtml(recipe.name);
 
@@ -156,10 +156,10 @@ function renderRecipeCard(
       : "";
 
     return `
-      <div class="recipe-card external" data-recipe="${escapeHtml(recipeKey)}">
+      <div class="ds-card recipe-card external" data-color="neutral" data-recipe="${escapeHtml(recipeKey)}">
         <div class="recipe-header">
           <h3>${titleHtml}</h3>
-          <span class="recipe-badge external-badge" title="External project">
+          <span class="ds-tag recipe-badge external-badge" data-color="accent" title="External project">
             <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
               <path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"/>
             </svg>
@@ -172,7 +172,7 @@ function renderRecipeCard(
         <div class="recipe-actions">
           <a href="${sanitizeUrl(
             recipe.url
-          )}" class="btn btn-primary btn-small" target="_blank" rel="noopener">
+          )}" class="ds-button" data-size="sm" target="_blank" rel="noopener">
             <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
               <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
             </svg>
@@ -196,7 +196,7 @@ function renderRecipeCard(
     .join("");
 
   return `
-    <div class="recipe-card" data-recipe="${escapeHtml(
+    <div class="ds-card recipe-card" data-color="neutral" data-recipe="${escapeHtml(
       recipeKey
     )}" data-cookbook="${escapeHtml(cookbook.id)}" data-recipe-id="${escapeHtml(
     recipe.id
@@ -211,7 +211,7 @@ function renderRecipeCard(
         ${
           variant
             ? `
-          <button class="btn btn-secondary btn-small view-recipe-btn" data-doc="${escapeHtml(
+          <button class="ds-button view-recipe-btn" data-variant="secondary" data-size="sm" data-doc="${escapeHtml(
             variant.doc
           )}">
             <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
@@ -222,7 +222,7 @@ function renderRecipeCard(
           ${
             variant.example
               ? `
-            <button class="btn btn-secondary btn-small view-example-btn" data-example="${escapeHtml(
+            <button class="ds-button view-example-btn" data-variant="secondary" data-size="sm" data-example="${escapeHtml(
               variant.example
             )}">
               <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
@@ -236,7 +236,7 @@ function renderRecipeCard(
           <a href="https://github.com/Altinn/kihub/blob/main/${escapeHtml(
             variant.doc
           )}"
-             class="btn btn-secondary btn-small" target="_blank" rel="noopener">
+             class="ds-button" data-variant="secondary" data-size="sm" target="_blank" rel="noopener">
             <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
               <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
             </svg>

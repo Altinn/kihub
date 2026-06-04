@@ -391,23 +391,20 @@ export function getInstallDropdownHtml(
   if (!vscodeUrl) return "";
 
   const sizeClass = small ? "install-dropdown-small" : "";
+  const sizeAttr = small ? ' data-size="sm"' : "";
   const uniqueId = `install-${filePath.replace(/[^a-zA-Z0-9]/g, "-")}`;
 
   return `
     <div class="install-dropdown ${sizeClass}" id="${uniqueId}" data-install-scope="list">
-      <a href="${vscodeUrl}" class="btn btn-primary ${
-    small ? "btn-small" : ""
-  } install-btn-main" target="_blank" rel="noopener">
+      <a href="${vscodeUrl}" class="ds-button install-btn-main"${sizeAttr} target="_blank" rel="noopener">
         Install
       </a>
-      <button type="button" class="btn btn-primary ${
-        small ? "btn-small" : ""
-      } install-btn-toggle" aria-label="Install options" aria-expanded="false">
+      <button type="button" class="ds-button install-btn-toggle"${sizeAttr} aria-label="Install options" aria-expanded="false">
         <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
           <path d="M4.427 7.427l3.396 3.396a.25.25 0 00.354 0l3.396-3.396A.25.25 0 0011.396 7H4.604a.25.25 0 00-.177.427z"/>
         </svg>
       </button>
-      <div class="install-dropdown-menu">
+      <div class="ds-dropdown install-dropdown-menu">
         <a href="${vscodeUrl}" target="_blank" rel="noopener">
           VS Code
         </a>
@@ -480,18 +477,18 @@ export function setupDropdownCloseHandlers(): void {
  * Generate HTML for action buttons (download, share) in list view
  */
 export function getActionButtonsHtml(filePath: string, small = false): string {
-  const btnClass = small ? "btn-small" : "";
+  const sizeAttr = small ? ' data-size="sm"' : "";
   const iconSize = small ? 14 : 16;
 
   return `
-    <button class="btn btn-secondary ${btnClass} action-download" data-path="${escapeHtml(
+    <button class="ds-button action-download" data-variant="secondary" data-icon${sizeAttr} data-path="${escapeHtml(
     filePath
   )}" title="Download file">
       <svg viewBox="0 0 16 16" width="${iconSize}" height="${iconSize}" fill="currentColor">
         <path d="M7.47 10.78a.75.75 0 0 0 1.06 0l3.75-3.75a.75.75 0 0 0-1.06-1.06L8.75 8.44V1.75a.75.75 0 0 0-1.5 0v6.69L4.78 5.97a.75.75 0 0 0-1.06 1.06l3.75 3.75ZM3.75 13a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5h-8.5Z"/>
       </svg>
     </button>
-    <button class="btn btn-secondary ${btnClass} action-share" data-path="${escapeHtml(
+    <button class="ds-button action-share" data-variant="secondary" data-icon${sizeAttr} data-path="${escapeHtml(
     filePath
   )}" title="Copy link">
       <svg viewBox="0 0 16 16" width="${iconSize}" height="${iconSize}" fill="currentColor">
@@ -610,10 +607,10 @@ export function getLastUpdatedHtml(isoDate: string | null | undefined): string {
   const fullDate = formatFullDate(isoDate);
 
   if (relativeTime === "Unknown") {
-    return `<span class="last-updated">Updated: Unknown</span>`;
+    return `<span class="ds-tag last-updated" data-variant="outline">Updated: Unknown</span>`;
   }
 
-  return `<span class="last-updated" title="${escapeHtml(
+  return `<span class="ds-tag last-updated" data-variant="outline" title="${escapeHtml(
     fullDate
   )}">Updated ${relativeTime}</span>`;
 }

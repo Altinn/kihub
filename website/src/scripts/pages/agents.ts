@@ -122,7 +122,7 @@ export async function initAgentsPage(): Promise<void> {
 
   const data = await fetchData<AgentsData>('agents.json');
   if (!data || !data.items) {
-    if (list) list.innerHTML = '<div class="empty-state"><h3>Failed to load data</h3></div>';
+    if (list) list.innerHTML = '<div class="ds-card empty-state" data-color="neutral"><h3>Failed to load data</h3></div>';
     return;
   }
 

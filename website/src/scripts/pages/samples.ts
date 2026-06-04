@@ -80,7 +80,7 @@ function showEmptyState(): void {
   const container = document.getElementById("samples-list");
   if (container) {
     container.innerHTML = `
-      <div class="empty-state">
+      <div class="ds-card empty-state" data-color="neutral">
         <h3>No Samples Available</h3>
         <p>Check back soon for code samples and recipes.</p>
       </div>

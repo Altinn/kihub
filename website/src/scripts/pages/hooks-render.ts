@@ -44,7 +44,7 @@ export function renderHooksHtml(
 
   if (items.length === 0) {
     return `
-      <div class="empty-state">
+      <div class="ds-card empty-state" data-color="neutral">
         <h3>No hooks found</h3>
         <p>Try a different search term or adjust filters</p>
       </div>
@@ -59,7 +59,7 @@ export function renderHooksHtml(
           : escapeHtml(item.title);
 
       return `
-        <article class="resource-item" data-path="${escapeHtml(
+        <article class="ds-card resource-item" data-color="neutral" data-path="${escapeHtml(
           item.readmeFile
         )}" data-hook-id="${escapeHtml(item.id)}" role="listitem">
           <button type="button" class="resource-preview">
@@ -72,7 +72,7 @@ export function renderHooksHtml(
                 ${item.hooks
                   .map(
                     (hook) =>
-                      `<span class="resource-tag tag-hook">${escapeHtml(
+                      `<span class="ds-tag resource-tag tag-hook" data-color="accent">${escapeHtml(
                         hook
                       )}</span>`
                   )
@@ -80,14 +80,14 @@ export function renderHooksHtml(
                 ${item.tags
                   .map(
                     (tag) =>
-                      `<span class="resource-tag tag-tag">${escapeHtml(
+                      `<span class="ds-tag resource-tag tag-tag" data-variant="outline">${escapeHtml(
                         tag
                       )}</span>`
                   )
                   .join("")}
                 ${
                   item.assets.length > 0
-                    ? `<span class="resource-tag tag-assets">${
+                    ? `<span class="ds-tag resource-tag tag-assets" data-color="info">${
                         item.assets.length
                       } asset${item.assets.length === 1 ? "" : "s"}</span>`
                     : ""
@@ -97,7 +97,7 @@ export function renderHooksHtml(
             </div>
           </button>
           <div class="resource-actions">
-            <button class="btn btn-primary download-hook-btn" data-hook-id="${escapeHtml(
+            <button class="ds-button download-hook-btn" data-size="sm" data-hook-id="${escapeHtml(
               item.id
             )}" title="Download as ZIP">
               <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
@@ -108,7 +108,7 @@ export function renderHooksHtml(
             </button>
             <a href="${getGitHubUrl(
               item.path
-            )}" class="btn btn-secondary" target="_blank" onclick="event.stopPropagation()" title="View on GitHub">GitHub</a>
+            )}" class="ds-button" data-variant="secondary" data-size="sm" target="_blank" onclick="event.stopPropagation()" title="View on GitHub">GitHub</a>
           </div>
         </article>
       `;

@@ -45,6 +45,27 @@ const twitterDomain =
 {socialImageType && <meta property="og:image:type" content={socialImageType} />}
 {socialImageAlt && <meta name="twitter:image:alt" content={socialImageAlt} />}
 <script is:inline define:vars={{ basePath }}>
+  (() => {
+    const root = document.documentElement;
+    const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const syncColorScheme = () => {
+      const theme = root.dataset.theme;
+      root.dataset.colorScheme =
+        theme === 'dark' || theme === 'light'
+          ? theme
+          : colorSchemeQuery.matches
+            ? 'dark'
+            : 'light';
+    };
+
+    syncColorScheme();
+    new MutationObserver(syncColorScheme).observe(root, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+    colorSchemeQuery.addEventListener?.('change', syncColorScheme);
+  })();
+
   document.addEventListener('DOMContentLoaded', () => {
     document.body.dataset.basePath = basePath;
   });

@@ -146,7 +146,7 @@ export async function initToolsPage(): Promise<void> {
     const container = document.getElementById("tools-list");
     if (container)
       container.innerHTML =
-        '<div class="empty-state"><h3>Failed to load tools</h3></div>';
+        '<div class="ds-card empty-state" data-color="neutral"><h3>Failed to load tools</h3></div>';
     return;
   }
 

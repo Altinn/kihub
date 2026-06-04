@@ -374,9 +374,9 @@ async function configureSkillFileSwitcher(filePath: string): Promise<void> {
   menu.innerHTML = skillItem.files
     .map(
       (file) =>
-        `<button type="button" class="modal-file-menu-item${
+        `<button type="button" class="ds-button modal-file-menu-item${
           file.path === filePath ? " active" : ""
-        }" data-path="${escapeHtml(file.path)}" role="menuitemradio" aria-checked="${
+        }" data-variant="tertiary" data-size="sm" data-path="${escapeHtml(file.path)}" role="menuitemradio" aria-checked="${
           file.path === filePath ? "true" : "false"
         }">${escapeHtml(file.name)}</button>`
     )
@@ -488,7 +488,7 @@ function handleModalKeydown(e: KeyboardEvent, modal: HTMLElement): void {
  * Setup modal functionality
  */
 export function setupModal(): void {
-  const modal = document.getElementById("file-modal");
+  const modal = document.getElementById("file-modal") as HTMLDialogElement | null;
   const closeBtn = document.getElementById("close-modal");
   const copyBtn = document.getElementById("copy-btn");
   const downloadBtn = document.getElementById("download-btn");
@@ -508,8 +508,16 @@ export function setupModal(): void {
     if (e.target === modal) closeModal();
   });
 
+  modal.addEventListener("cancel", (e) => {
+    e.preventDefault();
+    closeModal();
+  });
+
   document.addEventListener("keydown", (e) => {
-    if (!modal.classList.contains("hidden")) {
+    const isOpen = modal instanceof HTMLDialogElement
+      ? modal.open
+      : !modal.classList.contains("hidden");
+    if (isOpen) {
       if (e.key === "Escape") {
         closeModal();
       } else {
@@ -829,7 +837,7 @@ export async function openFileModal(
   updateUrl = true,
   trigger?: HTMLElement
 ): Promise<void> {
-  const modal = document.getElementById("file-modal");
+  const modal = document.getElementById("file-modal") as HTMLDialogElement | null;
   const title = document.getElementById("modal-title");
   const installDropdown = document.getElementById("install-dropdown");
   const installBtnMain = document.getElementById(
@@ -867,6 +875,9 @@ export async function openFileModal(
   const fallbackName = getFileName(filePath);
   updateModalTitle(fallbackName, filePath);
   modal.classList.remove("hidden");
+  if (modal instanceof HTMLDialogElement && !modal.open) {
+    modal.showModal();
+  }
 
   // Set focus to close button for accessibility
   setTimeout(() => {
@@ -1080,15 +1091,15 @@ function renderExternalPluginModal(
       ${
         plugin.tags && plugin.tags.length > 0
           ? `<div class="collection-tags">
-              <span class="resource-tag resource-tag-external">🔗 External Plugin</span>
+              <span class="ds-tag resource-tag resource-tag-external" data-color="accent">External Plugin</span>
               ${plugin.tags
                 .map(
-                  (t) => `<span class="resource-tag">${escapeHtml(t)}</span>`
+                  (t) => `<span class="ds-tag resource-tag" data-variant="outline">${escapeHtml(t)}</span>`
                 )
                 .join("")}
             </div>`
           : `<div class="collection-tags">
-              <span class="resource-tag resource-tag-external">🔗 External Plugin</span>
+              <span class="ds-tag resource-tag resource-tag-external" data-color="accent">External Plugin</span>
             </div>`
       }
       <div class="external-plugin-metadata">
@@ -1101,8 +1112,8 @@ function renderExternalPluginModal(
       <div class="external-plugin-cta">
         <a href="${sanitizeUrl(
           repoUrl
-        )}" class="btn btn-primary external-plugin-repo-btn" target="_blank" rel="noopener noreferrer">
-          View Repository →
+        )}" class="ds-button external-plugin-repo-btn" target="_blank" rel="noopener noreferrer">
+          View Repository
         </a>
       </div>
       <div class="external-plugin-note">
@@ -1129,7 +1140,7 @@ function renderLocalPluginModal(
           ? `
         <div class="collection-tags">
           ${plugin.tags
-            .map((t) => `<span class="resource-tag">${escapeHtml(t)}</span>`)
+            .map((t) => `<span class="ds-tag resource-tag" data-variant="outline">${escapeHtml(t)}</span>`)
             .join("")}
         </div>
       `
@@ -1142,7 +1153,7 @@ function renderLocalPluginModal(
         ${plugin.items
           .map(
             (item) => `
-          <div class="collection-item" data-path="${escapeHtml(
+          <div class="ds-card collection-item" data-color="neutral" data-path="${escapeHtml(
             item.path
           )}" data-type="${escapeHtml(item.kind)}">
             <span class="collection-item-icon">${getResourceIcon(
@@ -1160,7 +1171,7 @@ function renderLocalPluginModal(
                   : ""
               }
             </div>
-            <span class="collection-item-type">${escapeHtml(item.kind)}</span>
+            <span class="ds-tag collection-item-type" data-variant="outline">${escapeHtml(item.kind)}</span>
           </div>
         `
           )
@@ -1186,10 +1197,13 @@ function renderLocalPluginModal(
  * @param updateUrl - Whether to update the URL hash (default: true)
  */
 export function closeModal(updateUrl = true): void {
-  const modal = document.getElementById("file-modal");
+  const modal = document.getElementById("file-modal") as HTMLDialogElement | null;
   const installDropdown = document.getElementById("install-dropdown");
 
   if (modal) {
+    if (modal instanceof HTMLDialogElement && modal.open) {
+      modal.close();
+    }
     modal.classList.add("hidden");
   }
   if (installDropdown) {

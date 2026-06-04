@@ -17,28 +17,28 @@ const initialItems = sortHooks(hooksData.items, 'title');
     <div class="page-content">
       <div class="container">
         <div class="listing-toolbar">
-          <div class="search-bar">
+          <div class="search-bar ds-search">
             <label for="search-input" class="sr-only">Search hooks</label>
-            <input type="text" id="search-input" placeholder="Search hooks..." autocomplete="off">
+            <input type="search" id="search-input" class="ds-input" placeholder="Search hooks..." autocomplete="off">
           </div>
           
           <div class="filters-bar" id="filters-bar">
             <div class="filter-group">
               <label for="filter-hook">Hook Event:</label>
-              <select id="filter-hook" multiple aria-label="Filter by hook event"></select>
+              <select id="filter-hook" class="ds-input" multiple aria-label="Filter by hook event"></select>
             </div>
             <div class="filter-group">
               <label for="filter-tag">Tag:</label>
-              <select id="filter-tag" multiple aria-label="Filter by tag"></select>
+              <select id="filter-tag" class="ds-input" multiple aria-label="Filter by tag"></select>
             </div>
             <div class="filter-group">
               <label for="sort-select">Sort:</label>
-              <select id="sort-select" aria-label="Sort by">
+              <select id="sort-select" class="ds-input" aria-label="Sort by">
                 <option value="title">Name (A-Z)</option>
                 <option value="lastUpdated">Recently Updated</option>
               </select>
             </div>
-            <button id="clear-filters" class="btn btn-secondary btn-small">Clear Filters</button>
+            <button id="clear-filters" class="ds-button" data-variant="secondary" data-size="sm">Clear Filters</button>
           </div>
         </div>
         

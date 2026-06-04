@@ -17,35 +17,35 @@ const initialItems = sortAgents(agentsData.items, 'title');
     <div class="page-content">
       <div class="container">
         <div class="listing-toolbar">
-          <div class="search-bar">
+          <div class="search-bar ds-search">
             <label for="search-input" class="sr-only">Search agents</label>
-            <input type="text" id="search-input" placeholder="Search agents..." autocomplete="off">
+            <input type="search" id="search-input" class="ds-input" placeholder="Search agents..." autocomplete="off">
           </div>
 
           <!-- Filters -->
           <div class="filters-bar" id="filters-bar">
             <div class="filter-group">
               <label for="filter-model">Model:</label>
-              <select id="filter-model" multiple aria-label="Filter by model"></select>
+              <select id="filter-model" class="ds-input" multiple aria-label="Filter by model"></select>
             </div>
             <div class="filter-group">
               <label for="filter-tool">Tool:</label>
-              <select id="filter-tool" multiple aria-label="Filter by tool"></select>
+              <select id="filter-tool" class="ds-input" multiple aria-label="Filter by tool"></select>
             </div>
             <div class="filter-group">
               <label class="checkbox-label">
-                <input type="checkbox" id="filter-handoffs">
+                <input type="checkbox" id="filter-handoffs" class="ds-input">
                 Has Handoffs
               </label>
             </div>
             <div class="filter-group">
               <label for="sort-select">Sort:</label>
-              <select id="sort-select" aria-label="Sort by">
+              <select id="sort-select" class="ds-input" aria-label="Sort by">
                 <option value="title">Name (A-Z)</option>
                 <option value="lastUpdated">Recently Updated</option>
               </select>
             </div>
-            <button id="clear-filters" class="btn btn-secondary btn-small">Clear Filters</button>
+            <button id="clear-filters" class="ds-button" data-variant="secondary" data-size="sm">Clear Filters</button>
           </div>
         </div>
 

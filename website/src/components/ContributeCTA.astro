@@ -15,13 +15,13 @@ const newIssueUrl = 'https://github.com/Altinn/kihub/issues/new';
       <p class="contribute-cta-description">This collection is community-driven. Share your own {resourceType} to help others get more out of GitHub Copilot.</p>
     </div>
     <div class="contribute-cta-actions">
-      <a href={contributingUrl} class="btn btn-primary" target="_blank" rel="noopener">
+      <a href={contributingUrl} class="ds-button" target="_blank" rel="noopener">
         Contribute yours
         <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true">
           <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"/>
         </svg>
       </a>
-      <a href={newIssueUrl} class="btn btn-outline" target="_blank" rel="noopener">
+      <a href={newIssueUrl} class="ds-button" data-variant="secondary" target="_blank" rel="noopener">
         Request a resource
       </a>
     </div>
@@ -82,7 +82,7 @@ const newIssueUrl = 'https://github.com/Altinn/kihub/issues/new';
     flex-shrink: 0;
   }
 
-  .contribute-cta-actions .btn {
+  .contribute-cta-actions .ds-button {
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
@@ -101,7 +101,7 @@ const newIssueUrl = 'https://github.com/Altinn/kihub/issues/new';
       width: 100%;
     }
 
-    .contribute-cta-actions .btn {
+    .contribute-cta-actions .ds-button {
       justify-content: center;
     }
   }

@@ -50,7 +50,7 @@ export function renderSkillsHtml(
 
   if (items.length === 0) {
     return `
-      <div class="empty-state">
+      <div class="ds-card empty-state" data-color="neutral">
         <h3>No skills found</h3>
         <p>Try a different search term or adjust filters</p>
       </div>
@@ -65,7 +65,7 @@ export function renderSkillsHtml(
           : escapeHtml(item.title);
 
       return `
-        <article class="resource-item" data-path="${escapeHtml(
+        <article class="ds-card resource-item" data-color="neutral" data-path="${escapeHtml(
           item.skillFile
         )}" data-skill-id="${escapeHtml(item.id)}" role="listitem">
           <button type="button" class="resource-preview">
@@ -75,17 +75,17 @@ export function renderSkillsHtml(
                 item.description || "No description"
               )}</div>
               <div class="resource-meta">
-                <span class="resource-tag tag-category">${escapeHtml(
+                <span class="ds-tag resource-tag tag-category" data-color="accent">${escapeHtml(
                   item.category
                 )}</span>
                 ${
                   item.hasAssets
-                    ? `<span class="resource-tag tag-assets">${
+                    ? `<span class="ds-tag resource-tag tag-assets" data-color="info">${
                         item.assetCount
                       } asset${item.assetCount === 1 ? "" : "s"}</span>`
                     : ""
                 }
-                <span class="resource-tag">${item.files.length} file${
+                <span class="ds-tag resource-tag" data-variant="outline">${item.files.length} file${
           item.files.length === 1 ? "" : "s"
         }</span>
                 ${getLastUpdatedHtml(item.lastUpdated)}
@@ -93,7 +93,7 @@ export function renderSkillsHtml(
             </div>
           </button>
           <div class="resource-actions">
-            <button class="btn btn-primary download-skill-btn" data-skill-id="${escapeHtml(
+            <button class="ds-button download-skill-btn" data-size="sm" data-skill-id="${escapeHtml(
               item.id
             )}" title="Download as ZIP">
               <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
@@ -104,7 +104,7 @@ export function renderSkillsHtml(
             </button>
             <a href="${getGitHubUrl(
               item.path
-            )}" class="btn btn-secondary" target="_blank" onclick="event.stopPropagation()" title="View on GitHub">GitHub</a>
+            )}" class="ds-button" data-variant="secondary" data-size="sm" target="_blank" onclick="event.stopPropagation()" title="View on GitHub">GitHub</a>
           </div>
         </article>
       `;

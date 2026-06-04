@@ -5,14 +5,14 @@ import Modal from '../components/Modal.astro';
 const base = import.meta.env.BASE_URL;
 
 const cards = [
-  { id: 'agents', title: 'Agents', desc: 'Custom agents', countId: 'agents', countText: 'skills', color: '#5650a3', lightColor: '#a19ef4', image: 'images/agents.svg' },
-  { id: 'instructions', title: 'Instructions', desc: 'Coding standards', countId: 'instructions', countText: 'instructions', color: '#9c3f59', lightColor: '#d96a7d', image: 'images/instructions.svg' },
-  { id: 'skills', title: 'Skills', desc: 'Self-contained instructions', countId: 'skills', countText: 'skills', color: '#1d8c4c', lightColor: '#70d696', image: 'images/skills.svg' },
-  { id: 'hooks', title: 'Hooks', desc: 'Automated workflows', countId: 'hooks', countText: 'hooks', color: '#da761a', lightColor: '#ffb471', image: 'images/hooks.svg' },
-  { id: 'workflows', title: 'Workflows', desc: 'AI-powered automations', countId: 'workflows', countText: 'workflows', color: '#7a7a13', lightColor: '#c3c355', image: 'images/workflows.svg' },
-  { id: 'plugins', title: 'Plugins', desc: 'Curated plugins', countId: 'plugins', countText: 'plugins', color: '#2f8196', lightColor: '#71daeb', image: 'images/plugins.svg' },
-  { id: 'tools', title: 'Tools', desc: 'MCP servers', countId: 'tools', countText: 'tools', color: '#5650a3', lightColor: '#a19ef4', image: 'images/tools.svg' },
-  { id: 'learning-hub', title: 'Learning Hub', desc: 'Articles and guides', countId: null, countText: 'articles', color: '#9c3f59', lightColor: '#d96a7d', image: 'images/learninghub.svg' },
+  { id: 'agents', title: 'Agents', desc: 'Custom agents', countId: 'agents', countText: 'skills', image: 'images/agents.svg' },
+  { id: 'instructions', title: 'Instructions', desc: 'Coding standards', countId: 'instructions', countText: 'instructions', image: 'images/instructions.svg' },
+  { id: 'skills', title: 'Skills', desc: 'Self-contained instructions', countId: 'skills', countText: 'skills', image: 'images/skills.svg' },
+  { id: 'hooks', title: 'Hooks', desc: 'Automated workflows', countId: 'hooks', countText: 'hooks', image: 'images/hooks.svg' },
+  { id: 'workflows', title: 'Workflows', desc: 'AI-powered automations', countId: 'workflows', countText: 'workflows', image: 'images/workflows.svg' },
+  { id: 'plugins', title: 'Plugins', desc: 'Curated plugins', countId: 'plugins', countText: 'plugins', image: 'images/plugins.svg' },
+  { id: 'tools', title: 'Tools', desc: 'MCP servers', countId: 'tools', countText: 'tools', image: 'images/tools.svg' },
+  { id: 'learning-hub', title: 'Learning Hub', desc: 'Articles and guides', countId: null, countText: 'articles', image: 'images/learninghub.svg' },
 ];
 ---
 
@@ -31,22 +31,23 @@ const cards = [
 >
   <div id="main-content" class="v2-main">
     <!-- Hero Section -->
-    <section class="v2-hero" aria-labelledby="hero-heading">
+    <section class="ds-card v2-hero" data-color="neutral" aria-labelledby="hero-heading">
       <div class="v2-hero-content">
         <h1 id="hero-heading">Explore our growing hub for<br/>Agents, Skills & Instructions</h1>
         <p class="v2-hero-subtitle">
           DigDirs community-contributed agents, instructions, and skills to enhance your AI native experience
         </p>
         
-        <div class="v2-hero-search">
+        <div class="ds-search v2-hero-search">
           <label for="global-search" class="sr-only">Search all resources</label>
           <input
-            type="text"
+            type="search"
             id="global-search"
+            class="ds-input"
             placeholder="Search for any agent, skill, instruction..."
             autocomplete="off"
           />
-          <button class="v2-search-btn" aria-label="Search">
+          <button type="button" class="ds-button v2-search-btn" data-icon aria-label="Search">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="v2-search-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -56,18 +57,14 @@ const cards = [
         </div>
       </div>
       
-      <div class="v2-hero-graphics">
-        <div class="v2-circle v2-circle-1">
-          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400&h=400" alt="Content Creator"/>
-          <span class="v2-circle-label">Content Creator</span>
-        </div>
-        <div class="v2-circle v2-circle-2">
-          <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400&h=400" alt="Executive"/>
-          <span class="v2-circle-label">Executive</span>
-        </div>
-        <div class="v2-circle v2-circle-3">
-          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400&h=400" alt="Designer"/>
-          <span class="v2-circle-label">Designer</span>
+      <div class="v2-hero-graphics" aria-hidden="true">
+        <div class="v2-resource-stack">
+          {cards.slice(0, 6).map((card) => (
+            <div class="ds-card v2-resource-token" data-color="accent">
+              <img src={`${base}${card.image}`} alt="" />
+              <span>{card.title}</span>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -76,9 +73,9 @@ const cards = [
     <section class="v2-quick-links" aria-labelledby="quick-links-heading">
       <div class="v2-cards-grid">
         {cards.map(card => (
-          <a href={`${base}${card.id}/`} class="v2-card" id={`card-${card.id}`} style={`background-color: ${card.color};`}>
-            <div class="v2-card-image-wrap" style={`background-color: ${card.lightColor};`}>
-               <img src={card.image ? `${base}${card.image}` : `https://placehold.co/400x300/${card.lightColor.replace('#','')}/ffffff?text=${card.title}`} alt={`${card.title} graphic`} />
+          <a href={`${base}${card.id}/`} class="ds-card v2-card" data-color="neutral" id={`card-${card.id}`}>
+            <div class="v2-card-image-wrap">
+               <img src={`${base}${card.image}`} alt={`${card.title} graphic`} />
             </div>
             <div class="v2-card-content">
               <h3>{card.title}</h3>
@@ -115,192 +112,98 @@ const cards = [
   #main-content.v2-main {
     max-width: 1300px;
     margin: 0 auto !important;
-    padding: 2rem;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: var(--ds-size-8);
   }
 
-  /* Hero Section */
   .v2-hero {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(108deg, rgba(246,242,255,1) 0%, rgba(243,255,231,1) 37%, rgba(255,234,213,1) 68%, rgba(255,219,233,1) 100%);
-    border-radius: 24px;
-    padding: 4rem;
+    gap: var(--ds-size-10);
+    background: linear-gradient(135deg, var(--ds-color-neutral-surface-default), var(--ds-color-accent-surface-tinted));
+    border-color: var(--ds-color-neutral-border-subtle);
+    padding: var(--ds-size-12);
     position: relative;
     overflow: hidden;
     min-height: 480px;
-    margin-bottom: 3rem;
-  }
-
-  /* Diagonal divider for the hero right side background */
-  .v2-hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: -20%;
-    bottom: 0;
-    left: 45%;
-    background: #e4eaa0;
-    background: linear-gradient(135deg, rgba(228,234,160,0.5) 0%, rgba(254,234,229,0.5) 100%);
-    clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%);
-    z-index: 0;
-    opacity: 0.6;
+    margin-bottom: var(--ds-size-10);
   }
 
   .v2-hero-content {
     position: relative;
-    z-index: 10;
-    max-width: 55%;
+    z-index: 1;
+    max-width: 620px;
   }
 
   .v2-hero h1 {
-    font-size: 4rem !important;
+    font-size: clamp(2.5rem, 5vw, var(--ds-heading-2xl-font-size)) !important;
     line-height: 1.1 !important;
-    font-weight: 700 !important;
-    color: #111 !important;
-    margin-bottom: 1.5rem !important;
-    letter-spacing: -2px !important;
+    font-weight: var(--ds-font-weight-bold) !important;
+    color: var(--ds-color-neutral-text-default) !important;
+    margin-bottom: var(--ds-size-6) !important;
+    letter-spacing: 0 !important;
   }
 
   .v2-hero-subtitle {
-    font-size: 1.15rem;
-    color: #333;
-    margin-bottom: 2rem;
-    line-height: 1.5;
-    max-width: 90%;
-  }
-
-  .v2-hero-pill {
-    display: inline-block;
-    background: #fff;
-    padding: 0.6rem 1.2rem;
-    border-radius: 30px;
-    font-size: 0.85rem;
-    color: #333;
-    font-weight: 500;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    font-size: var(--ds-body-lg-font-size);
+    color: var(--ds-color-neutral-text-subtle);
+    margin-bottom: var(--ds-size-8);
+    line-height: var(--ds-body-long-lg-line-height);
+    max-width: 36rem;
   }
 
   .v2-hero-search {
     position: relative;
     width: 100%;
-    max-width: 450px;
-    display: flex;
-    align-items: center;
-    background: #fff;
-    border-radius: 12px;
-    padding: 0.4rem;
-    box-shadow: 0 8px 30px rgba(90, 80, 240, 0.1);
-  }
-
-  .v2-hero-search input {
-    flex: 1;
-    border: none;
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
-    outline: none;
-    background: transparent;
-    color: #333;
-    border-radius: 12px;
-  }
-
-  .v2-hero-search input::placeholder {
-    color: #888;
+    max-width: 520px;
   }
 
   .v2-search-btn {
-    background: #505af0;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.2s;
+    grid-area: 1 / 2;
   }
-  
-  .v2-search-btn:hover {
-    background: #424bc9;
-  }
+
   .v2-search-icon {
     stroke: currentColor;
     fill: none;
   }
 
-  /* Hero Graphics */
   .v2-hero-graphics {
     position: relative;
-    z-index: 10;
-    width: 45%;
-    height: 350px;
+    z-index: 1;
+    width: min(42%, 420px);
   }
 
-  .v2-circle {
-    position: absolute;
-    border-radius: 50%;
-    border: 8px solid #fff;
-    overflow: hidden;
-    position: absolute;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    background: #ccc;
-    display: flex;
-    flex-direction: column;
+  .v2-resource-stack {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: var(--ds-size-4);
+  }
+
+  .v2-resource-token {
+    display: grid;
+    grid-template-columns: var(--ds-size-10) 1fr;
     align-items: center;
+    gap: var(--ds-size-3);
+    padding: var(--ds-size-4);
+    color: var(--ds-color-accent-text-default);
+    background: var(--ds-color-accent-surface-default);
   }
 
-  .v2-circle img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  .v2-resource-token img {
+    width: var(--ds-size-10);
+    height: var(--ds-size-10);
+    object-fit: contain;
   }
 
-  .v2-circle-label {
-    position: absolute;
-    bottom: 5px;
-    background: #fff;
-    padding: 4px 14px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 600;
+  .v2-resource-token span {
+    font-weight: var(--ds-font-weight-medium);
+    color: var(--ds-color-accent-text-default);
   }
 
-  .v2-circle-1 {
-    width: 200px;
-    height: 200px;
-    top: -30px;
-    left: 20px;
-    border-color: #fce8ee; 
-  }
-  .v2-circle-1 .v2-circle-label { color: #d15671; }
-
-  .v2-circle-2 {
-    width: 160px;
-    height: 160px;
-    top: 80px;
-    right: 20px;
-    border-color: #e5e8f7;
-  }
-  .v2-circle-2 .v2-circle-label { color: #5164d1; }
-
-  .v2-circle-3 {
-    width: 180px;
-    height: 180px;
-    bottom: -30px;
-    left: 140px;
-    border-color: #e5f7e8; 
-  }
-  .v2-circle-3 .v2-circle-label { color: #49a15d; }
-
-  /* Cards grid below hero */
   .v2-cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.5rem;
+    gap: var(--ds-size-6);
   }
   @media (min-width: 1024px) {
     .v2-cards-grid {
@@ -309,18 +212,19 @@ const cards = [
   }
 
   .v2-card {
-    border-radius: 16px;
     overflow: hidden;
     text-decoration: none !important;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
-    color: #fff;
+    color: var(--ds-color-neutral-text-default);
     transition: transform 0.2s, box-shadow 0.2s;
     height: 260px;
+    padding: 0;
   }
+
   .v2-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+    box-shadow: var(--ds-shadow-md);
   }
 
   .v2-card-image-wrap {
@@ -329,9 +233,10 @@ const cards = [
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 8px;
-    border-radius: 12px;
+    margin: var(--ds-size-3);
+    border-radius: var(--ds-border-radius-md);
     overflow: hidden;
+    background: var(--ds-color-accent-surface-tinted);
   }
 
   .v2-card-image-wrap img {
@@ -341,7 +246,7 @@ const cards = [
   }
 
   .v2-card-content {
-    padding: 0.75rem 1rem 1rem 1rem;
+    padding: var(--ds-size-3) var(--ds-size-5) var(--ds-size-5);
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -349,39 +254,40 @@ const cards = [
   }
 
   .v2-card h3 {
-    font-size: 1.75rem !important;
-    font-weight: 700 !important;
-    margin: 0 0 0.5rem 0 !important;
+    font-size: var(--ds-heading-xs-font-size) !important;
+    font-weight: var(--ds-font-weight-bold) !important;
+    margin: 0 0 var(--ds-size-2) 0 !important;
     line-height: 1.1 !important;
-    color: #fff !important;
+    color: var(--ds-color-neutral-text-default) !important;
   }
 
   .v2-card-subtitle {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.7);
+    font-size: var(--ds-body-sm-font-size);
+    color: var(--ds-color-neutral-text-subtle);
     margin: 0;
   }
   
   .v2-card-subtitle span {
-    color: rgba(255,255,255,0.7);
+    color: var(--ds-color-neutral-text-subtle);
   }
 
-  /* Responsive fixes */
   @media (max-width: 900px) {
+    #main-content.v2-main {
+      padding: var(--ds-size-4);
+    }
+
     .v2-hero {
       flex-direction: column;
-      padding: 2rem;
+      padding: var(--ds-size-6);
+      align-items: stretch;
     }
+
     .v2-hero-content {
       max-width: 100%;
-      margin-bottom: 2rem;
     }
+
     .v2-hero-graphics {
       width: 100%;
-      height: 300px;
     }
-    .v2-circle-1 { left: 0; }
-    .v2-circle-2 { right: 0; }
-    .v2-circle-3 { left: 50px; bottom: 0; }
   }
 </style>

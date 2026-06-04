@@ -20,6 +20,8 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.2",
     "@astrojs/starlight": "^0.38.3",
+    "@digdir/designsystemet-css": "^1.15.0",
+    "@digdir/designsystemet-theme": "^1.11.0",
     "astro": "^6.1.9",
     "choices.js": "^11.1.0",
     "devalue": "^5.7.1",
