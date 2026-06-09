@@ -3,7 +3,17 @@ import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
 import pagefindResources from "./src/integrations/pagefind-resources";
 
-const site = "https://altinn.github.io/kihub/";
+const defaultSite = "https://altinn.github.io/kihub/";
+const defaultBase = "/kihub/";
+const normalizeSite = (value = defaultSite) => new URL(value).toString();
+const normalizeBase = (value = defaultBase) => {
+  if (!value || value === "/") return "/";
+  const withLeadingSlash = value.startsWith("/") ? value : `/${value}`;
+  return withLeadingSlash.endsWith("/") ? withLeadingSlash : `${withLeadingSlash}/`;
+};
+
+const site = normalizeSite(process.env.SITE_URL);
+const base = normalizeBase(process.env.BASE_PATH);
 const siteDescription =
   "KI Hub - Community-contributed agents, instructions, skills, and plugins for enhanced AI development";
 const socialImageUrl = new URL("/images/social-image.png", site).toString();
@@ -11,7 +21,7 @@ const socialImageUrl = new URL("/images/social-image.png", site).toString();
 // https://astro.build/config
 export default defineConfig({
   site,
-  base: "/kihub/",
+  base,
   output: "static",
   integrations: [
     starlight({
