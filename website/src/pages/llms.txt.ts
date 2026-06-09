@@ -5,6 +5,8 @@ import skillsData from "../../public/data/skills.json";
 
 // Base URL for absolute links (to raw GitHub content)
 const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/Altinn/kihub/main";
+const DEFAULT_SITE_URL = "https://altinn.github.io/kihub/";
+const siteUrl = new URL(process.env.SITE_URL || DEFAULT_SITE_URL).toString();
 
 export const GET: APIRoute = () => {
   const agents = agentsData.items;
@@ -79,7 +81,7 @@ export const GET: APIRoute = () => {
   content += "## Repository\n\n";
   content += "- **GitHub**: https://github.com/Altinn/kihub\n";
   content += "- **License**: MIT\n";
-  content += "- **Website**: https://altinn.github.io/kihub/\n";
+  content += `- **Website**: ${siteUrl}\n`;
 
   return new Response(content, {
     headers: { "Content-Type": "text/plain; charset=utf-8" },

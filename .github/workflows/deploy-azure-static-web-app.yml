@@ -1,0 +1,61 @@
+name: Deploy Website to Azure Static Web Apps
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "azure-static-web-apps-${{ github.ref_name }}"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      SITE_URL: ${{ github.ref_name == 'main' && vars.KIHUB_AZURE_PROD_URL || vars.KIHUB_AZURE_STAGING_URL }}
+      BASE_PATH: "/"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: |
+            package-lock.json
+            website/package-lock.json
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install website dependencies
+        run: npm ci
+        working-directory: ./website
+
+      - name: Generate website data
+        run: npm run website:data
+
+      - name: Build Astro site
+        run: npm run build
+        working-directory: ./website
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9 # v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_KIHUB }}
+          action: upload
+          app_location: website/dist
+          api_location: ""
+          output_location: ""
+          skip_app_build: true
+          production_branch: main
