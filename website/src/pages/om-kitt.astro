@@ -1,0 +1,36 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'Om KITT',
+    description: 'Om KITT-AI Hub',
+    prev: false,
+    next: false,
+    editUrl: false,
+  }}
+  hasSidebar={false}
+>
+  <main id="main-content" class="placeholder-page">
+    <h1>Om KITT</h1>
+    <p>Denne siden er en midlertidig plassholder for informasjon om KITT-AI Hub.</p>
+  </main>
+</StarlightPage>
+
+<style>
+  .placeholder-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: var(--ds-size-12) var(--ds-size-8);
+  }
+
+  .placeholder-page h1 {
+    margin: 0 0 var(--ds-size-4);
+    color: var(--ds-color-neutral-text-default);
+  }
+
+  .placeholder-page p {
+    color: var(--ds-color-neutral-text-subtle);
+  }
+</style>
