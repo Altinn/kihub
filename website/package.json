@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "npm run design:build",
     "build": "astro build",
+    "design:tokens": "designsystemet tokens create --config designsystemet.config.json",
+    "design:theme": "designsystemet tokens build --config designsystemet.config.json --out-dir src/styles/designsystemet --clean",
+    "design:build": "npm run design:tokens && npm run design:theme",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -21,7 +25,6 @@
     "@astrojs/sitemap": "^3.7.2",
     "@astrojs/starlight": "^0.38.3",
     "@digdir/designsystemet-css": "^1.15.0",
-    "@digdir/designsystemet-theme": "^1.11.0",
     "astro": "^6.1.9",
     "choices.js": "^11.1.0",
     "devalue": "^5.7.1",
@@ -36,5 +39,8 @@
     "tough-cookie": "^6.0.1",
     "uuid": "^14.0.0",
     "yaml": "^2.8.3"
+  },
+  "devDependencies": {
+    "@digdir/designsystemet": "^1.15.0"
   }
 }

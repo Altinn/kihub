@@ -1,0 +1,23 @@
+{
+  "tokenSetOrder": [
+    "primitives/globals",
+    "primitives/modes/size/small",
+    "primitives/modes/size/medium",
+    "primitives/modes/size/large",
+    "primitives/modes/size/global",
+    "primitives/modes/typography/size/small",
+    "primitives/modes/typography/size/medium",
+    "primitives/modes/typography/size/large",
+    "primitives/modes/typography/primary/kihub",
+    "primitives/modes/typography/secondary/kihub",
+    "primitives/modes/color-scheme/dark/kihub",
+    "primitives/modes/color-scheme/light/kihub",
+    "themes/kihub",
+    "semantic/color",
+    "semantic/modes/main-color/accent",
+    "semantic/modes/support-color/brand1",
+    "semantic/modes/support-color/brand2",
+    "semantic/modes/support-color/brand3",
+    "semantic/style"
+  ]
+}

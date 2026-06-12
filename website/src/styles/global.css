@@ -1,5 +1,5 @@
 @import url("@digdir/designsystemet-css");
-@import url("@digdir/designsystemet-theme/digdir.css");
+@import url("./designsystemet/kihub.css");
 
 /* CSS Variables and Base Styles */
 
