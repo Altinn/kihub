@@ -293,10 +293,10 @@ const isActive = (href: string) =>
     position: fixed;
     z-index: calc(var(--sl-z-index-navbar) - 1);
     inset: var(--sl-nav-height) 0 auto;
-    padding: var(--ds-size-4) var(--sl-nav-pad-x) var(--ds-size-6);
-    border-bottom: var(--ds-border-width-default) solid var(--ds-color-border-subtle);
+    padding: var(--ds-size-7) var(--sl-nav-pad-x) var(--ds-size-9);
+    border-bottom: 0;
     background: var(--ds-color-background-default);
-    box-shadow: var(--ds-shadow-md);
+    box-shadow: none;
   }
 
   .kihub-mobile-panel[hidden] {
@@ -305,32 +305,28 @@ const isActive = (href: string) =>
 
   .kihub-mobile-nav {
     display: grid;
-    gap: var(--ds-size-2);
+    gap: var(--ds-size-4);
     max-width: 44rem;
     margin: 0 auto;
   }
 
   .kihub-mobile-link {
     position: relative;
-    display: flex;
-    min-height: var(--ds-size-12);
-    align-items: center;
-    padding-inline: var(--ds-size-3);
+    display: inline-flex;
+    width: fit-content;
+    align-items: flex-start;
+    padding: var(--ds-size-2) var(--ds-size-3);
+    border-bottom: 3px solid transparent;
     color: var(--ds-color-text-default);
+    font-size: var(--ds-font-size-6);
     font-weight: var(--ds-font-weight-medium);
+    line-height: 1.15;
   }
 
+  .kihub-mobile-link:hover,
   .kihub-mobile-link[aria-current='page'] {
-    color: var(--kihub-nav-red);
-  }
-
-  .kihub-mobile-link[aria-current='page']::before {
-    width: 3px;
-    align-self: stretch;
-    margin-inline: 0 var(--ds-size-3);
-    border-radius: var(--ds-border-radius-full);
-    background: var(--kihub-nav-red);
-    content: '';
+    border-bottom-color: var(--ds-color-base-hover);
+    color: var(--ds-color-base-hover);
   }
 
   .kihub-header :global(site-search button[data-open-modal]),
@@ -389,11 +385,34 @@ const isActive = (href: string) =>
     .kihub-menu-button {
       display: inline-flex;
     }
+
+    .kihub-menu-button,
+    .kihub-header :global(site-search button[data-open-modal]) {
+      width: var(--ds-size-12);
+      height: var(--ds-size-12);
+      min-height: var(--ds-size-12);
+    }
+
+    .kihub-menu-button svg,
+    .kihub-header :global(site-search button[data-open-modal] svg) {
+      width: var(--ds-size-7);
+      height: var(--ds-size-7);
+    }
   }
 </style>
 
 <style is:global>
   @media (max-width: 767.98px) {
+    body[data-kihub-menu-open]::before {
+      position: fixed;
+      z-index: calc(var(--sl-z-index-navbar) - 2);
+      inset: var(--sl-nav-height) 0 0;
+      background: color-mix(in srgb, var(--ds-color-background-default) 22%, transparent);
+      backdrop-filter: blur(4px);
+      content: '';
+      pointer-events: none;
+    }
+
     body[data-kihub-menu-open] {
       overflow: hidden;
     }
