@@ -1,0 +1,430 @@
+---
+import Search from 'virtual:starlight/components/Search';
+
+const base = import.meta.env.BASE_URL;
+const withBase = (path: string) => `${base}${path.replace(/^\//, '')}`;
+const normalizePath = (path: string) => {
+  const withoutBase =
+    base !== '/' && path.startsWith(base) ? path.slice(base.length - 1) : path;
+  return withoutBase.endsWith('/') ? withoutBase : `${withoutBase}/`;
+};
+
+const currentPath = normalizePath(Astro.url.pathname);
+const navItems = [
+  { label: 'Hjem', href: '/' },
+  { label: 'Verktøy', href: '/tools/' },
+  { label: 'Prosjekter', href: '/prosjekter/' },
+  { label: 'Nyheter', href: '/nyheter/' },
+  { label: 'Om KITT', href: '/om-kitt/' },
+];
+
+const isActive = (href: string) =>
+  href === '/' ? currentPath === '/' : currentPath.startsWith(href);
+---
+
+<div class="kihub-header">
+  <a class="kihub-brand ds-focus" href={withBase('/')} aria-label="KITT-AI Hub hjem">
+    <span class="kihub-brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        <rect width="24" height="24" rx="6"></rect>
+        <path d="M7 8.25 12 6l5 2.25-5 2.25L7 8.25Z"></path>
+        <path d="m7 12 5 2.25L17 12"></path>
+        <path d="m7 15.5 5 2.25 5-2.25"></path>
+      </svg>
+    </span>
+    <span class="kihub-brand-text">KITT-AI Hub</span>
+  </a>
+
+  <nav class="kihub-desktop-nav" aria-label="Hovednavigasjon">
+    {
+      navItems.map((item) => (
+        <a
+          class="kihub-nav-link ds-focus"
+          href={withBase(item.href)}
+          aria-current={isActive(item.href) ? 'page' : undefined}
+        >
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+
+  <div class="kihub-actions">
+    <Search class="kihub-search" />
+    <a class="ds-button kihub-login" data-variant="secondary" href={withBase('/login/')}>
+      Logg inn
+    </a>
+    <button
+      type="button"
+      class="kihub-menu-button ds-focus"
+      aria-expanded="false"
+      aria-controls="kihub-mobile-nav"
+      aria-label="Åpne meny"
+    >
+      <svg class="kihub-menu-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M4 7h16M4 12h16M4 17h16"></path>
+      </svg>
+      <svg class="kihub-close-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="m6 6 12 12M18 6 6 18"></path>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<div id="kihub-mobile-nav" class="kihub-mobile-panel" hidden>
+  <nav class="kihub-mobile-nav" aria-label="Hovednavigasjon mobil">
+    {
+      navItems.map((item) => (
+        <a
+          class="kihub-mobile-link ds-focus"
+          href={withBase(item.href)}
+          aria-current={isActive(item.href) ? 'page' : undefined}
+        >
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+  <div class="kihub-mobile-actions">
+    <button type="button" class="kihub-mobile-search-button ds-focus" aria-label="Search">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="m16 16 4 4"></path>
+      </svg>
+    </button>
+    <a class="ds-button kihub-login" data-variant="secondary" data-fullwidth href={withBase('/login/')}>
+      Logg inn
+    </a>
+  </div>
+</div>
+
+<script>
+  const menuButton = document.querySelector<HTMLButtonElement>('.kihub-menu-button');
+  const mobilePanel = document.querySelector<HTMLElement>('#kihub-mobile-nav');
+
+  const setMenuState = (isOpen: boolean) => {
+    if (!menuButton || !mobilePanel) return;
+    menuButton.setAttribute('aria-expanded', String(isOpen));
+    menuButton.setAttribute('aria-label', isOpen ? 'Lukk meny' : 'Åpne meny');
+    mobilePanel.hidden = !isOpen;
+    document.body.toggleAttribute('data-kihub-menu-open', isOpen);
+  };
+
+  menuButton?.addEventListener('click', () => {
+    setMenuState(menuButton.getAttribute('aria-expanded') !== 'true');
+  });
+
+  mobilePanel?.addEventListener('click', (event) => {
+    if (event.target instanceof HTMLAnchorElement) {
+      setMenuState(false);
+    }
+  });
+
+  document.querySelector('.kihub-mobile-search-button')?.addEventListener('click', () => {
+    setMenuState(false);
+    document.querySelector<HTMLButtonElement>('.kihub-actions site-search button[data-open-modal]')?.click();
+  });
+
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      setMenuState(false);
+      menuButton?.focus();
+    }
+  });
+
+  window.matchMedia('(min-width: 768px)').addEventListener('change', (event) => {
+    if (event.matches) setMenuState(false);
+  });
+</script>
+
+<style>
+  .kihub-header {
+    --kihub-nav-red: #e02d27;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: stretch;
+    gap: clamp(var(--ds-size-5), 4vw, var(--ds-size-12));
+    height: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .kihub-brand,
+  .kihub-nav-link,
+  .kihub-mobile-link {
+    border-radius: var(--ds-border-radius-sm);
+    text-decoration: none;
+  }
+
+  .kihub-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-size-3);
+    min-width: max-content;
+    color: var(--kihub-nav-red);
+    font-weight: var(--ds-font-weight-bold);
+  }
+
+  .kihub-brand:hover {
+    color: var(--kihub-nav-red);
+  }
+
+  .kihub-brand-mark {
+    display: grid;
+    place-items: center;
+    width: var(--ds-size-9);
+    height: var(--ds-size-9);
+  }
+
+  .kihub-brand-mark svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .kihub-brand-mark rect {
+    fill: var(--kihub-nav-red);
+  }
+
+  .kihub-brand-mark path {
+    fill: none;
+    stroke: #fff;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+  }
+
+  .kihub-brand-text {
+    white-space: nowrap;
+  }
+
+  .kihub-desktop-nav {
+    display: flex;
+    align-items: stretch;
+    gap: clamp(var(--ds-size-4), 3vw, var(--ds-size-9));
+    min-width: 0;
+  }
+
+  .kihub-nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: var(--ds-color-neutral-text-subtle);
+    font-weight: var(--ds-font-weight-medium);
+    white-space: nowrap;
+  }
+
+  .kihub-nav-link:hover,
+  .kihub-nav-link[aria-current='page'] {
+    color: var(--kihub-nav-red);
+  }
+
+  .kihub-nav-link[aria-current='page']::after {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 2px;
+    border-radius: var(--ds-border-radius-full);
+    background: var(--kihub-nav-red);
+    content: '';
+  }
+
+  .kihub-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ds-size-5);
+  }
+
+  .kihub-login {
+    --dsc-button-border-color: var(--kihub-nav-red);
+    --dsc-button-color: var(--kihub-nav-red);
+    --dsc-button-color--hover: var(--kihub-nav-red);
+    --dsc-button-background--hover: color-mix(in srgb, var(--kihub-nav-red) 8%, transparent);
+    min-height: var(--ds-size-10);
+    padding-inline: var(--ds-size-5);
+    font-weight: var(--ds-font-weight-bold);
+  }
+
+  .kihub-menu-button {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--ds-size-11);
+    height: var(--ds-size-11);
+    padding: 0;
+    border: 0;
+    border-radius: var(--ds-border-radius-full);
+    background: transparent;
+    color: var(--ds-color-neutral-text-default);
+    cursor: pointer;
+  }
+
+  .kihub-mobile-search-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ds-size-12);
+    height: var(--ds-size-12);
+    margin: 0 auto;
+    border: 0;
+    border-radius: var(--ds-border-radius-full);
+    background: transparent;
+    color: var(--ds-color-neutral-text-subtle);
+    cursor: pointer;
+  }
+
+  .kihub-mobile-search-button:hover {
+    background: var(--ds-color-neutral-surface-hover);
+    color: var(--ds-color-neutral-text-default);
+  }
+
+  .kihub-mobile-search-button svg {
+    width: var(--ds-size-6);
+    height: var(--ds-size-6);
+  }
+
+  .kihub-mobile-search-button circle,
+  .kihub-mobile-search-button path {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 2;
+  }
+
+  .kihub-menu-button svg {
+    width: var(--ds-size-6);
+    height: var(--ds-size-6);
+  }
+
+  .kihub-menu-button path {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 2;
+  }
+
+  .kihub-menu-button[aria-expanded='true'] .kihub-menu-icon,
+  .kihub-menu-button:not([aria-expanded='true']) .kihub-close-icon {
+    display: none;
+  }
+
+  .kihub-mobile-panel {
+    position: fixed;
+    z-index: calc(var(--sl-z-index-navbar) - 1);
+    inset: var(--sl-nav-height) 0 auto;
+    padding: var(--ds-size-4) var(--sl-nav-pad-x) var(--ds-size-6);
+    border-bottom: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+    background: var(--ds-color-neutral-surface-default);
+    box-shadow: var(--ds-shadow-md);
+  }
+
+  .kihub-mobile-panel[hidden] {
+    display: none;
+  }
+
+  .kihub-mobile-nav,
+  .kihub-mobile-actions {
+    display: grid;
+    gap: var(--ds-size-2);
+    max-width: 44rem;
+    margin: 0 auto;
+  }
+
+  .kihub-mobile-actions {
+    margin-top: var(--ds-size-4);
+  }
+
+  .kihub-mobile-link {
+    position: relative;
+    display: flex;
+    min-height: var(--ds-size-12);
+    align-items: center;
+    padding-inline: var(--ds-size-3);
+    color: var(--ds-color-neutral-text-default);
+    font-weight: var(--ds-font-weight-medium);
+  }
+
+  .kihub-mobile-link[aria-current='page'] {
+    color: var(--kihub-nav-red);
+  }
+
+  .kihub-mobile-link[aria-current='page']::before {
+    width: 3px;
+    align-self: stretch;
+    margin-inline: 0 var(--ds-size-3);
+    border-radius: var(--ds-border-radius-full);
+    background: var(--kihub-nav-red);
+    content: '';
+  }
+
+  .kihub-header :global(site-search button[data-open-modal]),
+  .kihub-mobile-panel :global(site-search button[data-open-modal]) {
+    width: var(--ds-size-10);
+    height: var(--ds-size-10);
+    min-height: var(--ds-size-10);
+    padding: 0;
+    border: 0;
+    border-radius: var(--ds-border-radius-full);
+    background: transparent;
+    color: var(--ds-color-neutral-text-subtle);
+    justify-content: center;
+  }
+
+  .kihub-header :global(site-search button[data-open-modal]:hover),
+  .kihub-mobile-panel :global(site-search button[data-open-modal]:hover) {
+    background: var(--ds-color-neutral-surface-hover);
+    color: var(--ds-color-neutral-text-default);
+  }
+
+  .kihub-header :global(site-search button[data-open-modal]:focus-visible),
+  .kihub-mobile-panel :global(site-search button[data-open-modal]:focus-visible) {
+    box-shadow: var(--dsc-focus-boxShadow);
+    outline: var(--dsc-focus-outline);
+    outline-offset: var(--ds-border-width-focus);
+  }
+
+  .kihub-header :global(site-search button[data-open-modal] span),
+  .kihub-header :global(site-search button[data-open-modal] kbd),
+  .kihub-mobile-panel :global(site-search button[data-open-modal] span),
+  .kihub-mobile-panel :global(site-search button[data-open-modal] kbd) {
+    display: none !important;
+  }
+
+  @media (max-width: 960px) {
+    .kihub-header {
+      gap: var(--ds-size-5);
+    }
+
+    .kihub-desktop-nav {
+      gap: var(--ds-size-5);
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .kihub-header {
+      grid-template-columns: 1fr auto;
+    }
+
+    .kihub-desktop-nav,
+    .kihub-actions > :global(site-search),
+    .kihub-actions .kihub-login {
+      display: none;
+    }
+
+    .kihub-menu-button {
+      display: inline-flex;
+    }
+  }
+</style>
+
+<style is:global>
+  @media (max-width: 767.98px) {
+    body[data-kihub-menu-open] {
+      overflow: hidden;
+    }
+  }
+
+  starlight-menu-button {
+    display: none;
+  }
+</style>
