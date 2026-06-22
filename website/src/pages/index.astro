@@ -1,25 +1,34 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import Modal from '../components/Modal.astro';
+import projectSummaryData from '../../public/data/project-summary.json';
+import { formatNewsDate, getNewsImageUrl, getNewsUrl, getPublishedNews } from '../lib/news';
 
 const base = import.meta.env.BASE_URL;
-
-const cards = [
-  { id: 'agents', title: 'Agents', desc: 'Custom agents', countId: 'agents', countText: 'skills', image: 'images/agents.svg' },
-  { id: 'instructions', title: 'Instructions', desc: 'Coding standards', countId: 'instructions', countText: 'instructions', image: 'images/instructions.svg' },
-  { id: 'skills', title: 'Skills', desc: 'Self-contained instructions', countId: 'skills', countText: 'skills', image: 'images/skills.svg' },
-  { id: 'hooks', title: 'Hooks', desc: 'Automated workflows', countId: 'hooks', countText: 'hooks', image: 'images/hooks.svg' },
-  { id: 'workflows', title: 'Workflows', desc: 'AI-powered automations', countId: 'workflows', countText: 'workflows', image: 'images/workflows.svg' },
-  { id: 'plugins', title: 'Plugins', desc: 'Curated plugins', countId: 'plugins', countText: 'plugins', image: 'images/plugins.svg' },
-  { id: 'tools', title: 'Tools', desc: 'MCP servers', countId: 'tools', countText: 'tools', image: 'images/tools.svg' },
-  { id: 'learning-hub', title: 'Learning Hub', desc: 'Articles and guides', countId: null, countText: 'articles', image: 'images/learninghub.svg' },
+const latestNews = (await getPublishedNews()).slice(0, 4);
+const splitLastWord = (value: string) => {
+  const words = value.trim().split(/\s+/);
+  const last = words.pop() ?? '';
+  return {
+    head: words.length ? `${words.join(' ')} ` : '',
+    last,
+  };
+};
+const toolsTitleParts = splitLastWord('Verktøy');
+const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekter i BOD');
+const audienceRoles = [
+  { label: 'Utvikler', tone: 'red', href: `${base}tools/` },
+  { label: 'Produkteier', tone: 'pink', href: `${base}tools/` },
+  { label: 'Leder', tone: 'burgundy', href: `${base}tools/` },
+  { label: 'Designer', tone: 'pink', href: `${base}tools/` },
+  { label: 'Sikkerhet', tone: 'red', href: `${base}tools/` },
+  { label: 'Saksbehandler', tone: 'pink', href: `${base}tools/` },
 ];
 ---
 
 <StarlightPage
   frontmatter={{
     title: 'DigDir KI HUB',
-    description: 'Community-contributed agents, instructions, and skills to enhance your GitHub Copilot experience',
+    description: 'Godkjente KI-verktøy og aktive KI-prosjekter i BOD',
     template: 'splash',
     pagefind: false,
     prev: false,
@@ -29,271 +38,827 @@ const cards = [
   }}
   hasSidebar={false}
 >
-  <div id="main-content" class="v2-main">
-    <!-- Hero Section -->
-    <section class="ds-card v2-hero" data-color="neutral" aria-labelledby="hero-heading">
-      <div class="v2-hero-content">
-        <h1 id="hero-heading">Explore our growing hub for<br/>Agents, Skills & Instructions</h1>
+  <div id="main-content" class="v2-main" data-page-color="accent">
+    <section class="v2-hero" aria-labelledby="hero-heading">
+      <div class="v2-hero-copy">
+        <p class="v2-kicker">Digdir / BOD / KITT-teamet</p>
+        <h1 id="hero-heading" class="v2-hero-title">
+          Kunstig intelligens<br />i <span>BOD</span>
+        </h1>
         <p class="v2-hero-subtitle">
-          DigDirs community-contributed agents, instructions, and skills to enhance your AI native experience
+          Vi hjelper deg og ditt team i gang med verktøy og veiledning for en trygg og innovativ bruk av KI i offentlig sektor.
         </p>
-        
-        <div class="ds-search v2-hero-search">
-          <label for="global-search" class="sr-only">Search all resources</label>
-          <input
-            type="search"
-            id="global-search"
-            class="ds-input"
-            placeholder="Search for any agent, skill, instruction..."
-            autocomplete="off"
-          />
-          <button type="button" class="ds-button v2-search-btn" data-icon aria-label="Search">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="v2-search-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <div class="v2-hero-actions" aria-label="Hurtigvalg">
+          <a class="ds-button v2-primary-action" href={`${base}tools/`}>
+            Kom i gang
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
             </svg>
-          </button>
-          <div id="search-results" class="search-results hidden" aria-label="Search results"></div>
-        </div>
-      </div>
-      
-      <div class="v2-hero-graphics" aria-hidden="true">
-        <div class="v2-resource-stack">
-          {cards.slice(0, 6).map((card) => (
-            <div class="ds-card v2-resource-token" data-color="accent">
-              <img src={`${base}${card.image}`} alt="" />
-              <span>{card.title}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-
-    <!-- Quick Links -->
-    <section class="v2-quick-links" aria-labelledby="quick-links-heading">
-      <div class="v2-cards-grid">
-        {cards.map(card => (
-          <a href={`${base}${card.id}/`} class="ds-card v2-card" data-color="neutral" id={`card-${card.id}`}>
-            <div class="v2-card-image-wrap">
-               <img src={`${base}${card.image}`} alt={`${card.title} graphic`} />
-            </div>
-            <div class="v2-card-content">
-              <h3>{card.title}</h3>
-              <p class="v2-card-subtitle">
-                {card.countId ? <span class="card-count" data-count={card.countId}>-</span> : <span></span>} 
-                {card.countText}
-              </p>
-            </div>
           </a>
-        ))}
+          <a class="ds-button v2-secondary-action" data-variant="secondary" href={`${base}om-kitt/`}>
+            Om KITT
+          </a>
+        </div>
+      </div>
+      <div class="v2-hero-media" aria-hidden="true">
+        <img src={`${base}images/AIv2b.png`} alt="" loading="eager" />
       </div>
     </section>
+
+    <section class="v2-entry-section" aria-labelledby="entry-cards-heading">
+      <h2 id="entry-cards-heading" class="sr-only">Viktigste innganger</h2>
+      <div class="v2-feature-grid">
+        <a
+          href={`${base}tools/`}
+          class="v2-feature-card v2-tools-card ds-focus"
+          data-color="accent"
+          aria-label="Åpne katalog over verktøy"
+        >
+          <span class="v2-card-eyebrow">Katalog</span>
+          <h3>
+            {toolsTitleParts.head}<span class="v2-nowrap">
+              {toolsTitleParts.last}<span class="v2-card-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M5 12h14M13 6l6 6-6 6"></path>
+                </svg>
+              </span>
+            </span>
+          </h3>
+        </a>
+
+        <a
+          href={`${base}prosjekter/`}
+          class="v2-feature-card v2-project-card ds-focus"
+          data-color="accent"
+          aria-label="Se KI prosjekter i BOD"
+        >
+          <span class="v2-card-eyebrow">Oversikt</span>
+          <h3>
+            {projectTitleParts.head}<span class="v2-nowrap">
+              {projectTitleParts.last}<span class="v2-card-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M5 12h14M13 6l6 6-6 6"></path>
+                </svg>
+              </span>
+            </span>
+          </h3>
+        </a>
+      </div>
+    </section>
+
+    <section class="v2-subscriptions-section" aria-labelledby="subscriptions-heading">
+      <div class="v2-subscriptions-panel" data-color="brand2">
+        <div class="v2-subscriptions-copy">
+          <p class="v2-subscriptions-kicker">Tilgjengelige abonnementer</p>
+          <h2 id="subscriptions-heading">Støttede KI-abonnementer i Digdir</h2>
+          <p>
+            Disse abonnementene er godkjent og tilgjengelig for BOD-ansatte. Ta kontakt med KITT for tilgang.
+          </p>
+        </div>
+        <ul class="v2-subscriptions-list" aria-label="Støttede KI-abonnementer">
+          <li>GitHub Copilot</li>
+          <li>Claude Teams</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="v2-roles-section" aria-labelledby="roles-heading">
+      <h2 id="roles-heading">Kom raskt i gang</h2>
+      <ul class="v2-roles-grid" aria-label="Roller">
+        {audienceRoles.map((role) => (
+          <li>
+            <a
+              href={role.href}
+              class="v2-role-card ds-focus"
+              data-tone={role.tone}
+              aria-label={`Kom raskt i gang som ${role.label}`}
+            >
+              <h3>
+                {role.label}<span class="v2-card-arrow v2-role-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M5 12h14M13 6l6 6-6 6"></path>
+                  </svg>
+                </span>
+              </h3>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    {
+      latestNews.length > 0 && (
+        <section class="v2-news-section" aria-labelledby="latest-news-heading">
+          <div class="v2-news-header">
+            <div>
+              <p class="v2-news-kicker">Aktuelt</p>
+              <h2 id="latest-news-heading">Siste nytt</h2>
+            </div>
+            <a class="v2-news-all ds-focus" href={`${base}nyheter/`}>
+              Alle nyheter
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5 12h14M13 6l6 6-6 6"></path>
+              </svg>
+            </a>
+          </div>
+
+          <div class="v2-news-grid">
+            {latestNews.map((article) => (
+              <a class="v2-news-card ds-focus" href={getNewsUrl(base, article)} data-color={article.data.color}>
+                <span class="v2-news-image">
+                  <img src={getNewsImageUrl(base, article.data.image)} alt={article.data.imageAlt} loading="lazy" />
+                </span>
+                <span class="v2-news-copy">
+                  <h3>{article.data.title}</h3>
+                  <time datetime={article.data.pubDate.toISOString()}>{formatNewsDate(article.data.pubDate)}</time>
+                  <span>{article.data.description}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )
+    }
   </div>
-
-  <Modal />
-
-  <script>
-    import '../scripts/pages/index';
-  </script>
 </StarlightPage>
 
 <style>
   :global(:root) {
-    --sl-content-width: 1300px !important;
+    --sl-content-width: 1220px !important;
   }
+
+  :global(body:has(#main-content.v2-main)) {
+    background: var(--ds-color-accent-background-default);
+  }
+
   :global(.sl-container) {
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 auto !important;
   }
+
   :global(.main-pane) {
     width: 100% !important;
   }
+
   #main-content.v2-main {
-    max-width: 1300px;
+    --kihub-serif-font: "PT Serif", Georgia, "Times New Roman", serif;
+    box-sizing: border-box;
+    width: min(100%, 1220px);
     margin: 0 auto !important;
-    padding: var(--ds-size-8);
+    padding: var(--ds-size-12) var(--ds-size-8) var(--ds-size-16);
+    font-family: var(--kihub-serif-font);
+  }
+
+  #main-content.v2-main :where(a, button, p, h1, h2, h3, span) {
+    font-family: inherit;
   }
 
   .v2-hero {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.86fr);
     align-items: center;
     gap: var(--ds-size-10);
-    background: linear-gradient(135deg, var(--ds-color-neutral-surface-default), var(--ds-color-accent-surface-tinted));
-    border-color: var(--ds-color-neutral-border-subtle);
-    padding: var(--ds-size-12);
-    position: relative;
-    overflow: hidden;
-    min-height: 480px;
-    margin-bottom: var(--ds-size-10);
+    padding: var(--ds-size-8) 0 var(--ds-size-6);
   }
 
-  .v2-hero-content {
-    position: relative;
-    z-index: 1;
-    max-width: 620px;
+  .v2-hero-copy {
+    max-width: 720px;
   }
 
-  .v2-hero h1 {
-    font-size: clamp(2.5rem, 5vw, var(--ds-heading-2xl-font-size)) !important;
-    line-height: 1.1 !important;
-    font-weight: var(--ds-font-weight-bold) !important;
-    color: var(--ds-color-neutral-text-default) !important;
-    margin-bottom: var(--ds-size-6) !important;
-    letter-spacing: 0 !important;
-  }
-
-  .v2-hero-subtitle {
-    font-size: var(--ds-body-lg-font-size);
-    color: var(--ds-color-neutral-text-subtle);
-    margin-bottom: var(--ds-size-8);
-    line-height: var(--ds-body-long-lg-line-height);
-    max-width: 36rem;
-  }
-
-  .v2-hero-search {
-    position: relative;
-    width: 100%;
-    max-width: 520px;
-  }
-
-  .v2-search-btn {
-    grid-area: 1 / 2;
-  }
-
-  .v2-search-icon {
-    stroke: currentColor;
-    fill: none;
-  }
-
-  .v2-hero-graphics {
-    position: relative;
-    z-index: 1;
-    width: min(42%, 420px);
-  }
-
-  .v2-resource-stack {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(120px, 1fr));
-    gap: var(--ds-size-4);
-  }
-
-  .v2-resource-token {
-    display: grid;
-    grid-template-columns: var(--ds-size-10) 1fr;
+  .v2-hero-media {
+    min-width: 0;
+    align-self: stretch;
+    display: flex;
     align-items: center;
-    gap: var(--ds-size-3);
-    padding: var(--ds-size-4);
-    color: var(--ds-color-accent-text-default);
-    background: var(--ds-color-accent-surface-default);
+    justify-content: flex-end;
   }
 
-  .v2-resource-token img {
-    width: var(--ds-size-10);
-    height: var(--ds-size-10);
+  .v2-hero-media img {
+    display: block;
+    width: min(100%, 500px);
+    max-height: 420px;
     object-fit: contain;
   }
 
-  .v2-resource-token span {
+  .v2-kicker {
+    margin: 0;
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .v2-kicker {
+    color: var(--ds-color-accent-text-subtle);
+    margin-bottom: var(--ds-size-5);
+  }
+
+  .v2-hero-title {
+    margin: 0;
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-2xl-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.08;
+  }
+
+  .v2-hero-title span {
+    color: var(--ds-color-accent-base-default);
+  }
+
+  .v2-hero-subtitle {
+    max-width: 44rem;
+    margin: var(--ds-size-6) 0 0;
+    color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-lg-font-size);
+    line-height: var(--ds-body-long-lg-line-height);
+  }
+
+  .v2-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-size-3);
+    margin-top: var(--ds-size-8);
+  }
+
+  .v2-primary-action,
+  .v2-secondary-action {
+    min-height: var(--ds-size-12);
+    border-radius: var(--ds-border-radius-default);
+    font-weight: var(--ds-font-weight-bold);
+  }
+
+  .v2-primary-action {
+    --dsc-button-background: var(--ds-color-accent-base-default);
+    --dsc-button-background--hover: var(--ds-color-accent-base-hover);
+    --dsc-button-color: var(--ds-color-accent-base-contrast-default);
+    --dsc-button-border-color: var(--ds-color-accent-base-default);
+    --dsc-button-border-color--hover: var(--ds-color-accent-base-hover);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-size-2);
+  }
+
+  .v2-primary-action svg,
+  .v2-card-arrow svg {
+    width: var(--ds-size-5);
+    height: var(--ds-size-5);
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+
+  .v2-secondary-action {
+    --dsc-button-border-color: var(--ds-color-accent-border-default);
+    --dsc-button-border-color--hover: var(--ds-color-accent-border-strong);
+    --dsc-button-color: var(--ds-color-accent-text-subtle);
+    --dsc-button-color--hover: var(--ds-color-accent-text-default);
+  }
+
+  .v2-entry-section {
+    margin-top: var(--ds-size-8);
+  }
+
+  .v2-feature-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .v2-feature-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 300px;
+    padding: var(--ds-size-8);
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    text-decoration: none !important;
+    transition: filter 0.2s ease;
+  }
+
+  #main-content .v2-feature-card,
+  #main-content .v2-feature-card:hover {
+    text-decoration: none !important;
+  }
+
+  .v2-feature-card:hover {
+    filter: brightness(0.98);
+  }
+
+  .v2-feature-card:focus-visible {
+    outline: var(--ds-border-width-focus) solid var(--ds-color-focus-outer);
+    outline-offset: var(--ds-size-1);
+  }
+
+  .v2-feature-card h3 {
+    flex: 1;
+    margin: var(--ds-size-5) 0 0;
+    color: inherit;
+    font-size: var(--ds-heading-xl-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.08;
+  }
+
+  .v2-feature-card:hover h3 {
+    text-decoration: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.12em;
+  }
+
+  .v2-nowrap {
+    white-space: nowrap;
+  }
+
+  .v2-card-eyebrow {
+    order: -1;
+    align-self: flex-start;
+    margin: 0;
+    padding: var(--ds-size-2) var(--ds-size-4);
+    border-radius: var(--ds-border-radius-sm);
+    background: var(--ds-color-accent-background-default);
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-body-md-font-size);
     font-weight: var(--ds-font-weight-medium);
+    letter-spacing: 0;
+    line-height: var(--ds-body-short-md-line-height);
+  }
+
+  .v2-tools-card {
+    color: var(--ds-color-accent-base-contrast-default);
+    background: var(--ds-color-accent-base-default);
+  }
+
+  #main-content a.v2-tools-card,
+  #main-content a.v2-tools-card:hover {
+    color: var(--ds-color-accent-base-contrast-default) !important;
+  }
+
+  .v2-project-card {
+    color: var(--ds-color-accent-text-default);
+    background: var(--ds-color-accent-surface-hover);
+  }
+
+  #main-content a.v2-project-card,
+  #main-content a.v2-project-card:hover {
+    color: var(--ds-color-accent-text-default) !important;
+  }
+
+  .v2-card-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ds-size-10);
+    height: var(--ds-size-10);
+    margin-left: var(--ds-size-3);
+    border-radius: var(--ds-border-radius-full);
+    background: var(--ds-color-accent-base-contrast-default);
+    color: var(--ds-color-accent-base-default);
+    vertical-align: middle;
+    transform: translateY(-0.08em);
+  }
+
+  .v2-project-card .v2-card-arrow {
+    background: var(--ds-color-accent-text-default);
+    color: var(--ds-color-accent-surface-hover);
+  }
+
+  .v2-subscriptions-section {
+    margin-top: var(--ds-size-8);
+  }
+
+  .v2-subscriptions-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--ds-size-8);
+    min-height: 180px;
+    padding: var(--ds-size-8) var(--ds-size-10);
+    border: var(--ds-size-2) solid var(--ds-color-brand2-border-default);
+    background: var(--ds-color-accent-background-default);
     color: var(--ds-color-accent-text-default);
   }
 
-  .v2-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: var(--ds-size-6);
-  }
-  @media (min-width: 1024px) {
-    .v2-cards-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
+  .v2-subscriptions-copy {
+    min-width: 0;
   }
 
-  .v2-card {
-    overflow: hidden;
-    text-decoration: none !important;
-    display: flex !important;
-    flex-direction: column;
-    color: var(--ds-color-neutral-text-default);
-    transition: transform 0.2s, box-shadow 0.2s;
-    height: 260px;
-    padding: 0;
+  .v2-subscriptions-kicker {
+    margin: 0 0 var(--ds-size-3);
+    color: var(--ds-color-brand2-text-subtle);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
-  .v2-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--ds-shadow-md);
+  .v2-subscriptions-panel h2 {
+    margin: 0;
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-lg-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.12;
   }
 
-  .v2-card-image-wrap {
-    height: 150px;
-    padding: 0;
+  .v2-subscriptions-panel p:not(.v2-subscriptions-kicker) {
+    max-width: 46rem;
+    margin: var(--ds-size-3) 0 0;
+    color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-md-font-size);
+    line-height: var(--ds-body-long-md-line-height);
+  }
+
+  .v2-subscriptions-list {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: var(--ds-size-3);
-    border-radius: var(--ds-border-radius-md);
-    overflow: hidden;
-    background: var(--ds-color-accent-surface-tinted);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--ds-size-3);
+    min-width: min(100%, 360px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  .v2-card-image-wrap img {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
+  .v2-subscriptions-list li {
+    display: inline-grid;
+    place-items: center;
+    height: var(--ds-size-12);
+    min-height: var(--ds-size-12);
+    margin: 0;
+    padding: 0 var(--ds-size-5);
+    border: var(--ds-border-width-default) solid var(--ds-color-brand2-border-subtle);
+    border-radius: var(--ds-border-radius-default);
+    background: var(--ds-color-brand2-background-default);
+    color: var(--ds-color-neutral-text-default);
+    font-family: inherit;
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    line-height: 1;
+    white-space: nowrap;
   }
 
-  .v2-card-content {
-    padding: var(--ds-size-3) var(--ds-size-5) var(--ds-size-5);
-    flex-grow: 1;
+  .v2-roles-section {
+    margin-top: var(--ds-size-8);
+  }
+
+  .v2-roles-section h2 {
+    margin: 0 0 var(--ds-size-5);
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-lg-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.12;
+  }
+
+  .v2-roles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    align-items: stretch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .v2-roles-grid li {
+    min-width: 0;
+    margin: 0;
+  }
+
+  .v2-role-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-  }
-
-  .v2-card h3 {
-    font-size: var(--ds-heading-xs-font-size) !important;
-    font-weight: var(--ds-font-weight-bold) !important;
-    margin: 0 0 var(--ds-size-2) 0 !important;
-    line-height: 1.1 !important;
-    color: var(--ds-color-neutral-text-default) !important;
-  }
-
-  .v2-card-subtitle {
-    font-size: var(--ds-body-sm-font-size);
-    color: var(--ds-color-neutral-text-subtle);
+    min-width: 0;
+    min-height: 172px;
     margin: 0;
+    padding: var(--ds-size-6);
+    background: var(--role-card-background);
+    color: var(--role-card-color);
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    text-decoration: none !important;
+    transition: filter 0.2s ease;
   }
-  
-  .v2-card-subtitle span {
+
+  #main-content .v2-role-card,
+  #main-content .v2-role-card:hover {
+    color: var(--role-card-color) !important;
+    text-decoration: none !important;
+  }
+
+  #main-content a.v2-role-card h3,
+  #main-content a.v2-role-card:hover h3 {
+    color: var(--role-card-color) !important;
+  }
+
+  .v2-role-card:hover {
+    filter: brightness(0.98);
+  }
+
+  .v2-role-card:focus-visible {
+    outline: var(--ds-border-width-focus) solid var(--ds-color-focus-outer);
+    outline-offset: var(--ds-size-1);
+  }
+
+  .v2-role-card h3 {
+    flex: 1;
+    margin: 0;
+    color: inherit;
+    font-size: var(--ds-heading-lg-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.08;
+  }
+
+  .v2-role-card:hover h3 {
+    text-decoration: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.12em;
+  }
+
+  .v2-role-arrow {
+    width: var(--ds-size-9);
+    height: var(--ds-size-9);
+    margin-left: var(--ds-size-2);
+  }
+
+  .v2-role-card[data-tone="red"] {
+    --role-card-background: var(--ds-color-accent-base-default);
+    --role-card-color: var(--ds-color-accent-base-contrast-default);
+  }
+
+  .v2-role-card[data-tone="pink"] {
+    --role-card-background: var(--ds-color-accent-surface-hover);
+    --role-card-color: var(--ds-color-accent-text-default);
+  }
+
+  .v2-role-card[data-tone="burgundy"] {
+    --role-card-background: var(--ds-color-accent-text-default);
+    --role-card-color: var(--ds-color-accent-base-contrast-default);
+  }
+
+  .v2-role-card[data-tone="pink"] .v2-role-arrow {
+    background: var(--ds-color-accent-text-default);
+    color: var(--ds-color-accent-surface-hover);
+  }
+
+  .v2-news-section {
+    margin-top: var(--ds-size-10);
+  }
+
+  .v2-news-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--ds-size-6);
+    margin-bottom: var(--ds-size-6);
+  }
+
+  .v2-news-kicker {
+    margin: 0 0 var(--ds-size-2);
+    color: var(--ds-color-brand1-text-subtle);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .v2-news-header h2 {
+    margin: 0;
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-lg-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.12;
+  }
+
+  .v2-news-all {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-size-2);
+    min-height: var(--ds-size-10);
+    padding: 0 var(--ds-size-4);
+    border-radius: var(--ds-border-radius-full);
+    background: var(--ds-color-brand1-surface-hover);
+    color: var(--ds-color-brand1-text-default) !important;
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    text-decoration: none !important;
+  }
+
+  .v2-news-all:hover {
+    background: var(--ds-color-brand1-surface-active);
+  }
+
+  .v2-news-all svg {
+    width: var(--ds-size-5);
+    height: var(--ds-size-5);
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+
+  .v2-news-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ds-size-10) var(--ds-size-8);
+  }
+
+  .v2-news-card {
+    display: grid;
+    min-width: 0;
+    gap: var(--ds-size-5);
+    color: var(--ds-color-accent-text-default) !important;
+    text-decoration: none !important;
+  }
+
+  .v2-news-card:hover h3 {
+    text-decoration: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.12em;
+  }
+
+  .v2-news-image {
+    display: block;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--ds-color-brand1-surface-hover);
+  }
+
+  .v2-news-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.25s ease;
+  }
+
+  .v2-news-card:hover .v2-news-image img {
+    transform: scale(1.015);
+  }
+
+  .v2-news-copy {
+    display: grid;
+    gap: var(--ds-size-3);
+  }
+
+  .v2-news-copy h3 {
+    margin: 0;
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.1;
+  }
+
+  .v2-news-copy time {
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    line-height: var(--ds-body-short-md-line-height);
+  }
+
+  .v2-news-copy span {
     color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-md-font-size);
+    line-height: var(--ds-body-long-md-line-height);
   }
 
   @media (max-width: 900px) {
     #main-content.v2-main {
-      padding: var(--ds-size-4);
+      padding: var(--ds-size-8) var(--ds-size-5) var(--ds-size-12);
     }
 
     .v2-hero {
+      grid-template-columns: 1fr;
+      gap: var(--ds-size-7);
+      padding-top: var(--ds-size-5);
+    }
+
+    .v2-hero-copy {
+      max-width: none;
+    }
+
+    .v2-hero-media {
+      display: none;
+    }
+
+    .v2-hero-title {
+      font-size: var(--ds-heading-xl-font-size);
+    }
+
+    .v2-feature-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .v2-feature-card h3 {
+      font-size: var(--ds-heading-lg-font-size);
+    }
+
+    .v2-subscriptions-panel {
+      grid-template-columns: 1fr;
+      gap: var(--ds-size-6);
+      padding: var(--ds-size-7);
+    }
+
+    .v2-subscriptions-list {
+      justify-content: flex-start;
+      min-width: 0;
+    }
+
+    .v2-roles-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .v2-news-header {
+      align-items: flex-start;
       flex-direction: column;
-      padding: var(--ds-size-6);
-      align-items: stretch;
     }
 
-    .v2-hero-content {
-      max-width: 100%;
-    }
-
-    .v2-hero-graphics {
-      width: 100%;
+    .v2-news-grid {
+      grid-template-columns: 1fr;
+      gap: var(--ds-size-8);
     }
   }
 
-  @media (max-width: 480px) {
-    .v2-resource-stack {
+  @media (max-width: 560px) {
+    #main-content.v2-main {
+      padding-inline: var(--ds-size-4);
+    }
+
+    .v2-hero-title {
+      font-size: var(--ds-heading-lg-font-size);
+    }
+
+    .v2-hero-subtitle {
+      font-size: var(--ds-body-md-font-size);
+      line-height: var(--ds-body-long-md-line-height);
+    }
+
+    .v2-feature-card {
+      min-height: 240px;
+      padding: var(--ds-size-6);
+    }
+
+    .v2-feature-card h3 {
+      font-size: var(--ds-heading-md-font-size);
+    }
+
+    .v2-card-arrow {
+      width: var(--ds-size-9);
+      height: var(--ds-size-9);
+      margin-left: var(--ds-size-2);
+    }
+
+    .v2-subscriptions-panel {
+      min-height: 0;
+      padding: var(--ds-size-6);
+      border-width: var(--ds-size-1);
+    }
+
+    .v2-subscriptions-panel h2 {
+      font-size: var(--ds-heading-md-font-size);
+    }
+
+    .v2-subscriptions-list {
+      gap: var(--ds-size-2);
+    }
+
+    .v2-subscriptions-list li {
+      padding-inline: var(--ds-size-4);
+    }
+
+    .v2-roles-grid {
       grid-template-columns: 1fr;
+    }
+
+    .v2-role-card {
+      min-height: 132px;
+      padding: var(--ds-size-5);
+    }
+
+    .v2-role-card h3 {
+      font-size: var(--ds-heading-md-font-size);
+    }
+
+    .v2-news-header h2,
+    .v2-news-copy h3 {
+      font-size: var(--ds-heading-sm-font-size);
     }
   }
 </style>

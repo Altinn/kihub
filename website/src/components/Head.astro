@@ -48,6 +48,18 @@ const twitterDomain =
   (() => {
     const root = document.documentElement;
     const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const syncBodyTheme = () => {
+      if (!document.body) return;
+      const pageColor =
+        document.querySelector('[data-page-color]')?.getAttribute('data-page-color') ??
+        root.dataset.color ??
+        'accent';
+
+      document.body.dataset.basePath = basePath;
+      document.body.dataset.color = pageColor;
+      document.body.dataset.colorScheme = root.dataset.colorScheme || 'light';
+    };
+
     const syncColorScheme = () => {
       const theme = root.dataset.theme;
       root.dataset.colorScheme =
@@ -56,6 +68,7 @@ const twitterDomain =
           : colorSchemeQuery.matches
             ? 'dark'
             : 'light';
+      syncBodyTheme();
     };
 
     syncColorScheme();
@@ -64,11 +77,8 @@ const twitterDomain =
       attributeFilter: ['data-theme'],
     });
     colorSchemeQuery.addEventListener?.('change', syncColorScheme);
+    document.addEventListener('DOMContentLoaded', syncBodyTheme);
   })();
-
-  document.addEventListener('DOMContentLoaded', () => {
-    document.body.dataset.basePath = basePath;
-  });
 </script>
 {import.meta.env.PROD && (
   <>

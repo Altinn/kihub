@@ -1,36 +1,251 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { formatNewsDate, getNewsImageUrl, getNewsUrl, getPublishedNews } from '../lib/news';
+
+const base = import.meta.env.BASE_URL;
+const articles = await getPublishedNews();
 ---
 
 <StarlightPage
   frontmatter={{
     title: 'Nyheter',
-    description: 'Nyheter fra KITT-AI Hub',
+    description: 'Nyheter fra KI HUB',
+    template: 'splash',
+    tableOfContents: false,
     prev: false,
     next: false,
     editUrl: false,
   }}
   hasSidebar={false}
 >
-  <main id="main-content" class="placeholder-page">
-    <h1>Nyheter</h1>
-    <p>Denne siden er en midlertidig plassholder for nyheter fra KITT-AI Hub.</p>
+  <main id="main-content" class="news-index-page" data-color="brand1">
+    <header class="news-index-hero">
+      <p>Aktuelt</p>
+      <h1>Nyheter</h1>
+    </header>
+
+    <div class="news-index-content-band">
+      <section class="news-index-section" aria-labelledby="news-index-heading">
+        <h2 id="news-index-heading" class="sr-only">Alle nyheter</h2>
+        {
+          articles.length > 0 ? (
+            <div class="news-index-grid">
+              {articles.map((article) => (
+                <a class="news-index-card ds-focus" href={getNewsUrl(base, article)} data-color={article.data.color}>
+                  <span class="news-index-image">
+                    <img src={getNewsImageUrl(base, article.data.image)} alt={article.data.imageAlt} loading="lazy" />
+                  </span>
+                  <span class="news-index-copy">
+                    <h2>{article.data.title}</h2>
+                    <time datetime={article.data.pubDate.toISOString()}>{formatNewsDate(article.data.pubDate)}</time>
+                    <span>{article.data.description}</span>
+                  </span>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p class="news-index-empty">Ingen nyheter er publisert ennå.</p>
+          )
+        }
+      </section>
+    </div>
   </main>
 </StarlightPage>
 
 <style>
-  .placeholder-page {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: var(--ds-size-12) var(--ds-size-8);
+  :global(.sl-container:has(#main-content.news-index-page)) {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
   }
 
-  .placeholder-page h1 {
+  :global(.main-pane:has(#main-content.news-index-page)) {
+    width: 100% !important;
+  }
+
+  :global(body:has(#main-content.news-index-page)) {
+    background: var(--ds-color-brand1-surface-hover);
+  }
+
+  :global(body:has(#main-content.news-index-page) .header:has(.kihub-header)),
+  :global(body:has(#main-content.news-index-page) #kihub-mobile-nav) {
+    background: var(--ds-color-brand1-surface-hover) !important;
+  }
+
+  :global(body:has(#main-content.news-index-page) .kihub-header) {
+    --kihub-nav-red: var(--ds-color-brand1-text-default);
+  }
+
+  :global(body:has(#main-content.news-index-page) .kihub-brand),
+  :global(body:has(#main-content.news-index-page) .kihub-nav-link),
+  :global(body:has(#main-content.news-index-page) .kihub-mobile-link),
+  :global(body:has(#main-content.news-index-page) .kihub-menu-button),
+  :global(body:has(#main-content.news-index-page) site-search button[data-open-modal]) {
+    color: var(--ds-color-brand1-text-default);
+  }
+
+  :global(body:has(#main-content.news-index-page) .kihub-nav-link:hover),
+  :global(body:has(#main-content.news-index-page) .kihub-nav-link[aria-current='page']),
+  :global(body:has(#main-content.news-index-page) .kihub-mobile-link:hover),
+  :global(body:has(#main-content.news-index-page) .kihub-mobile-link[aria-current='page']) {
+    border-bottom-color: var(--ds-color-brand1-text-subtle);
+    color: var(--ds-color-brand1-text-subtle);
+  }
+
+  .news-index-page {
+    --kihub-serif-font: "PT Serif", Georgia, "Times New Roman", serif;
+    min-height: 100%;
+    background: var(--ds-color-brand1-surface-hover);
+    color: var(--ds-color-accent-text-default);
+    font-family: var(--kihub-serif-font);
+  }
+
+  .news-index-page :where(a, p, h1, h2, span, time) {
+    font-family: inherit;
+  }
+
+  .news-index-hero {
+    padding: var(--ds-size-14) var(--ds-size-8) var(--ds-size-11);
+    background: var(--ds-color-brand1-surface-hover);
+    text-align: center;
+  }
+
+  .news-index-hero p {
     margin: 0 0 var(--ds-size-4);
-    color: var(--ds-color-neutral-text-default);
+    color: var(--ds-color-brand1-text-subtle);
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
-  .placeholder-page p {
+  .news-index-hero h1 {
+    margin: 0;
+    color: var(--ds-color-brand1-text-default);
+    font-size: var(--ds-heading-xl-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.1;
+  }
+
+  .news-index-content-band {
+    width: min(calc(100% - var(--ds-size-6)), 1480px);
+    margin: 0 auto;
+    background: var(--ds-color-accent-background-default);
+  }
+
+  .news-index-section {
+    width: min(100%, 1220px);
+    margin: 0 auto;
+    padding: var(--ds-size-11) var(--ds-size-8) var(--ds-size-16);
+  }
+
+  .news-index-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ds-size-10) var(--ds-size-8);
+  }
+
+  .news-index-card {
+    display: grid;
+    min-width: 0;
+    gap: var(--ds-size-5);
+    color: var(--ds-color-accent-text-default) !important;
+    text-decoration: none !important;
+  }
+
+  .news-index-card:hover h2 {
+    text-decoration: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.12em;
+  }
+
+  .news-index-image {
+    display: block;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--ds-color-brand1-surface-hover);
+  }
+
+  .news-index-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.25s ease;
+  }
+
+  .news-index-card:hover .news-index-image img {
+    transform: scale(1.015);
+  }
+
+  .news-index-copy {
+    display: grid;
+    gap: var(--ds-size-3);
+  }
+
+  .news-index-copy h2 {
+    margin: 0;
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.1;
+  }
+
+  .news-index-copy time {
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    line-height: var(--ds-body-short-md-line-height);
+  }
+
+  .news-index-copy span {
     color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-md-font-size);
+    line-height: var(--ds-body-long-md-line-height);
+  }
+
+  .news-index-empty {
+    margin: 0;
+    color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-lg-font-size);
+  }
+
+  @media (max-width: 900px) {
+    .news-index-hero {
+      padding: var(--ds-size-11) var(--ds-size-5) var(--ds-size-9);
+    }
+
+    .news-index-hero h1 {
+      font-size: var(--ds-heading-lg-font-size);
+    }
+
+    .news-index-section {
+      padding: var(--ds-size-8) var(--ds-size-5) var(--ds-size-12);
+    }
+
+    .news-index-grid {
+      grid-template-columns: 1fr;
+      gap: var(--ds-size-8);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .news-index-content-band {
+      width: min(calc(100% - var(--ds-size-4)), 1480px);
+    }
+
+    .news-index-hero h1 {
+      font-size: var(--ds-heading-md-font-size);
+    }
+
+    .news-index-section {
+      padding-inline: var(--ds-size-4);
+    }
+
+    .news-index-copy h2 {
+      font-size: var(--ds-heading-sm-font-size);
+    }
   }
 </style>

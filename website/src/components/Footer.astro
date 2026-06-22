@@ -2,83 +2,52 @@
 import EditLink from "@astrojs/starlight/components/EditLink.astro";
 import LastUpdated from "@astrojs/starlight/components/LastUpdated.astro";
 import Pagination from "@astrojs/starlight/components/Pagination.astro";
-import config from "virtual:starlight/user-config";
-import { Icon } from "@astrojs/starlight/components";
+
+const base = import.meta.env.BASE_URL;
+const withBase = (path: string) => `${base}${path.replace(/^\//, '')}`;
+const footerLinks = [
+  { label: "Om KITT", href: "/om-kitt/" },
+  { label: "Verktøy", href: "/tools/" },
+  { label: "Prosjekter", href: "/prosjekter/" },
+  { label: "Nyheter", href: "/nyheter/" },
+];
 ---
 
-<footer class="sl-flex">
-  <div class="meta sl-flex">
-    <EditLink />
-    <LastUpdated />
+<footer class="kihub-site-footer">
+  <div class="starlight-footer-tools">
+    <div class="meta sl-flex">
+      <EditLink />
+      <LastUpdated />
+    </div>
+    <Pagination />
   </div>
-  <Pagination />
 
-  {
-    config.credits && (
-      <a class="kudos sl-flex" href="https://starlight.astro.build">
-        <Icon name={"starlight"} /> {Astro.locals.t("starlight:builtWithStarlight.label")}
-      </a>
-    )
-  }
+  <div class="kihub-footer-inner">
+    <a class="kihub-footer-brand ds-focus" href={withBase("/")} aria-label="KI HUB hjem">
+      <span class="kihub-footer-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <rect width="24" height="24" rx="6"></rect>
+          <path d="M7 8.25 12 6l5 2.25-5 2.25L7 8.25Z"></path>
+          <path d="m7 12 5 2.25L17 12"></path>
+          <path d="m7 15.5 5 2.25 5-2.25"></path>
+        </svg>
+      </span>
+      <span>KI HUB</span>
+    </a>
 
-  <!-- Footer attribution removed as requested -->
+    <div class="kihub-footer-contact">
+      <p>Kontakt oss:</p>
+      <a class="ds-focus" href="mailto:kitt@digdir.no">kitt@digdir.no</a>
+    </div>
+
+    <nav class="kihub-footer-links" aria-label="Bunnlenker">
+      {
+        footerLinks.map((link) => (
+          <a class="ds-focus" href={withBase(link.href)}>
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
 </footer>
-
-<style>
-  footer {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .meta {
-    gap: 0.75rem 3rem;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    margin-top: 0.75rem;
-    font-size: var(--sl-text-sm);
-    color: var(--sl-color-gray-3);
-  }
-
-  .meta > :global(p:only-child) {
-    margin-inline-start: auto;
-  }
-
-  :global(.pagination-links:empty) {
-    display: none;
-  }
-
-  .made-by {
-    text-align: center;
-    margin: 0 auto 0.75rem;
-    font-size: var(--sl-text-xs);
-    color: var(--sl-color-gray-3);
-  }
-
-  .kudos {
-    align-items: center;
-    gap: 0.5em;
-    margin: 0 auto;
-    font-size: var(--sl-text-xs);
-    text-decoration: none;
-    color: var(--sl-color-gray-3);
-  }
-
-  .kudos:hover {
-    color: var(--sl-color-white);
-  }
-
-  .kudos :global(svg) {
-    color: var(--sl-color-orange);
-  }
-
-  .made-by a {
-    color: var(--sl-color-gray-3);
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
-    transition: color 0.2s ease;
-  }
-
-  .made-by a:hover {
-    color: var(--sl-color-accent);
-  }
-</style>

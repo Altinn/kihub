@@ -1,0 +1,16 @@
+# Placeholder project summary for the KI Hub homepage.
+# Replace this source with a live feed in a future epic without changing the
+# homepage card structure.
+title: KI Prosjekter i BOD
+description: Aktiv oversikt over KI-prosjekter, modeller og agentlop i BOD.
+status: placeholder
+stats:
+  - id: total
+    label: Totalt antall
+    value: 14
+  - id: llm
+    label: LLM
+    value: 6
+  - id: agents
+    label: Agenter
+    value: 3
