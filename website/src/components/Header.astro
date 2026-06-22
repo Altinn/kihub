@@ -23,7 +23,7 @@ const isActive = (href: string) =>
 ---
 
 <div class="kihub-header" data-color="accent">
-  <a class="kihub-brand ds-focus" href={withBase('/')} aria-label="KITT-AI Hub hjem">
+  <a class="kihub-brand ds-focus" href={withBase('/')} aria-label="KI HUB hjem">
     <span class="kihub-brand-mark" aria-hidden="true">
       <svg viewBox="0 0 24 24" focusable="false">
         <rect width="24" height="24" rx="6"></rect>
@@ -32,7 +32,7 @@ const isActive = (href: string) =>
         <path d="m7 15.5 5 2.25 5-2.25"></path>
       </svg>
     </span>
-    <span class="kihub-brand-text">KITT-AI Hub</span>
+    <span class="kihub-brand-text">KI HUB</span>
   </a>
 
   <nav class="kihub-desktop-nav" aria-label="Hovednavigasjon">
@@ -86,17 +86,6 @@ const isActive = (href: string) =>
       ))
     }
   </nav>
-  <div class="kihub-mobile-actions">
-    <button type="button" class="kihub-mobile-search-button ds-focus" aria-label="Search">
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <circle cx="11" cy="11" r="7"></circle>
-        <path d="m16 16 4 4"></path>
-      </svg>
-    </button>
-    <a class="ds-button kihub-login" data-variant="secondary" data-fullwidth href={withBase('/login/')}>
-      Logg inn
-    </a>
-  </div>
 </div>
 
 <script>
@@ -119,11 +108,6 @@ const isActive = (href: string) =>
     if (event.target instanceof HTMLAnchorElement) {
       setMenuState(false);
     }
-  });
-
-  document.querySelector('.kihub-mobile-search-button')?.addEventListener('click', () => {
-    setMenuState(false);
-    document.querySelector<HTMLButtonElement>('.kihub-actions site-search button[data-open-modal]')?.click();
   });
 
   window.addEventListener('keydown', (event) => {
@@ -154,7 +138,7 @@ const isActive = (href: string) =>
   .kihub-header {
     --kihub-nav-red: var(--ds-color-text-default);
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: var(--ds-size-5);
     height: 100%;
@@ -171,8 +155,9 @@ const isActive = (href: string) =>
   }
 
   .kihub-brand {
-    display: none;
+    display: inline-flex;
     align-items: center;
+    justify-self: start;
     gap: var(--ds-size-3);
     min-width: max-content;
     color: var(--ds-color-text-default);
@@ -269,8 +254,7 @@ const isActive = (href: string) =>
     font-weight: var(--ds-font-weight-bold);
   }
 
-  .kihub-actions .kihub-login,
-  .kihub-mobile-actions .kihub-login {
+  .kihub-login {
     display: none;
   }
 
@@ -286,38 +270,6 @@ const isActive = (href: string) =>
     background: transparent;
     color: var(--ds-color-text-default);
     cursor: pointer;
-  }
-
-  .kihub-mobile-search-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--ds-size-12);
-    height: var(--ds-size-12);
-    margin: 0 auto;
-    border: 0;
-    border-radius: var(--ds-border-radius-full);
-    background: transparent;
-    color: var(--ds-color-text-default);
-    cursor: pointer;
-  }
-
-  .kihub-mobile-search-button:hover {
-    background: var(--ds-color-surface-hover);
-    color: var(--ds-color-text-default);
-  }
-
-  .kihub-mobile-search-button svg {
-    width: var(--ds-size-6);
-    height: var(--ds-size-6);
-  }
-
-  .kihub-mobile-search-button circle,
-  .kihub-mobile-search-button path {
-    fill: none;
-    stroke: currentColor;
-    stroke-linecap: round;
-    stroke-width: 2;
   }
 
   .kihub-menu-button svg {
@@ -351,16 +303,11 @@ const isActive = (href: string) =>
     display: none;
   }
 
-  .kihub-mobile-nav,
-  .kihub-mobile-actions {
+  .kihub-mobile-nav {
     display: grid;
     gap: var(--ds-size-2);
     max-width: 44rem;
     margin: 0 auto;
-  }
-
-  .kihub-mobile-actions {
-    margin-top: var(--ds-size-4);
   }
 
   .kihub-mobile-link {
@@ -434,12 +381,7 @@ const isActive = (href: string) =>
       grid-template-columns: 1fr auto;
     }
 
-    .kihub-brand {
-      display: inline-flex;
-    }
-
     .kihub-desktop-nav,
-    .kihub-actions > :global(site-search),
     .kihub-actions .kihub-login {
       display: none;
     }
