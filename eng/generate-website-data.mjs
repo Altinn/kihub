@@ -677,6 +677,51 @@ function generateToolsData() {
 }
 
 /**
+ * Generate homepage project summary data from website/data/project-summary.yml.
+ * The current source is intentionally small so a later live feed can keep the
+ * same public JSON shape.
+ */
+function generateProjectSummaryData() {
+  const projectSummaryFile = path.join(
+    WEBSITE_SOURCE_DATA_DIR,
+    "project-summary.yml"
+  );
+
+  if (!fs.existsSync(projectSummaryFile)) {
+    console.warn("No project-summary.yml file found at", projectSummaryFile);
+    return {
+      title: "KI Prosjekter i BOD",
+      description: "",
+      status: "placeholder",
+      stats: [],
+    };
+  }
+
+  const data = parseYamlFile(projectSummaryFile);
+  const stats = Array.isArray(data?.stats) ? data.stats : [];
+
+  return {
+    title: data?.title || "KI Prosjekter i BOD",
+    description: data?.description || "",
+    status: data?.status || "placeholder",
+    stats: stats
+      .filter((stat) => stat?.id && stat?.label)
+      .map((stat) => {
+        const parsedValue =
+          typeof stat.value === "number"
+            ? stat.value
+            : Number.parseInt(String(stat.value ?? ""), 10);
+
+        return {
+          id: String(stat.id),
+          label: String(stat.label),
+          value: Number.isFinite(parsedValue) ? parsedValue : null,
+        };
+      }),
+  };
+}
+
+/**
  * Generate a combined index for search
  */
 function generateSearchIndex(
@@ -959,6 +1004,11 @@ async function main() {
     `✓ Generated ${tools.length} tools (${toolsData.filters.categories.length} categories)`
   );
 
+  const projectSummaryData = generateProjectSummaryData();
+  console.log(
+    `✓ Generated project summary (${projectSummaryData.stats.length} stats)`
+  );
+
   const samplesData = generateSamplesData();
   console.log(
     `✓ Generated ${samplesData.totalRecipes} recipes in ${samplesData.totalCookbooks} cookbooks (${samplesData.filters.languages.length} languages, ${samplesData.filters.tags.length} tags)`
@@ -1014,6 +1064,11 @@ async function main() {
   fs.writeFileSync(
     path.join(WEBSITE_DATA_DIR, "tools.json"),
     JSON.stringify(toolsData, null, 2)
+  );
+
+  fs.writeFileSync(
+    path.join(WEBSITE_DATA_DIR, "project-summary.json"),
+    JSON.stringify(projectSummaryData, null, 2)
   );
 
   fs.writeFileSync(

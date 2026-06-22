@@ -56,6 +56,10 @@ main:has(#main-content) > .content-panel:has(h1#_top) {
   display: none !important;
 }
 
+main:has(#main-content) > .content-panel {
+  border-top: 0 !important;
+}
+
 /* ── Pagefind search filter pills ──────────────────────────── */
 /* Restyle the default checkbox filters as horizontal pill toggles above results */
 

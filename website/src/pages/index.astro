@@ -1,25 +1,22 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import Modal from '../components/Modal.astro';
+import projectSummaryData from '../../public/data/project-summary.json';
 
 const base = import.meta.env.BASE_URL;
+const projectStats = projectSummaryData.stats ?? [];
+const primaryProjectStat = projectStats.find((stat) => stat.id === 'total') ?? projectStats[0];
+const secondaryProjectStats = projectStats.filter((stat) => stat.id !== primaryProjectStat?.id);
+const numberFormatter = new Intl.NumberFormat('nb-NO');
+const formatStatValue = (value: number | null | undefined) =>
+  typeof value === 'number' ? numberFormatter.format(value) : '-';
 
-const cards = [
-  { id: 'agents', title: 'Agents', desc: 'Custom agents', countId: 'agents', countText: 'skills', image: 'images/agents.svg' },
-  { id: 'instructions', title: 'Instructions', desc: 'Coding standards', countId: 'instructions', countText: 'instructions', image: 'images/instructions.svg' },
-  { id: 'skills', title: 'Skills', desc: 'Self-contained instructions', countId: 'skills', countText: 'skills', image: 'images/skills.svg' },
-  { id: 'hooks', title: 'Hooks', desc: 'Automated workflows', countId: 'hooks', countText: 'hooks', image: 'images/hooks.svg' },
-  { id: 'workflows', title: 'Workflows', desc: 'AI-powered automations', countId: 'workflows', countText: 'workflows', image: 'images/workflows.svg' },
-  { id: 'plugins', title: 'Plugins', desc: 'Curated plugins', countId: 'plugins', countText: 'plugins', image: 'images/plugins.svg' },
-  { id: 'tools', title: 'Tools', desc: 'MCP servers', countId: 'tools', countText: 'tools', image: 'images/tools.svg' },
-  { id: 'learning-hub', title: 'Learning Hub', desc: 'Articles and guides', countId: null, countText: 'articles', image: 'images/learninghub.svg' },
-];
+const toolTags = ['Godkjent', 'Eksperimentelt', 'Skills', 'MCP', 'Hooks'];
 ---
 
 <StarlightPage
   frontmatter={{
     title: 'DigDir KI HUB',
-    description: 'Community-contributed agents, instructions, and skills to enhance your GitHub Copilot experience',
+    description: 'Godkjente KI-verktøy og aktive KI-prosjekter i BOD',
     template: 'splash',
     pagefind: false,
     prev: false,
@@ -29,68 +26,103 @@ const cards = [
   }}
   hasSidebar={false}
 >
-  <div id="main-content" class="v2-main">
-    <!-- Hero Section -->
-    <section class="ds-card v2-hero" data-color="neutral" aria-labelledby="hero-heading">
-      <div class="v2-hero-content">
-        <h1 id="hero-heading">Explore our growing hub for<br/>Agents, Skills & Instructions</h1>
-        <p class="v2-hero-subtitle">
-          DigDirs community-contributed agents, instructions, and skills to enhance your AI native experience
-        </p>
-        
-        <div class="ds-search v2-hero-search">
-          <label for="global-search" class="sr-only">Search all resources</label>
-          <input
-            type="search"
-            id="global-search"
-            class="ds-input"
-            placeholder="Search for any agent, skill, instruction..."
-            autocomplete="off"
-          />
-          <button type="button" class="ds-button v2-search-btn" data-icon aria-label="Search">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="v2-search-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-          </button>
-          <div id="search-results" class="search-results hidden" aria-label="Search results"></div>
-        </div>
-      </div>
-      
-      <div class="v2-hero-graphics" aria-hidden="true">
-        <div class="v2-resource-stack">
-          {cards.slice(0, 6).map((card) => (
-            <div class="ds-card v2-resource-token" data-color="accent">
-              <img src={`${base}${card.image}`} alt="" />
-              <span>{card.title}</span>
-            </div>
-          ))}
-        </div>
+  <div id="main-content" class="v2-main" data-page-color="accent">
+    <section class="v2-hero" aria-labelledby="hero-heading">
+      <p class="v2-kicker">Digdir / BOD / KITT-teamet</p>
+      <h1 id="hero-heading" class="v2-hero-title">
+        Kunstig intelligens<br />i <span>BOD</span>
+      </h1>
+      <p class="v2-hero-subtitle">
+        Vi hjelper deg og ditt team i gang med verktøy og veiledning for en trygg og innovativ bruk av KI i offentlig sektor.
+      </p>
+      <div class="v2-hero-actions" aria-label="Hurtigvalg">
+        <a class="ds-button v2-primary-action" href={`${base}tools/`}>
+          Kom i gang
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M5 12h14M13 6l6 6-6 6"></path>
+          </svg>
+        </a>
+        <a class="ds-button v2-secondary-action" data-variant="secondary" href={`${base}om-kitt/`}>
+          Om KITT
+        </a>
       </div>
     </section>
 
-    <!-- Quick Links -->
-    <section class="v2-quick-links" aria-labelledby="quick-links-heading">
-      <div class="v2-cards-grid">
-        {cards.map(card => (
-          <a href={`${base}${card.id}/`} class="ds-card v2-card" data-color="neutral" id={`card-${card.id}`}>
-            <div class="v2-card-image-wrap">
-               <img src={`${base}${card.image}`} alt={`${card.title} graphic`} />
+    <section class="v2-entry-section" aria-labelledby="entry-cards-heading">
+      <h2 id="entry-cards-heading" class="sr-only">Viktigste innganger</h2>
+      <div class="v2-feature-grid">
+        <a href={`${base}tools/`} class="v2-feature-card v2-tools-card ds-focus" data-color="neutral">
+          <div class="v2-card-copy">
+            <p class="v2-card-eyebrow">Katalog</p>
+            <h3>Verktøy</h3>
+            <p>
+              Oversikt over verktøy godkjent i BOD, inkludert skills, hooks, MCP-servere og agentoppsett for ditt team.
+            </p>
+          </div>
+
+          <ul class="v2-tag-list" aria-label="Verktøykategorier">
+            {toolTags.map((tag) => (
+              <li>{tag}</li>
+            ))}
+          </ul>
+
+          <span class="v2-card-action">
+            Åpne katalog
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
+            </svg>
+          </span>
+        </a>
+
+        <a href={`${base}prosjekter/`} class="v2-feature-card v2-project-card ds-focus" data-color="brand2">
+          <div class="v2-card-copy">
+            <p class="v2-card-eyebrow">Oversikt</p>
+            <h3>{projectSummaryData.title}</h3>
+          </div>
+
+          {primaryProjectStat && (
+            <div class="v2-primary-stat">
+              <span
+                class="v2-primary-stat-value"
+                data-project-stat-value={primaryProjectStat.id}
+                aria-live="polite"
+              >
+                {formatStatValue(primaryProjectStat.value)}
+              </span>
+              <span class="v2-stat-label">{primaryProjectStat.label}</span>
             </div>
-            <div class="v2-card-content">
-              <h3>{card.title}</h3>
-              <p class="v2-card-subtitle">
-                {card.countId ? <span class="card-count" data-count={card.countId}>-</span> : <span></span>} 
-                {card.countText}
-              </p>
-            </div>
-          </a>
-        ))}
+          )}
+
+          <div class="v2-secondary-stats">
+            {secondaryProjectStats.map((stat) => (
+              <div class="v2-stat-item">
+                <span class="v2-stat-value" data-project-stat-value={stat.id} aria-live="polite">
+                  {formatStatValue(stat.value)}
+                </span>
+                <span class="v2-stat-label">{stat.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <span class="v2-project-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" focusable="false">
+              <path d="M37 6c8 2 15 9 17 17-5 10-13 18-24 24l-13-13C23 23 31 11 37 6Z"></path>
+              <path d="M23 41l-6 14 14-6"></path>
+              <path d="M16 28c-6 0-10 4-11 11l12-2"></path>
+              <path d="M36 48l-2 12c7-1 11-5 11-11"></path>
+            </svg>
+          </span>
+
+          <span class="v2-card-action">
+            Se prosjekter
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
+            </svg>
+          </span>
+        </a>
       </div>
     </section>
   </div>
-
-  <Modal />
 
   <script>
     import '../scripts/pages/index';
@@ -99,201 +131,392 @@ const cards = [
 
 <style>
   :global(:root) {
-    --sl-content-width: 1300px !important;
+    --sl-content-width: 1220px !important;
   }
+
+  :global(body:has(#main-content.v2-main)) {
+    background: var(--ds-color-accent-background-default);
+  }
+
   :global(.sl-container) {
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 auto !important;
   }
+
   :global(.main-pane) {
     width: 100% !important;
   }
+
   #main-content.v2-main {
-    max-width: 1300px;
+    box-sizing: border-box;
+    width: min(100%, 1220px);
     margin: 0 auto !important;
-    padding: var(--ds-size-8);
+    padding: var(--ds-size-12) var(--ds-size-8) var(--ds-size-16);
   }
 
   .v2-hero {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--ds-size-10);
-    background: linear-gradient(135deg, var(--ds-color-neutral-surface-default), var(--ds-color-accent-surface-tinted));
-    border-color: var(--ds-color-neutral-border-subtle);
-    padding: var(--ds-size-12);
-    position: relative;
-    overflow: hidden;
-    min-height: 480px;
-    margin-bottom: var(--ds-size-10);
+    max-width: 720px;
+    padding: var(--ds-size-8) 0 var(--ds-size-6);
   }
 
-  .v2-hero-content {
-    position: relative;
-    z-index: 1;
-    max-width: 620px;
+  .v2-kicker,
+  .v2-card-eyebrow,
+  .v2-stat-label {
+    margin: 0;
+    font-size: var(--ds-body-xs-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
-  .v2-hero h1 {
-    font-size: clamp(2.5rem, 5vw, var(--ds-heading-2xl-font-size)) !important;
-    line-height: 1.1 !important;
-    font-weight: var(--ds-font-weight-bold) !important;
-    color: var(--ds-color-neutral-text-default) !important;
-    margin-bottom: var(--ds-size-6) !important;
-    letter-spacing: 0 !important;
+  .v2-kicker {
+    color: var(--ds-color-accent-text-subtle);
+    margin-bottom: var(--ds-size-5);
+  }
+
+  .v2-hero-title {
+    margin: 0;
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-2xl-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.08;
+  }
+
+  .v2-hero-title span {
+    color: var(--ds-color-accent-base-default);
   }
 
   .v2-hero-subtitle {
-    font-size: var(--ds-body-lg-font-size);
+    max-width: 44rem;
+    margin: var(--ds-size-6) 0 0;
     color: var(--ds-color-neutral-text-subtle);
-    margin-bottom: var(--ds-size-8);
+    font-size: var(--ds-body-lg-font-size);
     line-height: var(--ds-body-long-lg-line-height);
-    max-width: 36rem;
   }
 
-  .v2-hero-search {
-    position: relative;
-    width: 100%;
-    max-width: 520px;
+  .v2-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-size-3);
+    margin-top: var(--ds-size-8);
   }
 
-  .v2-search-btn {
-    grid-area: 1 / 2;
+  .v2-primary-action,
+  .v2-secondary-action {
+    min-height: var(--ds-size-12);
+    border-radius: var(--ds-border-radius-default);
+    font-weight: var(--ds-font-weight-bold);
   }
 
-  .v2-search-icon {
-    stroke: currentColor;
+  .v2-primary-action {
+    --dsc-button-background: var(--ds-color-accent-base-default);
+    --dsc-button-background--hover: var(--ds-color-accent-base-hover);
+    --dsc-button-color: var(--ds-color-accent-base-contrast-default);
+    --dsc-button-border-color: var(--ds-color-accent-base-default);
+    --dsc-button-border-color--hover: var(--ds-color-accent-base-hover);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-size-2);
+  }
+
+  .v2-primary-action svg,
+  .v2-card-action svg {
+    width: var(--ds-size-5);
+    height: var(--ds-size-5);
     fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
   }
 
-  .v2-hero-graphics {
+  .v2-secondary-action {
+    --dsc-button-border-color: var(--ds-color-accent-border-default);
+    --dsc-button-border-color--hover: var(--ds-color-accent-border-strong);
+    --dsc-button-color: var(--ds-color-accent-text-subtle);
+    --dsc-button-color--hover: var(--ds-color-accent-text-default);
+  }
+
+  .v2-entry-section {
+    margin-top: var(--ds-size-8);
+  }
+
+  .v2-feature-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--ds-size-6);
+    align-items: stretch;
+  }
+
+  .v2-feature-card {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    min-height: 250px;
+    padding: var(--ds-size-8);
+    overflow: hidden;
+    border: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+    border-radius: var(--ds-border-radius-md);
+    box-shadow: none;
+    text-decoration: none !important;
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  #main-content .v2-feature-card,
+  #main-content .v2-feature-card:hover {
+    text-decoration: none !important;
+  }
+
+  .v2-feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ds-shadow-sm);
+  }
+
+  .v2-feature-card:focus-visible {
+    outline: var(--ds-border-width-focus) solid var(--ds-color-focus-outer);
+    outline-offset: var(--ds-size-1);
+  }
+
+  .v2-card-copy {
     position: relative;
     z-index: 1;
-    width: min(42%, 420px);
+    max-width: 30rem;
   }
 
-  .v2-resource-stack {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(120px, 1fr));
-    gap: var(--ds-size-4);
+  .v2-card-copy h3 {
+    margin: var(--ds-size-3) 0 0;
+    color: inherit;
+    font-size: var(--ds-heading-xs-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.15;
   }
 
-  .v2-resource-token {
-    display: grid;
-    grid-template-columns: var(--ds-size-10) 1fr;
-    align-items: center;
-    gap: var(--ds-size-3);
-    padding: var(--ds-size-4);
-    color: var(--ds-color-accent-text-default);
-    background: var(--ds-color-accent-surface-default);
+  .v2-card-copy p:not(.v2-card-eyebrow) {
+    margin: var(--ds-size-4) 0 0;
+    color: inherit;
+    font-size: var(--ds-body-md-font-size);
+    line-height: var(--ds-body-long-md-line-height);
+    overflow-wrap: anywhere;
   }
 
-  .v2-resource-token img {
-    width: var(--ds-size-10);
-    height: var(--ds-size-10);
-    object-fit: contain;
-  }
-
-  .v2-resource-token span {
-    font-weight: var(--ds-font-weight-medium);
-    color: var(--ds-color-accent-text-default);
-  }
-
-  .v2-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: var(--ds-size-6);
-  }
-  @media (min-width: 1024px) {
-    .v2-cards-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  .v2-card {
-    overflow: hidden;
-    text-decoration: none !important;
-    display: flex !important;
-    flex-direction: column;
+  .v2-tools-card {
     color: var(--ds-color-neutral-text-default);
-    transition: transform 0.2s, box-shadow 0.2s;
-    height: 260px;
-    padding: 0;
+    background: var(--ds-color-neutral-surface-default);
+    border-inline-start: var(--ds-border-width-focus) solid var(--ds-color-accent-border-default);
   }
 
-  .v2-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--ds-shadow-md);
-  }
-
-  .v2-card-image-wrap {
-    height: 150px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: var(--ds-size-3);
-    border-radius: var(--ds-border-radius-md);
-    overflow: hidden;
-    background: var(--ds-color-accent-surface-tinted);
-  }
-
-  .v2-card-image-wrap img {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-  }
-
-  .v2-card-content {
-    padding: var(--ds-size-3) var(--ds-size-5) var(--ds-size-5);
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-  }
-
-  .v2-card h3 {
-    font-size: var(--ds-heading-xs-font-size) !important;
-    font-weight: var(--ds-font-weight-bold) !important;
-    margin: 0 0 var(--ds-size-2) 0 !important;
-    line-height: 1.1 !important;
+  #main-content a.v2-tools-card,
+  #main-content a.v2-tools-card:hover {
     color: var(--ds-color-neutral-text-default) !important;
   }
 
-  .v2-card-subtitle {
-    font-size: var(--ds-body-sm-font-size);
-    color: var(--ds-color-neutral-text-subtle);
-    margin: 0;
+  .v2-tools-card:hover {
+    border-color: var(--ds-color-accent-border-default);
   }
-  
-  .v2-card-subtitle span {
+
+  .v2-tools-card .v2-card-eyebrow {
     color: var(--ds-color-neutral-text-subtle);
+  }
+
+  .v2-tools-card .v2-card-copy p {
+    color: var(--ds-color-neutral-text-subtle);
+  }
+
+  .v2-tag-list {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-size-2);
+    align-self: end;
+    padding: 0;
+    margin: var(--ds-size-6) 0 var(--ds-size-10);
+    list-style: none;
+  }
+
+  .v2-tag-list li {
+    padding: var(--ds-size-1) var(--ds-size-3);
+    color: var(--ds-color-neutral-text-subtle);
+    background: var(--ds-color-neutral-surface-tinted);
+    border: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+    border-radius: var(--ds-border-radius-full);
+    font-size: var(--ds-body-xs-font-size);
+    font-weight: var(--ds-font-weight-medium);
+    line-height: var(--ds-body-short-xs-line-height);
+  }
+
+  .v2-tag-list li:first-child {
+    color: var(--ds-color-accent-text-subtle);
+    background: var(--ds-color-accent-surface-tinted);
+    border-color: var(--ds-color-accent-border-subtle);
+  }
+
+  .v2-project-card {
+    grid-template-rows: auto 1fr auto auto;
+    color: var(--ds-color-brand2-text-default);
+    background: var(--ds-color-brand2-background-default);
+    border-color: var(--ds-color-brand2-border-subtle);
+  }
+
+  #main-content a.v2-project-card,
+  #main-content a.v2-project-card:hover {
+    color: var(--ds-color-brand2-text-default) !important;
+  }
+
+  .v2-project-card:hover {
+    border-color: var(--ds-color-brand2-border-default);
+  }
+
+  .v2-project-card .v2-card-eyebrow,
+  .v2-project-card .v2-stat-label {
+    color: var(--ds-color-brand2-text-subtle);
+  }
+
+  .v2-primary-stat {
+    position: relative;
+    z-index: 1;
+    align-self: end;
+    margin-top: var(--ds-size-6);
+  }
+
+  .v2-primary-stat-value {
+    display: block;
+    color: var(--ds-color-accent-base-default);
+    font-size: var(--ds-heading-2xl-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 0.95;
+  }
+
+  .v2-secondary-stats {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-size-6);
+    margin: var(--ds-size-5) 0 var(--ds-size-10);
+  }
+
+  .v2-stat-item {
+    min-width: var(--ds-size-14);
+  }
+
+  .v2-stat-value {
+    display: block;
+    color: var(--ds-color-neutral-text-default);
+    font-size: var(--ds-heading-sm-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  .v2-card-action {
+    position: absolute;
+    z-index: 2;
+    right: var(--ds-size-5);
+    bottom: var(--ds-size-5);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-size-2);
+    min-height: var(--ds-size-10);
+    max-width: calc(100% - var(--ds-size-10));
+    padding: var(--ds-size-2) var(--ds-size-3);
+    color: var(--ds-color-accent-base-contrast-default);
+    background: var(--ds-color-accent-base-default);
+    border-radius: var(--ds-border-radius-full);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    line-height: var(--ds-body-short-sm-line-height);
+  }
+
+  .v2-project-card .v2-card-action {
+    color: var(--ds-color-brand2-base-contrast-default);
+    background: var(--ds-color-brand2-base-default);
+  }
+
+  .v2-project-mark {
+    position: absolute;
+    right: var(--ds-size-6);
+    bottom: var(--ds-size-11);
+    width: var(--ds-size-16);
+    height: var(--ds-size-16);
+    color: var(--ds-color-brand2-border-default);
+    opacity: 0.45;
+  }
+
+  .v2-project-mark svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 3;
   }
 
   @media (max-width: 900px) {
     #main-content.v2-main {
-      padding: var(--ds-size-4);
+      padding: var(--ds-size-8) var(--ds-size-5) var(--ds-size-12);
     }
 
     .v2-hero {
-      flex-direction: column;
-      padding: var(--ds-size-6);
-      align-items: stretch;
+      max-width: none;
+      padding-top: var(--ds-size-5);
     }
 
-    .v2-hero-content {
-      max-width: 100%;
+    .v2-hero-title {
+      font-size: var(--ds-heading-xl-font-size);
     }
 
-    .v2-hero-graphics {
-      width: 100%;
+    .v2-feature-grid {
+      grid-template-columns: 1fr;
     }
   }
 
-  @media (max-width: 480px) {
-    .v2-resource-stack {
-      grid-template-columns: 1fr;
+  @media (max-width: 560px) {
+    #main-content.v2-main {
+      padding-inline: var(--ds-size-4);
+    }
+
+    .v2-hero-title {
+      font-size: var(--ds-heading-lg-font-size);
+    }
+
+    .v2-hero-subtitle {
+      font-size: var(--ds-body-md-font-size);
+      line-height: var(--ds-body-long-md-line-height);
+    }
+
+    .v2-feature-card {
+      min-height: 280px;
+      padding: var(--ds-size-6);
+    }
+
+    .v2-secondary-stats {
+      gap: var(--ds-size-4);
+    }
+
+    .v2-card-action {
+      position: static;
+      justify-self: start;
+      margin-top: var(--ds-size-6);
+    }
+
+    .v2-tag-list,
+    .v2-secondary-stats {
+      margin-bottom: 0;
+    }
+
+    .v2-project-mark {
+      right: var(--ds-size-4);
+      bottom: var(--ds-size-4);
+      width: var(--ds-size-14);
+      height: var(--ds-size-14);
     }
   }
 </style>

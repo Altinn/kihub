@@ -14,35 +14,35 @@
 
 :root {
   color-scheme: light dark;
-  --color-bg: var(--ds-color-neutral-background-default);
-  --color-bg-secondary: var(--ds-color-neutral-surface-default);
-  --color-bg-tertiary: var(--ds-color-neutral-surface-tinted);
-  --color-border: var(--ds-color-neutral-border-subtle);
-  --color-text: var(--ds-color-neutral-text-default);
-  --color-text-muted: var(--ds-color-neutral-text-subtle);
-  --color-text-emphasis: var(--ds-color-neutral-text-default);
+  --color-bg: var(--ds-color-background-default);
+  --color-bg-secondary: var(--ds-color-surface-default);
+  --color-bg-tertiary: var(--ds-color-surface-tinted);
+  --color-border: var(--ds-color-border-subtle);
+  --color-text: var(--ds-color-text-default);
+  --color-text-muted: var(--ds-color-text-subtle);
+  --color-text-emphasis: var(--ds-color-text-default);
   --color-text-primary: var(--color-text);
   --color-text-secondary: var(--color-text-muted);
   --color-bg-primary: var(--color-bg);
-  --color-primary: var(--ds-color-accent-base-default);
-  --color-purple-light: var(--ds-color-accent-surface-tinted);
-  --color-purple-dark: var(--ds-color-accent-text-default);
-  --color-link: var(--ds-color-accent-text-subtle);
-  --color-link-hover: var(--ds-color-accent-text-default);
-  --color-accent: var(--ds-color-accent-base-default);
-  --color-accent-hover: var(--ds-color-accent-base-hover);
+  --color-primary: var(--ds-color-base-default);
+  --color-purple-light: var(--ds-color-surface-tinted);
+  --color-purple-dark: var(--ds-color-text-default);
+  --color-link: var(--ds-color-text-subtle);
+  --color-link-hover: var(--ds-color-text-default);
+  --color-accent: var(--ds-color-base-default);
+  --color-accent-hover: var(--ds-color-base-hover);
   --color-accent-secondary: var(--ds-color-brand2-base-default);
   --color-danger: var(--ds-color-danger-base-default);
   --color-warning: var(--ds-color-warning-base-default);
   --color-success: var(--ds-color-success-base-default);
   --color-error: var(--ds-color-danger-base-default);
-  --color-card-bg: var(--ds-color-neutral-surface-default);
-  --color-card-hover: var(--ds-color-neutral-surface-hover);
-  --color-glass: var(--ds-color-neutral-surface-tinted);
-  --color-glass-border: var(--ds-color-neutral-border-subtle);
-  --gradient-primary: linear-gradient(90deg, var(--ds-color-accent-base-default), var(--ds-color-brand2-base-default));
-  --gradient-accent: linear-gradient(135deg, var(--ds-color-accent-surface-tinted), var(--ds-color-brand2-surface-tinted));
-  --gradient-hero: linear-gradient(180deg, var(--ds-color-neutral-background-default), var(--ds-color-neutral-background-tinted));
+  --color-card-bg: var(--ds-color-surface-default);
+  --color-card-hover: var(--ds-color-surface-hover);
+  --color-glass: var(--ds-color-surface-tinted);
+  --color-glass-border: var(--ds-color-border-subtle);
+  --gradient-primary: linear-gradient(90deg, var(--ds-color-base-default), var(--ds-color-brand2-base-default));
+  --gradient-accent: linear-gradient(135deg, var(--ds-color-surface-tinted), var(--ds-color-brand2-surface-tinted));
+  --gradient-hero: none;
   --border-radius: var(--ds-border-radius-default);
   --border-radius-lg: var(--ds-border-radius-lg);
   --border-radius-xl: var(--ds-border-radius-xl);
@@ -79,12 +79,11 @@
   padding: 0;
 }
 
-/* Full-width page gradient on custom pages (not Starlight docs).
-   Applied to body so it spans the entire viewport width,
-   similar to how github.github.com/gh-aw/ handles its gradient. */
+/* Full-width page background on custom pages (not Starlight docs). */
 body:has(#main-content) {
-  background-image: var(--gradient-hero);
-  background-attachment: fixed;
+  background-color: var(--ds-color-background-default);
+  background-image: none;
+  color: var(--ds-color-text-default);
 }
 
 /* body styles removed — Starlight handles base body styling.

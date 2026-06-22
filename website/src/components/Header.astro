@@ -22,7 +22,7 @@ const isActive = (href: string) =>
   href === '/' ? currentPath === '/' : currentPath.startsWith(href);
 ---
 
-<div class="kihub-header">
+<div class="kihub-header" data-color="accent">
   <a class="kihub-brand ds-focus" href={withBase('/')} aria-label="KITT-AI Hub hjem">
     <span class="kihub-brand-mark" aria-hidden="true">
       <svg viewBox="0 0 24 24" focusable="false">
@@ -42,6 +42,7 @@ const isActive = (href: string) =>
           class="kihub-nav-link ds-focus"
           href={withBase(item.href)}
           aria-current={isActive(item.href) ? 'page' : undefined}
+          data-home-link={item.href === '/' ? 'true' : undefined}
         >
           {item.label}
         </a>
@@ -71,7 +72,7 @@ const isActive = (href: string) =>
   </div>
 </div>
 
-<div id="kihub-mobile-nav" class="kihub-mobile-panel" hidden>
+<div id="kihub-mobile-nav" class="kihub-mobile-panel" data-color="accent" hidden>
   <nav class="kihub-mobile-nav" aria-label="Hovednavigasjon mobil">
     {
       navItems.map((item) => (
@@ -138,15 +139,28 @@ const isActive = (href: string) =>
 </script>
 
 <style>
+  :global(.header:has(.kihub-header)) {
+    position: static !important;
+    inset: auto !important;
+    border-bottom: 0 !important;
+    background: var(--ds-color-accent-background-default) !important;
+    box-shadow: none !important;
+  }
+
+  :global(.page:has(.kihub-header) > .main-frame) {
+    padding-top: 0 !important;
+  }
+
   .kihub-header {
-    --kihub-nav-red: #e02d27;
+    --kihub-nav-red: var(--ds-color-text-default);
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: stretch;
-    gap: clamp(var(--ds-size-5), 4vw, var(--ds-size-12));
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--ds-size-5);
     height: 100%;
-    max-width: 1440px;
+    max-width: 1280px;
     margin: 0 auto;
+    background: transparent;
   }
 
   .kihub-brand,
@@ -157,12 +171,12 @@ const isActive = (href: string) =>
   }
 
   .kihub-brand {
-    display: inline-flex;
+    display: none;
     align-items: center;
     gap: var(--ds-size-3);
     min-width: max-content;
-    color: var(--kihub-nav-red);
-    font-weight: var(--ds-font-weight-bold);
+    color: var(--ds-color-text-default);
+    font-weight: var(--ds-font-weight-medium);
   }
 
   .kihub-brand:hover {
@@ -199,8 +213,9 @@ const isActive = (href: string) =>
 
   .kihub-desktop-nav {
     display: flex;
-    align-items: stretch;
-    gap: clamp(var(--ds-size-4), 3vw, var(--ds-size-9));
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ds-size-1);
     min-width: 0;
   }
 
@@ -208,31 +223,40 @@ const isActive = (href: string) =>
     position: relative;
     display: inline-flex;
     align-items: center;
-    color: var(--ds-color-neutral-text-subtle);
+    border-bottom: 2px solid transparent;
+    color: var(--ds-color-text-default);
+    font-size: var(--ds-font-size-4);
     font-weight: var(--ds-font-weight-medium);
+    padding-block: var(--ds-size-2);
+    padding-inline: var(--ds-size-5);
     white-space: nowrap;
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease;
   }
 
-  .kihub-nav-link:hover,
+  .kihub-nav-link:hover {
+    border-bottom-color: var(--ds-color-base-hover);
+    color: var(--ds-color-base-hover);
+  }
+
   .kihub-nav-link[aria-current='page'] {
-    color: var(--kihub-nav-red);
+    border-bottom-color: var(--ds-color-base-hover);
+    border-bottom-width: 3px;
+    color: var(--ds-color-base-hover);
   }
 
-  .kihub-nav-link[aria-current='page']::after {
-    position: absolute;
-    inset-inline: 0;
-    bottom: 0;
-    height: 2px;
-    border-radius: var(--ds-border-radius-full);
-    background: var(--kihub-nav-red);
-    content: '';
+  .kihub-nav-link[data-home-link='true'][aria-current='page'] {
+    border-bottom-color: transparent;
+    border-bottom-width: 2px;
+    color: var(--ds-color-text-default);
   }
 
   .kihub-actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--ds-size-5);
+    gap: var(--ds-size-4);
   }
 
   .kihub-login {
@@ -245,6 +269,11 @@ const isActive = (href: string) =>
     font-weight: var(--ds-font-weight-bold);
   }
 
+  .kihub-actions .kihub-login,
+  .kihub-mobile-actions .kihub-login {
+    display: none;
+  }
+
   .kihub-menu-button {
     display: none;
     align-items: center;
@@ -255,7 +284,7 @@ const isActive = (href: string) =>
     border: 0;
     border-radius: var(--ds-border-radius-full);
     background: transparent;
-    color: var(--ds-color-neutral-text-default);
+    color: var(--ds-color-text-default);
     cursor: pointer;
   }
 
@@ -269,13 +298,13 @@ const isActive = (href: string) =>
     border: 0;
     border-radius: var(--ds-border-radius-full);
     background: transparent;
-    color: var(--ds-color-neutral-text-subtle);
+    color: var(--ds-color-text-default);
     cursor: pointer;
   }
 
   .kihub-mobile-search-button:hover {
-    background: var(--ds-color-neutral-surface-hover);
-    color: var(--ds-color-neutral-text-default);
+    background: var(--ds-color-surface-hover);
+    color: var(--ds-color-text-default);
   }
 
   .kihub-mobile-search-button svg {
@@ -313,8 +342,8 @@ const isActive = (href: string) =>
     z-index: calc(var(--sl-z-index-navbar) - 1);
     inset: var(--sl-nav-height) 0 auto;
     padding: var(--ds-size-4) var(--sl-nav-pad-x) var(--ds-size-6);
-    border-bottom: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
-    background: var(--ds-color-neutral-surface-default);
+    border-bottom: var(--ds-border-width-default) solid var(--ds-color-border-subtle);
+    background: var(--ds-color-background-default);
     box-shadow: var(--ds-shadow-md);
   }
 
@@ -340,7 +369,7 @@ const isActive = (href: string) =>
     min-height: var(--ds-size-12);
     align-items: center;
     padding-inline: var(--ds-size-3);
-    color: var(--ds-color-neutral-text-default);
+    color: var(--ds-color-text-default);
     font-weight: var(--ds-font-weight-medium);
   }
 
@@ -366,14 +395,14 @@ const isActive = (href: string) =>
     border: 0;
     border-radius: var(--ds-border-radius-full);
     background: transparent;
-    color: var(--ds-color-neutral-text-subtle);
+    color: var(--ds-color-text-default);
     justify-content: center;
   }
 
   .kihub-header :global(site-search button[data-open-modal]:hover),
   .kihub-mobile-panel :global(site-search button[data-open-modal]:hover) {
-    background: var(--ds-color-neutral-surface-hover);
-    color: var(--ds-color-neutral-text-default);
+    background: var(--ds-color-surface-hover);
+    color: var(--ds-color-text-default);
   }
 
   .kihub-header :global(site-search button[data-open-modal]:focus-visible),
@@ -403,6 +432,10 @@ const isActive = (href: string) =>
   @media (max-width: 767.98px) {
     .kihub-header {
       grid-template-columns: 1fr auto;
+    }
+
+    .kihub-brand {
+      display: inline-flex;
     }
 
     .kihub-desktop-nav,
