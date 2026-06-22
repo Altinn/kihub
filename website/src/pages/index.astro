@@ -13,6 +13,14 @@ const splitLastWord = (value: string) => {
 };
 const toolsTitleParts = splitLastWord('Verktøy');
 const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekter i BOD');
+const audienceRoles = [
+  { label: 'Utvikler', tone: 'red', href: `${base}tools/` },
+  { label: 'Produkteier', tone: 'pink', href: `${base}tools/` },
+  { label: 'Leder', tone: 'burgundy', href: `${base}tools/` },
+  { label: 'Designer', tone: 'pink', href: `${base}tools/` },
+  { label: 'Sikkerhet', tone: 'red', href: `${base}tools/` },
+  { label: 'Saksbehandler', tone: 'pink', href: `${base}tools/` },
+];
 ---
 
 <StarlightPage
@@ -110,6 +118,30 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
           <li>Claude Teams</li>
         </ul>
       </div>
+    </section>
+
+    <section class="v2-roles-section" aria-labelledby="roles-heading">
+      <h2 id="roles-heading">Kom raskt i gang</h2>
+      <ul class="v2-roles-grid" aria-label="Roller">
+        {audienceRoles.map((role) => (
+          <li>
+            <a
+              href={role.href}
+              class="v2-role-card ds-focus"
+              data-tone={role.tone}
+              aria-label={`Kom raskt i gang som ${role.label}`}
+            >
+              <h3>
+                {role.label}<span class="v2-card-arrow v2-role-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M5 12h14M13 6l6 6-6 6"></path>
+                  </svg>
+                </span>
+              </h3>
+            </a>
+          </li>
+        ))}
+      </ul>
     </section>
   </div>
 </StarlightPage>
@@ -438,6 +470,115 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
     white-space: nowrap;
   }
 
+  .v2-roles-section {
+    margin-top: var(--ds-size-8);
+  }
+
+  .v2-roles-section h2 {
+    margin: 0 0 var(--ds-size-5);
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-lg-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.12;
+  }
+
+  .v2-roles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    align-items: stretch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .v2-roles-grid li {
+    min-width: 0;
+    margin: 0;
+  }
+
+  .v2-role-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-width: 0;
+    min-height: 172px;
+    margin: 0;
+    padding: var(--ds-size-6);
+    background: var(--role-card-background);
+    color: var(--role-card-color);
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    text-decoration: none !important;
+    transition: filter 0.2s ease;
+  }
+
+  #main-content .v2-role-card,
+  #main-content .v2-role-card:hover {
+    color: var(--role-card-color) !important;
+    text-decoration: none !important;
+  }
+
+  #main-content a.v2-role-card h3,
+  #main-content a.v2-role-card:hover h3 {
+    color: var(--role-card-color) !important;
+  }
+
+  .v2-role-card:hover {
+    filter: brightness(0.98);
+  }
+
+  .v2-role-card:focus-visible {
+    outline: var(--ds-border-width-focus) solid var(--ds-color-focus-outer);
+    outline-offset: var(--ds-size-1);
+  }
+
+  .v2-role-card h3 {
+    flex: 1;
+    margin: 0;
+    color: inherit;
+    font-size: var(--ds-heading-lg-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.08;
+  }
+
+  .v2-role-card:hover h3 {
+    text-decoration: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.12em;
+  }
+
+  .v2-role-arrow {
+    width: var(--ds-size-9);
+    height: var(--ds-size-9);
+    margin-left: var(--ds-size-2);
+  }
+
+  .v2-role-card[data-tone="red"] {
+    --role-card-background: var(--ds-color-accent-base-default);
+    --role-card-color: var(--ds-color-accent-base-contrast-default);
+  }
+
+  .v2-role-card[data-tone="pink"] {
+    --role-card-background: var(--ds-color-accent-surface-hover);
+    --role-card-color: var(--ds-color-accent-text-default);
+  }
+
+  .v2-role-card[data-tone="burgundy"] {
+    --role-card-background: var(--ds-color-accent-text-default);
+    --role-card-color: var(--ds-color-accent-base-contrast-default);
+  }
+
+  .v2-role-card[data-tone="pink"] .v2-role-arrow {
+    background: var(--ds-color-accent-text-default);
+    color: var(--ds-color-accent-surface-hover);
+  }
+
   @media (max-width: 900px) {
     #main-content.v2-main {
       padding: var(--ds-size-8) var(--ds-size-5) var(--ds-size-12);
@@ -478,6 +619,10 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
     .v2-subscriptions-list {
       justify-content: flex-start;
       min-width: 0;
+    }
+
+    .v2-roles-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
@@ -526,6 +671,19 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
 
     .v2-subscriptions-list li {
       padding-inline: var(--ds-size-4);
+    }
+
+    .v2-roles-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .v2-role-card {
+      min-height: 132px;
+      padding: var(--ds-size-5);
+    }
+
+    .v2-role-card h3 {
+      font-size: var(--ds-heading-md-font-size);
     }
   }
 </style>
