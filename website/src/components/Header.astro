@@ -137,12 +137,15 @@ const isActive = (href: string) =>
 
   .kihub-header {
     --kihub-nav-red: var(--ds-color-text-default);
+    --kihub-search-size: calc(var(--ds-size-12) * 0.85);
+    --kihub-search-icon-size: calc(var(--ds-size-7) * 0.85);
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: var(--ds-size-5);
     height: 100%;
-    max-width: 1280px;
+    width: min(calc(100% - (var(--ds-size-8) * 2)), 1220px);
+    max-width: 100%;
     margin: 0 auto;
     background: transparent;
   }
@@ -332,15 +335,21 @@ const isActive = (href: string) =>
 
   .kihub-header :global(site-search button[data-open-modal]),
   .kihub-mobile-panel :global(site-search button[data-open-modal]) {
-    width: var(--ds-size-10);
-    height: var(--ds-size-10);
-    min-height: var(--ds-size-10);
+    width: var(--kihub-search-size);
+    height: var(--kihub-search-size);
+    min-height: var(--kihub-search-size);
     padding: 0;
     border: 0;
     border-radius: var(--ds-border-radius-full);
     background: transparent;
     color: var(--ds-color-text-default);
     justify-content: center;
+  }
+
+  .kihub-header :global(site-search button[data-open-modal] svg),
+  .kihub-mobile-panel :global(site-search button[data-open-modal] svg) {
+    width: var(--kihub-search-icon-size);
+    height: var(--kihub-search-icon-size);
   }
 
   .kihub-header :global(site-search button[data-open-modal]:hover),
@@ -365,6 +374,7 @@ const isActive = (href: string) =>
 
   @media (max-width: 960px) {
     .kihub-header {
+      width: min(calc(100% - (var(--ds-size-5) * 2)), 1220px);
       gap: var(--ds-size-5);
     }
 
@@ -376,6 +386,7 @@ const isActive = (href: string) =>
   @media (max-width: 767.98px) {
     .kihub-header {
       grid-template-columns: 1fr auto;
+      width: min(calc(100% - (var(--ds-size-4) * 2)), 1220px);
     }
 
     .kihub-desktop-nav,
@@ -387,15 +398,13 @@ const isActive = (href: string) =>
       display: inline-flex;
     }
 
-    .kihub-menu-button,
-    .kihub-header :global(site-search button[data-open-modal]) {
+    .kihub-menu-button {
       width: var(--ds-size-12);
       height: var(--ds-size-12);
       min-height: var(--ds-size-12);
     }
 
-    .kihub-menu-button svg,
-    .kihub-header :global(site-search button[data-open-modal] svg) {
+    .kihub-menu-button svg {
       width: var(--ds-size-7);
       height: var(--ds-size-7);
     }

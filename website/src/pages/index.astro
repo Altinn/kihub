@@ -30,23 +30,28 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
 >
   <div id="main-content" class="v2-main" data-page-color="accent">
     <section class="v2-hero" aria-labelledby="hero-heading">
-      <p class="v2-kicker">Digdir / BOD / KITT-teamet</p>
-      <h1 id="hero-heading" class="v2-hero-title">
-        Kunstig intelligens<br />i <span>BOD</span>
-      </h1>
-      <p class="v2-hero-subtitle">
-        Vi hjelper deg og ditt team i gang med verktøy og veiledning for en trygg og innovativ bruk av KI i offentlig sektor.
-      </p>
-      <div class="v2-hero-actions" aria-label="Hurtigvalg">
-        <a class="ds-button v2-primary-action" href={`${base}tools/`}>
-          Kom i gang
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M5 12h14M13 6l6 6-6 6"></path>
-          </svg>
-        </a>
-        <a class="ds-button v2-secondary-action" data-variant="secondary" href={`${base}om-kitt/`}>
-          Om KITT
-        </a>
+      <div class="v2-hero-copy">
+        <p class="v2-kicker">Digdir / BOD / KITT-teamet</p>
+        <h1 id="hero-heading" class="v2-hero-title">
+          Kunstig intelligens<br />i <span>BOD</span>
+        </h1>
+        <p class="v2-hero-subtitle">
+          Vi hjelper deg og ditt team i gang med verktøy og veiledning for en trygg og innovativ bruk av KI i offentlig sektor.
+        </p>
+        <div class="v2-hero-actions" aria-label="Hurtigvalg">
+          <a class="ds-button v2-primary-action" href={`${base}tools/`}>
+            Kom i gang
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
+            </svg>
+          </a>
+          <a class="ds-button v2-secondary-action" data-variant="secondary" href={`${base}om-kitt/`}>
+            Om KITT
+          </a>
+        </div>
+      </div>
+      <div class="v2-hero-media" aria-hidden="true">
+        <img src={`${base}images/AIv2b.png`} alt="" loading="eager" />
       </div>
     </section>
 
@@ -126,14 +131,36 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
   }
 
   .v2-hero {
-    max-width: 720px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.86fr);
+    align-items: center;
+    gap: var(--ds-size-10);
     padding: var(--ds-size-8) 0 var(--ds-size-6);
+  }
+
+  .v2-hero-copy {
+    max-width: 720px;
+  }
+
+  .v2-hero-media {
+    min-width: 0;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .v2-hero-media img {
+    display: block;
+    width: min(100%, 500px);
+    max-height: 420px;
+    object-fit: contain;
   }
 
   .v2-kicker {
     margin: 0;
-    font-size: var(--ds-body-xs-font-size);
-    font-weight: var(--ds-font-weight-bold);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: 700;
     letter-spacing: 0;
     text-transform: uppercase;
   }
@@ -326,8 +353,17 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
     }
 
     .v2-hero {
-      max-width: none;
+      grid-template-columns: 1fr;
+      gap: var(--ds-size-7);
       padding-top: var(--ds-size-5);
+    }
+
+    .v2-hero-copy {
+      max-width: none;
+    }
+
+    .v2-hero-media {
+      display: none;
     }
 
     .v2-hero-title {
