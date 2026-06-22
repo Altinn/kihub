@@ -3,14 +3,16 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import projectSummaryData from '../../public/data/project-summary.json';
 
 const base = import.meta.env.BASE_URL;
-const projectStats = projectSummaryData.stats ?? [];
-const primaryProjectStat = projectStats.find((stat) => stat.id === 'total') ?? projectStats[0];
-const secondaryProjectStats = projectStats.filter((stat) => stat.id !== primaryProjectStat?.id);
-const numberFormatter = new Intl.NumberFormat('nb-NO');
-const formatStatValue = (value: number | null | undefined) =>
-  typeof value === 'number' ? numberFormatter.format(value) : '-';
-
-const toolTags = ['Godkjent', 'Eksperimentelt', 'Skills', 'MCP', 'Hooks'];
+const splitLastWord = (value: string) => {
+  const words = value.trim().split(/\s+/);
+  const last = words.pop() ?? '';
+  return {
+    head: words.length ? `${words.join(' ')} ` : '',
+    last,
+  };
+};
+const toolsTitleParts = splitLastWord('Verktøy');
+const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekter i BOD');
 ---
 
 <StarlightPage
@@ -49,84 +51,46 @@ const toolTags = ['Godkjent', 'Eksperimentelt', 'Skills', 'MCP', 'Hooks'];
     </section>
 
     <section class="v2-entry-section" aria-labelledby="entry-cards-heading">
-      <h2 id="entry-cards-heading" class="sr-only">Viktigste innganger</h2>
+      <h2 id="entry-cards-heading" class="v2-entry-heading">Snarveier</h2>
       <div class="v2-feature-grid">
-        <a href={`${base}tools/`} class="v2-feature-card v2-tools-card ds-focus" data-color="neutral">
-          <div class="v2-card-copy">
-            <p class="v2-card-eyebrow">Katalog</p>
-            <h3>Verktøy</h3>
-            <p>
-              Oversikt over verktøy godkjent i BOD, inkludert skills, hooks, MCP-servere og agentoppsett for ditt team.
-            </p>
-          </div>
-
-          <ul class="v2-tag-list" aria-label="Verktøykategorier">
-            {toolTags.map((tag) => (
-              <li>{tag}</li>
-            ))}
-          </ul>
-
-          <span class="v2-card-action">
-            Åpne katalog
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M5 12h14M13 6l6 6-6 6"></path>
-            </svg>
-          </span>
+        <a
+          href={`${base}tools/`}
+          class="v2-feature-card v2-tools-card ds-focus"
+          data-color="accent"
+          aria-label="Åpne katalog over verktøy"
+        >
+          <span class="v2-card-eyebrow">Katalog</span>
+          <h3>
+            {toolsTitleParts.head}<span class="v2-nowrap">
+              {toolsTitleParts.last}<span class="v2-card-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M5 12h14M13 6l6 6-6 6"></path>
+                </svg>
+              </span>
+            </span>
+          </h3>
         </a>
 
-        <a href={`${base}prosjekter/`} class="v2-feature-card v2-project-card ds-focus" data-color="brand2">
-          <div class="v2-card-copy">
-            <p class="v2-card-eyebrow">Oversikt</p>
-            <h3>{projectSummaryData.title}</h3>
-          </div>
-
-          {primaryProjectStat && (
-            <div class="v2-primary-stat">
-              <span
-                class="v2-primary-stat-value"
-                data-project-stat-value={primaryProjectStat.id}
-                aria-live="polite"
-              >
-                {formatStatValue(primaryProjectStat.value)}
+        <a
+          href={`${base}prosjekter/`}
+          class="v2-feature-card v2-project-card ds-focus"
+          data-color="accent"
+          aria-label="Se KI prosjekter i BOD"
+        >
+          <span class="v2-card-eyebrow">Oversikt</span>
+          <h3>
+            {projectTitleParts.head}<span class="v2-nowrap">
+              {projectTitleParts.last}<span class="v2-card-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M5 12h14M13 6l6 6-6 6"></path>
+                </svg>
               </span>
-              <span class="v2-stat-label">{primaryProjectStat.label}</span>
-            </div>
-          )}
-
-          <div class="v2-secondary-stats">
-            {secondaryProjectStats.map((stat) => (
-              <div class="v2-stat-item">
-                <span class="v2-stat-value" data-project-stat-value={stat.id} aria-live="polite">
-                  {formatStatValue(stat.value)}
-                </span>
-                <span class="v2-stat-label">{stat.label}</span>
-              </div>
-            ))}
-          </div>
-
-          <span class="v2-project-mark" aria-hidden="true">
-            <svg viewBox="0 0 64 64" focusable="false">
-              <path d="M37 6c8 2 15 9 17 17-5 10-13 18-24 24l-13-13C23 23 31 11 37 6Z"></path>
-              <path d="M23 41l-6 14 14-6"></path>
-              <path d="M16 28c-6 0-10 4-11 11l12-2"></path>
-              <path d="M36 48l-2 12c7-1 11-5 11-11"></path>
-            </svg>
-          </span>
-
-          <span class="v2-card-action">
-            Se prosjekter
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M5 12h14M13 6l6 6-6 6"></path>
-            </svg>
-          </span>
+            </span>
+          </h3>
         </a>
       </div>
     </section>
   </div>
-
-  <script>
-    import '../scripts/pages/index';
-  </script>
 </StarlightPage>
 
 <style>
@@ -160,9 +124,7 @@ const toolTags = ['Godkjent', 'Eksperimentelt', 'Skills', 'MCP', 'Hooks'];
     padding: var(--ds-size-8) 0 var(--ds-size-6);
   }
 
-  .v2-kicker,
-  .v2-card-eyebrow,
-  .v2-stat-label {
+  .v2-kicker {
     margin: 0;
     font-size: var(--ds-body-xs-font-size);
     font-weight: var(--ds-font-weight-bold);
@@ -222,7 +184,7 @@ const toolTags = ['Godkjent', 'Eksperimentelt', 'Skills', 'MCP', 'Hooks'];
   }
 
   .v2-primary-action svg,
-  .v2-card-action svg {
+  .v2-card-arrow svg {
     width: var(--ds-size-5);
     height: var(--ds-size-5);
     fill: none;
@@ -243,27 +205,36 @@ const toolTags = ['Godkjent', 'Eksperimentelt', 'Skills', 'MCP', 'Hooks'];
     margin-top: var(--ds-size-8);
   }
 
+  .v2-entry-heading {
+    margin: 0 0 var(--ds-size-8);
+    color: var(--ds-color-accent-text-default);
+    font-family: "PT Serif", Georgia, "Times New Roman", serif;
+    font-size: var(--ds-heading-xl-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.05;
+  }
+
   .v2-feature-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: var(--ds-size-6);
+    gap: 0;
     align-items: stretch;
   }
 
   .v2-feature-card {
     position: relative;
-    display: grid;
+    display: flex;
+    flex-direction: column;
     min-width: 0;
-    min-height: 250px;
+    min-height: 300px;
     padding: var(--ds-size-8);
     overflow: hidden;
-    border: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
-    border-radius: var(--ds-border-radius-md);
+    border: 0;
+    border-radius: 0;
     box-shadow: none;
     text-decoration: none !important;
-    transition:
-      transform 0.2s ease,
-      border-color 0.2s ease;
+    transition: filter 0.2s ease;
   }
 
   #main-content .v2-feature-card,
@@ -272,8 +243,7 @@ const toolTags = ['Godkjent', 'Eksperimentelt', 'Skills', 'MCP', 'Hooks'];
   }
 
   .v2-feature-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--ds-shadow-sm);
+    filter: brightness(0.98);
   }
 
   .v2-feature-card:focus-visible {
@@ -281,182 +251,78 @@ const toolTags = ['Godkjent', 'Eksperimentelt', 'Skills', 'MCP', 'Hooks'];
     outline-offset: var(--ds-size-1);
   }
 
-  .v2-card-copy {
-    position: relative;
-    z-index: 1;
-    max-width: 30rem;
-  }
-
-  .v2-card-copy h3 {
-    margin: var(--ds-size-3) 0 0;
+  .v2-feature-card h3 {
+    flex: 1;
+    margin: var(--ds-size-5) 0 0;
     color: inherit;
-    font-size: var(--ds-heading-xs-font-size);
+    font-family: "PT Serif", Georgia, "Times New Roman", serif;
+    font-size: var(--ds-heading-xl-font-size);
     font-weight: var(--ds-font-weight-bold);
     letter-spacing: 0;
-    line-height: 1.15;
+    line-height: 1.08;
   }
 
-  .v2-card-copy p:not(.v2-card-eyebrow) {
-    margin: var(--ds-size-4) 0 0;
-    color: inherit;
+  .v2-feature-card:hover h3 {
+    text-decoration: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.12em;
+  }
+
+  .v2-nowrap {
+    white-space: nowrap;
+  }
+
+  .v2-card-eyebrow {
+    order: -1;
+    align-self: flex-start;
+    margin: 0;
+    padding: var(--ds-size-2) var(--ds-size-4);
+    border-radius: var(--ds-border-radius-sm);
+    background: var(--ds-color-accent-background-default);
+    color: var(--ds-color-accent-text-default);
     font-size: var(--ds-body-md-font-size);
-    line-height: var(--ds-body-long-md-line-height);
-    overflow-wrap: anywhere;
+    font-weight: var(--ds-font-weight-medium);
+    letter-spacing: 0;
+    line-height: var(--ds-body-short-md-line-height);
   }
 
   .v2-tools-card {
-    color: var(--ds-color-neutral-text-default);
-    background: var(--ds-color-neutral-surface-default);
-    border-inline-start: var(--ds-border-width-focus) solid var(--ds-color-accent-border-default);
+    color: var(--ds-color-accent-base-contrast-default);
+    background: var(--ds-color-accent-base-default);
   }
 
   #main-content a.v2-tools-card,
   #main-content a.v2-tools-card:hover {
-    color: var(--ds-color-neutral-text-default) !important;
-  }
-
-  .v2-tools-card:hover {
-    border-color: var(--ds-color-accent-border-default);
-  }
-
-  .v2-tools-card .v2-card-eyebrow {
-    color: var(--ds-color-neutral-text-subtle);
-  }
-
-  .v2-tools-card .v2-card-copy p {
-    color: var(--ds-color-neutral-text-subtle);
-  }
-
-  .v2-tag-list {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--ds-size-2);
-    align-self: end;
-    padding: 0;
-    margin: var(--ds-size-6) 0 var(--ds-size-10);
-    list-style: none;
-  }
-
-  .v2-tag-list li {
-    padding: var(--ds-size-1) var(--ds-size-3);
-    color: var(--ds-color-neutral-text-subtle);
-    background: var(--ds-color-neutral-surface-tinted);
-    border: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
-    border-radius: var(--ds-border-radius-full);
-    font-size: var(--ds-body-xs-font-size);
-    font-weight: var(--ds-font-weight-medium);
-    line-height: var(--ds-body-short-xs-line-height);
-  }
-
-  .v2-tag-list li:first-child {
-    color: var(--ds-color-accent-text-subtle);
-    background: var(--ds-color-accent-surface-tinted);
-    border-color: var(--ds-color-accent-border-subtle);
+    color: var(--ds-color-accent-base-contrast-default) !important;
   }
 
   .v2-project-card {
-    grid-template-rows: auto 1fr auto auto;
-    color: var(--ds-color-brand2-text-default);
-    background: var(--ds-color-brand2-background-default);
-    border-color: var(--ds-color-brand2-border-subtle);
+    color: var(--ds-color-accent-text-default);
+    background: var(--ds-color-accent-surface-hover);
   }
 
   #main-content a.v2-project-card,
   #main-content a.v2-project-card:hover {
-    color: var(--ds-color-brand2-text-default) !important;
+    color: var(--ds-color-accent-text-default) !important;
   }
 
-  .v2-project-card:hover {
-    border-color: var(--ds-color-brand2-border-default);
-  }
-
-  .v2-project-card .v2-card-eyebrow,
-  .v2-project-card .v2-stat-label {
-    color: var(--ds-color-brand2-text-subtle);
-  }
-
-  .v2-primary-stat {
-    position: relative;
-    z-index: 1;
-    align-self: end;
-    margin-top: var(--ds-size-6);
-  }
-
-  .v2-primary-stat-value {
-    display: block;
-    color: var(--ds-color-accent-base-default);
-    font-size: var(--ds-heading-2xl-font-size);
-    font-weight: var(--ds-font-weight-bold);
-    letter-spacing: 0;
-    line-height: 0.95;
-  }
-
-  .v2-secondary-stats {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--ds-size-6);
-    margin: var(--ds-size-5) 0 var(--ds-size-10);
-  }
-
-  .v2-stat-item {
-    min-width: var(--ds-size-14);
-  }
-
-  .v2-stat-value {
-    display: block;
-    color: var(--ds-color-neutral-text-default);
-    font-size: var(--ds-heading-sm-font-size);
-    font-weight: var(--ds-font-weight-bold);
-    letter-spacing: 0;
-    line-height: 1;
-  }
-
-  .v2-card-action {
-    position: absolute;
-    z-index: 2;
-    right: var(--ds-size-5);
-    bottom: var(--ds-size-5);
+  .v2-card-arrow {
     display: inline-flex;
     align-items: center;
-    gap: var(--ds-size-2);
-    min-height: var(--ds-size-10);
-    max-width: calc(100% - var(--ds-size-10));
-    padding: var(--ds-size-2) var(--ds-size-3);
-    color: var(--ds-color-accent-base-contrast-default);
-    background: var(--ds-color-accent-base-default);
+    justify-content: center;
+    width: var(--ds-size-10);
+    height: var(--ds-size-10);
+    margin-left: var(--ds-size-3);
     border-radius: var(--ds-border-radius-full);
-    font-size: var(--ds-body-sm-font-size);
-    font-weight: var(--ds-font-weight-bold);
-    line-height: var(--ds-body-short-sm-line-height);
+    background: var(--ds-color-accent-base-contrast-default);
+    color: var(--ds-color-accent-base-default);
+    vertical-align: middle;
+    transform: translateY(-0.08em);
   }
 
-  .v2-project-card .v2-card-action {
-    color: var(--ds-color-brand2-base-contrast-default);
-    background: var(--ds-color-brand2-base-default);
-  }
-
-  .v2-project-mark {
-    position: absolute;
-    right: var(--ds-size-6);
-    bottom: var(--ds-size-11);
-    width: var(--ds-size-16);
-    height: var(--ds-size-16);
-    color: var(--ds-color-brand2-border-default);
-    opacity: 0.45;
-  }
-
-  .v2-project-mark svg {
-    width: 100%;
-    height: 100%;
-    fill: none;
-    stroke: currentColor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 3;
+  .v2-project-card .v2-card-arrow {
+    background: var(--ds-color-accent-text-default);
+    color: var(--ds-color-accent-surface-hover);
   }
 
   @media (max-width: 900px) {
@@ -476,6 +342,11 @@ const toolTags = ['Godkjent', 'Eksperimentelt', 'Skills', 'MCP', 'Hooks'];
     .v2-feature-grid {
       grid-template-columns: 1fr;
     }
+
+    .v2-entry-heading,
+    .v2-feature-card h3 {
+      font-size: var(--ds-heading-lg-font-size);
+    }
   }
 
   @media (max-width: 560px) {
@@ -493,30 +364,19 @@ const toolTags = ['Godkjent', 'Eksperimentelt', 'Skills', 'MCP', 'Hooks'];
     }
 
     .v2-feature-card {
-      min-height: 280px;
+      min-height: 240px;
       padding: var(--ds-size-6);
     }
 
-    .v2-secondary-stats {
-      gap: var(--ds-size-4);
+    .v2-entry-heading,
+    .v2-feature-card h3 {
+      font-size: var(--ds-heading-md-font-size);
     }
 
-    .v2-card-action {
-      position: static;
-      justify-self: start;
-      margin-top: var(--ds-size-6);
-    }
-
-    .v2-tag-list,
-    .v2-secondary-stats {
-      margin-bottom: 0;
-    }
-
-    .v2-project-mark {
-      right: var(--ds-size-4);
-      bottom: var(--ds-size-4);
-      width: var(--ds-size-14);
-      height: var(--ds-size-14);
+    .v2-card-arrow {
+      width: var(--ds-size-9);
+      height: var(--ds-size-9);
+      margin-left: var(--ds-size-2);
     }
   }
 </style>
