@@ -95,6 +95,22 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
         </a>
       </div>
     </section>
+
+    <section class="v2-subscriptions-section" aria-labelledby="subscriptions-heading">
+      <div class="v2-subscriptions-panel" data-color="brand2">
+        <div class="v2-subscriptions-copy">
+          <p class="v2-subscriptions-kicker">Tilgjengelige abonnementer</p>
+          <h2 id="subscriptions-heading">Støttede KI-abonnementer i Digdir</h2>
+          <p>
+            Disse abonnementene er godkjent og tilgjengelig for BOD-ansatte. Ta kontakt med KITT for tilgang.
+          </p>
+        </div>
+        <ul class="v2-subscriptions-list" aria-label="Støttede KI-abonnementer">
+          <li>GitHub Copilot</li>
+          <li>Claude Teams</li>
+        </ul>
+      </div>
+    </section>
   </div>
 </StarlightPage>
 
@@ -347,6 +363,81 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
     color: var(--ds-color-accent-surface-hover);
   }
 
+  .v2-subscriptions-section {
+    margin-top: var(--ds-size-8);
+  }
+
+  .v2-subscriptions-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--ds-size-8);
+    min-height: 180px;
+    padding: var(--ds-size-8) var(--ds-size-10);
+    border: var(--ds-size-2) solid var(--ds-color-brand2-border-default);
+    background: var(--ds-color-accent-background-default);
+    color: var(--ds-color-accent-text-default);
+  }
+
+  .v2-subscriptions-copy {
+    min-width: 0;
+  }
+
+  .v2-subscriptions-kicker {
+    margin: 0 0 var(--ds-size-3);
+    color: var(--ds-color-brand2-text-subtle);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .v2-subscriptions-panel h2 {
+    margin: 0;
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-lg-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.12;
+  }
+
+  .v2-subscriptions-panel p:not(.v2-subscriptions-kicker) {
+    max-width: 46rem;
+    margin: var(--ds-size-3) 0 0;
+    color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-md-font-size);
+    line-height: var(--ds-body-long-md-line-height);
+  }
+
+  .v2-subscriptions-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--ds-size-3);
+    min-width: min(100%, 360px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .v2-subscriptions-list li {
+    display: inline-grid;
+    place-items: center;
+    height: var(--ds-size-12);
+    min-height: var(--ds-size-12);
+    margin: 0;
+    padding: 0 var(--ds-size-5);
+    border: var(--ds-border-width-default) solid var(--ds-color-brand2-border-subtle);
+    border-radius: var(--ds-border-radius-default);
+    background: var(--ds-color-brand2-background-default);
+    color: var(--ds-color-neutral-text-default);
+    font-family: inherit;
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
   @media (max-width: 900px) {
     #main-content.v2-main {
       padding: var(--ds-size-8) var(--ds-size-5) var(--ds-size-12);
@@ -377,6 +468,17 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
     .v2-feature-card h3 {
       font-size: var(--ds-heading-lg-font-size);
     }
+
+    .v2-subscriptions-panel {
+      grid-template-columns: 1fr;
+      gap: var(--ds-size-6);
+      padding: var(--ds-size-7);
+    }
+
+    .v2-subscriptions-list {
+      justify-content: flex-start;
+      min-width: 0;
+    }
   }
 
   @media (max-width: 560px) {
@@ -406,6 +508,24 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
       width: var(--ds-size-9);
       height: var(--ds-size-9);
       margin-left: var(--ds-size-2);
+    }
+
+    .v2-subscriptions-panel {
+      min-height: 0;
+      padding: var(--ds-size-6);
+      border-width: var(--ds-size-1);
+    }
+
+    .v2-subscriptions-panel h2 {
+      font-size: var(--ds-heading-md-font-size);
+    }
+
+    .v2-subscriptions-list {
+      gap: var(--ds-size-2);
+    }
+
+    .v2-subscriptions-list li {
+      padding-inline: var(--ds-size-4);
     }
   }
 </style>
