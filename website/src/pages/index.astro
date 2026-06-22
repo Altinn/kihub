@@ -1,8 +1,10 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import projectSummaryData from '../../public/data/project-summary.json';
+import { formatNewsDate, getNewsImageUrl, getNewsUrl, getPublishedNews } from '../lib/news';
 
 const base = import.meta.env.BASE_URL;
+const latestNews = (await getPublishedNews()).slice(0, 4);
 const splitLastWord = (value: string) => {
   const words = value.trim().split(/\s+/);
   const last = words.pop() ?? '';
@@ -143,6 +145,40 @@ const audienceRoles = [
         ))}
       </ul>
     </section>
+
+    {
+      latestNews.length > 0 && (
+        <section class="v2-news-section" aria-labelledby="latest-news-heading">
+          <div class="v2-news-header">
+            <div>
+              <p class="v2-news-kicker">Aktuelt</p>
+              <h2 id="latest-news-heading">Siste nytt</h2>
+            </div>
+            <a class="v2-news-all ds-focus" href={`${base}nyheter/`}>
+              Alle nyheter
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5 12h14M13 6l6 6-6 6"></path>
+              </svg>
+            </a>
+          </div>
+
+          <div class="v2-news-grid">
+            {latestNews.map((article) => (
+              <a class="v2-news-card ds-focus" href={getNewsUrl(base, article)} data-color={article.data.color}>
+                <span class="v2-news-image">
+                  <img src={getNewsImageUrl(base, article.data.image)} alt={article.data.imageAlt} loading="lazy" />
+                </span>
+                <span class="v2-news-copy">
+                  <h3>{article.data.title}</h3>
+                  <time datetime={article.data.pubDate.toISOString()}>{formatNewsDate(article.data.pubDate)}</time>
+                  <span>{article.data.description}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )
+    }
   </div>
 </StarlightPage>
 
@@ -579,6 +615,130 @@ const audienceRoles = [
     color: var(--ds-color-accent-surface-hover);
   }
 
+  .v2-news-section {
+    margin-top: var(--ds-size-10);
+  }
+
+  .v2-news-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--ds-size-6);
+    margin-bottom: var(--ds-size-6);
+  }
+
+  .v2-news-kicker {
+    margin: 0 0 var(--ds-size-2);
+    color: var(--ds-color-brand1-text-subtle);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .v2-news-header h2 {
+    margin: 0;
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-lg-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.12;
+  }
+
+  .v2-news-all {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-size-2);
+    min-height: var(--ds-size-10);
+    padding: 0 var(--ds-size-4);
+    border-radius: var(--ds-border-radius-full);
+    background: var(--ds-color-brand1-surface-hover);
+    color: var(--ds-color-brand1-text-default) !important;
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    text-decoration: none !important;
+  }
+
+  .v2-news-all:hover {
+    background: var(--ds-color-brand1-surface-active);
+  }
+
+  .v2-news-all svg {
+    width: var(--ds-size-5);
+    height: var(--ds-size-5);
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+
+  .v2-news-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ds-size-10) var(--ds-size-8);
+  }
+
+  .v2-news-card {
+    display: grid;
+    min-width: 0;
+    gap: var(--ds-size-5);
+    color: var(--ds-color-accent-text-default) !important;
+    text-decoration: none !important;
+  }
+
+  .v2-news-card:hover h3 {
+    text-decoration: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.12em;
+  }
+
+  .v2-news-image {
+    display: block;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--ds-color-brand1-surface-hover);
+  }
+
+  .v2-news-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.25s ease;
+  }
+
+  .v2-news-card:hover .v2-news-image img {
+    transform: scale(1.015);
+  }
+
+  .v2-news-copy {
+    display: grid;
+    gap: var(--ds-size-3);
+  }
+
+  .v2-news-copy h3 {
+    margin: 0;
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.1;
+  }
+
+  .v2-news-copy time {
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    line-height: var(--ds-body-short-md-line-height);
+  }
+
+  .v2-news-copy span {
+    color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-md-font-size);
+    line-height: var(--ds-body-long-md-line-height);
+  }
+
   @media (max-width: 900px) {
     #main-content.v2-main {
       padding: var(--ds-size-8) var(--ds-size-5) var(--ds-size-12);
@@ -623,6 +783,16 @@ const audienceRoles = [
 
     .v2-roles-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .v2-news-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .v2-news-grid {
+      grid-template-columns: 1fr;
+      gap: var(--ds-size-8);
     }
   }
 
@@ -684,6 +854,11 @@ const audienceRoles = [
 
     .v2-role-card h3 {
       font-size: var(--ds-heading-md-font-size);
+    }
+
+    .v2-news-header h2,
+    .v2-news-copy h3 {
+      font-size: var(--ds-heading-sm-font-size);
     }
   }
 </style>

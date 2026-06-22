@@ -492,31 +492,170 @@ body a.ds-button:active {
 }
 
 /* Footer */
-.site-footer {
-  background: var(--color-bg-secondary);
-  border-top: 1px solid var(--color-glass-border);
-  padding: 32px 0;
-  text-align: center;
+.kihub-site-footer {
+  --kihub-footer-text: var(--ds-color-accent-text-default);
+  --kihub-footer-link: var(--ds-color-accent-text-default);
+  --kihub-footer-background: var(--ds-color-accent-background-default);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--kihub-footer-background);
+  color: var(--kihub-footer-text);
+  font-family: "PT Serif", Georgia, "Times New Roman", serif;
 }
 
-.site-footer p {
-  font-size: 14px;
-  color: var(--color-text-muted);
+body:has(#main-content.news-index-page) .kihub-site-footer,
+body:has(#main-content.news-article-page) .kihub-site-footer {
+  --kihub-footer-background: var(--ds-color-brand1-surface-hover);
+  --kihub-footer-text: var(--ds-color-brand1-text-default);
+  --kihub-footer-link: var(--ds-color-brand1-text-default);
 }
 
-.site-footer a {
-  color: var(--color-text-muted);
-  transition: color var(--transition);
+.kihub-site-footer .pagination-links:empty {
+  display: none;
 }
 
-.site-footer a:hover {
-  color: var(--color-accent);
+.kihub-site-footer .starlight-footer-tools {
+  width: min(100%, 1220px);
+  margin: 0 auto;
+  padding: 0 var(--ds-size-8);
 }
 
-.site-footer .build-info {
-  margin-top: 8px;
-  font-size: 12px;
-  opacity: 0.7;
+.kihub-site-footer .meta {
+  display: flex;
+  gap: 0.75rem 3rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin: 0;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-gray-3);
+}
+
+.kihub-site-footer .meta > p:only-child {
+  margin-inline-start: auto;
+}
+
+.kihub-site-footer .starlight-footer-tools:has(.pagination-links:empty) .meta:empty,
+.kihub-site-footer .starlight-footer-tools:has(.pagination-links:empty) {
+  display: none;
+}
+
+.kihub-footer-inner {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 0.6fr) minmax(220px, 0.8fr);
+  gap: var(--ds-size-8);
+  width: min(100%, 1220px);
+  margin: 0 auto;
+  padding: var(--ds-size-13) var(--ds-size-8) var(--ds-size-14);
+}
+
+.kihub-footer-brand {
+  display: inline-flex;
+  align-items: center;
+  align-self: start;
+  justify-self: start;
+  gap: var(--ds-size-3);
+  color: var(--kihub-footer-text);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: var(--ds-font-size-6);
+  font-weight: var(--ds-font-weight-medium);
+  line-height: 1;
+  text-decoration: none;
+}
+
+.kihub-footer-brand:hover {
+  color: var(--kihub-footer-link);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.kihub-footer-mark {
+  display: grid;
+  place-items: center;
+  width: var(--ds-size-9);
+  height: var(--ds-size-9);
+}
+
+.kihub-footer-mark svg {
+  width: 100%;
+  height: 100%;
+}
+
+.kihub-footer-mark rect {
+  fill: var(--kihub-footer-text);
+}
+
+.kihub-footer-mark path {
+  fill: none;
+  stroke: var(--ds-color-accent-base-contrast-default);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.kihub-footer-contact,
+.kihub-footer-links {
+  color: var(--kihub-footer-text);
+  font-size: var(--ds-body-md-font-size);
+  line-height: var(--ds-body-long-md-line-height);
+}
+
+.kihub-footer-contact p {
+  margin: 0 0 var(--ds-size-2);
+  font-weight: var(--ds-font-weight-bold);
+}
+
+.kihub-footer-contact a,
+.kihub-footer-links a {
+  color: var(--kihub-footer-link);
+  text-decoration: underline;
+  text-decoration-thickness: 0.06em;
+  text-underline-offset: 0.16em;
+  transition: color 0.2s ease;
+}
+
+.kihub-footer-contact a:hover,
+.kihub-footer-links a:hover {
+  color: var(--ds-color-accent-base-hover);
+}
+
+.kihub-footer-links {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: var(--ds-size-2);
+}
+
+@media (max-width: 900px) {
+  .kihub-site-footer .starlight-footer-tools,
+  .kihub-footer-inner {
+    padding-inline: var(--ds-size-5);
+  }
+
+  .kihub-footer-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--ds-size-8) var(--ds-size-6);
+  }
+
+  .kihub-footer-brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .kihub-site-footer .starlight-footer-tools,
+  .kihub-footer-inner {
+    padding-inline: var(--ds-size-4);
+  }
+
+  .kihub-footer-inner {
+    grid-template-columns: 1fr;
+    padding-block: var(--ds-size-10);
+  }
+
+  .kihub-footer-brand {
+    font-size: var(--ds-font-size-5);
+  }
 }
 
 /* Split Button Dropdown */
