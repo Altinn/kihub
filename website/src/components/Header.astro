@@ -294,7 +294,8 @@ const isActive = (href: string) =>
     z-index: calc(var(--sl-z-index-navbar) - 1);
     inset: var(--sl-nav-height) 0 auto;
     padding: var(--ds-size-7) var(--sl-nav-pad-x) var(--ds-size-9);
-    border-bottom: 0;
+    border-bottom: var(--ds-border-width-default) solid
+      color-mix(in srgb, var(--ds-color-base-default) 42%, transparent);
     background: var(--ds-color-background-default);
     box-shadow: none;
   }
@@ -407,8 +408,8 @@ const isActive = (href: string) =>
       position: fixed;
       z-index: calc(var(--sl-z-index-navbar) - 2);
       inset: var(--sl-nav-height) 0 0;
-      background: color-mix(in srgb, var(--ds-color-background-default) 22%, transparent);
-      backdrop-filter: blur(4px);
+      background: color-mix(in srgb, var(--ds-color-text-default) 18%, transparent);
+      backdrop-filter: blur(5px);
       content: '';
       pointer-events: none;
     }
