@@ -51,7 +51,7 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
     </section>
 
     <section class="v2-entry-section" aria-labelledby="entry-cards-heading">
-      <h2 id="entry-cards-heading" class="v2-entry-heading">Snarveier</h2>
+      <h2 id="entry-cards-heading" class="sr-only">Viktigste innganger</h2>
       <div class="v2-feature-grid">
         <a
           href={`${base}tools/`}
@@ -113,10 +113,16 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
   }
 
   #main-content.v2-main {
+    --kihub-serif-font: "PT Serif", Georgia, "Times New Roman", serif;
     box-sizing: border-box;
     width: min(100%, 1220px);
     margin: 0 auto !important;
     padding: var(--ds-size-12) var(--ds-size-8) var(--ds-size-16);
+    font-family: var(--kihub-serif-font);
+  }
+
+  #main-content.v2-main :where(a, button, p, h1, h2, h3, span) {
+    font-family: inherit;
   }
 
   .v2-hero {
@@ -205,16 +211,6 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
     margin-top: var(--ds-size-8);
   }
 
-  .v2-entry-heading {
-    margin: 0 0 var(--ds-size-8);
-    color: var(--ds-color-accent-text-default);
-    font-family: "PT Serif", Georgia, "Times New Roman", serif;
-    font-size: var(--ds-heading-xl-font-size);
-    font-weight: var(--ds-font-weight-bold);
-    letter-spacing: 0;
-    line-height: 1.05;
-  }
-
   .v2-feature-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -255,7 +251,6 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
     flex: 1;
     margin: var(--ds-size-5) 0 0;
     color: inherit;
-    font-family: "PT Serif", Georgia, "Times New Roman", serif;
     font-size: var(--ds-heading-xl-font-size);
     font-weight: var(--ds-font-weight-bold);
     letter-spacing: 0;
@@ -343,7 +338,6 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
       grid-template-columns: 1fr;
     }
 
-    .v2-entry-heading,
     .v2-feature-card h3 {
       font-size: var(--ds-heading-lg-font-size);
     }
@@ -368,7 +362,6 @@ const projectTitleParts = splitLastWord(projectSummaryData.title ?? 'KI Prosjekt
       padding: var(--ds-size-6);
     }
 
-    .v2-entry-heading,
     .v2-feature-card h3 {
       font-size: var(--ds-heading-md-font-size);
     }
