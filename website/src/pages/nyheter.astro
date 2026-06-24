@@ -64,12 +64,12 @@ const articles = await getPublishedNews();
   }
 
   :global(body:has(#main-content.news-index-page)) {
-    background: var(--ds-color-brand1-surface-hover);
+    background: var(--ds-color-accent-background-default);
   }
 
   :global(body:has(#main-content.news-index-page) .header:has(.kihub-header)),
   :global(body:has(#main-content.news-index-page) #kihub-mobile-nav) {
-    background: var(--ds-color-brand1-surface-hover) !important;
+    background: var(--ds-color-accent-background-default) !important;
   }
 
   :global(body:has(#main-content.news-index-page) .kihub-header) {
@@ -95,7 +95,7 @@ const articles = await getPublishedNews();
   .news-index-page {
     --kihub-serif-font: "PT Serif", Georgia, "Times New Roman", serif;
     min-height: 100%;
-    background: var(--ds-color-brand1-surface-hover);
+    background: var(--ds-color-accent-background-default);
     color: var(--ds-color-accent-text-default);
     font-family: var(--kihub-serif-font);
   }
@@ -106,7 +106,7 @@ const articles = await getPublishedNews();
 
   .news-index-hero {
     padding: var(--ds-size-14) var(--ds-size-8) var(--ds-size-11);
-    background: var(--ds-color-brand1-surface-hover);
+    background: var(--ds-color-accent-background-default);
     text-align: center;
   }
 
