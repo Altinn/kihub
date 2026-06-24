@@ -23,6 +23,8 @@ const audienceRoles = [
   { label: 'Sikkerhet', tone: 'red', href: `${base}tools/` },
   { label: 'Saksbehandler', tone: 'pink', href: `${base}tools/` },
 ];
+// Set to true when role-specific guides are ready
+const SHOW_ROLES_SECTION = false;
 ---
 
 <StarlightPage
@@ -122,29 +124,31 @@ const audienceRoles = [
       </div>
     </section>
 
-    <section class="v2-roles-section" aria-labelledby="roles-heading">
-      <h2 id="roles-heading">Kom raskt i gang</h2>
-      <ul class="v2-roles-grid" aria-label="Roller">
-        {audienceRoles.map((role) => (
-          <li>
-            <a
-              href={role.href}
-              class="v2-role-card ds-focus"
-              data-tone={role.tone}
-              aria-label={`Kom raskt i gang som ${role.label}`}
-            >
-              <h3>
-                {role.label}<span class="v2-card-arrow v2-role-arrow" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" focusable="false">
-                    <path d="M5 12h14M13 6l6 6-6 6"></path>
-                  </svg>
-                </span>
-              </h3>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </section>
+    {SHOW_ROLES_SECTION && (
+      <section class="v2-roles-section" aria-labelledby="roles-heading">
+        <h2 id="roles-heading">Kom raskt i gang</h2>
+        <ul class="v2-roles-grid" aria-label="Roller">
+          {audienceRoles.map((role) => (
+            <li>
+              <a
+                href={role.href}
+                class="v2-role-card ds-focus"
+                data-tone={role.tone}
+                aria-label={`Kom raskt i gang som ${role.label}`}
+              >
+                <h3>
+                  {role.label}<span class="v2-card-arrow v2-role-arrow" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M5 12h14M13 6l6 6-6 6"></path>
+                    </svg>
+                  </span>
+                </h3>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
 
     {
       latestNews.length > 0 && (
