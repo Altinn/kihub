@@ -75,6 +75,7 @@ export default defineConfig({
             { label: "Plugins", link: "/plugins/" },
             { label: "Tools", link: "/tools/" },
             { label: "Contributors", link: "/contributors/" },
+            { label: "Tips & Tricks", link: "/tips-and-tricks/" },
           ],
         },
         {
