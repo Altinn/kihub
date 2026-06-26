@@ -49,6 +49,13 @@ nav[aria-label="Main"] > ul > li:first-child > a {
   font-weight: 600;
 }
 
+/* ── Tips & Triks nested group — match regular link weight ─── */
+nav[aria-label="Main"] > ul > li:first-child > details > ul > li > details > summary,
+nav[aria-label="Main"] > ul > li:first-child > details > ul > li > details > summary .large {
+  font-size: var(--sl-text-sm) !important;
+  font-weight: 500 !important;
+}
+
 /* ── Hide Starlight's auto-generated page title on custom splash pages ── */
 /* Only affects pages that have their own #main-content (custom pages) */
 /* Starlight generates a title h1; custom pages render their own h1 */
