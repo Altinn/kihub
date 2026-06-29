@@ -2,7 +2,7 @@ name: Check Plugin Structure
 
 on:
   pull_request:
-    branches: [main]
+    branches: [staging, main]
     paths:
       - "plugins/**"
 

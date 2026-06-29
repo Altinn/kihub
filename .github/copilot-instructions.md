@@ -61,11 +61,12 @@ The following instructions are only to be applied when performing a code review.
 
 - [ ] The plugin directory contains a `.github/plugin/plugin.json` file.
 - [ ] The plugin directory contains a `README.md` file.
-- [ ] The plugin.json has a `name` field matching the directory name.
-- [ ] The plugin.json has a `description` field.
-- [ ] The `description` field is not empty.
+- [ ] The plugin.json has a `name` field matching the directory name (lowercase with hyphens, max 50 characters).
+- [ ] The plugin.json has a non-empty `description` field (1–500 characters).
+- [ ] The plugin.json has a `version` field (e.g., `"1.0.0"`).
 - [ ] The directory name is lower case, with words separated by hyphens.
-- [ ] If `tags` is present, it is an array of lowercase hyphenated strings.
-- [ ] If `items` is present, each item has `path` and `kind` fields.
-- [ ] The `kind` field value is one of: `prompt`, `agent`, `instruction`, `skill`, or `hook`.
+- [ ] If `keywords` or `tags` is present, it is an array of lowercase hyphenated strings (max 10 items).
+- [ ] If `agents` is present, each entry starts with `./agents/` and ends with `.md`; the source file must exist at repo root.
+- [ ] If `skills` is present, each entry starts with `./skills/` and ends with `/`; the source `SKILL.md` must exist at repo root.
 - [ ] The plugin does not reference non-existent files.
+- [ ] Run `npm run build && npm run plugin:validate` to verify before submitting.

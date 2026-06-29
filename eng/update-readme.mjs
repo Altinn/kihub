@@ -10,6 +10,7 @@ import {
     HOOKS_DIR,
     INSTRUCTIONS_DIR,
     PLUGINS_DIR,
+    PROMPTS_DIR,
     repoBaseUrl,
     ROOT_FOLDER,
     SKILLS_DIR,
@@ -553,6 +554,50 @@ function generateHooksSection(hooksDir) {
 /**
  * Generate the workflows section with a table of all agentic workflows
  */
+function generatePromptsSection(promptsDir) {
+  if (!fs.existsSync(promptsDir)) {
+    console.log(`Prompts directory does not exist: ${promptsDir}`);
+    return "";
+  }
+
+  const promptFiles = fs.readdirSync(promptsDir).filter((file) => {
+    return file.endsWith(".prompt.md") && file !== ".gitkeep";
+  });
+
+  const promptEntries = promptFiles
+    .map((file) => {
+      const filePath = path.join(promptsDir, file);
+      const frontmatter = parseFrontmatter(filePath);
+      if (!frontmatter) return null;
+
+      return {
+        file,
+        name: frontmatter.name || file.replace(".prompt.md", ""),
+        description: frontmatter.description || "",
+        mode: frontmatter.mode || frontmatter.agent || "ask",
+        model: frontmatter.model || null,
+      };
+    })
+    .filter((entry) => entry !== null)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  console.log(`Found ${promptEntries.length} prompt(s)`);
+
+  if (promptEntries.length === 0) {
+    return "";
+  }
+
+  let content =
+    "| Name | Description | Mode |\n| ---- | ----------- | ---- |\n";
+
+  for (const prompt of promptEntries) {
+    const link = `../prompts/${prompt.file}`;
+    content += `| [${prompt.name}](${link}) | ${formatTableCell(prompt.description)} | \`${prompt.mode}\` |\n`;
+  }
+
+  return `${TEMPLATES.promptsSection}\n${TEMPLATES.promptsUsage}\n\n${content}`;
+}
+
 function generateWorkflowsSection(workflowsDir) {
   if (!fs.existsSync(workflowsDir)) {
     console.log(`Workflows directory does not exist: ${workflowsDir}`);
@@ -957,6 +1002,7 @@ async function main() {
     const agentsHeader = TEMPLATES.agentsSection.replace(/^##\s/m, "# ");
     const hooksHeader = TEMPLATES.hooksSection.replace(/^##\s/m, "# ");
     const workflowsHeader = TEMPLATES.workflowsSection.replace(/^##\s/m, "# ");
+    const promptsHeader = TEMPLATES.promptsSection.replace(/^##\s/m, "# ");
     const skillsHeader = TEMPLATES.skillsSection.replace(/^##\s/m, "# ");
     const pluginsHeader = TEMPLATES.pluginsSection.replace(
       /^##\s/m,
@@ -1006,6 +1052,15 @@ async function main() {
       registryNames
     );
 
+    // Generate prompts README
+    const promptsReadme = buildCategoryReadme(
+      generatePromptsSection,
+      PROMPTS_DIR,
+      promptsHeader,
+      TEMPLATES.promptsUsage,
+      registryNames
+    );
+
     // Generate plugins README
     const pluginsReadme = buildCategoryReadme(
       generatePluginsSection,
@@ -1028,6 +1083,7 @@ async function main() {
     writeFileIfChanged(path.join(DOCS_DIR, "README.agents.md"), agentsReadme);
     writeFileIfChanged(path.join(DOCS_DIR, "README.hooks.md"), hooksReadme);
     writeFileIfChanged(path.join(DOCS_DIR, "README.workflows.md"), workflowsReadme);
+    writeFileIfChanged(path.join(DOCS_DIR, "README.prompts.md"), promptsReadme);
     writeFileIfChanged(path.join(DOCS_DIR, "README.skills.md"), skillsReadme);
     writeFileIfChanged(
       path.join(DOCS_DIR, "README.plugins.md"),
