@@ -30,13 +30,11 @@ const virtualTeam = [
     name: 'Ole Bay Hansen',
     role: 'Produktutvikling',
     location: 'Fast · Oslo',
-    avatar: 'https://ca.slack-edge.com/TNSQ6Q0KG-U076NU5QHTM-9e3c77456174-512',
   },
   {
     name: 'Sebastian Duran',
     role: 'Plattformengineering',
     location: 'Fast · Oslo',
-    avatar: 'https://ca.slack-edge.com/TNSQ6Q0KG-U06FR8Y4YRG-65f85e2a1b7b-512',
   },
   {
     name: 'Eira Marie S. B. Scherjon',
@@ -48,39 +46,31 @@ const virtualTeam = [
 
 const steps = [
   {
-    step: 'Steg 1',
     title: 'Behovskartlegging',
     desc: 'Vi starter med en innledende samtale for å forstå teamets spesifikke behov og utfordringer knyttet til KI – innenfor BODs kontekst og Digdirs retningslinjer.',
     active: true,
-    icon: `<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>`,
   },
   {
-    step: 'Steg 2',
     title: 'Analyse og vurdering',
     desc: 'Våre eksperter analyserer mulige løsninger med fokus på teknisk gjennomførbarhet, etikk og regelverk (f.eks. GDPR og KI-forordningen).',
     active: false,
-    icon: `<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>`,
   },
   {
-    step: 'Steg 3',
     title: 'Rådgivning og støtte',
     desc: 'Vi gir konkrete anbefalinger og tilbyr veiledning i implementeringsfasen for å sikre trygg og verdiøkende bruk.',
     active: false,
-    icon: `<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/>`,
   },
   {
-    step: 'Steg 4',
     title: 'Kunnskapsdeling',
     desc: 'Erfaringer fra prosjektet deles som beste praksis internt i BOD, slik at hele avdelingen lærer og vokser sammen.',
     active: false,
-    icon: `<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>`,
   },
 ];
 ---
 
 <StarlightPage
   frontmatter={{
-    title: 'Om KITT',
+    title: 'Om KITT-teamet',
     description: 'KI Tilretteleggingsteamet under BOD i Digdir',
     tableOfContents: false,
     prev: false,
@@ -89,7 +79,7 @@ const steps = [
   }}
   hasSidebar={false}
 >
-  <main id="main-content" class="om-kitt-page">
+  <div id="main-content" class="om-kitt-page">
 
     <!-- ── 1. Hero ──────────────────────────────────────────────── -->
     <section class="kitt-hero">
@@ -98,7 +88,7 @@ const steps = [
 
           <div class="kitt-hero-content">
             <span class="kitt-badge">KI Tilretteleggingsteam</span>
-            <h1 class="kitt-hero-title">Om KITT-teamet</h1>
+            <h2 class="kitt-hero-title">Om KITT-teamet</h2>
             <p class="kitt-hero-desc">
               KITT er et tilretteleggingsteam under avdelingen Brukeropplevelse og Datadeling (BOD)
               i Digdir. Vi støtter team i BOD med å ta i bruk kunstig intelligens på en trygg,
@@ -109,12 +99,12 @@ const steps = [
           <!-- Illustration: KITT team presenting AI concepts -->
           <div class="kitt-hero-visual" aria-hidden="true">
             <img
-              src="/kihub/images/kitt-hero-illustration.png"
+              src={`${import.meta.env.BASE_URL}images/kitt-hero-illustration.png`}
               alt=""
               class="kitt-hero-img"
               width="2528"
               height="1696"
-              loading="eager"
+              loading="lazy"
             />
           </div>
 
@@ -172,7 +162,7 @@ const steps = [
               <div class="kitt-member-divider"></div>
               <div class="kitt-member-links">
                 <a
-                  href={`https://github.com/${member.github}`}
+                  href={member.github ? `https://github.com/${member.github}` : undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   class="kitt-member-link"
@@ -216,14 +206,20 @@ const steps = [
         <div class="kitt-virtual-grid">
           {virtualTeam.map(member => (
             <div class="kitt-virtual-card">
-              <img
-                src={member.avatar}
-                alt={`Profilbilde av ${member.name}`}
-                class="kitt-virtual-avatar"
-                width="56"
-                height="56"
-                loading="lazy"
-              />
+              {member.avatar ? (
+                <img
+                  src={member.avatar}
+                  alt={`Profilbilde av ${member.name}`}
+                  class="kitt-virtual-avatar"
+                  width="56"
+                  height="56"
+                  loading="lazy"
+                />
+              ) : (
+                <div class="kitt-virtual-avatar kitt-letter-avatar" aria-hidden="true">
+                  {member.name.split(' ').slice(0, 2).map((n: string) => n[0]).join('')}
+                </div>
+              )}
               <div class="kitt-virtual-info">
                 <h3 class="kitt-virtual-name">{member.name}</h3>
                 <p class="kitt-virtual-role">{member.role}</p>
@@ -299,7 +295,7 @@ const steps = [
       </div>
     </section>
 
-  </main>
+  </div>
 
   <style>
     /* ── Base ─────────────────────────────────────────────────── */
@@ -315,22 +311,17 @@ const steps = [
     .kitt-section       { padding-top: var(--ds-size-18); }
     .kitt-section--sm   { padding-top: var(--ds-size-12); }
     .kitt-section--lg   { padding-top: var(--ds-size-22); }
-    .kitt-center        { text-align: center; }
-    .kitt-prose-cap     { max-width: 44rem; margin-inline: auto; }
 
     /* ── Hero ─────────────────────────────────────────────────── */
     .kitt-hero {
-      padding-top: var(--ds-size-8);
+      padding: var(--ds-size-12) 0;
+      background: var(--ds-color-accent-background-default);
     }
 
-    /* Improvement #2: warm accent background instead of neutral grey */
     .kitt-hero-inner {
       display: flex;
       align-items: center;
       gap: var(--ds-size-8);
-      padding: var(--ds-size-12) var(--ds-size-10);
-      border-radius: var(--ds-border-radius-xl);
-      background: var(--ds-color-accent-background-default);
       overflow: hidden;
       position: relative;
     }
@@ -374,82 +365,20 @@ const steps = [
     }
 
     .kitt-hero-title {
-      font-size: clamp(1.75rem, 3.5vw, var(--ds-heading-lg-font-size));
-      font-weight: var(--ds-font-weight-semibold);
-      line-height: var(--ds-heading-lg-line-height);
-      letter-spacing: var(--ds-heading-lg-letter-spacing);
+      font-size: var(--ds-heading-2xl-font-size);
+      font-weight: var(--ds-font-weight-bold);
+      line-height: 1.08;
+      letter-spacing: 0;
       color: var(--ds-color-accent-text-default);
       margin: 0;
     }
 
     .kitt-hero-desc {
-      font-size: var(--ds-body-md-font-size);
-      line-height: var(--ds-body-long-md-line-height);
+      font-size: var(--ds-body-lg-font-size);
+      line-height: var(--ds-body-long-lg-line-height);
       color: var(--ds-color-neutral-text-subtle);
       margin: 0;
       max-width: 480px;
-    }
-
-    .kitt-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--ds-size-2);
-      width: fit-content;
-      padding: var(--ds-size-3) var(--ds-size-6);
-      background: var(--ds-color-accent-base-default);
-      color: var(--ds-color-accent-base-contrast-default);
-      border-radius: var(--ds-border-radius-default);
-      font-size: var(--ds-body-sm-font-size);
-      font-weight: var(--ds-font-weight-semibold);
-      text-decoration: none;
-      transition: background-color var(--transition), transform var(--transition);
-      box-shadow: var(--ds-shadow-sm);
-    }
-
-    .kitt-cta:hover {
-      background: var(--ds-color-accent-base-hover);
-      color: var(--ds-color-accent-base-contrast-default);
-      transform: translateY(-2px);
-    }
-
-    /* ── Improvement #3: Stats strip ─────────────────────────── */
-    .kitt-stats {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--ds-size-8);
-      padding: var(--ds-size-6) var(--ds-size-8);
-      margin-top: var(--ds-size-6);
-      border-radius: var(--ds-border-radius-lg);
-      background: var(--ds-color-neutral-surface-default);
-      border: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
-    }
-
-    .kitt-stat {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--ds-size-1);
-    }
-
-    .kitt-stat-num {
-      font-size: var(--ds-heading-sm-font-size);
-      font-weight: var(--ds-font-weight-semibold);
-      color: var(--ds-color-accent-base-default);
-      line-height: 1;
-    }
-
-    .kitt-stat-label {
-      font-size: var(--ds-body-xs-font-size);
-      color: var(--ds-color-neutral-text-subtle);
-      font-weight: var(--ds-font-weight-medium);
-    }
-
-    .kitt-stat-sep {
-      width: 1px;
-      height: var(--ds-size-8);
-      background: var(--ds-color-neutral-border-subtle);
-      flex-shrink: 0;
     }
 
     /* ── Section headings ─────────────────────────────────────── */
@@ -463,22 +392,22 @@ const steps = [
     }
 
     .kitt-section-title {
-      font-size: var(--ds-heading-md-font-size);
-      font-weight: var(--ds-font-weight-semibold);
-      line-height: var(--ds-heading-md-line-height);
+      font-size: var(--ds-heading-lg-font-size);
+      font-weight: var(--ds-font-weight-bold);
+      line-height: 1.12;
       color: var(--ds-color-neutral-text-default);
       margin: 0 0 var(--ds-size-1);
     }
 
     .kitt-subsection-title {
-      font-size: var(--ds-heading-xs-font-size);
-      font-weight: var(--ds-font-weight-semibold);
+      font-size: var(--ds-heading-md-font-size);
+      font-weight: var(--ds-font-weight-bold);
       color: var(--ds-color-neutral-text-default);
       margin: 0 0 var(--ds-size-1);
     }
 
     .kitt-section-sub {
-      font-size: var(--ds-body-sm-font-size);
+      font-size: var(--ds-body-md-font-size);
       color: var(--ds-color-neutral-text-subtle);
       margin: 0;
     }
@@ -553,22 +482,34 @@ const steps = [
       border-radius: 50%;
       background: var(--ds-color-accent-base-default);
       color: var(--ds-color-accent-base-contrast-default);
-      font-size: 10px;
+      font-size: var(--ds-font-size-1);
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: var(--ds-shadow-xs);
     }
 
-    .kitt-member-name {
-      font-size: var(--ds-body-md-font-size);
+    .kitt-letter-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--ds-color-accent-surface-subtle);
+      color: var(--ds-color-accent-text-default);
       font-weight: var(--ds-font-weight-semibold);
+      font-size: var(--ds-body-sm-font-size);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .kitt-member-name {
+      font-size: var(--ds-heading-sm-font-size);
+      font-weight: var(--ds-font-weight-bold);
       color: var(--ds-color-neutral-text-default);
       margin: 0 0 var(--ds-size-1);
     }
 
     .kitt-member-role {
-      font-size: var(--ds-body-xs-font-size);
+      font-size: var(--ds-body-sm-font-size);
       font-weight: var(--ds-font-weight-semibold);
       color: var(--ds-color-accent-text-subtle);
       text-transform: uppercase;
@@ -597,7 +538,7 @@ const steps = [
       display: inline-flex;
       align-items: center;
       gap: var(--ds-size-1);
-      font-size: var(--ds-body-xs-font-size);
+      font-size: var(--ds-body-sm-font-size);
       color: var(--ds-color-neutral-text-subtle);
       text-decoration: none;
       transition: color var(--transition);
@@ -665,14 +606,14 @@ const steps = [
     }
 
     .kitt-virtual-role {
-      font-size: var(--ds-body-xs-font-size);
+      font-size: var(--ds-body-sm-font-size);
       font-weight: var(--ds-font-weight-medium);
       color: var(--ds-color-accent-text-subtle);
       margin: 0 0 2px;
     }
 
     .kitt-virtual-meta {
-      font-size: var(--ds-body-xs-font-size);
+      font-size: var(--ds-body-sm-font-size);
       color: var(--ds-color-neutral-text-subtle);
     }
 
@@ -756,15 +697,15 @@ const steps = [
     }
 
     .kitt-step-title {
-      font-size: var(--ds-heading-xs-font-size);
-      font-weight: var(--ds-font-weight-semibold);
+      font-size: var(--ds-heading-sm-font-size);
+      font-weight: var(--ds-font-weight-bold);
       color: var(--ds-color-neutral-text-default);
       margin: 0 0 var(--ds-size-2);
     }
 
     .kitt-step-desc {
-      font-size: var(--ds-body-sm-font-size);
-      line-height: var(--ds-body-long-sm-line-height);
+      font-size: var(--ds-body-md-font-size);
+      line-height: var(--ds-body-long-md-line-height);
       color: var(--ds-color-neutral-text-subtle);
       margin: 0;
       max-width: 520px;
@@ -793,8 +734,9 @@ const steps = [
     }
 
     .kitt-contact-title {
-      font-size: var(--ds-heading-sm-font-size);
-      font-weight: var(--ds-font-weight-semibold);
+      font-size: var(--ds-heading-lg-font-size);
+      font-weight: var(--ds-font-weight-bold);
+      line-height: 1.12;
       color: var(--ds-color-accent-text-default);
       margin: 0 0 var(--ds-size-2);
     }
@@ -817,6 +759,7 @@ const steps = [
     /* ── Responsive ───────────────────────────────────────────── */
     @media (max-width: 900px) {
       .kitt-hero-visual { display: none; }
+      .kitt-hero-title { font-size: var(--ds-heading-xl-font-size); }
 
       .kitt-members-grid,
       .kitt-virtual-grid {
@@ -838,18 +781,17 @@ const steps = [
     }
 
     @media (max-width: 600px) {
-      .kitt-hero-inner {
-        padding: var(--ds-size-8) var(--ds-size-5);
+      .kitt-hero-title {
+        font-size: var(--ds-heading-lg-font-size);
       }
 
-      .kitt-stats {
-        flex-direction: column;
-        gap: var(--ds-size-4);
+      .kitt-hero-desc {
+        font-size: var(--ds-body-md-font-size);
+        line-height: var(--ds-body-long-md-line-height);
       }
 
-      .kitt-stat-sep {
-        width: var(--ds-size-10);
-        height: 1px;
+      .kitt-hero {
+        padding: var(--ds-size-8) 0;
       }
 
       .kitt-contact-actions {
@@ -858,7 +800,6 @@ const steps = [
         width: 100%;
       }
 
-      .kitt-cta,
       .kitt-slack-btn {
         justify-content: center;
       }
