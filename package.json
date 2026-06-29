@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "start": "npm run build",
+    "test": "npm run plugin:validate && npm run skill:validate",
     "build": "node ./eng/update-readme.mjs && node ./eng/generate-marketplace.mjs",
     "contributors:add": "all-contributors add",
     "contributors:report": "node ./eng/contributor-report.mjs",

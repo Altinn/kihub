@@ -1,12 +1,13 @@
 ## Pull Request Checklist
 
-- [ ] I have read and followed the [CONTRIBUTING.md](https://github.com/Altinn/Kitt_KI_Hub/blob/main/CONTRIBUTING.md) guidelines.
+- [ ] I have read and followed the [CONTRIBUTING.md](CONTRIBUTING.md) guidelines.
 - [ ] I have read and followed the [Guidance for submissions involving paid services](https://github.com/Altinn/Kitt_KI_Hub/discussions).
 - [ ] My contribution adds a new instruction, prompt, agent, skill, or workflow file in the correct directory.
 - [ ] The file follows the required naming convention.
 - [ ] The content is clearly structured and follows the example format.
 - [ ] I have tested my instructions, prompt, agent, skill, or workflow with GitHub Copilot.
 - [ ] I have run `npm start` and verified that `README.md` is up to date.
+- [ ] This PR targets `staging`, or promotes `staging` to `main`, and was not pushed directly to either protected branch.
 
 ---
 
@@ -35,4 +36,4 @@
 
 ---
 
-By submitting this pull request, I confirm that my contribution abides by the [Code of Conduct](../CODE_OF_CONDUCT.md) and will be licensed under the MIT License.
+By submitting this pull request, I confirm that my contribution abides by the [Code of Conduct](CODE_OF_CONDUCT.md) and will be licensed under the MIT License.

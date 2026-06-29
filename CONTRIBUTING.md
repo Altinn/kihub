@@ -313,13 +313,16 @@ Create a daily summary of open issues for the team.
 4. **Run the update script**: `npm start` to update the README with your new file (make sure you run `npm install` first if you haven't already)
    - A GitHub Actions workflow will verify that this step was performed correctly
    - If the README.md would be modified by running the script, the PR check will fail with a comment showing the required changes
-5. **Submit a pull request** targeting the `main` branch with:
+5. **Submit a pull request** targeting the `staging` branch with:
    - A clear title describing your contribution
    - A brief description of what your instruction/skill/agent does
    - Any relevant context or usage notes
 
 > [!IMPORTANT]
-> All pull requests should target the **`main`** branch.
+> `main` is the production branch and `staging` is the staging branch. Do not push directly to either branch.
+> Create a feature or fix branch, push that branch, and open a GitHub pull request.
+> Regular contribution PRs should target **`staging`**. Production releases should be promoted from
+> **`staging`** to **`main`** through a GitHub pull request.
 
 > [!NOTE] 
 > We use [all-contributors](https://github.com/all-contributors/all-contributors) to recognize all types of contributions to the project. Jump to [Contributors Recognition](#contributor-recognition) to learn more!

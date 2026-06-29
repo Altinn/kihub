@@ -171,6 +171,27 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md#adding-agentic-workflows) for guideline
 - Run scheduled code quality checks
 - Respond to slash commands in issues and PRs
 - Orchestrate multi-step repository automation`,
+
+  promptsSection: `## 💬 Reusable Prompts
+
+Ready-to-use prompt templates for GitHub Copilot Chat and Claude Code. Each prompt is a \`.prompt.md\` file with frontmatter that configures the mode, model, and tools.`,
+
+  promptsUsage: `### How to Contribute
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md#adding-prompts) for guidelines on how to contribute new prompts.
+
+### How to Use Prompts
+
+**To Install:**
+- Download the \`.prompt.md\` file and add it to your repository's \`.github/prompts/\` directory
+- VS Code will automatically discover prompts in that location
+
+**To Use in VS Code with Copilot:**
+- Open Copilot Chat and type \`/\` to see available prompt templates
+- Select the prompt you want to use, or reference it with its name
+
+**To Use with Claude Code:**
+- Reference the prompt file directly, or copy its content as a starting point for your session`,
 };
 
 const vscodeInstallImage =
@@ -195,6 +216,7 @@ const SKILLS_DIR = path.join(ROOT_FOLDER, "skills");
 const HOOKS_DIR = path.join(ROOT_FOLDER, "hooks");
 const PLUGINS_DIR = path.join(ROOT_FOLDER, "plugins");
 const WORKFLOWS_DIR = path.join(ROOT_FOLDER, "workflows");
+const PROMPTS_DIR = path.join(ROOT_FOLDER, "prompts");
 const COOKBOOK_DIR = path.join(ROOT_FOLDER, "cookbook");
 const MAX_PLUGIN_ITEMS = 50;
 
@@ -226,4 +248,5 @@ export {
   vscodeInsidersInstallImage,
   vscodeInstallImage,
   WORKFLOWS_DIR,
+  PROMPTS_DIR,
 };
