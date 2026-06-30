@@ -570,6 +570,7 @@ body:has(#main-content.news-article-page) .kihub-site-footer {
   font-weight: var(--ds-font-weight-medium);
   line-height: 1;
   text-decoration: none;
+  padding-left: 30px;
 }
 
 .kihub-footer-brand:hover {

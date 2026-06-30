@@ -26,7 +26,7 @@ const isActive = (href: string) =>
 <div class="kihub-header" data-color="accent">
   <a class="kihub-brand ds-focus" href={withBase('/')} aria-label="KI HUB hjem">
     <span class="kihub-brand-mark" aria-hidden="true">
-      <img src={withBase('/images/kitt-emblem.svg')} alt="" height="24" style="width:auto;position:relative;top:0.5mm" />
+      <img src={withBase('/images/kitt-emblem.svg')} alt="" height="28" style="width:auto;position:relative;top:0.5mm" />
     </span>
     <span class="kihub-brand-text">KI HUB</span>
   </a>
@@ -161,6 +161,7 @@ const isActive = (href: string) =>
     min-width: max-content;
     color: var(--ds-color-text-default);
     font-weight: var(--ds-font-weight-medium);
+    margin-left: 32px;
   }
 
   .kihub-brand:hover {
@@ -193,6 +194,7 @@ const isActive = (href: string) =>
 
   .kihub-brand-text {
     white-space: nowrap;
+    font-size: 22px;
   }
 
   .kihub-desktop-nav {
