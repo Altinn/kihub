@@ -1,0 +1,14 @@
+{
+  "github.copilot.chat.codeGeneration.instructions": [
+    {
+      "file": ".github/copilot-instructions.md"
+    }
+  ],
+  "github.copilot.chat.reviewSelection.instructions": [
+    {
+      "text": "Focus on repo conventions and maintainability."
+    }
+  ],
+  "chat.promptFiles": true,
+  "chat.mcp.access": "all"
+}

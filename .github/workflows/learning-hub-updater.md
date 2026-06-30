@@ -18,7 +18,7 @@ safe-outputs:
   create-pull-request:
     labels: [automated-update, copilot-updates]
     title-prefix: "[bot] "
-    base-branch: main
+    base-branch: staging
 ---
 
 # Check for Awesome GitHub Copilot Updates

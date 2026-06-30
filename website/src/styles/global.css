@@ -459,7 +459,17 @@ body a.ds-button:active {
   line-height: 1.6;
 }
 
-/* Footer */
+/* Footer — strip the Starlight ContentPanel constraints so the footer fills full width */
+.content-panel:has(.kihub-site-footer) {
+  padding: 0 !important;
+  border-top: none !important;
+}
+
+.content-panel:has(.kihub-site-footer) .sl-container {
+  max-width: 100% !important;
+  margin: 0 !important;
+}
+
 .kihub-site-footer {
   --kihub-footer-text: var(--ds-color-accent-text-default);
   --kihub-footer-link: var(--ds-color-accent-text-default);
@@ -599,6 +609,7 @@ body:has(#main-content.news-article-page) .kihub-site-footer {
 
 @media (max-width: 900px) {
   .kihub-footer-inner {
+    padding-inline: var(--ds-size-5);
     grid-template-columns: 1fr 1fr;
     gap: var(--ds-size-8) var(--ds-size-6);
   }
