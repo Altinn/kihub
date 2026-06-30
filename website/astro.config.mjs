@@ -141,6 +141,7 @@ export default defineConfig({
         Head: "./src/components/Head.astro",
         Header: "./src/components/Header.astro",
         Footer: "./src/components/Footer.astro",
+        PageFrame: "./src/components/PageFrame.astro",
       },
     }),
     sitemap(),

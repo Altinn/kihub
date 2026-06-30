@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '2 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Begrepene brukes om hverandre, men de betyr ikke det samme. Her er en enkel oversikt over forskjellen.

@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '6 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 KI er et kraftig verktøy - men med stor kraft kommer stort ansvar! Her er det du MÅ vite om sikkerhet, personvern og ansvarlig bruk av KI-verktøy i jobben.

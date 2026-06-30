@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '4 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Første svar fra KI-en er som første utkast fra en kollega - et utgangspunkt, ikke et ferdig produkt. De som får best resultater er de som tør å si "bra, men kan vi prøve igjen med...?" Her lærer du hvordan!

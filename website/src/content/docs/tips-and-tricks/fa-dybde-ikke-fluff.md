@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '4 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Kjenner du følelsen av å få et KI-svar som høres fint ut, men som egentlig ikke sier noe konkret? "Vi bør fokusere på brukeropplevelsen og innovasjon..." Jada, men hvordan da? Her er trikset for å få substans i stedet for generisk bedriftssnakk.

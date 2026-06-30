@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '5 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Har du en 50-siders rapport du må lese? En lang e-posttråd du skal sette deg inn i? KI kan spare deg for timer - MEN bare hvis du vet hvordan du ber om oppsummering riktig. Her er guiden!

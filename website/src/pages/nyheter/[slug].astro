@@ -1,7 +1,7 @@
 ---
 import { render, type CollectionEntry } from "astro:content";
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
-import { formatNewsDate, getNewsImageUrl, getPublishedNews } from "../../lib/news";
+import { formatNewsDate, getNewsImageUrl, getPublishedNews, withBasePath } from "../../lib/news";
 
 export async function getStaticPaths() {
   const articles = await getPublishedNews();
@@ -19,6 +19,7 @@ const { article } = Astro.props;
 const { Content } = await render(article);
 const base = import.meta.env.BASE_URL;
 const imageSrc = getNewsImageUrl(base, article.data.image);
+const ogImageUrl = Astro.site ? new URL(imageSrc, Astro.site).toString() : imageSrc;
 const publishedDate = formatNewsDate(article.data.pubDate);
 const articleUrl = Astro.url.href;
 ---
@@ -36,7 +37,7 @@ const articleUrl = Astro.url.href;
       { tag: "meta", attrs: { property: "og:type", content: "article" } },
       { tag: "meta", attrs: { property: "og:title", content: article.data.title } },
       { tag: "meta", attrs: { property: "og:description", content: article.data.description } },
-      { tag: "meta", attrs: { property: "og:image", content: imageSrc } },
+      { tag: "meta", attrs: { property: "og:image", content: ogImageUrl } },
     ],
   }}
   hasSidebar={false}
@@ -44,7 +45,7 @@ const articleUrl = Astro.url.href;
   <main id="main-content" class="news-article-page" data-color={article.data.color}>
     <header class="news-article-hero">
       <div class="news-article-hero-inner">
-        <a class="news-back-link ds-focus" href={`${base}nyheter/`}>Nyheter</a>
+        <a class="news-back-link ds-focus" href={withBasePath(base, "nyheter/")}>Nyheter</a>
         <h1>{article.data.title}</h1>
       </div>
     </header>
@@ -79,28 +80,32 @@ const articleUrl = Astro.url.href;
 </StarlightPage>
 
 <script>
+  import { copyToClipboard } from "../../scripts/utils";
+
   const shareButtons = document.querySelectorAll<HTMLButtonElement>("[data-news-share]");
 
   shareButtons.forEach((button) => {
     const originalLabel = button.querySelector("span")?.textContent ?? "Del";
     const shareUrl = button.dataset.shareUrl ?? window.location.href;
+    const pageTitle = document.title;
 
     button.addEventListener("click", async () => {
-      try {
-        if (navigator.share) {
-          await navigator.share({ title: document.title, url: shareUrl });
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: pageTitle, url: shareUrl });
           return;
+        } catch (err) {
+          if (err instanceof Error && err.name === "AbortError") return;
         }
+      }
 
-        await navigator.clipboard.writeText(shareUrl);
-        const label = button.querySelector("span");
-        if (label) label.textContent = "Kopiert";
+      const success = await copyToClipboard(shareUrl);
+      const label = button.querySelector("span");
+      if (label) {
+        label.textContent = success ? "Kopiert" : "Feil";
         window.setTimeout(() => {
           if (label) label.textContent = originalLabel;
         }, 1600);
-      } catch {
-        const label = button.querySelector("span");
-        if (label) label.textContent = originalLabel;
       }
     });
   });

@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '5 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Har du opplevd at KI-en "glemmer" hva dere snakket om tidligere i samtalen? Eller at du må forklare det samme om og om igjen? Her lærer du hvordan du får KI-en til å faktisk huske og bygge videre på konteksten!

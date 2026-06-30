@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '6 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Gratulerer - hvis du har fulgt de foregående Tips & Triks har du lært en haug med KI-triks allerede! Det er på tide å sette det hele sammen til DIN egen, personlige arbeidsflyt. Her er hvordan!

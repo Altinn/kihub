@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '4 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Slutt å bruke KI som en "svarmaskin" - begynn å bruke den som en kollega du tenker høyt sammen med! De beste resultatene kommer når du lar KI-en utfordre tankene dine, ikke bare utføre ordrer.

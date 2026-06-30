@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '2 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Denne uken er tipset litt mer nisjerettet enn vanlig – primært for dere som bruker GitHub Copilot i hverdagen. Ikke alle i Digdir har tilgang til GitHub Copilot, så om du ikke gjør det, kan du trygt scrolle videre 😊

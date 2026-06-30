@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '2 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Kjært barn har mange navn - men noen ganger blir det fort litt mange...

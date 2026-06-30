@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '4 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Et tidligere innlegg så vi på hvordan du avslører om KI-en bommer. Denne uken ser vi på hvordan du **forebygger** det. Hemmeligheten er ikke smartere spørsmål – det er å gi KI-en tilgang til riktig kunnskap. Fagfolk kaller det **grounding**:

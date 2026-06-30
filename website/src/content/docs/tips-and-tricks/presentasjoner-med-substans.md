@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '6 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Skal du lage en presentasjon og ser for deg en KI som bare spytter ut generiske punktlister? Tenk om igjen! Med riktig tilnærming kan KI hjelpe deg å bygge presentasjoner med faktisk innhold og struktur. Her er hvordan!

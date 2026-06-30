@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '5 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Visste du at KI kan være din beste sparringspartner for å forbedre tekster du allerede har skrevet? I stedet for å la KI skrive alt, bruk den til å gjøre DIN skriving bedre. Her er hvordan!

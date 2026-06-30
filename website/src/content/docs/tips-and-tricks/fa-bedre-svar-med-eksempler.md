@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '5 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Noen ganger er det enkleste å vise hva du vil ha - i stedet for å forklare det. Dette kalles "few-shot prompting" - og det er et av de kraftigste triksene for konsistente, presise resultater!

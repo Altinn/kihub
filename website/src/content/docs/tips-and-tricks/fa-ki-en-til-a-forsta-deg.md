@@ -4,6 +4,7 @@ description: 'Fire enkle tips som tar deg fra vage svar til presise resultater m
 lastUpdated: 2026-06-26
 estimatedReadingTime: '4 minutter'
 prev: false
+tableOfContents: false
 ---
 
 Er du en av de i Digdir som har prøvd ChatGPT eller Claude o.l. litt, men fått svar som føles litt… ved siden av? Hemmeligheten ligger ikke i KI-en, men i hvordan du spør! Her er fire tips som får deg fra "tjaaaa..." til "Wow!" på rekordtid.

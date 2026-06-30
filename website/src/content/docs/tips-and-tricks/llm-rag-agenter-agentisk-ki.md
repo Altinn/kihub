@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '2 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Jeg har laget en liten oversikt over hva som er hva - når du skal bruke det - styrker - ting å passe på og eksempler for bruksområder 🙂 Håper det er nyttig for flere.

@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '4 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Ukens tips handler om begrepene som dukker opp når du går fra å bruke KI til å bygge med den. La oss følge et tenkt eksempel – du skal lage en KI-løsning som hjelper saksbehandlere med å kvalitetssikre vedtaksutkast.

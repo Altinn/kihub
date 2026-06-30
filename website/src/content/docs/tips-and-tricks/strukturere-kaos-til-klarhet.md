@@ -5,6 +5,7 @@ lastUpdated: 2026-06-26
 estimatedReadingTime: '5 minutter'
 prev: false
 next: false
+tableOfContents: false
 ---
 
 Har du noen gang sittet med et dokument fullt av stikkord, tanker og ideer - og bare tenkt "hvor begynner jeg?" KI er genial til å hjelpe deg å organisere tankene dine. Her lærer du hvordan!
