@@ -26,12 +26,7 @@ const isActive = (href: string) =>
 <div class="kihub-header" data-color="accent">
   <a class="kihub-brand ds-focus" href={withBase('/')} aria-label="KI HUB hjem">
     <span class="kihub-brand-mark" aria-hidden="true">
-      <svg viewBox="0 0 24 24" focusable="false">
-        <rect width="24" height="24" rx="6"></rect>
-        <path d="M7 8.25 12 6l5 2.25-5 2.25L7 8.25Z"></path>
-        <path d="m7 12 5 2.25L17 12"></path>
-        <path d="m7 15.5 5 2.25 5-2.25"></path>
-      </svg>
+      <img src={withBase('/images/kitt-emblem.svg')} alt="" height="24" style="width:auto;position:relative;top:0.5mm" />
     </span>
     <span class="kihub-brand-text">KI HUB</span>
   </a>
@@ -162,7 +157,7 @@ const isActive = (href: string) =>
     display: inline-flex;
     align-items: center;
     justify-self: start;
-    gap: var(--ds-size-3);
+    gap: calc(var(--ds-size-5) + 6mm);
     min-width: max-content;
     color: var(--ds-color-text-default);
     font-weight: var(--ds-font-weight-medium);

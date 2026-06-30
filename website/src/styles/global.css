@@ -563,7 +563,7 @@ body:has(#main-content.news-article-page) .kihub-site-footer {
   align-items: center;
   align-self: start;
   justify-self: start;
-  gap: var(--ds-size-3);
+  gap: calc(var(--ds-size-5) + 6mm);
   color: var(--kihub-footer-text);
   font-family: Arial, Helvetica, sans-serif;
   font-size: var(--ds-font-size-6);
