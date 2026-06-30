@@ -22,8 +22,15 @@ export const formatNewsDate = (date: Date) =>
     year: "numeric",
   }).format(date);
 
-export const isPublishedNews = (article: NewsArticle, now = new Date()) =>
-  !article.data.draft && article.data.pubDate.getTime() <= now.getTime();
+export const isPublishedNews = (article: NewsArticle, now = new Date()) => {
+  if (article.data.draft) return false;
+  // Compare at UTC day granularity: date-only pubDate strings (e.g. "2026-06-22") are
+  // parsed as UTC midnight by z.coerce.date(), so comparing full timestamps would make
+  // articles appear 2 h late in UTC+2. Slicing to YYYY-MM-DD keeps behaviour timezone-neutral.
+  const pubDay = article.data.pubDate.toISOString().slice(0, 10);
+  const today = now.toISOString().slice(0, 10);
+  return pubDay <= today;
+};
 
 export const sortNewsByDate = (articles: NewsArticle[]) =>
   [...articles].sort((first, second) => second.data.pubDate.getTime() - first.data.pubDate.getTime());

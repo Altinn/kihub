@@ -1,5 +1,6 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import Modal from '../components/Modal.astro';
 import projectSummaryData from '../../public/data/project-summary.json';
 import { formatNewsDate, getNewsImageUrl, getNewsUrl, getPublishedNews } from '../lib/news';
 
@@ -64,6 +65,26 @@ const SHOW_ROLES_SECTION = false;
       </div>
       <div class="v2-hero-media" aria-hidden="true">
         <img src={`${base}images/AIv2b.png`} alt="" loading="eager" />
+      </div>
+    </section>
+
+    <section class="v2-search-section" aria-label="Søk i alle ressurser">
+      <div class="v2-search-wrapper">
+        <div class="v2-search-bar">
+          <svg class="v2-search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <label for="global-search" class="sr-only">Søk i agenter, instruksjoner og ferdigheter</label>
+          <input
+            type="search"
+            id="global-search"
+            placeholder="Søk i agenter, instruksjoner, ferdigheter..."
+            autocomplete="off"
+          />
+        </div>
+        <div id="search-results" class="search-results hidden" aria-label="Søkeresultater"></div>
+        <div id="global-search-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
       </div>
     </section>
 
@@ -184,7 +205,13 @@ const SHOW_ROLES_SECTION = false;
       )
     }
   </div>
+
+  <Modal />
 </StarlightPage>
+
+<script>
+  import '../scripts/pages/index';
+</script>
 
 <style>
   :global(:root) {
@@ -320,6 +347,58 @@ const SHOW_ROLES_SECTION = false;
     --dsc-button-border-color--hover: var(--ds-color-accent-border-strong);
     --dsc-button-color: var(--ds-color-accent-text-subtle);
     --dsc-button-color--hover: var(--ds-color-accent-text-default);
+  }
+
+  .v2-search-section {
+    margin-top: var(--ds-size-10);
+  }
+
+  .v2-search-wrapper {
+    position: relative;
+    max-width: 680px;
+  }
+
+  .v2-search-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-size-3);
+    padding: var(--ds-size-3) var(--ds-size-5);
+    background: var(--ds-color-neutral-surface-default);
+    border: var(--ds-border-width-default) solid var(--ds-color-neutral-border-default);
+    border-radius: var(--ds-border-radius-full);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .v2-search-bar:focus-within {
+    border-color: var(--ds-color-accent-border-strong);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-accent-base-default) 20%, transparent);
+  }
+
+  .v2-search-icon {
+    flex-shrink: 0;
+    width: var(--ds-size-5);
+    height: var(--ds-size-5);
+    color: var(--ds-color-neutral-text-subtle);
+  }
+
+  #global-search {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ds-color-neutral-text-default);
+    font-family: inherit;
+    font-size: var(--ds-body-md-font-size);
+    outline: none;
+  }
+
+  #global-search::placeholder {
+    color: var(--ds-color-neutral-text-subtle);
+  }
+
+  #global-search::-webkit-search-cancel-button {
+    cursor: pointer;
   }
 
   .v2-entry-section {
