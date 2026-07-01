@@ -43,12 +43,11 @@ const footerLinks = [
     </div>
 
     <div class="kihub-footer-inner">
-      <a class="kihub-footer-brand ds-focus" href={withBase("/")} aria-label="KI HUB hjem">
+      <button class="kihub-footer-brand kitt-easter-egg" id="kitt-easter-egg" aria-label="Gi KITT litt kjærlighet">
         <span class="kihub-footer-mark" aria-hidden="true">
-          <img src={withBase('/images/kitt-emblem.svg')} alt="" height="28" style="width:auto;position:relative;top:0.5mm" />
+          <img src={withBase('/images/kitt-emblem.svg')} alt="KITT" height="28" style="width:auto;position:relative;top:0.5mm" />
         </span>
-        <span>KI HUB</span>
-      </a>
+      </button>
 
       <div class="kihub-footer-contact">
         <p>Kontakt oss:</p>
@@ -65,6 +64,21 @@ const footerLinks = [
 </div>
 
 <script>
+  // KITT easter egg — sonar ripple on click
+  const easterEgg = document.getElementById('kitt-easter-egg') as HTMLButtonElement | null;
+  if (easterEgg) {
+    easterEgg.addEventListener('click', () => {
+      [0, 220].forEach((delay) => {
+        setTimeout(() => {
+          const r = document.createElement('span');
+          r.className = 'kitt-ripple';
+          easterEgg.appendChild(r);
+          r.addEventListener('animationend', () => r.remove());
+        }, delay);
+      });
+    });
+  }
+
   // Keep sidebar bottom aligned with footer top so items are never hidden behind the footer.
   const footer = document.querySelector('.kihub-site-footer') as HTMLElement | null;
   if (footer) {
@@ -80,6 +94,40 @@ const footerLinks = [
 </script>
 
 <style>
+  .kitt-easter-egg {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-size-2);
+    color: inherit;
+    font: inherit;
+    position: relative;
+  }
+
+  .kitt-easter-egg {
+    overflow: visible;
+  }
+
+  @keyframes kitt-sonar {
+    from { opacity: 0.6; transform: translate(-50%, -50%) scale(0); }
+    to   { opacity: 0;   transform: translate(-50%, -50%) scale(4); }
+  }
+
+  :global(.kitt-ripple) {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid var(--ds-color-accent-text-default);
+    pointer-events: none;
+    animation: kitt-sonar 0.75s ease-out forwards;
+  }
+
   @layer starlight.core {
     .page {
       flex-direction: column;

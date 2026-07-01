@@ -562,17 +562,6 @@ body:has(#main-content.news-article-page) .kihub-site-footer {
   height: 100%;
 }
 
-.kihub-footer-mark rect {
-  fill: var(--kihub-footer-text);
-}
-
-.kihub-footer-mark path {
-  fill: none;
-  stroke: var(--ds-color-accent-base-contrast-default);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.7;
-}
 
 .kihub-footer-contact,
 .kihub-footer-links {
