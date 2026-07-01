@@ -1,0 +1,787 @@
+---
+import { render, type CollectionEntry } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import {
+  TYPE_COLORS,
+  TYPE_LABELS,
+  MODE_LABELS,
+  formatEventLongDate,
+  formatEventTime,
+  formatEventDayPadded,
+  formatEventMonthShort,
+  generateIcsDataUrl,
+  getSpotsLabel,
+  getAllEvents,
+  getEventUrl,
+  withBasePath,
+} from "../../lib/events";
+
+export async function getStaticPaths() {
+  const events = await getAllEvents();
+  return events.map((event) => ({
+    params: { slug: event.id },
+    props: { event },
+  }));
+}
+
+type Props = { event: CollectionEntry<"arrangementer"> };
+
+const { event } = Astro.props;
+const { Content } = await render(event);
+const base = import.meta.env.BASE_URL;
+const ev = event.data;
+
+const colors = TYPE_COLORS[ev.type];
+const typeLabel = TYPE_LABELS[ev.type];
+const modeLabel = MODE_LABELS[ev.mode];
+const dateLong = formatEventLongDate(ev.startDateTime);
+const timeStart = formatEventTime(ev.startDateTime);
+const timeEnd = formatEventTime(ev.endDateTime);
+const timeRange = `${timeStart}–${timeEnd}`;
+const icsUrl = generateIcsDataUrl(event);
+const isFull = ev.status === "full" || (ev.capacity !== null && ev.capacity - ev.registeredCount <= 0);
+const spotsLabel = getSpotsLabel(event);
+
+const locationMain = ev.locationAddress ?? ev.locationName;
+const locationSub = ev.locationAddress
+  ? `${ev.locationName} · ${modeLabel}`
+  : modeLabel;
+
+const eventUrl = Astro.url.href;
+const emailSubject = encodeURIComponent(ev.title);
+const emailBody = encodeURIComponent(`${ev.ingress}\n\nLes mer: ${eventUrl}`);
+const teamsUrl = `https://teams.microsoft.com/share?href=${encodeURIComponent(eventUrl)}&msgText=${encodeURIComponent(ev.title)}`;
+
+// Resolve related events
+const allEvents = await getAllEvents();
+const relatedEvents = ev.relatedEventIds
+  .map((id) => allEvents.find((e) => e.id === id))
+  .filter((e): e is CollectionEntry<"arrangementer"> => e !== undefined);
+---
+
+<StarlightPage
+  frontmatter={{
+    title: ev.title,
+    description: ev.ingress,
+    template: "splash",
+    tableOfContents: false,
+    prev: false,
+    next: false,
+    editUrl: false,
+    head: [
+      { tag: "meta", attrs: { property: "og:type", content: "website" } },
+      { tag: "meta", attrs: { property: "og:title", content: ev.title } },
+      { tag: "meta", attrs: { property: "og:description", content: ev.ingress } },
+    ],
+  }}
+  hasSidebar={false}
+>
+  <div id="evd-page" class="evd-main">
+    <!-- Breadcrumb -->
+    <nav class="evd-breadcrumb" aria-label="Brødsmulesti">
+      <span>Digdir</span>
+      <span class="evd-crumb-sep" aria-hidden="true">/</span>
+      <span>BOD</span>
+      <span class="evd-crumb-sep" aria-hidden="true">/</span>
+      <span>KI HUB</span>
+      <span class="evd-crumb-sep" aria-hidden="true">/</span>
+      <a href={withBasePath(base, "arrangementer/")}>Arrangementer</a>
+      <span class="evd-crumb-sep" aria-hidden="true">/</span>
+      <span class="evd-crumb-current" aria-current="page">{ev.title}</span>
+    </nav>
+
+    <!-- Page header -->
+    <header class="evd-header">
+      <span class="evd-type-badge" style={`color: ${colors.text}; background: ${colors.tint};`}>
+        {typeLabel}
+      </span>
+      <h1 class="evd-title">{ev.title}</h1>
+      <p class="evd-ingress">{ev.ingress}</p>
+    </header>
+
+    <!-- Two-column body -->
+    <div class="evd-body">
+      <!-- Left: main content -->
+      <div class="evd-content">
+        <!-- Markdown body (Om arrangementet etc.) -->
+        <div class="evd-prose">
+          <Content />
+        </div>
+
+        <!-- Program -->
+        {ev.agenda.length > 0 && (
+          <section class="evd-section">
+            <h2 class="evd-section-heading">Program</h2>
+            <table class="evd-agenda">
+              <tbody>
+                {ev.agenda.map((item) => (
+                  <tr class={item.isBreak ? "evd-agenda-break" : ""}>
+                    <td class="evd-agenda-time">{item.time}</td>
+                    <td class="evd-agenda-title">{item.title}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        )}
+
+        <!-- Holdere -->
+        {ev.speakers.length > 0 && (
+          <section class="evd-section">
+            <h2 class="evd-section-heading">Holdere</h2>
+            <ul class="evd-speakers" role="list">
+              {ev.speakers.map((speaker) => (
+                <li class="evd-speaker">
+                  <div class="evd-avatar" aria-hidden="true">{speaker.initials}</div>
+                  <div class="evd-speaker-info">
+                    <strong>{speaker.name}</strong>
+                    <span>{speaker.role}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <!-- Andre arrangementer -->
+        {relatedEvents.length > 0 && (
+          <section class="evd-section evd-related-section">
+            <h2 class="evd-section-heading">Andre arrangementer</h2>
+            <div class="evd-related-grid">
+              {relatedEvents.map((related) => (
+                <a href={getEventUrl(base, related)} class="evd-related-card ds-focus">
+                  <div class="evd-related-date">
+                    <span class="evd-related-month">
+                      {formatEventMonthShort(related.data.startDateTime).toUpperCase()}
+                    </span>
+                    <span class="evd-related-day">
+                      {formatEventDayPadded(related.data.startDateTime)}
+                    </span>
+                  </div>
+                  <div class="evd-related-info">
+                    <strong>{related.data.title}</strong>
+                    <span>{TYPE_LABELS[related.data.type]} · {related.data.locationName}</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      <!-- Right: sticky info card -->
+      <aside class="evd-sidebar" aria-label="Praktisk informasjon">
+        <div class="evd-info-card">
+          <!-- Date & time -->
+          <div class="evd-info-row">
+            <svg class="evd-info-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <div class="evd-info-text">
+              <strong>{dateLong}</strong>
+              <span>{timeRange}</span>
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="evd-info-row">
+            <svg class="evd-info-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <div class="evd-info-text">
+              <strong>{locationMain}</strong>
+              <span>{locationSub}</span>
+            </div>
+          </div>
+
+          <!-- Capacity + organizer -->
+          <div class="evd-info-row">
+            <svg class="evd-info-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <div class="evd-info-text">
+              <strong>{spotsLabel}</strong>
+              <span>Arrangør: {ev.organizer}</span>
+            </div>
+          </div>
+
+          <!-- CTAs -->
+          <div class="evd-info-actions">
+            {ev.registrationOpen && ev.registrationUrl && !isFull ? (
+              <a
+                class="evd-reg-btn ds-focus"
+                href={ev.registrationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Meld deg på
+              </a>
+            ) : isFull ? (
+              <span class="evd-reg-btn evd-reg-btn--full" aria-disabled="true">Fullbooket</span>
+            ) : null}
+
+            <a class="evd-ics-btn ds-focus" href={icsUrl} download={`${event.id}.ics`}>
+              + Legg til i kalender (.ics)
+            </a>
+          </div>
+
+          <!-- Share -->
+          <div class="evd-share">
+            <span class="evd-share-label">Del:</span>
+            <a
+              class="evd-share-link ds-focus"
+              href={teamsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >Teams</a>
+            <span class="evd-share-sep" aria-hidden="true">·</span>
+            <a
+              class="evd-share-link ds-focus"
+              href={`mailto:?subject=${emailSubject}&body=${emailBody}`}
+            >E-post</a>
+            <span class="evd-share-sep" aria-hidden="true">·</span>
+            <button
+              class="evd-share-link evd-copy-btn ds-focus"
+              type="button"
+              data-copy-url={eventUrl}
+            >Kopier lenke</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</StarlightPage>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-copy-url]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const url = btn.dataset.copyUrl ?? location.href;
+      try {
+        await navigator.clipboard.writeText(url);
+        const original = btn.textContent;
+        btn.textContent = 'Kopiert!';
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      } catch {
+        // fallback: select a temporary input
+        const inp = document.createElement('input');
+        inp.value = url;
+        document.body.appendChild(inp);
+        inp.select();
+        document.execCommand('copy');
+        document.body.removeChild(inp);
+      }
+    });
+  });
+</script>
+
+<style>
+  :global(:root) {
+    --sl-content-width: 1220px !important;
+  }
+
+  :global(body:has(#evd-page)) {
+    background: var(--ds-color-accent-background-default);
+  }
+
+  :global(.sl-container:has(#evd-page)) {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  :global(.main-pane:has(#evd-page)) {
+    width: 100% !important;
+  }
+
+  #evd-page.evd-main {
+    --kihub-serif-font: "PT Serif", Georgia, "Times New Roman", serif;
+    box-sizing: border-box;
+    width: min(100%, 1220px);
+    margin: 0 auto !important;
+    padding: var(--ds-size-8) var(--ds-size-8) var(--ds-size-15);
+    font-family: var(--kihub-serif-font);
+  }
+
+  /* Breadcrumb */
+  .evd-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ds-size-2);
+    margin-bottom: var(--ds-size-6);
+    color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-sm-font-size);
+  }
+
+  .evd-breadcrumb a {
+    color: var(--ds-color-accent-text-subtle) !important;
+    text-decoration: none !important;
+  }
+
+  .evd-breadcrumb a:hover {
+    text-decoration: underline !important;
+    text-decoration-thickness: 0.06em !important;
+    text-underline-offset: 0.12em !important;
+  }
+
+  .evd-crumb-sep {
+    color: var(--ds-color-neutral-border-default);
+  }
+
+  .evd-crumb-current {
+    color: var(--ds-color-accent-text-default);
+    font-weight: var(--ds-font-weight-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 240px;
+  }
+
+  /* Header */
+  .evd-header {
+    margin-bottom: var(--ds-size-10);
+  }
+
+  .evd-type-badge {
+    display: inline-block;
+    padding: var(--ds-size-1) var(--ds-size-3);
+    margin-bottom: var(--ds-size-4);
+    border-radius: var(--ds-border-radius-sm);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .evd-title {
+    margin: 0 0 var(--ds-size-4);
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-2xl-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.08;
+  }
+
+  .evd-ingress {
+    max-width: 52rem;
+    margin: 0;
+    color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-lg-font-size);
+    line-height: var(--ds-body-long-lg-line-height);
+  }
+
+  /* Two-column layout */
+  .evd-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: var(--ds-size-12);
+    align-items: start;
+  }
+
+  /* Content (left) */
+  .evd-content {
+    min-width: 0;
+  }
+
+  .evd-prose {
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-body-lg-font-size);
+    line-height: var(--ds-body-long-lg-line-height);
+  }
+
+  .evd-prose :global(h2) {
+    margin: 0 0 var(--ds-size-4);
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.15;
+  }
+
+  .evd-prose :global(p) {
+    margin: 0 0 var(--ds-size-4);
+  }
+
+  .evd-prose :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .evd-section {
+    margin-top: var(--ds-size-10);
+    padding-top: var(--ds-size-8);
+    border-top: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+  }
+
+  .evd-section-heading {
+    margin: 0 0 var(--ds-size-6);
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.15;
+  }
+
+  /* Agenda table */
+  .evd-agenda {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .evd-agenda tr {
+    border-bottom: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+  }
+
+  .evd-agenda tr:first-child {
+    border-top: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+  }
+
+  .evd-agenda-time {
+    width: 72px;
+    padding: var(--ds-size-3) var(--ds-size-4) var(--ds-size-3) 0;
+    color: var(--ds-color-accent-base-default);
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    vertical-align: top;
+    white-space: nowrap;
+  }
+
+  .evd-agenda-title {
+    padding: var(--ds-size-3) 0;
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-body-md-font-size);
+    line-height: var(--ds-body-long-md-line-height);
+    vertical-align: top;
+  }
+
+  .evd-agenda-break .evd-agenda-time,
+  .evd-agenda-break .evd-agenda-title {
+    color: var(--ds-color-neutral-text-subtle);
+    font-weight: var(--ds-font-weight-regular, 400);
+  }
+
+  /* Speakers */
+  .evd-speakers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-size-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .evd-speaker {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-size-3);
+    margin: 0;
+  }
+
+  .evd-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--ds-size-12);
+    height: var(--ds-size-12);
+    border-radius: var(--ds-border-radius-full);
+    background: var(--ds-color-accent-surface-hover);
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+  }
+
+  .evd-speaker-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .evd-speaker-info strong {
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    line-height: 1.3;
+  }
+
+  .evd-speaker-info span {
+    color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-sm-font-size);
+    line-height: 1.3;
+  }
+
+  /* Related events */
+  .evd-related-section {
+    margin-bottom: var(--ds-size-4);
+  }
+
+  .evd-related-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ds-size-4);
+  }
+
+  .evd-related-card {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-size-5);
+    padding: var(--ds-size-5) var(--ds-size-6);
+    border: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+    border-radius: var(--ds-border-radius-default);
+    color: var(--ds-color-accent-text-default) !important;
+    text-decoration: none !important;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .evd-related-card:hover {
+    border-color: var(--ds-color-accent-border-default);
+    background: var(--ds-color-accent-surface-hover);
+  }
+
+  .evd-related-card:hover .evd-related-info strong {
+    text-decoration: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.12em;
+  }
+
+  .evd-related-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: var(--ds-size-10);
+  }
+
+  .evd-related-month {
+    color: var(--ds-color-accent-base-default);
+    font-size: var(--ds-body-xs-font-size, 11px);
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0.06em;
+    line-height: 1.2;
+  }
+
+  .evd-related-day {
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    line-height: 1;
+  }
+
+  .evd-related-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .evd-related-info strong {
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    line-height: 1.3;
+  }
+
+  .evd-related-info span {
+    color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-sm-font-size);
+    line-height: 1.3;
+  }
+
+  /* Sidebar */
+  .evd-sidebar {
+    min-width: 0;
+  }
+
+  .evd-info-card {
+    position: sticky;
+    top: var(--ds-size-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-size-5);
+    padding: var(--ds-size-6);
+    background: var(--ds-color-neutral-surface-default, #fff);
+    border: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+    border-radius: var(--ds-border-radius-lg, 12px);
+    box-shadow: var(--ds-shadow-sm);
+  }
+
+  .evd-info-row {
+    display: flex;
+    gap: var(--ds-size-3);
+    align-items: flex-start;
+  }
+
+  .evd-info-icon {
+    flex-shrink: 0;
+    width: var(--ds-size-5);
+    height: var(--ds-size-5);
+    margin-top: 2px;
+    fill: none;
+    stroke: var(--ds-color-accent-text-subtle);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+  }
+
+  .evd-info-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .evd-info-text strong {
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    line-height: 1.3;
+  }
+
+  .evd-info-text span {
+    color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-sm-font-size);
+    line-height: 1.3;
+  }
+
+  .evd-info-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-size-3);
+    margin-top: var(--ds-size-2);
+  }
+
+  .evd-reg-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: var(--ds-size-12);
+    padding: 0 var(--ds-size-5);
+    border-radius: var(--ds-border-radius-default);
+    background: var(--ds-color-accent-base-default);
+    color: var(--ds-color-accent-base-contrast-default) !important;
+    font-size: var(--ds-body-md-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .evd-reg-btn:hover:not([aria-disabled]) {
+    background: var(--ds-color-accent-base-hover);
+  }
+
+  .evd-reg-btn--full {
+    background: var(--ds-color-neutral-surface-hover);
+    color: var(--ds-color-neutral-text-subtle) !important;
+    cursor: default;
+  }
+
+  .evd-ics-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: var(--ds-size-11);
+    padding: 0 var(--ds-size-4);
+    border: var(--ds-border-width-default) solid var(--ds-color-neutral-border-default);
+    border-radius: var(--ds-border-radius-default);
+    background: transparent;
+    color: var(--ds-color-accent-text-subtle) !important;
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-medium);
+    text-decoration: none !important;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .evd-ics-btn:hover {
+    border-color: var(--ds-color-accent-border-default);
+    color: var(--ds-color-accent-text-default) !important;
+  }
+
+  /* Share row */
+  .evd-share {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-size-2);
+    padding-top: var(--ds-size-3);
+    border-top: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+  }
+
+  .evd-share-label {
+    color: var(--ds-color-neutral-text-subtle);
+    font-size: var(--ds-body-sm-font-size);
+  }
+
+  .evd-share-link {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--ds-color-accent-text-subtle) !important;
+    font-family: inherit;
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-medium);
+    text-decoration: none !important;
+    transition: color 0.15s ease;
+  }
+
+  .evd-share-link:hover {
+    color: var(--ds-color-accent-text-default) !important;
+    text-decoration: underline !important;
+    text-decoration-thickness: 0.06em !important;
+    text-underline-offset: 0.12em !important;
+  }
+
+  .evd-share-sep {
+    color: var(--ds-color-neutral-border-default);
+    font-size: var(--ds-body-sm-font-size);
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    #evd-page.evd-main {
+      padding: var(--ds-size-6) var(--ds-size-5) var(--ds-size-12);
+    }
+
+    .evd-title {
+      font-size: var(--ds-heading-xl-font-size);
+    }
+
+    .evd-body {
+      grid-template-columns: 1fr;
+      gap: var(--ds-size-8);
+    }
+
+    .evd-sidebar {
+      order: -1;
+    }
+
+    .evd-info-card {
+      position: static;
+    }
+
+    .evd-related-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    #evd-page.evd-main {
+      padding-inline: var(--ds-size-4);
+    }
+
+    .evd-title {
+      font-size: var(--ds-heading-lg-font-size);
+    }
+
+    .evd-crumb-current {
+      max-width: 140px;
+    }
+  }
+</style>

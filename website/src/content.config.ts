@@ -52,6 +52,17 @@ const arrangementer = defineCollection({
     registeredCount: z.number().default(0),
     status: z.enum(["upcoming", "full", "cancelled", "past"]).default("upcoming"),
     draft: z.boolean().default(false),
+    speakers: z.array(z.object({
+      name: z.string(),
+      role: z.string(),
+      initials: z.string(),
+    })).default([]),
+    agenda: z.array(z.object({
+      time: z.string(),
+      title: z.string(),
+      isBreak: z.boolean().default(false),
+    })).default([]),
+    relatedEventIds: z.array(z.string()).default([]),
   }),
 });
 

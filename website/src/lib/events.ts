@@ -108,3 +108,10 @@ export const getUpcomingEvents = async (now = new Date()) => {
     .filter((e) => isUpcomingEvent(e, now))
     .sort((a, b) => a.data.startDateTime.getTime() - b.data.startDateTime.getTime());
 };
+
+export const getAllEvents = async () => {
+  const events = await getCollection("arrangementer");
+  return events
+    .filter((e) => !e.data.draft)
+    .sort((a, b) => a.data.startDateTime.getTime() - b.data.startDateTime.getTime());
+};

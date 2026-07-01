@@ -1,0 +1,90 @@
+---
+// Placeholder — full design coming separately
+import { getUpcomingEvents, getEventUrl, TYPE_LABELS, formatEventShortDate, formatEventTime } from '../lib/events';
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+
+const base = import.meta.env.BASE_URL;
+const events = await getUpcomingEvents();
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'Arrangementer',
+    description: 'Kommende kurs, webinarer og arrangementer fra KITT-teamet og Digdir',
+    template: 'splash',
+    prev: false,
+    next: false,
+    editUrl: false,
+  }}
+  hasSidebar={false}
+>
+  <div id="arr-index" class="arr-index-main">
+    <header class="arr-index-header">
+      <p class="arr-index-kicker">Arrangementer</p>
+      <h1>Hva skjer i BOD</h1>
+    </header>
+    <ul class="arr-index-list" role="list">
+      {events.map((event) => (
+        <li>
+          <a href={getEventUrl(base, event)} class="arr-index-item ds-focus">
+            <span class="arr-index-date">
+              {formatEventShortDate(event.data.startDateTime)} · {formatEventTime(event.data.startDateTime)}
+            </span>
+            <span class="arr-index-title">{event.data.title}</span>
+            <span class="arr-index-meta">{TYPE_LABELS[event.data.type]} · {event.data.locationName}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</StarlightPage>
+
+<style>
+  :global(:root) { --sl-content-width: 1220px !important; }
+  :global(body:has(#arr-index)) { background: var(--ds-color-accent-background-default); }
+  :global(.sl-container:has(#arr-index)) { max-width: 100% !important; padding: 0 !important; }
+  :global(.main-pane:has(#arr-index)) { width: 100% !important; }
+
+  #arr-index.arr-index-main {
+    --kihub-serif-font: "PT Serif", Georgia, "Times New Roman", serif;
+    width: min(100%, 1220px);
+    margin: 0 auto !important;
+    padding: var(--ds-size-12) var(--ds-size-8) var(--ds-size-15);
+    font-family: var(--kihub-serif-font);
+  }
+
+  .arr-index-kicker {
+    margin: 0 0 var(--ds-size-2);
+    color: var(--ds-color-accent-text-subtle);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    text-transform: uppercase;
+  }
+
+  .arr-index-header h1 {
+    margin: 0 0 var(--ds-size-10);
+    color: var(--ds-color-accent-text-default);
+    font-size: var(--ds-heading-2xl-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    line-height: 1.08;
+  }
+
+  .arr-index-list { margin: 0; padding: 0; list-style: none; }
+
+  .arr-index-item {
+    display: grid;
+    grid-template-columns: 180px 1fr auto;
+    align-items: center;
+    gap: var(--ds-size-4);
+    padding: var(--ds-size-4) 0;
+    border-top: 1px solid var(--ds-color-neutral-border-subtle);
+    color: var(--ds-color-accent-text-default) !important;
+    text-decoration: none !important;
+  }
+
+  .arr-index-list li:last-child .arr-index-item { border-bottom: 1px solid var(--ds-color-neutral-border-subtle); }
+  .arr-index-date { color: var(--ds-color-neutral-text-subtle); font-size: var(--ds-body-sm-font-size); white-space: nowrap; }
+  .arr-index-title { font-weight: var(--ds-font-weight-bold); }
+  .arr-index-item:hover .arr-index-title { text-decoration: underline; }
+  .arr-index-meta { color: var(--ds-color-neutral-text-subtle); font-size: var(--ds-body-sm-font-size); white-space: nowrap; }
+</style>
