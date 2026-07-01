@@ -31,7 +31,32 @@ const nyheter = defineCollection({
   }),
 });
 
+const arrangementer = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/arrangementer" }),
+  schema: z.object({
+    title: z.string(),
+    ingress: z.string(),
+    type: z.enum(["webinar", "verksted", "kurs", "konferanse", "internt"]),
+    startDateTime: z.coerce.date(),
+    endDateTime: z.coerce.date(),
+    allDay: z.boolean().default(false),
+    mode: z.enum(["digitalt", "oppmote", "hybrid"]),
+    locationName: z.string(),
+    locationAddress: z.string().optional(),
+    meetingUrl: z.string().optional(),
+    organizer: z.string(),
+    registrationOpen: z.boolean().default(true),
+    registrationUrl: z.string().optional(),
+    registrationDeadline: z.coerce.date().optional(),
+    capacity: z.number().nullable().default(null),
+    registeredCount: z.number().default(0),
+    status: z.enum(["upcoming", "full", "cancelled", "past"]).default("upcoming"),
+    draft: z.boolean().default(false),
+  }),
+});
+
 export const collections = {
   docs,
   nyheter,
+  arrangementer,
 };

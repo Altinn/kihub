@@ -1,6 +1,7 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import Modal from '../components/Modal.astro';
+import EventsSection from '../components/EventsSection.astro';
 import projectSummaryData from '../../public/data/project-summary.json';
 import { formatNewsDate, getNewsImageUrl, getNewsUrl, getPublishedNews } from '../lib/news';
 
@@ -170,6 +171,8 @@ const SHOW_ROLES_SECTION = false;
         </ul>
       </section>
     )}
+
+    <EventsSection />
 
     {
       latestNews.length > 0 && (
