@@ -1,0 +1,1033 @@
+---
+import { getUpcomingEvents, getEventUrl, TYPE_LABELS, TYPE_COLORS, MODE_LABELS, formatEventTime, getSpotsLabel } from '../lib/events';
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+
+const base = import.meta.env.BASE_URL;
+const events = await getUpcomingEvents();
+
+const osloFmt = (date: Date, opts: Intl.DateTimeFormatOptions) =>
+  new Intl.DateTimeFormat("nb-NO", { timeZone: "Europe/Oslo", ...opts }).format(date);
+
+const groupLabel = (date: Date): string => {
+  const wd = osloFmt(date, { weekday: "long" });
+  const d  = osloFmt(date, { day: "numeric" }).replace(/\.$/, "");
+  const m  = osloFmt(date, { month: "long" });
+  return `${wd.charAt(0).toUpperCase() + wd.slice(1)} ${d}. ${m}`;
+};
+
+const dateKey = (date: Date): string =>
+  new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Oslo", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(date);
+
+type EventGroup = { label: string; events: typeof events };
+const grouped = new Map<string, EventGroup>();
+for (const event of events) {
+  const key = dateKey(event.data.startDateTime);
+  if (!grouped.has(key)) grouped.set(key, { label: groupLabel(event.data.startDateTime), events: [] });
+  grouped.get(key)!.events.push(event);
+}
+
+const EVENTS_CLIENT = events.map(e => ({
+  id: e.id,
+  title: e.data.title,
+  type: e.data.type,
+  mode: e.data.mode,
+  locationName: e.data.locationName,
+  startDateTime: e.data.startDateTime.toISOString(),
+  url: getEventUrl(base, e),
+}));
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'Arrangementer',
+    description: 'Kommende kurs, webinarer og arrangementer fra KITT-teamet og Digdir',
+    template: 'splash',
+    prev: false,
+    next: false,
+    editUrl: false,
+  }}
+  hasSidebar={false}
+>
+  <div id="arr-index">
+
+    <div class="arr-topbar">
+      <h1 class="arr-h1">Arrangementer</h1>
+      <div class="arr-toggle-group" role="group" aria-label="Velg visning">
+        <button class="arr-toggle-btn arr-toggle-btn--active" id="btn-kalender" aria-pressed="true">Kalender</button>
+        <button class="arr-toggle-btn" id="btn-liste" aria-pressed="false">Liste</button>
+      </div>
+    </div>
+
+    <!-- ——— LIST VIEW ——— -->
+    <div id="arr-liste" class="arr-view" hidden>
+      <div class="arr-filter-backdrop" id="arr-filter-backdrop"></div>
+      <div class="arr-mobile-bar">
+        <button class="arr-mobile-filter-btn" id="arr-mobile-filter-btn">Filtrer</button>
+      </div>
+      <div class="arr-liste-layout">
+
+        <aside class="arr-sidebar" aria-label="Filtrer arrangementer">
+          <div class="arr-sidebar-mobile-hdr">
+            <span class="arr-sidebar-mobile-title">Filter</span>
+            <button class="arr-sidebar-mobile-close" id="arr-sidebar-close" aria-label="Lukk filter">✕</button>
+          </div>
+          <div class="arr-fgroup">
+            <p class="arr-fheading">TYPE</p>
+            {Object.entries(TYPE_LABELS).map(([key, label]) => (
+              <label class="arr-flabel">
+                <input class="arr-cb" type="checkbox" name="arr-type" value={key} />
+                <span class="arr-fcheck" aria-hidden="true"></span>
+                {label}
+              </label>
+            ))}
+          </div>
+          <div class="arr-fgroup">
+            <p class="arr-fheading">FORM</p>
+            <label class="arr-flabel">
+              <input class="arr-rb" type="radio" name="arr-mode" value="alle" checked />
+              <span class="arr-fradio" aria-hidden="true"></span>
+              Alle
+            </label>
+            {Object.entries(MODE_LABELS).map(([key, label]) => (
+              <label class="arr-flabel">
+                <input class="arr-rb" type="radio" name="arr-mode" value={key} />
+                <span class="arr-fradio" aria-hidden="true"></span>
+                {label}
+              </label>
+            ))}
+          </div>
+          <button class="arr-nullstill" id="arr-nullstill">Nullstill filtre</button>
+        </aside>
+
+        <div class="arr-events-main">
+          {events.length === 0 && (
+            <p class="arr-empty">Ingen kommende arrangementer.</p>
+          )}
+          {[...grouped.entries()].map(([_key, { label, events: ge }]) => (
+            <div class="arr-date-group">
+              <div class="arr-date-pill">{label}</div>
+              {ge.map(event => (
+                <a
+                  href={getEventUrl(base, event)}
+                  class="arr-event-row ds-focus"
+                  data-type={event.data.type}
+                  data-mode={event.data.mode}
+                >
+                  <span class="arr-row-time">{formatEventTime(event.data.startDateTime)}</span>
+                  <span class="arr-row-body">
+                    <span class="arr-row-title">{event.data.title}</span>
+                    <span class="arr-row-meta">
+                      {event.data.locationName} · {getSpotsLabel(event)}
+                    </span>
+                  </span>
+                  <span
+                    class="arr-row-badge"
+                    style={`background:${TYPE_COLORS[event.data.type].tint};color:${TYPE_COLORS[event.data.type].text}`}
+                  >
+                    {TYPE_LABELS[event.data.type].toUpperCase()}
+                  </span>
+                  <span class="arr-row-arrow" aria-hidden="true">→</span>
+                </a>
+              ))}
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ——— CALENDAR VIEW ——— -->
+    <div id="arr-kalender" class="arr-view">
+      <div class="arr-cal-header">
+        <div class="arr-cal-nav">
+          <button class="arr-cal-nav-btn" id="arr-cal-prev" aria-label="Forrige måned">‹</button>
+          <span class="arr-cal-month" id="arr-cal-month">Juli 2026</span>
+          <button class="arr-cal-nav-btn" id="arr-cal-next" aria-label="Neste måned">›</button>
+        </div>
+        <div class="arr-cal-legend">
+          {Object.entries(TYPE_LABELS).map(([key, label]) => (
+            <span class="arr-legend-item">
+              <span
+                class="arr-legend-dot"
+                style={`background:${TYPE_COLORS[key as keyof typeof TYPE_COLORS].text}`}
+              ></span>
+              {label}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div class="arr-cal-grid-outer">
+        <div class="arr-cal-grid" id="arr-cal-grid">
+          <div class="arr-cal-hdr">MAN</div>
+          <div class="arr-cal-hdr">TIR</div>
+          <div class="arr-cal-hdr">ONS</div>
+          <div class="arr-cal-hdr">TOR</div>
+          <div class="arr-cal-hdr">FRE</div>
+          <div class="arr-cal-hdr">LØR</div>
+          <div class="arr-cal-hdr">SØN</div>
+        </div>
+      </div>
+      <div id="arr-cal-day-detail" hidden></div>
+    </div>
+
+  </div>
+</StarlightPage>
+
+<script define:vars={{ EVENTS_CLIENT, TYPE_LABELS, MODE_LABELS, TYPE_COLORS }}>
+
+
+  const MONTHS_NB = [
+    "Januar","Februar","Mars","April","Mai","Juni",
+    "Juli","August","September","Oktober","November","Desember",
+  ];
+
+  // ——— VIEW TOGGLE ———
+  const btnListe    = document.getElementById('btn-liste');
+  const btnKalender = document.getElementById('btn-kalender');
+  const viewListe   = document.getElementById('arr-liste');
+  const viewKalender = document.getElementById('arr-kalender');
+
+  function setView(v) {
+    viewListe.hidden    = v !== 'liste';
+    viewKalender.hidden = v !== 'kalender';
+    btnListe.classList.toggle('arr-toggle-btn--active', v === 'liste');
+    btnKalender.classList.toggle('arr-toggle-btn--active', v === 'kalender');
+    btnListe.setAttribute('aria-pressed', String(v === 'liste'));
+    btnKalender.setAttribute('aria-pressed', String(v === 'kalender'));
+    if (v === 'kalender') renderCalendar();
+  }
+
+  btnListe.addEventListener('click', () => setView('liste'));
+  btnKalender.addEventListener('click', () => setView('kalender'));
+
+  // ——— FILTER LOGIC ———
+  const mobileFilterBtn  = document.getElementById('arr-mobile-filter-btn');
+  const filterBackdrop   = document.getElementById('arr-filter-backdrop');
+  const sidebarEl        = document.querySelector('.arr-sidebar');
+  const sidebarCloseBtn  = document.getElementById('arr-sidebar-close');
+
+  function updateFilterBadge() {
+    const typeCount  = document.querySelectorAll('.arr-cb:checked').length;
+    const modeActive = (document.querySelector('.arr-rb:checked')?.value ?? 'alle') !== 'alle' ? 1 : 0;
+    const total = typeCount + modeActive;
+    if (mobileFilterBtn) {
+      mobileFilterBtn.textContent = total > 0 ? `Filtrer (${total})` : 'Filtrer';
+      mobileFilterBtn.classList.toggle('arr-mobile-filter-btn--active', total > 0);
+    }
+  }
+
+  function openFilterSheet() {
+    sidebarEl?.classList.add('arr-sidebar--open');
+    filterBackdrop?.classList.add('arr-filter-backdrop--visible');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFilterSheet() {
+    sidebarEl?.classList.remove('arr-sidebar--open');
+    filterBackdrop?.classList.remove('arr-filter-backdrop--visible');
+    document.body.style.overflow = '';
+  }
+
+  mobileFilterBtn?.addEventListener('click', openFilterSheet);
+  sidebarCloseBtn?.addEventListener('click', closeFilterSheet);
+  filterBackdrop?.addEventListener('click', closeFilterSheet);
+
+  function applyFilters() {
+    const checked = [...document.querySelectorAll('.arr-cb:checked')].map(el => el.value);
+    const mode = document.querySelector('.arr-rb:checked')?.value ?? 'alle';
+
+    document.querySelectorAll('.arr-event-row').forEach(row => {
+      const typeOk = checked.length === 0 || checked.includes(row.dataset.type);
+      const modeOk = mode === 'alle' || row.dataset.mode === mode;
+      row.hidden = !(typeOk && modeOk);
+    });
+
+    document.querySelectorAll('.arr-date-group').forEach(group => {
+      const hasVisible = [...group.querySelectorAll('.arr-event-row')].some(r => !r.hidden);
+      group.hidden = !hasVisible;
+    });
+
+    updateFilterBadge();
+  }
+
+  document.querySelectorAll('.arr-cb, .arr-rb').forEach(el => {
+    el.addEventListener('change', applyFilters);
+  });
+
+  document.getElementById('arr-nullstill').addEventListener('click', () => {
+    document.querySelectorAll('.arr-cb').forEach(cb => { cb.checked = false; });
+    document.querySelector('.arr-rb[value="alle"]').checked = true;
+    applyFilters();
+  });
+
+  // ——— CALENDAR ———
+  const now = new Date();
+  let calYear  = now.getFullYear();
+  let calMonth = now.getMonth();
+  let calByDay = {};
+  let selectedDay = null;
+
+  function osloYMD(iso) {
+    const s = new Intl.DateTimeFormat('sv-SE', {
+      timeZone: 'Europe/Oslo', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(new Date(iso));
+    const [y, m, d] = s.split('-').map(Number);
+    return { year: y, month: m - 1, day: d };
+  }
+
+  function osloHM(iso) {
+    return new Intl.DateTimeFormat('nb-NO', {
+      timeZone: 'Europe/Oslo', hour: '2-digit', minute: '2-digit',
+    }).format(new Date(iso));
+  }
+
+  function todayYMD() {
+    const s = new Intl.DateTimeFormat('sv-SE', {
+      timeZone: 'Europe/Oslo', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(new Date());
+    const [y, m, d] = s.split('-').map(Number);
+    return { year: y, month: m - 1, day: d };
+  }
+
+  function renderDayDetail() {
+    const detail = document.getElementById('arr-cal-day-detail');
+    if (selectedDay === null || !calByDay[selectedDay]) {
+      detail.hidden = true;
+      return;
+    }
+    const evs = calByDay[selectedDay];
+
+    const dateLabel = new Intl.DateTimeFormat('nb-NO', {
+      timeZone: 'Europe/Oslo', weekday: 'long', day: 'numeric', month: 'long',
+    }).format(new Date(calYear, calMonth, selectedDay));
+    const labelCap = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1);
+
+    detail.innerHTML = '';
+
+    const pill = document.createElement('div');
+    pill.className = 'arr-cal-detail-pill';
+    pill.textContent = labelCap;
+    detail.appendChild(pill);
+
+    for (const ev of evs) {
+      const row = document.createElement('a');
+      row.href = ev.url;
+      row.className = 'arr-cal-detail-row';
+
+      const time = document.createElement('span');
+      time.className = 'arr-cal-detail-time';
+      time.textContent = osloHM(ev.startDateTime);
+
+      const body = document.createElement('span');
+      body.className = 'arr-cal-detail-body';
+
+      const title = document.createElement('span');
+      title.className = 'arr-cal-detail-title';
+      title.textContent = ev.title;
+
+      const meta = document.createElement('span');
+      meta.className = 'arr-cal-detail-meta';
+      meta.textContent = `${TYPE_LABELS[ev.type] ?? ev.type} · ${MODE_LABELS[ev.mode] ?? ev.mode}`;
+
+      body.append(title, meta);
+      row.append(time, body);
+      detail.appendChild(row);
+    }
+
+    detail.hidden = false;
+  }
+
+  function renderCalendar() {
+    document.getElementById('arr-cal-month').textContent =
+      `${MONTHS_NB[calMonth]} ${calYear}`;
+
+    const tYMD = todayYMD();
+    const firstJsDay  = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+    const firstMonDay = (firstJsDay + 6) % 7;                    // 0=Mon
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
+    const totalCells  = Math.ceil((firstMonDay + daysInMonth) / 7) * 7;
+
+    calByDay = {};
+    for (const ev of EVENTS_CLIENT) {
+      const ymd = osloYMD(ev.startDateTime);
+      if (ymd.year === calYear && ymd.month === calMonth) {
+        (calByDay[ymd.day] ??= []).push(ev);
+      }
+    }
+
+    const container = document.getElementById('arr-cal-grid');
+    while (container.children.length > 7) container.removeChild(container.lastChild);
+
+    for (let i = 0; i < totalCells; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'arr-cal-cell';
+
+      let dayNum;
+      let inMonth = false;
+
+      if (i < firstMonDay) {
+        dayNum = daysInPrev - firstMonDay + i + 1;
+        cell.classList.add('arr-cal-cell--out');
+      } else if (i >= firstMonDay + daysInMonth) {
+        dayNum = i - firstMonDay - daysInMonth + 1;
+        cell.classList.add('arr-cal-cell--out');
+      } else {
+        dayNum = i - firstMonDay + 1;
+        inMonth = true;
+        if (tYMD.year === calYear && tYMD.month === calMonth && tYMD.day === dayNum) {
+          cell.classList.add('arr-cal-cell--today');
+        }
+        if (selectedDay === dayNum) {
+          cell.classList.add('arr-cal-cell--selected');
+        }
+      }
+
+      const numEl = document.createElement('span');
+      numEl.className = 'arr-cal-day-num';
+      numEl.textContent = String(dayNum);
+      cell.appendChild(numEl);
+
+      if (inMonth && calByDay[dayNum]) {
+        for (const ev of calByDay[dayNum]) {
+          const chip = document.createElement('a');
+          chip.className = 'arr-cal-chip';
+          chip.href = ev.url;
+          const c = TYPE_COLORS[ev.type] ?? { text: '#333', tint: '#eee' };
+          chip.style.cssText = `background:${c.text};color:white`;
+          chip.textContent = `${osloHM(ev.startDateTime)} ${ev.title}`;
+          cell.appendChild(chip);
+        }
+        cell.style.cursor = 'pointer';
+        cell.addEventListener('click', (e) => {
+          if (e.target.closest('.arr-cal-chip')) return;
+          selectedDay = selectedDay === dayNum ? null : dayNum;
+          renderCalendar();
+          renderDayDetail();
+        });
+      }
+
+      container.appendChild(cell);
+    }
+  }
+
+  document.getElementById('arr-cal-prev').addEventListener('click', () => {
+    selectedDay = null;
+    if (--calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+    document.getElementById('arr-cal-day-detail').hidden = true;
+  });
+
+  document.getElementById('arr-cal-next').addEventListener('click', () => {
+    selectedDay = null;
+    if (++calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+    document.getElementById('arr-cal-day-detail').hidden = true;
+  });
+
+  renderCalendar();
+</script>
+
+<style>
+  /* ——— GLOBAL OVERRIDES ——— */
+  :global(:root) { --sl-content-width: 1220px !important; }
+  :global(body:has(#arr-index)) { background: var(--ds-color-accent-background-default); }
+  :global(.sl-container:has(#arr-index)) { max-width: 100% !important; padding: 0 !important; }
+  :global(.main-pane:has(#arr-index)) { width: 100% !important; }
+  :global(.main-pane:has(#arr-index) h1:not(.arr-h1)) { display: none; }
+  :global(.main-pane:has(#arr-index) hr) { display: none; }
+  :global(main:has(#arr-index) > .content-panel) { border-top: 0 !important; }
+
+  /* ——— ROOT ——— */
+  #arr-index {
+    --arr-serif: "PT Serif", Georgia, "Times New Roman", serif;
+    --arr-accent:  var(--ds-color-accent-text-default, #6b1c2b);
+    --arr-subtle:  var(--ds-color-neutral-text-subtle, #777);
+    --arr-border:  var(--ds-color-neutral-border-subtle, #ddd);
+    --arr-surface: var(--ds-color-accent-surface-default, #ede3dc);
+    width: min(100%, 1220px);
+    margin: 0 auto;
+    padding: var(--ds-size-12) var(--ds-size-8) var(--ds-size-15);
+    font-family: var(--arr-serif);
+  }
+
+  /* ——— TOP BAR ——— */
+  .arr-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--ds-size-10);
+    gap: var(--ds-size-4);
+    flex-wrap: wrap;
+  }
+
+  .arr-h1 {
+    margin: 0;
+    color: var(--arr-accent);
+    font-size: var(--ds-heading-2xl-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    line-height: 1.08;
+  }
+
+  /* ——— TOGGLE BUTTONS ——— */
+  .arr-toggle-group {
+    display: inline-flex;
+    background: white;
+    border: 1.5px solid var(--arr-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .arr-toggle-btn {
+    padding: var(--ds-size-2) var(--ds-size-5);
+    margin-top: 0;
+    border: none;
+    background: transparent;
+    color: var(--arr-accent);
+    font-family: var(--arr-serif);
+    font-size: var(--ds-body-md-font-size, 1rem);
+    font-weight: var(--ds-font-weight-regular, 400);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+  }
+
+  .arr-toggle-btn--active {
+    background: var(--arr-accent);
+    color: white;
+  }
+
+  .arr-toggle-btn:not(.arr-toggle-btn--active):hover {
+    background: var(--arr-surface);
+  }
+
+  /* ——— LIST LAYOUT ——— */
+  .arr-liste-layout {
+    display: flex;
+    gap: var(--ds-size-12);
+    align-items: flex-start;
+  }
+
+  /* ——— FILTER SIDEBAR ——— */
+  .arr-sidebar { flex: 0 0 200px; }
+
+  .arr-fgroup { margin-bottom: var(--ds-size-7); }
+
+  .arr-fheading {
+    margin: 0 0 var(--ds-size-3);
+    color: var(--arr-subtle);
+    font-size: 0.7rem;
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .arr-flabel {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-size-2);
+    padding: 3px 0;
+    color: var(--arr-accent);
+    font-size: var(--ds-body-sm-font-size);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .arr-cb, .arr-rb {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* Custom checkbox */
+  .arr-fcheck {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--arr-border);
+    border-radius: 3px;
+    background: white;
+    transition: background 0.1s, border-color 0.1s;
+  }
+
+  .arr-cb:checked + .arr-fcheck {
+    background: var(--arr-accent);
+    border-color: var(--arr-accent);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 5l3.5 3.5L11 1' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-size: 10px 8px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  /* Custom radio */
+  .arr-fradio {
+    position: relative;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--arr-border);
+    border-radius: 50%;
+    background: white;
+    transition: border-color 0.1s;
+  }
+
+  .arr-rb:checked + .arr-fradio { border-color: var(--arr-accent); }
+
+  .arr-rb:checked + .arr-fradio::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: var(--arr-accent);
+  }
+
+  /* Nullstill button */
+  .arr-nullstill {
+    border: none;
+    background: none;
+    padding: 0;
+    margin-top: var(--ds-size-2);
+    color: var(--arr-accent);
+    font-family: var(--arr-serif);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .arr-nullstill:hover { opacity: 0.7; }
+
+  /* ——— EVENTS MAIN ——— */
+  .arr-events-main { flex: 1; min-width: 0; }
+
+  .arr-empty {
+    color: var(--arr-subtle);
+    font-style: italic;
+  }
+
+  /* ——— DATE GROUP ——— */
+  .arr-date-group { margin-bottom: var(--ds-size-8); }
+
+  .arr-date-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--ds-size-1) var(--ds-size-4);
+    margin-bottom: var(--ds-size-3);
+    background: var(--arr-surface);
+    color: var(--arr-accent);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    border-radius: 20px;
+  }
+
+  /* ——— EVENT ROW ——— */
+  .arr-event-row {
+    display: grid;
+    grid-template-columns: 52px 1fr auto auto;
+    align-items: center;
+    gap: var(--ds-size-4);
+    padding: var(--ds-size-3) 0;
+    color: var(--arr-accent) !important;
+    text-decoration: none !important;
+  }
+
+  .arr-row-time {
+    color: var(--arr-subtle);
+    font-size: var(--ds-body-sm-font-size);
+    white-space: nowrap;
+  }
+
+  .arr-row-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .arr-row-title {
+    font-weight: var(--ds-font-weight-bold);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .arr-event-row:hover .arr-row-title { text-decoration: underline; }
+
+  .arr-row-meta {
+    color: var(--arr-subtle);
+    font-size: var(--ds-body-sm-font-size);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .arr-row-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px var(--ds-size-2);
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .arr-row-arrow {
+    color: var(--arr-subtle);
+    font-size: var(--ds-body-sm-font-size);
+  }
+
+  /* ——— MOBILE FILTER BAR (hidden on desktop) ——— */
+  .arr-mobile-bar { display: none; }
+  .arr-filter-backdrop { display: none; }
+  .arr-sidebar-mobile-hdr { display: none; }
+
+  /* ——— CALENDAR HEADER ——— */
+  .arr-cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--ds-size-6);
+    gap: var(--ds-size-4);
+    flex-wrap: wrap;
+  }
+
+  .arr-cal-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-size-4);
+  }
+
+  .arr-cal-nav-btn {
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid var(--arr-border);
+    border-radius: 8px;
+    background: white;
+    color: var(--arr-accent);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+  }
+
+  .arr-cal-nav-btn:hover { background: var(--arr-surface); }
+
+  .arr-cal-month {
+    font-size: var(--ds-heading-md-font-size, 1.5rem);
+    font-weight: var(--ds-font-weight-bold);
+    color: var(--arr-accent);
+    min-width: 160px;
+  }
+
+  .arr-cal-legend {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-size-5);
+    flex-wrap: wrap;
+  }
+
+  .arr-legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-size-2);
+    font-size: var(--ds-body-sm-font-size);
+    color: var(--arr-subtle);
+  }
+
+  .arr-legend-dot {
+    width: 16px;
+    height: 11px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* ——— CALENDAR GRID ——— */
+  .arr-cal-grid-outer {
+    border: 1px solid var(--arr-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .arr-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  /* Header cells share the same columns as body cells */
+  .arr-cal-hdr {
+    padding: 8px 12px;
+    border-right: 1px solid var(--arr-border);
+    border-bottom: 1px solid var(--arr-border);
+    color: var(--arr-subtle);
+    font-size: 0.7rem;
+    font-weight: var(--ds-font-weight-bold);
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+
+  .arr-cal-hdr:nth-child(7) { border-right: none; }
+
+  /* Neutralise the global * + * margin rule that Starlight/Designsystemet injects */
+  :global(#arr-cal-grid > *) { margin-top: 0 !important; }
+
+  /* All calendar cell rules use :global() because the cells are JS-generated */
+  :global(.arr-cal-cell) {
+    min-height: 110px;
+    padding: 6px 8px;
+    border-right: 1px solid var(--ds-color-neutral-border-subtle, #ddd);
+    border-bottom: 1px solid var(--ds-color-neutral-border-subtle, #ddd);
+    vertical-align: top;
+    font-family: "PT Serif", Georgia, "Times New Roman", serif;
+  }
+
+  :global(.arr-cal-cell:nth-child(7n)) { border-right: none; }
+  :global(#arr-cal-grid .arr-cal-cell:nth-last-child(-n+7)) { border-bottom: none; }
+
+  /* Weekday cells (Mon–Fri): white background */
+  :global(.arr-cal-cell:nth-child(7n+1)),
+  :global(.arr-cal-cell:nth-child(7n+2)),
+  :global(.arr-cal-cell:nth-child(7n+3)),
+  :global(.arr-cal-cell:nth-child(7n+4)),
+  :global(.arr-cal-cell:nth-child(7n+5)) { background: white; }
+
+  /* Weekend cells (Sat–Sun): muted day numbers */
+  :global(.arr-cal-cell:nth-child(7n+6) .arr-cal-day-num),
+  :global(.arr-cal-cell:nth-child(7n) .arr-cal-day-num) { opacity: 0.4; }
+
+  :global(.arr-cal-day-num) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-size: 0.875rem;
+    color: var(--ds-color-accent-text-default, #6b1c2b);
+    margin-bottom: 4px;
+  }
+
+  :global(.arr-cal-cell--out .arr-cal-day-num) {
+    color: var(--ds-color-neutral-text-subtle, #777);
+    opacity: 0.45;
+  }
+
+  :global(.arr-cal-cell--today .arr-cal-day-num) {
+    background: var(--ds-color-accent-text-default, #6b1c2b);
+    color: white;
+  }
+
+  :global(.arr-cal-cell--selected .arr-cal-day-num) {
+    outline: 2px solid var(--ds-color-accent-text-default, #6b1c2b);
+    outline-offset: 1px;
+  }
+
+  :global(.arr-cal-chip) {
+    display: block;
+    padding: 3px 6px;
+    margin-bottom: 3px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-decoration: none !important;
+    color: white !important;
+    overflow: hidden;
+    transition: opacity 0.1s;
+  }
+
+  :global(.arr-cal-chip:hover) { opacity: 0.8; }
+
+  /* ——— CALENDAR DAY DETAIL ——— */
+  #arr-cal-day-detail {
+    margin-top: var(--ds-size-6);
+  }
+
+  :global(.arr-cal-detail-pill) {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--ds-size-1) var(--ds-size-4);
+    margin-bottom: var(--ds-size-3);
+    background: var(--arr-surface);
+    color: var(--arr-accent);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    border-radius: 20px;
+  }
+
+  :global(.arr-cal-detail-row) {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    align-items: center;
+    gap: var(--ds-size-4);
+    padding: var(--ds-size-4) 0;
+    border-top: 1px solid var(--arr-border);
+    color: var(--arr-accent) !important;
+    text-decoration: none !important;
+  }
+
+  :global(.arr-cal-detail-row:last-child) {
+    border-bottom: 1px solid var(--arr-border);
+  }
+
+  :global(.arr-cal-detail-row:hover .arr-cal-detail-title) {
+    text-decoration: underline;
+  }
+
+  :global(.arr-cal-detail-time) {
+    color: var(--arr-subtle);
+    font-size: var(--ds-body-sm-font-size);
+    white-space: nowrap;
+  }
+
+  :global(.arr-cal-detail-body) {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  :global(.arr-cal-detail-title) {
+    font-weight: var(--ds-font-weight-bold);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :global(.arr-cal-detail-meta) {
+    color: var(--arr-subtle);
+    font-size: var(--ds-body-sm-font-size);
+  }
+
+  /* ——— RESPONSIVE ——— */
+  @media (max-width: 700px) {
+    .arr-topbar { flex-direction: column; align-items: flex-start; }
+
+    .arr-liste-layout { flex-direction: column; }
+
+    .arr-event-row {
+      grid-template-columns: 46px 1fr auto;
+    }
+
+    .arr-row-arrow { display: none; }
+
+    /* Allow title to wrap on mobile */
+    .arr-row-title { white-space: normal; }
+
+    .arr-cal-month { min-width: unset; }
+
+    /* ——— MOBILE FILTER BAR ——— */
+    .arr-mobile-bar {
+      display: flex;
+      margin-bottom: var(--ds-size-5);
+    }
+
+    .arr-mobile-filter-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ds-size-2);
+      padding: var(--ds-size-2) var(--ds-size-5);
+      border: 1.5px solid var(--arr-accent);
+      border-radius: 8px;
+      background: white;
+      color: var(--arr-accent);
+      font-family: var(--arr-serif);
+      font-size: var(--ds-body-md-font-size, 1rem);
+      font-weight: var(--ds-font-weight-regular, 400);
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+
+    .arr-mobile-filter-btn:hover { background: var(--arr-surface); }
+
+    .arr-mobile-filter-btn--active {
+      background: var(--arr-accent);
+      color: white;
+    }
+
+    /* ——— BACKDROP ——— */
+    .arr-filter-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 99;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .arr-filter-backdrop--visible {
+      display: block;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ——— SIDEBAR AS BOTTOM SHEET ——— */
+    .arr-sidebar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 16px 16px 0 0;
+      padding: var(--ds-size-6);
+      z-index: 100;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .arr-sidebar--open {
+      transform: translateY(0);
+    }
+
+    .arr-sidebar-mobile-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--ds-size-6);
+    }
+
+    .arr-sidebar-mobile-title {
+      color: var(--arr-accent);
+      font-size: var(--ds-heading-sm-font-size, 1.25rem);
+      font-weight: var(--ds-font-weight-bold);
+    }
+
+    .arr-sidebar-mobile-close {
+      border: none;
+      background: none;
+      color: var(--arr-subtle);
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    :global(.arr-cal-cell) {
+      min-height: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 2px;
+    }
+
+    :global(.arr-cal-chip) {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      font-size: 0;
+      padding: 0;
+      margin-bottom: 2px;
+      pointer-events: none;
+      display: inline-block;
+      overflow: hidden;
+    }
+  }
+</style>
