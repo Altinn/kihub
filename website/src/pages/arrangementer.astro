@@ -175,14 +175,8 @@ const EVENTS_CLIENT = events.map(e => ({
   </div>
 </StarlightPage>
 
-<script define:vars={{ EVENTS_CLIENT, TYPE_LABELS, MODE_LABELS }}>
-  const TYPE_COLORS_JS = {
-    webinar:    { text: "#b42a46", tint: "#f7dfe4" },
-    verksted:   { text: "#a2571c", tint: "#f6e7d5" },
-    kurs:       { text: "#3b7357", tint: "#dcece3" },
-    konferanse: { text: "#63478a", tint: "#e7dcf1" },
-    internt:    { text: "#7a5b60", tint: "#ece0e1" },
-  };
+<script define:vars={{ EVENTS_CLIENT, TYPE_LABELS, MODE_LABELS, TYPE_COLORS }}>
+
 
   const MONTHS_NB = [
     "Januar","Februar","Mars","April","Mai","Juni",
@@ -401,7 +395,7 @@ const EVENTS_CLIENT = events.map(e => ({
           const chip = document.createElement('a');
           chip.className = 'arr-cal-chip';
           chip.href = ev.url;
-          const c = TYPE_COLORS_JS[ev.type] ?? { text: '#333', tint: '#eee' };
+          const c = TYPE_COLORS[ev.type] ?? { text: '#333', tint: '#eee' };
           chip.style.cssText = `background:${c.text};color:white`;
           chip.textContent = `${osloHM(ev.startDateTime)} ${ev.title}`;
           cell.appendChild(chip);

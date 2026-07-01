@@ -82,11 +82,19 @@ async function resolveResourceTitle(
   const jsonFile = RESOURCE_TYPE_TO_JSON[type];
   if (!jsonFile) return fallback;
 
-  if (!(jsonFile in resourceDataCache)) {
-    resourceDataCache[jsonFile] = await fetchData<ResourceData>(jsonFile);
+  // Skills reuse the shared getSkillsData() cache so that a concurrent
+  // configureSkillFileSwitcher() call in the same Promise.all doesn't
+  // trigger a second parallel fetch of skills.json.
+  let data: ResourceData | null;
+  if (type === "skill") {
+    data = await getSkillsData();
+  } else {
+    if (!(jsonFile in resourceDataCache)) {
+      resourceDataCache[jsonFile] = await fetchData<ResourceData>(jsonFile);
+    }
+    data = resourceDataCache[jsonFile];
   }
 
-  const data = resourceDataCache[jsonFile];
   if (!data) return fallback;
 
   // Try exact path match first
@@ -437,7 +445,7 @@ interface PluginsData {
   items: Plugin[];
 }
 
-let pluginsCache: PluginsData | null = null;
+let pluginsCache: PluginsData | null | undefined;
 
 /**
  * Get all focusable elements within a container
@@ -971,8 +979,8 @@ async function openPluginModal(
       '<div class="collection-loading">Loading plugin...</div>';
   }
 
-  // Load plugins data if not cached
-  if (!pluginsCache) {
+  // Load plugins data if not cached (undefined = not attempted; null = attempted but failed)
+  if (pluginsCache === undefined) {
     pluginsCache = await fetchData<PluginsData>("plugins.json");
   }
 
@@ -1109,13 +1117,11 @@ function renderExternalPluginModal(
         ${licenseHtml}
         ${sourceHtml}
       </div>
-      <div class="external-plugin-cta">
-        <a href="${sanitizeUrl(
-          repoUrl
-        )}" class="ds-button external-plugin-repo-btn" target="_blank" rel="noopener noreferrer">
+      ${repoUrl !== "#" ? `<div class="external-plugin-cta">
+        <a href="${sanitizeUrl(repoUrl)}" class="ds-button external-plugin-repo-btn" target="_blank" rel="noopener noreferrer">
           View Repository
         </a>
-      </div>
+      </div>` : ""}
       <div class="external-plugin-note">
         This is an external plugin maintained outside this repository. Browse the repository to see its contents and installation instructions.
       </div>

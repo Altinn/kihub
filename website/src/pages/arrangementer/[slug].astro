@@ -11,6 +11,7 @@ import {
   formatEventMonthShort,
   generateIcsDataUrl,
   getSpotsLabel,
+  isEventFull,
   getAllEvents,
   getEventUrl,
   withBasePath,
@@ -20,13 +21,18 @@ export async function getStaticPaths() {
   const events = await getAllEvents();
   return events.map((event) => ({
     params: { slug: event.id },
-    props: { event },
+    props: {
+      event,
+      relatedEvents: event.data.relatedEventIds
+        .map((id) => events.find((e) => e.id === id))
+        .filter((e): e is CollectionEntry<"arrangementer"> => e !== undefined),
+    },
   }));
 }
 
-type Props = { event: CollectionEntry<"arrangementer"> };
+type Props = { event: CollectionEntry<"arrangementer">; relatedEvents: CollectionEntry<"arrangementer">[] };
 
-const { event } = Astro.props;
+const { event, relatedEvents } = Astro.props;
 const { Content } = await render(event);
 const base = import.meta.env.BASE_URL;
 const ev = event.data;
@@ -39,7 +45,7 @@ const timeStart = formatEventTime(ev.startDateTime);
 const timeEnd = formatEventTime(ev.endDateTime);
 const timeRange = `${timeStart}–${timeEnd}`;
 const icsUrl = generateIcsDataUrl(event);
-const isFull = ev.status === "full" || (ev.capacity !== null && ev.capacity - ev.registeredCount <= 0);
+const isFull = isEventFull(event);
 const spotsLabel = getSpotsLabel(event);
 
 const locationMain = ev.locationAddress ?? ev.locationName;
@@ -52,11 +58,6 @@ const emailSubject = encodeURIComponent(ev.title);
 const emailBody = encodeURIComponent(`${ev.ingress}\n\nLes mer: ${eventUrl}`);
 const teamsUrl = `https://teams.microsoft.com/share?href=${encodeURIComponent(eventUrl)}&msgText=${encodeURIComponent(ev.title)}`;
 
-// Resolve related events
-const allEvents = await getAllEvents();
-const relatedEvents = ev.relatedEventIds
-  .map((id) => allEvents.find((e) => e.id === id))
-  .filter((e): e is CollectionEntry<"arrangementer"> => e !== undefined);
 ---
 
 <StarlightPage

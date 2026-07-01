@@ -12,6 +12,7 @@ import {
   getEventUrl,
   getUpcomingEvents,
   getSpotsLabel,
+  isEventFull,
 } from "../lib/events";
 
 const base = import.meta.env.BASE_URL;
@@ -31,7 +32,7 @@ const nextTime = formatEventTime(next.startDateTime);
 const nextIcs = generateIcsDataUrl(nextEvent);
 const nextUrl = getEventUrl(base, nextEvent);
 const spotsLabel = getSpotsLabel(nextEvent);
-const isFull = next.status === "full" || (next.capacity !== null && next.capacity - next.registeredCount <= 0);
+const isFull = isEventFull(nextEvent);
 ---
 
 <section class="ev-section" aria-labelledby="ev-heading">

@@ -68,10 +68,15 @@ export const formatEventShortDate = (date: Date) => {
 export const formatEventLongDate = (date: Date) =>
   osloFmt(date, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
+export const isEventFull = (event: ArrangementEvent): boolean =>
+  event.data.status === "full" ||
+  (event.data.capacity !== null && event.data.capacity - event.data.registeredCount <= 0);
+
 export const getSpotsLabel = (event: ArrangementEvent): string => {
   if (event.data.status === "full") return "Fullbooket";
   if (event.data.capacity === null) return "Åpen for alle";
   const left = event.data.capacity - event.data.registeredCount;
+  if (left <= 0) return "Fullbooket";
   return `${left} av ${event.data.capacity} plasser igjen`;
 };
 
@@ -88,7 +93,7 @@ export const generateIcsContent = (event: ArrangementEvent) => {
     `DTEND:${fmt(endDateTime)}`,
     `SUMMARY:${title.replace(/[,;\\]/g, (c) => `\\${c}`)}`,
     `DESCRIPTION:${ingress.replace(/[,;\\]/g, (c) => `\\${c}`).replace(/\n/g, "\\n")}`,
-    `LOCATION:${locationName}`,
+    `LOCATION:${locationName.replace(/[,;\\]/g, (c) => `\\${c}`)}`,
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");
