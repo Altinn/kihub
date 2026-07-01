@@ -55,16 +55,24 @@ const EVENTS_CLIENT = events.map(e => ({
     <div class="arr-topbar">
       <h1 class="arr-h1">Arrangementer</h1>
       <div class="arr-toggle-group" role="group" aria-label="Velg visning">
-        <button class="arr-toggle-btn arr-toggle-btn--active" id="btn-liste" aria-pressed="true">Liste</button>
-        <button class="arr-toggle-btn" id="btn-kalender" aria-pressed="false">Kalender</button>
+        <button class="arr-toggle-btn arr-toggle-btn--active" id="btn-kalender" aria-pressed="true">Kalender</button>
+        <button class="arr-toggle-btn" id="btn-liste" aria-pressed="false">Liste</button>
       </div>
     </div>
 
     <!-- ——— LIST VIEW ——— -->
-    <div id="arr-liste" class="arr-view">
+    <div id="arr-liste" class="arr-view" hidden>
+      <div class="arr-filter-backdrop" id="arr-filter-backdrop"></div>
+      <div class="arr-mobile-bar">
+        <button class="arr-mobile-filter-btn" id="arr-mobile-filter-btn">Filtrer</button>
+      </div>
       <div class="arr-liste-layout">
 
         <aside class="arr-sidebar" aria-label="Filtrer arrangementer">
+          <div class="arr-sidebar-mobile-hdr">
+            <span class="arr-sidebar-mobile-title">Filter</span>
+            <button class="arr-sidebar-mobile-close" id="arr-sidebar-close" aria-label="Lukk filter">✕</button>
+          </div>
           <div class="arr-fgroup">
             <p class="arr-fheading">TYPE</p>
             {Object.entries(TYPE_LABELS).map(([key, label]) => (
@@ -131,7 +139,7 @@ const EVENTS_CLIENT = events.map(e => ({
     </div>
 
     <!-- ——— CALENDAR VIEW ——— -->
-    <div id="arr-kalender" class="arr-view" hidden>
+    <div id="arr-kalender" class="arr-view">
       <div class="arr-cal-header">
         <div class="arr-cal-nav">
           <button class="arr-cal-nav-btn" id="arr-cal-prev" aria-label="Forrige måned">‹</button>
@@ -161,12 +169,13 @@ const EVENTS_CLIENT = events.map(e => ({
           <div class="arr-cal-hdr">SØN</div>
         </div>
       </div>
+      <div id="arr-cal-day-detail" hidden></div>
     </div>
 
   </div>
 </StarlightPage>
 
-<script define:vars={{ EVENTS_CLIENT }}>
+<script define:vars={{ EVENTS_CLIENT, TYPE_LABELS, MODE_LABELS }}>
   const TYPE_COLORS_JS = {
     webinar:    { text: "#b42a46", tint: "#f7dfe4" },
     verksted:   { text: "#a2571c", tint: "#f6e7d5" },
@@ -200,6 +209,37 @@ const EVENTS_CLIENT = events.map(e => ({
   btnKalender.addEventListener('click', () => setView('kalender'));
 
   // ——— FILTER LOGIC ———
+  const mobileFilterBtn  = document.getElementById('arr-mobile-filter-btn');
+  const filterBackdrop   = document.getElementById('arr-filter-backdrop');
+  const sidebarEl        = document.querySelector('.arr-sidebar');
+  const sidebarCloseBtn  = document.getElementById('arr-sidebar-close');
+
+  function updateFilterBadge() {
+    const typeCount  = document.querySelectorAll('.arr-cb:checked').length;
+    const modeActive = (document.querySelector('.arr-rb:checked')?.value ?? 'alle') !== 'alle' ? 1 : 0;
+    const total = typeCount + modeActive;
+    if (mobileFilterBtn) {
+      mobileFilterBtn.textContent = total > 0 ? `Filtrer (${total})` : 'Filtrer';
+      mobileFilterBtn.classList.toggle('arr-mobile-filter-btn--active', total > 0);
+    }
+  }
+
+  function openFilterSheet() {
+    sidebarEl?.classList.add('arr-sidebar--open');
+    filterBackdrop?.classList.add('arr-filter-backdrop--visible');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFilterSheet() {
+    sidebarEl?.classList.remove('arr-sidebar--open');
+    filterBackdrop?.classList.remove('arr-filter-backdrop--visible');
+    document.body.style.overflow = '';
+  }
+
+  mobileFilterBtn?.addEventListener('click', openFilterSheet);
+  sidebarCloseBtn?.addEventListener('click', closeFilterSheet);
+  filterBackdrop?.addEventListener('click', closeFilterSheet);
+
   function applyFilters() {
     const checked = [...document.querySelectorAll('.arr-cb:checked')].map(el => el.value);
     const mode = document.querySelector('.arr-rb:checked')?.value ?? 'alle';
@@ -214,6 +254,8 @@ const EVENTS_CLIENT = events.map(e => ({
       const hasVisible = [...group.querySelectorAll('.arr-event-row')].some(r => !r.hidden);
       group.hidden = !hasVisible;
     });
+
+    updateFilterBadge();
   }
 
   document.querySelectorAll('.arr-cb, .arr-rb').forEach(el => {
@@ -230,6 +272,8 @@ const EVENTS_CLIENT = events.map(e => ({
   const now = new Date();
   let calYear  = now.getFullYear();
   let calMonth = now.getMonth();
+  let calByDay = {};
+  let selectedDay = null;
 
   function osloYMD(iso) {
     const s = new Intl.DateTimeFormat('sv-SE', {
@@ -253,6 +297,54 @@ const EVENTS_CLIENT = events.map(e => ({
     return { year: y, month: m - 1, day: d };
   }
 
+  function renderDayDetail() {
+    const detail = document.getElementById('arr-cal-day-detail');
+    if (selectedDay === null || !calByDay[selectedDay]) {
+      detail.hidden = true;
+      return;
+    }
+    const evs = calByDay[selectedDay];
+
+    const dateLabel = new Intl.DateTimeFormat('nb-NO', {
+      timeZone: 'Europe/Oslo', weekday: 'long', day: 'numeric', month: 'long',
+    }).format(new Date(calYear, calMonth, selectedDay));
+    const labelCap = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1);
+
+    detail.innerHTML = '';
+
+    const pill = document.createElement('div');
+    pill.className = 'arr-cal-detail-pill';
+    pill.textContent = labelCap;
+    detail.appendChild(pill);
+
+    for (const ev of evs) {
+      const row = document.createElement('a');
+      row.href = ev.url;
+      row.className = 'arr-cal-detail-row';
+
+      const time = document.createElement('span');
+      time.className = 'arr-cal-detail-time';
+      time.textContent = osloHM(ev.startDateTime);
+
+      const body = document.createElement('span');
+      body.className = 'arr-cal-detail-body';
+
+      const title = document.createElement('span');
+      title.className = 'arr-cal-detail-title';
+      title.textContent = ev.title;
+
+      const meta = document.createElement('span');
+      meta.className = 'arr-cal-detail-meta';
+      meta.textContent = `${TYPE_LABELS[ev.type] ?? ev.type} · ${MODE_LABELS[ev.mode] ?? ev.mode}`;
+
+      body.append(title, meta);
+      row.append(time, body);
+      detail.appendChild(row);
+    }
+
+    detail.hidden = false;
+  }
+
   function renderCalendar() {
     document.getElementById('arr-cal-month').textContent =
       `${MONTHS_NB[calMonth]} ${calYear}`;
@@ -264,16 +356,15 @@ const EVENTS_CLIENT = events.map(e => ({
     const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
     const totalCells  = Math.ceil((firstMonDay + daysInMonth) / 7) * 7;
 
-    const byDay = {};
+    calByDay = {};
     for (const ev of EVENTS_CLIENT) {
       const ymd = osloYMD(ev.startDateTime);
       if (ymd.year === calYear && ymd.month === calMonth) {
-        (byDay[ymd.day] ??= []).push(ev);
+        (calByDay[ymd.day] ??= []).push(ev);
       }
     }
 
     const container = document.getElementById('arr-cal-grid');
-    // Remove old day cells, keep the first 7 weekday header children
     while (container.children.length > 7) container.removeChild(container.lastChild);
 
     for (let i = 0; i < totalCells; i++) {
@@ -295,6 +386,9 @@ const EVENTS_CLIENT = events.map(e => ({
         if (tYMD.year === calYear && tYMD.month === calMonth && tYMD.day === dayNum) {
           cell.classList.add('arr-cal-cell--today');
         }
+        if (selectedDay === dayNum) {
+          cell.classList.add('arr-cal-cell--selected');
+        }
       }
 
       const numEl = document.createElement('span');
@@ -302,8 +396,8 @@ const EVENTS_CLIENT = events.map(e => ({
       numEl.textContent = String(dayNum);
       cell.appendChild(numEl);
 
-      if (inMonth && byDay[dayNum]) {
-        for (const ev of byDay[dayNum]) {
+      if (inMonth && calByDay[dayNum]) {
+        for (const ev of calByDay[dayNum]) {
           const chip = document.createElement('a');
           chip.className = 'arr-cal-chip';
           chip.href = ev.url;
@@ -312,6 +406,13 @@ const EVENTS_CLIENT = events.map(e => ({
           chip.textContent = `${osloHM(ev.startDateTime)} ${ev.title}`;
           cell.appendChild(chip);
         }
+        cell.style.cursor = 'pointer';
+        cell.addEventListener('click', (e) => {
+          if (e.target.closest('.arr-cal-chip')) return;
+          selectedDay = selectedDay === dayNum ? null : dayNum;
+          renderCalendar();
+          renderDayDetail();
+        });
       }
 
       container.appendChild(cell);
@@ -319,14 +420,20 @@ const EVENTS_CLIENT = events.map(e => ({
   }
 
   document.getElementById('arr-cal-prev').addEventListener('click', () => {
+    selectedDay = null;
     if (--calMonth < 0) { calMonth = 11; calYear--; }
     renderCalendar();
+    document.getElementById('arr-cal-day-detail').hidden = true;
   });
 
   document.getElementById('arr-cal-next').addEventListener('click', () => {
+    selectedDay = null;
     if (++calMonth > 11) { calMonth = 0; calYear++; }
     renderCalendar();
+    document.getElementById('arr-cal-day-detail').hidden = true;
   });
+
+  renderCalendar();
 </script>
 
 <style>
@@ -335,6 +442,9 @@ const EVENTS_CLIENT = events.map(e => ({
   :global(body:has(#arr-index)) { background: var(--ds-color-accent-background-default); }
   :global(.sl-container:has(#arr-index)) { max-width: 100% !important; padding: 0 !important; }
   :global(.main-pane:has(#arr-index)) { width: 100% !important; }
+  :global(.main-pane:has(#arr-index) h1:not(.arr-h1)) { display: none; }
+  :global(.main-pane:has(#arr-index) hr) { display: none; }
+  :global(main:has(#arr-index) > .content-panel) { border-top: 0 !important; }
 
   /* ——— ROOT ——— */
   #arr-index {
@@ -524,14 +634,9 @@ const EVENTS_CLIENT = events.map(e => ({
     grid-template-columns: 52px 1fr auto auto;
     align-items: center;
     gap: var(--ds-size-4);
-    padding: var(--ds-size-4) 0;
-    border-top: 1px solid var(--arr-border);
+    padding: var(--ds-size-3) 0;
     color: var(--arr-accent) !important;
     text-decoration: none !important;
-  }
-
-  .arr-date-group .arr-event-row:last-child {
-    border-bottom: 1px solid var(--arr-border);
   }
 
   .arr-row-time {
@@ -579,6 +684,11 @@ const EVENTS_CLIENT = events.map(e => ({
     color: var(--arr-subtle);
     font-size: var(--ds-body-sm-font-size);
   }
+
+  /* ——— MOBILE FILTER BAR (hidden on desktop) ——— */
+  .arr-mobile-bar { display: none; }
+  .arr-filter-backdrop { display: none; }
+  .arr-sidebar-mobile-hdr { display: none; }
 
   /* ——— CALENDAR HEADER ——— */
   .arr-cal-header {
@@ -718,6 +828,11 @@ const EVENTS_CLIENT = events.map(e => ({
     color: white;
   }
 
+  :global(.arr-cal-cell--selected .arr-cal-day-num) {
+    outline: 2px solid var(--ds-color-accent-text-default, #6b1c2b);
+    outline-offset: 1px;
+  }
+
   :global(.arr-cal-chip) {
     display: block;
     padding: 3px 6px;
@@ -734,13 +849,72 @@ const EVENTS_CLIENT = events.map(e => ({
 
   :global(.arr-cal-chip:hover) { opacity: 0.8; }
 
+  /* ——— CALENDAR DAY DETAIL ——— */
+  #arr-cal-day-detail {
+    margin-top: var(--ds-size-6);
+  }
+
+  :global(.arr-cal-detail-pill) {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--ds-size-1) var(--ds-size-4);
+    margin-bottom: var(--ds-size-3);
+    background: var(--arr-surface);
+    color: var(--arr-accent);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-bold);
+    border-radius: 20px;
+  }
+
+  :global(.arr-cal-detail-row) {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    align-items: center;
+    gap: var(--ds-size-4);
+    padding: var(--ds-size-4) 0;
+    border-top: 1px solid var(--arr-border);
+    color: var(--arr-accent) !important;
+    text-decoration: none !important;
+  }
+
+  :global(.arr-cal-detail-row:last-child) {
+    border-bottom: 1px solid var(--arr-border);
+  }
+
+  :global(.arr-cal-detail-row:hover .arr-cal-detail-title) {
+    text-decoration: underline;
+  }
+
+  :global(.arr-cal-detail-time) {
+    color: var(--arr-subtle);
+    font-size: var(--ds-body-sm-font-size);
+    white-space: nowrap;
+  }
+
+  :global(.arr-cal-detail-body) {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  :global(.arr-cal-detail-title) {
+    font-weight: var(--ds-font-weight-bold);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :global(.arr-cal-detail-meta) {
+    color: var(--arr-subtle);
+    font-size: var(--ds-body-sm-font-size);
+  }
+
   /* ——— RESPONSIVE ——— */
   @media (max-width: 700px) {
     .arr-topbar { flex-direction: column; align-items: flex-start; }
 
     .arr-liste-layout { flex-direction: column; }
-
-    .arr-sidebar { width: 100%; }
 
     .arr-event-row {
       grid-template-columns: 46px 1fr auto;
@@ -748,10 +922,118 @@ const EVENTS_CLIENT = events.map(e => ({
 
     .arr-row-arrow { display: none; }
 
-    .arr-cal-cell { min-height: 64px; }
-
-    .arr-cal-chip { font-size: 0.6rem; }
+    /* Allow title to wrap on mobile */
+    .arr-row-title { white-space: normal; }
 
     .arr-cal-month { min-width: unset; }
+
+    /* ——— MOBILE FILTER BAR ——— */
+    .arr-mobile-bar {
+      display: flex;
+      margin-bottom: var(--ds-size-5);
+    }
+
+    .arr-mobile-filter-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ds-size-2);
+      padding: var(--ds-size-2) var(--ds-size-5);
+      border: 1.5px solid var(--arr-accent);
+      border-radius: 8px;
+      background: white;
+      color: var(--arr-accent);
+      font-family: var(--arr-serif);
+      font-size: var(--ds-body-md-font-size, 1rem);
+      font-weight: var(--ds-font-weight-regular, 400);
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+
+    .arr-mobile-filter-btn:hover { background: var(--arr-surface); }
+
+    .arr-mobile-filter-btn--active {
+      background: var(--arr-accent);
+      color: white;
+    }
+
+    /* ——— BACKDROP ——— */
+    .arr-filter-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 99;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .arr-filter-backdrop--visible {
+      display: block;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ——— SIDEBAR AS BOTTOM SHEET ——— */
+    .arr-sidebar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 16px 16px 0 0;
+      padding: var(--ds-size-6);
+      z-index: 100;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .arr-sidebar--open {
+      transform: translateY(0);
+    }
+
+    .arr-sidebar-mobile-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--ds-size-6);
+    }
+
+    .arr-sidebar-mobile-title {
+      color: var(--arr-accent);
+      font-size: var(--ds-heading-sm-font-size, 1.25rem);
+      font-weight: var(--ds-font-weight-bold);
+    }
+
+    .arr-sidebar-mobile-close {
+      border: none;
+      background: none;
+      color: var(--arr-subtle);
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    :global(.arr-cal-cell) {
+      min-height: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 2px;
+    }
+
+    :global(.arr-cal-chip) {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      font-size: 0;
+      padding: 0;
+      margin-bottom: 2px;
+      pointer-events: none;
+      display: inline-block;
+      overflow: hidden;
+    }
   }
 </style>

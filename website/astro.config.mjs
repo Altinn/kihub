@@ -23,6 +23,7 @@ export default defineConfig({
   site,
   base,
   output: "static",
+  server: { port: parseInt(process.env.PORT || "4323") },
   integrations: [
     starlight({
       title: "KI Hub",
