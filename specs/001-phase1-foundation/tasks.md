@@ -32,14 +32,14 @@ Content lives only in the sibling `ai-artifacts` repository.
 
 **Purpose**: Initialize the monorepo and the app skeleton
 
-- [ ] T001 Create pnpm workspace at repo root: `pnpm-workspace.yaml` (globs `apps/*`, `packages/*`) and root `package.json` (private, engines: node 22)
-- [ ] T002 [P] Add shared TypeScript config `tsconfig.base.json` at repo root
-- [ ] T003 [P] Configure ESLint + Prettier at repo root (`.eslintrc`, `.prettierrc`)
-- [ ] T004 [P] Add root `.gitignore` (node_modules, .env*, .next, dist, coverage)
-- [ ] T005 Scaffold Next.js 15 (App Router, TypeScript) app in `apps/web/`
-- [ ] T006 [P] Add local PostgreSQL 16 service in `apps/web/docker-compose.yml`
-- [ ] T007 [P] Add `apps/web/.env.example` with `DATABASE_URI`, `AUTH_SECRET`, `AUTH_MODE` (`mock`|`entra`, default `mock` for local dev), and the `AUTH_MICROSOFT_ENTRA_ID_ID`/`_SECRET`/`_ISSUER` values (used only when `AUTH_MODE=entra`)
-- [ ] T008 [P] Configure Vitest in `apps/web` (test + coverage scripts) and root `test` script wiring pnpm filters
+- [X] T001 Create pnpm workspace at repo root: `pnpm-workspace.yaml` (globs `apps/*`, `packages/*`) and root `package.json` (private, engines: node 22)
+- [X] T002 [P] Add shared TypeScript config `tsconfig.base.json` at repo root
+- [X] T003 [P] Configure ESLint + Prettier at repo root (`.eslintrc`, `.prettierrc`)
+- [X] T004 [P] Add root `.gitignore` (node_modules, .env*, .next, dist, coverage)
+- [X] T005 Scaffold Next.js 15 (App Router, TypeScript) app in `apps/web/`
+- [X] T006 [P] Add local PostgreSQL 16 service in `apps/web/docker-compose.yml`
+- [X] T007 [P] Add `apps/web/.env.example` with `DATABASE_URI`, `AUTH_SECRET`, `AUTH_MODE` (`mock`|`entra`, default `mock` for local dev), and the `AUTH_MICROSOFT_ENTRA_ID_ID`/`_SECRET`/`_ISSUER` values (used only when `AUTH_MODE=entra`)
+- [X] T008 [P] Configure Vitest in `apps/web` (test + coverage scripts) and root `test` script wiring pnpm filters
 
 ---
 
@@ -49,12 +49,12 @@ Content lives only in the sibling `ai-artifacts` repository.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T009 Install Payload CMS 3.x + `@payloadcms/db-postgres` in `apps/web`
-- [ ] T010 Create `apps/web/src/payload.config.ts` with `postgresAdapter({ pool: { connectionString: process.env.DATABASE_URI } })` and a minimal boot config (no content collections)
-- [ ] T011 Wire Payload into the App Router (`apps/web/src/app/(payload)/` admin route group) and verify the app + Payload boot against local Postgres (`pnpm --filter web dev`)
-- [ ] T012 [P] Install Designsystemet packages in `apps/web`: `@digdir/designsystemet-react`, `@digdir/designsystemet-css`, dev `@digdir/designsystemet`, `@digdir/designsystemet-types`
-- [ ] T013 Generate/build the theme via `@digdir/designsystemet` CLI (`apps/web/designsystemet.config.json`) — Digdir default theme
-- [ ] T014 Create root layout `apps/web/src/app/layout.tsx` importing `@digdir/designsystemet-css` + theme CSS and setting `data-color-scheme="light"` / `data-size="md"` on `<html>` (depends on T012, T013)
+- [X] T009 Install Payload CMS 3.x + `@payloadcms/db-postgres` in `apps/web`
+- [X] T010 Create `apps/web/src/payload.config.ts` with `postgresAdapter({ pool: { connectionString: process.env.DATABASE_URI } })` and a minimal boot config (no content collections)
+- [X] T011 Wire Payload into the App Router (`apps/web/src/app/(payload)/` admin route group) and verify the app + Payload boot against local Postgres (`pnpm --filter web dev`)
+- [X] T012 [P] Install Designsystemet packages in `apps/web`: `@digdir/designsystemet-react`, `@digdir/designsystemet-css`, dev `@digdir/designsystemet`, `@digdir/designsystemet-types`
+- [X] T013 Generate/build the theme via `@digdir/designsystemet` CLI (`apps/web/designsystemet.config.json`) — Digdir default theme
+- [X] T014 Create root layout `apps/web/src/app/layout.tsx` importing `@digdir/designsystemet-css` + theme CSS and setting `data-color-scheme="light"` / `data-size="md"` on `<html>` (depends on T012, T013)
 
 **Checkpoint**: App boots, DB connects, Payload admin reachable, styled skeleton renders
 
@@ -68,20 +68,20 @@ Content lives only in the sibling `ai-artifacts` repository.
 
 ### Tests for User Story 1 (constitution-mandated: gating logic) ⚠️ write first, ensure they FAIL
 
-- [ ] T015 [P] [US1] Unit tests for `employeeGate` (member→allow; guest→deny; foreign-tenant→deny; missing oid/email→deny) in `apps/web/tests/unit/employee-gate.test.ts`
-- [ ] T016 [P] [US1] Integration test: protected route redirects unauthenticated and denies non-employee (mocked identities) in `apps/web/tests/integration/route-protection.test.ts`
-- [ ] T016b [P] [US1] Integration test for the Payload write path: an allowed employee session upserts a `Users` doc keyed by `entraOid` (create on first login, update `lastLoginAt` on repeat; denied identities write nothing) in `apps/web/tests/integration/users-upsert.test.ts` — satisfies the constitution "integration tests cover Payload write paths" gate
+- [X] T015 [P] [US1] Unit tests for `employeeGate` (member→allow; guest→deny; foreign-tenant→deny; missing oid/email→deny) in `apps/web/tests/unit/employee-gate.test.ts`
+- [X] T016 [P] [US1] Integration test: protected route redirects unauthenticated and denies non-employee (mocked identities) in `apps/web/tests/integration/route-protection.test.ts`
+- [X] T016b [P] [US1] Integration test for the Payload write path: an allowed employee session upserts a `Users` doc keyed by `entraOid` (create on first login, update `lastLoginAt` on repeat; denied identities write nothing) in `apps/web/tests/integration/users-upsert.test.ts` — satisfies the constitution "integration tests cover Payload write paths" gate
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Configure Auth.js v5 with an `AUTH_MODE`-switched provider in `apps/web/src/auth/entra.ts` + route handler `apps/web/src/app/api/auth/[...nextauth]/route.ts`: the real Microsoft Entra ID provider (single-tenant, scopes `openid profile email`) when `AUTH_MODE=entra`
-- [ ] T017b [P] [US1] Implement the dev-only mock auth provider (personas `member`/`guest`/`foreign-tenant` emitting the same claim shape as Entra: `oid`, `email`, `name`, `tid`, `idtyp`) in `apps/web/src/auth/mock-provider.ts`, wired into T017's config as the `AUTH_MODE=mock` branch; guard it so it cannot activate in a production build
-- [ ] T018 [P] [US1] Implement `employeeGate(claims)` (home-tenant member only, guests/foreign denied) in `apps/web/src/auth/employee-gate.ts` per contracts/auth-gating.md — consumes the same claim shape in both auth modes
-- [ ] T019 [US1] Create Payload `Users` collection (`entraOid` unique+indexed, `email` unique, `name`, `tenantId`, `role` default `reader`, `lastLoginAt`), disable local email/password strategy, in `apps/web/src/collections/Users.ts`; register in `apps/web/src/payload.config.ts` (depends on T010)
-- [ ] T020 [US1] Implement Payload custom auth strategy bridging Auth.js session → `employeeGate` → upsert `Users` by `entraOid`, in `apps/web/src/auth/payload-strategy.ts` (depends on T017, T018, T019)
-- [ ] T021 [US1] Protect application routes — redirect unauthenticated to sign-in, deny non-employees — via `apps/web/src/middleware.ts` and/or `apps/web/src/app/(app)/layout.tsx` (depends on T020)
-- [ ] T022 [US1] Build catalog shell `apps/web/src/app/(app)/page.tsx` using Designsystemet components: intentional empty state, signed-in identity display, sign-out action (depends on T014, T021)
-- [ ] T023 [US1] Make tests T015, T016, T016b pass and walk quickstart Scenario A end-to-end using the mock provider personas (`member` reaches the shell; `guest`/`foreign-tenant` denied). Real-Entra verification (`AUTH_MODE=entra`) is deferred until a tenant app registration is available.
+- [X] T017 [P] [US1] Configure Auth.js v5 with an `AUTH_MODE`-switched provider in `apps/web/src/auth/entra.ts` + route handler `apps/web/src/app/api/auth/[...nextauth]/route.ts`: the real Microsoft Entra ID provider (single-tenant, scopes `openid profile email`) when `AUTH_MODE=entra`
+- [X] T017b [P] [US1] Implement the dev-only mock auth provider (personas `member`/`guest`/`foreign-tenant` emitting the same claim shape as Entra: `oid`, `email`, `name`, `tid`, `idtyp`) in `apps/web/src/auth/mock-provider.ts`, wired into T017's config as the `AUTH_MODE=mock` branch; guard it so it cannot activate in a production build
+- [X] T018 [P] [US1] Implement `employeeGate(claims)` (home-tenant member only, guests/foreign denied) in `apps/web/src/auth/employee-gate.ts` per contracts/auth-gating.md — consumes the same claim shape in both auth modes
+- [X] T019 [US1] Create Payload `Users` collection (`entraOid` unique+indexed, `email` unique, `name`, `tenantId`, `role` default `reader`, `lastLoginAt`), disable local email/password strategy, in `apps/web/src/collections/Users.ts`; register in `apps/web/src/payload.config.ts` (depends on T010)
+- [X] T020 [US1] Implement Payload custom auth strategy bridging Auth.js session → `employeeGate` → upsert `Users` by `entraOid`, in `apps/web/src/auth/payload-strategy.ts` (depends on T017, T018, T019)
+- [X] T021 [US1] Protect application routes — redirect unauthenticated to sign-in, deny non-employees — via `apps/web/src/middleware.ts` and/or `apps/web/src/app/(app)/layout.tsx` (depends on T020)
+- [X] T022 [US1] Build catalog shell `apps/web/src/app/(app)/page.tsx` using Designsystemet components: intentional empty state, signed-in identity display, sign-out action (depends on T014, T021)
+- [X] T023 [US1] Make tests T015, T016, T016b pass and walk quickstart Scenario A end-to-end using the mock provider personas (`member` reaches the shell; `guest`/`foreign-tenant` denied). Real-Entra verification (`AUTH_MODE=entra`) is deferred until a tenant app registration is available.
 
 **Checkpoint**: US1 fully functional and independently testable — this is the MVP
 
@@ -210,3 +210,30 @@ After Foundational: Dev A → US1, Dev B → US2; once US2's schema/CLI land, De
 - Live Entra ID sign-in is validated manually (quickstart Scenario A), not automated this phase (research.md §6)
 - Azure deployment is explicitly out of scope — Phase 1 "done" is local (FR-019)
 - Commit after each task or logical group; stop at any checkpoint to validate a story independently
+
+---
+
+## MVP Implementation Notes (US1 checkpoint — 2026-07-02)
+
+Recorded deviations from the original task wording, made during implementation:
+
+- **Next.js version**: Used **Next 16.2.10** (React 19.2.7, Payload 3.85.2) rather than Next 15.
+  Payload 3.85's peer range explicitly supports `>=16.2.6 <17`; 16 is the current supported line.
+- **T011 (Payload admin route group)**: The `(payload)` admin UI route group was **deferred**. It is
+  not needed for US1 (auth + shell + Users upsert use Payload's Local API). Payload boots and connects
+  to Postgres via `getPayload`, verified by the T016b integration test (schema pushed via drizzle in dev).
+  The admin UI can be added in a later phase.
+- **T014 (root layout)**: Next.js requires a single root layout OR per-route-group roots. Because
+  Payload uses its own root layout, the app uses the **multiple-root-layouts** pattern: a shared
+  `src/app/themed-html.tsx` (Designsystemet CSS + `data-color-scheme`) is rendered by
+  `(app)/layout.tsx` and `(auth)/layout.tsx` instead of a single `src/app/layout.tsx`.
+- **T021 (route protection)**: Implemented as a JSX-free guard `src/auth/require-session.ts` called by
+  `(app)/layout.tsx` (layout guard, not middleware) — cleaner to unit-test and avoids edge/DB conflicts.
+- **Auth pipeline**: Employee gating runs centrally in the Auth.js `signIn` callback; the `Users`
+  upsert runs in the `jwt` callback via the Payload Local API. The Payload custom strategy
+  (`payload-strategy.ts`) bridges the Auth.js session for direct Payload API access (best-effort).
+- **Local Postgres port**: Host port **55432** (not 5432) to avoid a collision with another local
+  Postgres already bound to 5432. `.env` / `.env.example` / docker-compose use 55432.
+- **Validation**: `pnpm --filter web test` → 8/8 passing. Quickstart Scenario A verified via HTTP:
+  unauth → 307 `/signin`; mock `member` → session + shell empty state; mock `guest` → `AccessDenied`,
+  no session, DB shows exactly the one member user written.

@@ -1,0 +1,19 @@
+{
+  "name": "kihub",
+  "version": "0.1.0",
+  "private": true,
+  "description": "KI Hub — internal AI enablement and governance platform (catalog + governance layer over Git-based artifacts).",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.22.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "sharp", "unrs-resolver"]
+  },
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint"
+  }
+}
