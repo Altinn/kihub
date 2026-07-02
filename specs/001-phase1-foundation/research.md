@@ -69,6 +69,18 @@ request (`xms_*` / `idtyp`) is finalized during implementation; the rule — "ho
 only, guests denied" — is fixed. This check lives in `auth/employee-gate.ts` and is unit-tested
 with mocked claim sets.
 
+**Dev mock auth seam**: To develop and validate locally without a real Entra tenant, the Auth.js
+config selects its provider by an `AUTH_MODE` env var:
+- `AUTH_MODE=mock` (default for local dev): a dev-only provider that signs in as a chosen persona
+  (`member`, `guest`, `foreign-tenant`) and emits the **same claim shape** Entra would (`oid`,
+  `email`, `name`, `tid`, `idtyp`). No external calls, no credentials required.
+- `AUTH_MODE=entra`: the real Microsoft Entra ID provider (single-tenant).
+Crucially, `employeeGate` and the Payload custom strategy consume the claim shape identically in
+both modes, so the gating and `Users`-upsert logic are genuinely exercised by the mock. The mock
+provider MUST be inert outside development (guarded so it cannot be enabled in a production build).
+This does not weaken Principle "Entra ID from day one": the real provider is implemented now; the
+mock is a local-dev convenience and the seam for automating Scenario A.
+
 **Alternatives considered**:
 - Payload built-in email/password auth — rejected: Entra ID is mandatory from day one.
 - Custom OIDC strategy directly in Payload (no Auth.js) — rejected for Phase 1: more code, more
@@ -76,6 +88,9 @@ with mocked claim sets.
   Auth.js↔Payload bridge proves awkward.
 - Multi-tenant registration + allow-list — rejected: unnecessary surface; single-tenant is simpler
   and safer for an employees-only internal tool.
+- Requiring a real Entra tenant for all local dev — rejected: blocks development and test automation
+  on external credentials; the env-switched mock seam removes that dependency while preserving the
+  real path.
 
 ## 4. Manifest schema authoring + validation
 

@@ -38,7 +38,7 @@ Content lives only in the sibling `ai-artifacts` repository.
 - [ ] T004 [P] Add root `.gitignore` (node_modules, .env*, .next, dist, coverage)
 - [ ] T005 Scaffold Next.js 15 (App Router, TypeScript) app in `apps/web/`
 - [ ] T006 [P] Add local PostgreSQL 16 service in `apps/web/docker-compose.yml`
-- [ ] T007 [P] Add `apps/web/.env.example` with `DATABASE_URI`, `AUTH_SECRET`, `AUTH_MICROSOFT_ENTRA_ID_ID`, `AUTH_MICROSOFT_ENTRA_ID_SECRET`, `AUTH_MICROSOFT_ENTRA_ID_ISSUER`
+- [ ] T007 [P] Add `apps/web/.env.example` with `DATABASE_URI`, `AUTH_SECRET`, `AUTH_MODE` (`mock`|`entra`, default `mock` for local dev), and the `AUTH_MICROSOFT_ENTRA_ID_ID`/`_SECRET`/`_ISSUER` values (used only when `AUTH_MODE=entra`)
 - [ ] T008 [P] Configure Vitest in `apps/web` (test + coverage scripts) and root `test` script wiring pnpm filters
 
 ---
@@ -74,13 +74,14 @@ Content lives only in the sibling `ai-artifacts` repository.
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Configure Auth.js v5 Microsoft Entra ID provider (single-tenant, scopes `openid profile email`) in `apps/web/src/auth/entra.ts` + route handler `apps/web/src/app/api/auth/[...nextauth]/route.ts`
-- [ ] T018 [P] [US1] Implement `employeeGate(claims)` (home-tenant member only, guests/foreign denied) in `apps/web/src/auth/employee-gate.ts` per contracts/auth-gating.md
+- [ ] T017 [P] [US1] Configure Auth.js v5 with an `AUTH_MODE`-switched provider in `apps/web/src/auth/entra.ts` + route handler `apps/web/src/app/api/auth/[...nextauth]/route.ts`: the real Microsoft Entra ID provider (single-tenant, scopes `openid profile email`) when `AUTH_MODE=entra`
+- [ ] T017b [P] [US1] Implement the dev-only mock auth provider (personas `member`/`guest`/`foreign-tenant` emitting the same claim shape as Entra: `oid`, `email`, `name`, `tid`, `idtyp`) in `apps/web/src/auth/mock-provider.ts`, wired into T017's config as the `AUTH_MODE=mock` branch; guard it so it cannot activate in a production build
+- [ ] T018 [P] [US1] Implement `employeeGate(claims)` (home-tenant member only, guests/foreign denied) in `apps/web/src/auth/employee-gate.ts` per contracts/auth-gating.md — consumes the same claim shape in both auth modes
 - [ ] T019 [US1] Create Payload `Users` collection (`entraOid` unique+indexed, `email` unique, `name`, `tenantId`, `role` default `reader`, `lastLoginAt`), disable local email/password strategy, in `apps/web/src/collections/Users.ts`; register in `apps/web/src/payload.config.ts` (depends on T010)
 - [ ] T020 [US1] Implement Payload custom auth strategy bridging Auth.js session → `employeeGate` → upsert `Users` by `entraOid`, in `apps/web/src/auth/payload-strategy.ts` (depends on T017, T018, T019)
 - [ ] T021 [US1] Protect application routes — redirect unauthenticated to sign-in, deny non-employees — via `apps/web/src/middleware.ts` and/or `apps/web/src/app/(app)/layout.tsx` (depends on T020)
 - [ ] T022 [US1] Build catalog shell `apps/web/src/app/(app)/page.tsx` using Designsystemet components: intentional empty state, signed-in identity display, sign-out action (depends on T014, T021)
-- [ ] T023 [US1] Make tests T015, T016, T016b pass and walk quickstart Scenario A end-to-end with a real employee + a guest account
+- [ ] T023 [US1] Make tests T015, T016, T016b pass and walk quickstart Scenario A end-to-end using the mock provider personas (`member` reaches the shell; `guest`/`foreign-tenant` denied). Real-Entra verification (`AUTH_MODE=entra`) is deferred until a tenant app registration is available.
 
 **Checkpoint**: US1 fully functional and independently testable — this is the MVP
 

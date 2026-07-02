@@ -7,9 +7,11 @@ root unless noted.
 ## Prerequisites
 
 - Node.js 22 LTS, pnpm, Docker (for local PostgreSQL).
-- An Entra ID **app registration** (single-tenant) with client id/secret and redirect URI
-  `http://localhost:3000/api/auth/callback/microsoft-entra-id`.
-- `.env` created from `apps/web/.env.example` with `AUTH_*`, `AUTH_SECRET`, `DATABASE_URI`.
+- `.env` created from `apps/web/.env.example` with `DATABASE_URI`, `AUTH_SECRET`, and `AUTH_MODE`.
+- **Local dev (default)**: `AUTH_MODE=mock` — no Entra credentials needed; sign in as a persona.
+- **Real Entra (optional/deferred)**: `AUTH_MODE=entra` plus an Entra ID single-tenant **app
+  registration** (client id/secret/issuer, redirect URI
+  `http://localhost:3000/api/auth/callback/microsoft-entra-id`).
 
 ## Setup
 
@@ -21,15 +23,18 @@ pnpm --filter web dev                                  # Next.js + Payload on ht
 
 ## Scenario A — Authentication & catalog shell (User Story 1)
 
-1. Open `http://localhost:3000` while signed out → **Expect**: redirected to Microsoft sign-in;
+With `AUTH_MODE=mock` (default), "sign in" selects a persona; with `AUTH_MODE=entra` the same steps
+run against a real Microsoft sign-in. Behavior and expectations are identical either way.
+
+1. Open `http://localhost:3000` while signed out → **Expect**: redirected to sign-in;
    no app content visible. *(FR-001, SC-001)*
-2. Sign in with an employee (home-tenant) account → **Expect**: returned to the catalog shell;
-   your identity is displayed; the shell shows an intentional **empty state** (no artifacts) and no
-   errors. *(FR-003, FR-005, SC-002, SC-004)*
+2. Sign in as the `member` persona (or a real employee/home-tenant account) → **Expect**: returned
+   to the catalog shell; your identity is displayed; the shell shows an intentional **empty state**
+   (no artifacts) and no errors. *(FR-003, FR-005, SC-002, SC-004)*
 3. Click sign-out → **Expect**: session ends; reopening the page requires signing in again.
    *(FR-004)*
-4. Attempt sign-in with a guest/external account → **Expect**: access denied, no app content, not a
-   broken page. *(FR-002, SC-003)*
+4. Sign in as the `guest` or `foreign-tenant` persona (or a real guest/external account) →
+   **Expect**: access denied, no app content, not a broken page. *(FR-002, SC-003)*
 
 ## Scenario B — Manifest schema (User Story 2)
 

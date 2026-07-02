@@ -15,7 +15,7 @@ Stand up the KI Hub foundation: a locally-runnable Next.js (App Router) applicat
 **Primary Dependencies**:
 - Next.js 15 (App Router) — application shell and server.
 - Payload CMS 3.x (embedded in the Next.js app) + `@payloadcms/db-postgres` (`postgresAdapter`, `DATABASE_URI`).
-- Auth.js v5 (`next-auth`) Microsoft Entra ID provider — OIDC sign-in flow — bridged into Payload via a Payload custom auth strategy.
+- Auth.js v5 (`next-auth`) Microsoft Entra ID provider — OIDC sign-in flow — bridged into Payload via a Payload custom auth strategy. An `AUTH_MODE`-switched dev-only mock persona provider stands in for Entra locally (same claim shape → same `employeeGate`/upsert pipeline); real Entra used when `AUTH_MODE=entra`.
 - Digdir Designsystemet: `@digdir/designsystemet-react`, `@digdir/designsystemet-css` (+ `@digdir/designsystemet-types`, CLI `@digdir/designsystemet` for theme/token build). All UI built from these; theming via `data-color-scheme`/`data-size` attributes on `<html>`, no custom-styled forks.
 - Schema/validation: Zod (authoring + runtime validation) with a generated JSON Schema export for the published `artifact.yaml` contract; `yaml` for parsing manifests.
 
