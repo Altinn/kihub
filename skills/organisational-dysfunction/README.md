@@ -22,7 +22,7 @@ The 59 dysfunctions originate from **Trond Hjorteland**'s [*"Organisational Dysf
 New entries are appended as they are propagated from the upstream repo ([sorensensig/organisational-dysfunction](https://github.com/sorensensig/organisational-dysfunction)). Newest first.
 
 ### 0.2.0 — 2026-07-02
-- Added **#60 The output nobody owned** and **#61 Rearranging the furniture** (59 → 61 dysfunctions).
+- Added `#60` **The output nobody owned** and `#61` **Rearranging the furniture** (59 → 61 dysfunctions).
 
 ### 0.1.0 — 2026-07-02
 - Initial contribution to kihub: 59 dysfunctions as one umbrella skill (router `SKILL.md` + `references/`).
