@@ -16,3 +16,10 @@ It then activates **automatically** whenever you describe an org/team dysfunctio
 ## Attribution
 
 The 59 dysfunctions originate from **Trond Hjorteland**'s [*"Organisational Dysfunction of the Day"*](https://www.linkedin.com/pulse/organisational-dysfunction-day-full-list-trond-hjorteland-gxrze/) series. Content is **synthesised and paraphrased** (not copied) through the OST framing he uses, and each reference file links its specific source post.
+
+## Changelog
+
+New entries are appended as they are propagated from the upstream repo ([sorensensig/organisational-dysfunction](https://github.com/sorensensig/organisational-dysfunction)). Newest first.
+
+### 0.1.0 — 2026-07-02
+- Initial contribution to kihub: 59 dysfunctions as one umbrella skill (router `SKILL.md` + `references/`).
