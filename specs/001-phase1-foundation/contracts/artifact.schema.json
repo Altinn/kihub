@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kihub.digdir.no/schemas/artifact-1.0.0.json",
+  "title": "KI Hub Artifact Manifest",
+  "description": "Contract for artifact.yaml. Machine-readable schema version 1.0.0. Generated from the Zod schema in packages/artifact-schema; this JSON Schema is the published, language-agnostic contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "type", "name", "version", "description", "owner", "source", "visibility", "lifecycle"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable, repository-independent artifact identity in reverse-DNS org.slug form.",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*\\.[a-z0-9]+(-[a-z0-9]+)*$",
+      "examples": ["digdir.security-review"]
+    },
+    "type": {
+      "type": "string",
+      "enum": ["skill", "prompt", "workflow", "mcp", "template", "policy", "playbook"]
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "examples": ["1.0.0"]
+    },
+    "description": { "type": "string", "minLength": 1 },
+    "owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["team", "contact"],
+      "properties": {
+        "team": { "type": "string", "minLength": 1 },
+        "contact": { "type": "string", "format": "email" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "repository", "path"],
+      "properties": {
+        "provider": { "type": "string", "enum": ["github"] },
+        "repository": { "type": "string", "minLength": 1, "examples": ["digdir/ai-artifacts"] },
+        "path": { "type": "string", "minLength": 1, "examples": ["skills/security-review"] }
+      }
+    },
+    "install": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "apm": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["package"],
+          "properties": {
+            "package": { "type": "string", "minLength": 1, "examples": ["digdir/security-review"] }
+          }
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+      "uniqueItems": true
+    },
+    "visibility": {
+      "type": "string",
+      "enum": ["internal", "public", "restricted"],
+      "description": "Only 'internal' is used in Phase 1; other values reserved."
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["draft", "experimental", "in-review", "approved", "recommended", "deprecated", "archived"]
+        }
+      }
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "default": "1.0.0"
+    }
+  }
+}
