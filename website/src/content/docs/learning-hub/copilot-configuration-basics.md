@@ -1,1 +1,0 @@
-../../learning-hub/copilot-configuration-basics.md

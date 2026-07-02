@@ -1,1 +1,0 @@
-../../learning-hub/github-copilot-terminology-glossary.md

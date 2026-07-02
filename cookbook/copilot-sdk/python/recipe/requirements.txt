@@ -1,2 +1,0 @@
-# Install the Copilot SDK package from PyPI
-github-copilot-sdk

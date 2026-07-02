@@ -1,1 +1,0 @@
-../../learning-hub/creating-effective-skills.md
