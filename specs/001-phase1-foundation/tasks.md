@@ -70,6 +70,7 @@ Content lives only in the sibling `ai-artifacts` repository.
 
 - [ ] T015 [P] [US1] Unit tests for `employeeGate` (member→allow; guest→deny; foreign-tenant→deny; missing oid/email→deny) in `apps/web/tests/unit/employee-gate.test.ts`
 - [ ] T016 [P] [US1] Integration test: protected route redirects unauthenticated and denies non-employee (mocked identities) in `apps/web/tests/integration/route-protection.test.ts`
+- [ ] T016b [P] [US1] Integration test for the Payload write path: an allowed employee session upserts a `Users` doc keyed by `entraOid` (create on first login, update `lastLoginAt` on repeat; denied identities write nothing) in `apps/web/tests/integration/users-upsert.test.ts` — satisfies the constitution "integration tests cover Payload write paths" gate
 
 ### Implementation for User Story 1
 
@@ -79,7 +80,7 @@ Content lives only in the sibling `ai-artifacts` repository.
 - [ ] T020 [US1] Implement Payload custom auth strategy bridging Auth.js session → `employeeGate` → upsert `Users` by `entraOid`, in `apps/web/src/auth/payload-strategy.ts` (depends on T017, T018, T019)
 - [ ] T021 [US1] Protect application routes — redirect unauthenticated to sign-in, deny non-employees — via `apps/web/src/middleware.ts` and/or `apps/web/src/app/(app)/layout.tsx` (depends on T020)
 - [ ] T022 [US1] Build catalog shell `apps/web/src/app/(app)/page.tsx` using Designsystemet components: intentional empty state, signed-in identity display, sign-out action (depends on T014, T021)
-- [ ] T023 [US1] Make tests T015–T016 pass and walk quickstart Scenario A end-to-end with a real employee + a guest account
+- [ ] T023 [US1] Make tests T015, T016, T016b pass and walk quickstart Scenario A end-to-end with a real employee + a guest account
 
 **Checkpoint**: US1 fully functional and independently testable — this is the MVP
 
@@ -164,7 +165,7 @@ Content lives only in the sibling `ai-artifacts` repository.
 
 - Setup: T002, T003, T004 in parallel; T006, T007, T008 in parallel
 - Foundational: T012 parallel with T009/T010 work; T013 after T012
-- US1: T015 + T016 (tests) in parallel; then T017 + T018 in parallel
+- US1: T015 + T016 + T016b (tests) in parallel; then T017 + T018 in parallel
 - US2: T026, T028, T029 in parallel after T025
 - US3: T033, T034, T035 in parallel after T032
 - With capacity, US1 and US2 can be built in parallel by different developers; US3 starts once US2's schema/CLI exist
@@ -177,6 +178,7 @@ Content lives only in the sibling `ai-artifacts` repository.
 # Tests first (parallel):
 Task: "Unit tests for employeeGate in apps/web/tests/unit/employee-gate.test.ts"
 Task: "Integration test for route protection in apps/web/tests/integration/route-protection.test.ts"
+Task: "Integration test for Users upsert write path in apps/web/tests/integration/users-upsert.test.ts"
 
 # Then independent implementation files (parallel):
 Task: "Auth.js Entra provider + route handler in apps/web/src/auth/entra.ts"
