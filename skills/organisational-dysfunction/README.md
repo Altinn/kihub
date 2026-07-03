@@ -21,6 +21,9 @@ The 59 dysfunctions originate from **Trond Hjorteland**'s [*"Organisational Dysf
 
 New entries are appended as they are propagated from the upstream repo ([sorensensig/organisational-dysfunction](https://github.com/sorensensig/organisational-dysfunction)). Newest first.
 
+### 0.3.0 — 2026-07-03
+- Added `#62` **The agenda that sabotaged itself** (61 → 62 dysfunctions).
+
 ### 0.2.0 — 2026-07-02
 - Added `#60` **The output nobody owned** and `#61` **Rearranging the furniture** (59 → 61 dysfunctions).
 
