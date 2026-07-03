@@ -6,6 +6,8 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.test.ts'],
     globals: true,
+    // Integration tests share one Postgres/artifacts table — run files sequentially to avoid races.
+    fileParallelism: false,
   },
   resolve: {
     alias: {

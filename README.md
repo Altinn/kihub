@@ -4,15 +4,20 @@ Internal AI enablement and governance platform — a catalog and governance laye
 AI artifacts. KI Hub indexes, enriches, reviews, and exposes artifacts; it never stores their
 content (that lives in the sibling [`ai-artifacts`](../ai-artifacts) repository).
 
-> **Status**: Phase 1 — Foundation. Authenticated, employees-only shell + the `artifact.yaml`
-> manifest schema. No catalog browsing, discovery automation, or search yet (later phases).
+> **Status**: Phase 2 — Catalog. Authenticated employees browse an indexed catalog (listing +
+> type/tag/category filters) and open artifact detail pages with a copyable install command.
+> Artifacts are indexed on demand from a local `ai-artifacts` checkout. No discovery automation,
+> governance workflows, or semantic search yet (later phases). Phase 1 (foundation) delivered the
+> auth shell + the `artifact.yaml` manifest schema.
 
 ## Repository layout
 
 ```text
-apps/web/                     Next.js 16 (App Router) + embedded Payload CMS 3
+apps/web/                     Next.js 16 (App Router) + embedded Payload CMS 3 (catalog UI + indexer CLI)
 packages/artifact-schema/     @kihub/artifact-schema — the versioned artifact.yaml contract
-specs/001-phase1-foundation/  Spec-kit artifacts (spec, plan, tasks, contracts, quickstart)
+packages/discovery-core/      @kihub/discovery-core — scan/buildRecord/reconcile indexing core
+specs/001-phase1-foundation/  Spec-kit artifacts — Phase 1 (foundation)
+specs/002-catalog/            Spec-kit artifacts — Phase 2 (catalog)
 .specify/                     Spec-kit config + constitution
 ```
 
@@ -40,8 +45,21 @@ pnpm dev            # http://localhost:3000
 ```
 
 Open http://localhost:3000 → redirected to sign-in. With `AUTH_MODE=mock` (default) pick a persona:
-`member` reaches the catalog shell; `guest`/`foreign-tenant` are denied. Set `AUTH_MODE=entra`
+`member` reaches the catalog; `guest`/`foreign-tenant` are denied. Set `AUTH_MODE=entra`
 (plus a single-tenant Entra app registration) for real Microsoft sign-in.
+
+### Populate the catalog (Phase 2)
+
+Index a local checkout of the sibling `ai-artifacts` repo into the catalog:
+
+```bash
+# set AI_ARTIFACTS_PATH (absolute) in apps/web/.env, then:
+pnpm --filter web index
+```
+
+Re-run any time to reconcile (add/update/deactivate). The catalog is rebuildable from Git — nothing
+is authored in the app. Then browse at http://localhost:3000 and open an artifact for its detail +
+`apm install …` command.
 
 ## Scripts
 

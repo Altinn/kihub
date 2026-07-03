@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    artifacts: Artifact;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,6 +77,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    artifacts: ArtifactsSelect<false> | ArtifactsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -133,6 +135,37 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "artifacts".
+ */
+export interface Artifact {
+  id: number;
+  artifactId: string;
+  type: 'skill' | 'prompt' | 'workflow' | 'mcp' | 'template' | 'policy' | 'playbook';
+  name: string;
+  description: string;
+  version: string;
+  owner?: {
+    team?: string | null;
+    contact?: string | null;
+  };
+  source?: {
+    provider?: string | null;
+    repository?: string | null;
+    path?: string | null;
+  };
+  installCommand?: string | null;
+  readme?: string | null;
+  tags?: string[] | null;
+  visibility?: ('internal' | 'public' | 'restricted') | null;
+  lifecycleStatus?:
+    ('draft' | 'experimental' | 'in-review' | 'approved' | 'recommended' | 'deprecated' | 'archived') | null;
+  active?: boolean | null;
+  lastIndexedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -154,10 +187,15 @@ export interface PayloadKv {
  */
 export interface PayloadLockedDocument {
   id: number;
-  document?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null)
+    | ({
+        relationTo: 'artifacts';
+        value: number | Artifact;
+      } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
@@ -211,6 +249,39 @@ export interface UsersSelect<T extends boolean = true> {
   tenantId?: T;
   role?: T;
   lastLoginAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "artifacts_select".
+ */
+export interface ArtifactsSelect<T extends boolean = true> {
+  artifactId?: T;
+  type?: T;
+  name?: T;
+  description?: T;
+  version?: T;
+  owner?:
+    | T
+    | {
+        team?: T;
+        contact?: T;
+      };
+  source?:
+    | T
+    | {
+        provider?: T;
+        repository?: T;
+        path?: T;
+      };
+  installCommand?: T;
+  readme?: T;
+  tags?: T;
+  visibility?: T;
+  lifecycleStatus?: T;
+  active?: T;
+  lastIndexedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

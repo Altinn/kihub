@@ -30,9 +30,9 @@ Monorepo: app in `apps/web/`, new indexing core in `packages/discovery-core/`, r
 
 ## Phase 1: Setup
 
-- [ ] T001 Initialize `packages/discovery-core` (`package.json` name `@kihub/discovery-core`, `type: module`, `tsconfig.json`, dep `@kihub/artifact-schema` (workspace), dev `vitest`; `test` script)
-- [ ] T002 [P] Add `react-markdown` + `remark-gfm` to `apps/web` dependencies
-- [ ] T003 [P] Add `AI_ARTIFACTS_PATH` (e.g. `../ai-artifacts`) to `apps/web/.env.example` with a comment
+- [X] T001 Initialize `packages/discovery-core` (`package.json` name `@kihub/discovery-core`, `type: module`, `tsconfig.json`, dep `@kihub/artifact-schema` (workspace), dev `vitest`; `test` script)
+- [X] T002 [P] Add `react-markdown` + `remark-gfm` to `apps/web` dependencies
+- [X] T003 [P] Add `AI_ARTIFACTS_PATH` (e.g. `../ai-artifacts`) to `apps/web/.env.example` with a comment
 
 ---
 
@@ -42,9 +42,9 @@ Monorepo: app in `apps/web/`, new indexing core in `packages/discovery-core/`, r
 
 **⚠️ CRITICAL**: Blocks all user stories
 
-- [ ] T004 Create the `Artifact` Payload collection in `apps/web/src/collections/Artifact.ts` per data-model.md (fields: `artifactId` unique+indexed, `type`, `name`, `description`, `version`, `source` group, `installCommand`, `readme`, `tags`, `visibility`, `lifecycleStatus`, `active` default true, `lastIndexedAt`; read=authenticated, write=server-side only)
-- [ ] T005 Register `Artifact` in `apps/web/src/payload.config.ts` collections
-- [ ] T006 [P] Implement catalog query helpers in `apps/web/src/lib/catalog.ts`: `listArtifacts(filters)` (always `active=true`; optional type/tag/category) and `getArtifact(artifactId)` via the Payload Local API
+- [X] T004 Create the `Artifact` Payload collection in `apps/web/src/collections/Artifact.ts` per data-model.md (fields: `artifactId` unique+indexed, `type`, `name`, `description`, `version`, `source` group, `installCommand`, `readme`, `tags`, `visibility`, `lifecycleStatus`, `active` default true, `lastIndexedAt`; read=authenticated, write=server-side only)
+- [X] T005 Register `Artifact` in `apps/web/src/payload.config.ts` collections
+- [X] T006 [P] Implement catalog query helpers in `apps/web/src/lib/catalog.ts`: `listArtifacts(filters)` (always `active=true`; optional type/tag/category) and `getArtifact(artifactId)` via the Payload Local API
 
 **Checkpoint**: Collection exists and is queryable; indexing and UI can build on it
 
@@ -58,18 +58,18 @@ Monorepo: app in `apps/web/`, new indexing core in `packages/discovery-core/`, r
 
 ### Tests for User Story 1 (constitution-mandated) ⚠️ write first, ensure they FAIL
 
-- [ ] T007 [P] [US1] `scan()` tests in `packages/discovery-core/tests/scan.test.ts`: valid artifact, invalid/unparseable manifest (→ `valid:false`+errors), missing README (still valid), non-artifact folder ignored
-- [ ] T008 [P] [US1] `buildRecord()` tests in `packages/discovery-core/tests/record.test.ts`: install-command derivation (`apm install <pkg>`; empty when no `install.apm`), full field mapping
-- [ ] T009 [P] [US1] `reconcile()` unit tests in `packages/discovery-core/tests/reconcile.test.ts` with a fake payload: create, update-in-place, deactivate-missing, duplicate-id detection, invalid pass-through
-- [ ] T010 [US1] Integration test in `apps/web/tests/integration/reconcile.test.ts` against live Payload+Postgres: first run creates N; re-run updates in place (no duplicate); removing an input deactivates it; stored record holds only metadata (no body)
+- [X] T007 [P] [US1] `scan()` tests in `packages/discovery-core/tests/scan.test.ts`: valid artifact, invalid/unparseable manifest (→ `valid:false`+errors), missing README (still valid), non-artifact folder ignored
+- [X] T008 [P] [US1] `buildRecord()` tests in `packages/discovery-core/tests/record.test.ts`: install-command derivation (`apm install <pkg>`; empty when no `install.apm`), full field mapping
+- [X] T009 [P] [US1] `reconcile()` unit tests in `packages/discovery-core/tests/reconcile.test.ts` with a fake payload: create, update-in-place, deactivate-missing, duplicate-id detection, invalid pass-through
+- [X] T010 [US1] Integration test in `apps/web/tests/integration/reconcile.test.ts` against live Payload+Postgres: first run creates N; re-run updates in place (no duplicate); removing an input deactivates it; stored record holds only metadata (no body)
 
 ### Implementation for User Story 1
 
-- [ ] T011 [P] [US1] Implement `scan(rootPath)` in `packages/discovery-core/src/scan.ts` — walk type dirs, read `artifact.yaml`+`README.md`, validate via `@kihub/artifact-schema` → `RawArtifact[]` per contracts/indexer.md
-- [ ] T012 [P] [US1] Implement `buildRecord(manifest, readme?)` in `packages/discovery-core/src/record.ts` — map to the `Artifact` shape + derive install command
-- [ ] T013 [US1] Implement `reconcile(payload, records)` in `packages/discovery-core/src/reconcile.ts` (upsert by `artifactId`, soft-deactivate missing, duplicate detection, `IndexReport`) and re-export from `src/index.ts` (depends on T011, T012)
-- [ ] T014 [US1] Implement the CLI `apps/web/scripts/index-artifacts.ts` (resolve `AI_ARTIFACTS_PATH`, `scan` → `getPayload({ config })` → `reconcile`, print report, exit codes 0/1/2) and add an `index` script to `apps/web/package.json` (depends on T013, T004, T005)
-- [ ] T015 [US1] Run the indexer against the seeded `ai-artifacts`; make tests T007–T010 pass; walk quickstart Scenario A (create → edit/add/remove re-run)
+- [X] T011 [P] [US1] Implement `scan(rootPath)` in `packages/discovery-core/src/scan.ts` — walk type dirs, read `artifact.yaml`+`README.md`, validate via `@kihub/artifact-schema` → `RawArtifact[]` per contracts/indexer.md
+- [X] T012 [P] [US1] Implement `buildRecord(manifest, readme?)` in `packages/discovery-core/src/record.ts` — map to the `Artifact` shape + derive install command
+- [X] T013 [US1] Implement `reconcile(payload, records)` in `packages/discovery-core/src/reconcile.ts` (upsert by `artifactId`, soft-deactivate missing, duplicate detection, `IndexReport`) and re-export from `src/index.ts` (depends on T011, T012)
+- [X] T014 [US1] Implement the CLI `apps/web/scripts/index-artifacts.ts` (resolve `AI_ARTIFACTS_PATH`, `scan` → `getPayload({ config })` → `reconcile`, print report, exit codes 0/1/2) and add an `index` script to `apps/web/package.json` (depends on T013, T004, T005)
+- [X] T015 [US1] Run the indexer against the seeded `ai-artifacts`; make tests T007–T010 pass; walk quickstart Scenario A (create → edit/add/remove re-run)
 
 **Checkpoint**: Catalog is populated and reconciles correctly — MVP data layer
 
@@ -83,15 +83,15 @@ Monorepo: app in `apps/web/`, new indexing core in `packages/discovery-core/`, r
 
 ### Tests for User Story 2 (filter correctness — SC-007) ⚠️ write first
 
-- [ ] T015b [US2] Integration test for `listArtifacts` in `apps/web/tests/integration/catalog-filters.test.ts` against live Payload: seed a small set, then assert type / tag / category / combined (AND) filters return exactly the matching artifacts, and that inactive (`active=false`) records are excluded (SC-007, FR-010–014)
+- [X] T015b [US2] Integration test for `listArtifacts` in `apps/web/tests/integration/catalog-filters.test.ts` against live Payload: seed a small set, then assert type / tag / category / combined (AND) filters return exactly the matching artifacts, and that inactive (`active=false`) records are excluded (SC-007, FR-010–014)
 
 ### Implementation for User Story 2
 
-- [ ] T016 [P] [US2] Build `ArtifactCard` in `apps/web/src/components/ArtifactCard.tsx` (Designsystemet Card: name, type, description, key tags; links to detail)
-- [ ] T017 [P] [US2] Build `CatalogFilters` in `apps/web/src/components/CatalogFilters.tsx` (Designsystemet controls for type/tag/category; URL-param driven)
-- [ ] T018 [US2] Replace the Phase 1 shell with the catalog listing in `apps/web/src/app/(app)/page.tsx`: read `?type/tag/category`, call `listArtifacts` (active only, AND-combined), render cards (depends on T006, T016, T017)
-- [ ] T019 [US2] Add the intentional empty state (no artifacts / no matches) to the listing and confirm the Phase 1 auth guard still applies (depends on T018)
-- [ ] T020 [US2] Make test T015b pass and walk quickstart Scenario B (filters individually + combined, empty state, unauthenticated redirect)
+- [X] T016 [P] [US2] Build `ArtifactCard` in `apps/web/src/components/ArtifactCard.tsx` (Designsystemet Card: name, type, description, key tags; links to detail)
+- [X] T017 [P] [US2] Build `CatalogFilters` in `apps/web/src/components/CatalogFilters.tsx` (Designsystemet controls for type/tag/category; URL-param driven)
+- [X] T018 [US2] Replace the Phase 1 shell with the catalog listing in `apps/web/src/app/(app)/page.tsx`: read `?type/tag/category`, call `listArtifacts` (active only, AND-combined), render cards (depends on T006, T016, T017)
+- [X] T019 [US2] Add the intentional empty state (no artifacts / no matches) to the listing and confirm the Phase 1 auth guard still applies (depends on T018)
+- [X] T020 [US2] Make test T015b pass and walk quickstart Scenario B (filters individually + combined, empty state, unauthenticated redirect)
 
 **Checkpoint**: Discovery works — US1 + US2 independently functional
 
@@ -105,10 +105,10 @@ Monorepo: app in `apps/web/`, new indexing core in `packages/discovery-core/`, r
 
 ### Implementation for User Story 3
 
-- [ ] T021 [P] [US3] Build `Markdown` renderer in `apps/web/src/components/Markdown.tsx` (react-markdown + remark-gfm, no raw HTML, styled with Designsystemet typography)
-- [ ] T022 [P] [US3] Build `CopyButton` client component in `apps/web/src/components/CopyButton.tsx` (copies the install command)
-- [ ] T023 [US3] Build the detail page `apps/web/src/app/(app)/artifacts/[artifactId]/page.tsx`: fetch via `getArtifact`, show identity/type/owner/tags/visibility/lifecycle + version + install command (CopyButton) + README (Markdown); `notFound()` for unknown/inactive id (depends on T006, T021, T022)
-- [ ] T024 [US3] Walk quickstart Scenario C (detail render + copy + not-found)
+- [X] T021 [P] [US3] Build `Markdown` renderer in `apps/web/src/components/Markdown.tsx` (react-markdown + remark-gfm, no raw HTML, styled with Designsystemet typography)
+- [X] T022 [P] [US3] Build `CopyButton` client component in `apps/web/src/components/CopyButton.tsx` (copies the install command)
+- [X] T023 [US3] Build the detail page `apps/web/src/app/(app)/artifacts/[artifactId]/page.tsx`: fetch via `getArtifact`, show identity/type/owner/tags/visibility/lifecycle + version + install command (CopyButton) + README (Markdown); `notFound()` for unknown/inactive id (depends on T006, T021, T022)
+- [X] T024 [US3] Walk quickstart Scenario C (detail render + copy + not-found)
 
 **Checkpoint**: All three stories independently functional
 
@@ -116,9 +116,9 @@ Monorepo: app in `apps/web/`, new indexing core in `packages/discovery-core/`, r
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T025 [P] Update root `README.md` (and Phase 2 quickstart refs) with the indexing step and `AI_ARTIFACTS_PATH`
-- [ ] T026 [P] Constitution self-check: inspect the `artifacts` table to confirm only metadata + README snapshot are stored (no bodies); confirm catalog UI imports only Designsystemet (+ react-markdown renderer)
-- [ ] T027 Run full quickstart Scenarios A–C and the complete test suite (web + discovery-core + artifact-schema) green
+- [X] T025 [P] Update root `README.md` (and Phase 2 quickstart refs) with the indexing step and `AI_ARTIFACTS_PATH`
+- [X] T026 [P] Constitution self-check: inspect the `artifacts` table to confirm only metadata + README snapshot are stored (no bodies); confirm catalog UI imports only Designsystemet (+ react-markdown renderer)
+- [X] T027 Run full quickstart Scenarios A–C and the complete test suite (web + discovery-core + artifact-schema) green
 
 ---
 

@@ -4,6 +4,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
 import sharp from 'sharp';
+import { Artifact } from './collections/Artifact';
 import { Users } from './collections/Users';
 
 const filename = fileURLToPath(import.meta.url);
@@ -13,7 +14,7 @@ export default buildConfig({
   admin: {
     user: Users.slug,
   },
-  collections: [Users],
+  collections: [Users, Artifact],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET ?? '',
   typescript: {

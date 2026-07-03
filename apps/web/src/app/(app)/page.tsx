@@ -1,24 +1,37 @@
 import { Button, Card, Divider, Heading, Paragraph, Tag } from '@digdir/designsystemet-react';
 import { auth, signOut } from '@/auth';
+import { ArtifactCard } from '@/components/ArtifactCard';
+import { CatalogFilters } from '@/components/CatalogFilters';
+import { listArtifacts } from '@/lib/catalog';
 
-/**
- * The Phase 1 catalog shell (User Story 1): a working, authenticated home that renders an
- * intentional empty state (FR-005). Discovery/browsing/search arrive in later phases.
- */
-export default async function CatalogShellPage() {
+type SearchParams = { type?: string; tag?: string | string[] };
+
+/** Phase 2 catalog listing: browse + filter indexed artifacts (US2). */
+export default async function CatalogPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
   const session = await auth();
   const user = session?.user;
+  const { type, tag } = await searchParams;
+  const activeTags = Array.isArray(tag) ? tag : tag ? [tag] : [];
+  const activeType = type;
+
+  const [filtered, allActive] = await Promise.all([
+    listArtifacts({ type: activeType, tags: activeTags }),
+    listArtifacts(),
+  ]);
+
+  // Facets derived from the full active set so filters stay visible.
+  const availableTypes = [...new Set(allActive.map((a) => a.type as string))].sort();
+  const availableTags = [
+    ...new Set(allActive.flatMap((a) => (a.tags as string[] | undefined) ?? [])),
+  ].sort();
 
   return (
-    <main style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1rem' }}>
-      <header
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: '1rem',
-        }}
-      >
+    <main style={{ maxWidth: '1040px', margin: '0 auto', padding: '2rem 1rem' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
         <div>
           <Heading level={1} data-size="lg">
             KI Hub
@@ -32,9 +45,6 @@ export default async function CatalogShellPage() {
             </Paragraph>
             <Paragraph data-size="xs">{user?.email}</Paragraph>
           </div>
-          <Tag data-color="neutral" data-size="sm">
-            {user?.role ?? 'reader'}
-          </Tag>
           <form
             action={async () => {
               'use server';
@@ -50,16 +60,57 @@ export default async function CatalogShellPage() {
 
       <Divider style={{ margin: '1.5rem 0' }} />
 
-      <Card>
-        <Heading level={2} data-size="md">
-          Catalog
-        </Heading>
-        <Paragraph style={{ marginTop: '0.5rem' }}>No artifacts yet.</Paragraph>
-        <Paragraph data-size="sm" style={{ marginTop: '0.5rem' }}>
-          The catalog is empty. Artifact discovery and browsing arrive in a later phase — this
-          authenticated shell confirms the foundation is in place.
-        </Paragraph>
-      </Card>
+      {allActive.length === 0 ? (
+        <Card>
+          <Heading level={2} data-size="md">
+            Catalog is empty
+          </Heading>
+          <Paragraph data-size="sm" style={{ marginTop: '0.5rem' }}>
+            No artifacts have been indexed yet. Run the indexer (<code>pnpm --filter web index</code>)
+            against a local <code>ai-artifacts</code> checkout.
+          </Paragraph>
+        </Card>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: '2rem', alignItems: 'start' }}>
+          <CatalogFilters
+            availableTypes={availableTypes}
+            availableTags={availableTags}
+            activeType={activeType}
+            activeTags={activeTags}
+          />
+          <div>
+            <Paragraph data-size="sm" style={{ marginBottom: '1rem' }}>
+              {filtered.length} {filtered.length === 1 ? 'artifact' : 'artifacts'}
+              {activeType || activeTags.length ? ' (filtered)' : ''}
+            </Paragraph>
+            {filtered.length === 0 ? (
+              <Card>
+                <Heading level={2} data-size="sm">
+                  No matching artifacts
+                </Heading>
+                <Paragraph data-size="sm" style={{ marginTop: '0.5rem' }}>
+                  No artifacts match the active filters. <a href="/">Clear filters</a> to see all.
+                </Paragraph>
+              </Card>
+            ) : (
+              <div style={{ display: 'grid', gap: '1rem' }}>
+                {filtered.map((a) => (
+                  <ArtifactCard
+                    key={a.artifactId as string}
+                    artifact={{
+                      artifactId: a.artifactId as string,
+                      name: a.name as string,
+                      type: a.type as string,
+                      description: a.description as string,
+                      tags: (a.tags as string[] | undefined) ?? [],
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

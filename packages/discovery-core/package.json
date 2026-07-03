@@ -1,0 +1,24 @@
+{
+  "name": "@kihub/discovery-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reusable, Payload-agnostic indexing core for KI Hub — scan ai-artifacts, build records, reconcile the catalog.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kihub/artifact-schema": "workspace:*",
+    "yaml": "2.9.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "4.1.9"
+  }
+}
