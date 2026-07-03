@@ -95,17 +95,17 @@ Content lives only in the sibling `ai-artifacts` repository.
 
 ### Tests for User Story 2 (constitution-mandated: schema validation) ⚠️ write first, ensure they FAIL
 
-- [ ] T024 [P] [US2] Schema validation tests — valid fixtures pass; invalid (non-reverse-DNS `id`, unknown `type`, missing required field, bad `version`) fail with identifiable errors — in `packages/artifact-schema/tests/schema.test.ts`
+- [X] T024 [P] [US2] Schema validation tests — valid fixtures pass; invalid (non-reverse-DNS `id`, unknown `type`, missing required field, bad `version`) fail with identifiable errors — in `packages/artifact-schema/tests/schema.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T025 [US2] Initialize `packages/artifact-schema` package (`package.json` name `@kihub/artifact-schema`, `tsconfig.json`, deps `zod` + `yaml`)
-- [ ] T026 [P] [US2] Author the Zod schema (id reverse-DNS regex, `type` enum, `name`, semver `version`, `description`, `owner{team,contact}`, `source{provider,repository,path}`, optional `install.apm.package`, `tags`, `visibility` enum, `lifecycle.status` enum, optional `schemaVersion`) in `packages/artifact-schema/src/schema.ts` per data-model.md
-- [ ] T027 [US2] Implement `validate(fileContents)` — parse YAML then validate → `{ valid, errors }` — in `packages/artifact-schema/src/validate.ts` and re-export from `src/index.ts` (depends on T026)
-- [ ] T028 [P] [US2] Export the generated JSON Schema contract to `packages/artifact-schema/schema/artifact.schema.json`, matching `specs/001-phase1-foundation/contracts/artifact.schema.json` (depends on T026)
-- [ ] T029 [P] [US2] Write human-readable field documentation in `packages/artifact-schema/docs/artifact-manifest.md`
-- [ ] T030 [US2] Implement on-demand validation CLI `packages/artifact-schema/scripts/validate-file.ts` and expose a package `bin`/`validate` script (depends on T027)
-- [ ] T031 [US2] Make test T024 pass and walk quickstart Scenario B
+- [X] T025 [US2] Initialize `packages/artifact-schema` package (`package.json` name `@kihub/artifact-schema`, `tsconfig.json`, deps `zod` + `yaml`)
+- [X] T026 [P] [US2] Author the Zod schema (id reverse-DNS regex, `type` enum, `name`, semver `version`, `description`, `owner{team,contact}`, `source{provider,repository,path}`, optional `install.apm.package`, `tags`, `visibility` enum, `lifecycle.status` enum, optional `schemaVersion`) in `packages/artifact-schema/src/schema.ts` per data-model.md
+- [X] T027 [US2] Implement `validate(fileContents)` — parse YAML then validate → `{ valid, errors }` — in `packages/artifact-schema/src/validate.ts` and re-export from `src/index.ts` (depends on T026)
+- [X] T028 [P] [US2] Export the generated JSON Schema contract to `packages/artifact-schema/schema/artifact.schema.json`, matching `specs/001-phase1-foundation/contracts/artifact.schema.json` (depends on T026)
+- [X] T029 [P] [US2] Write human-readable field documentation in `packages/artifact-schema/docs/artifact-manifest.md`
+- [X] T030 [US2] Implement on-demand validation CLI `packages/artifact-schema/scripts/validate-file.ts` and expose a package `bin`/`validate` script (depends on T027)
+- [X] T031 [US2] Make test T024 pass and walk quickstart Scenario B
 
 **Checkpoint**: US1 and US2 both independently functional
 

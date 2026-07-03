@@ -39,8 +39,8 @@ run against a real Microsoft sign-in. Behavior and expectations are identical ei
 ## Scenario B — Manifest schema (User Story 2)
 
 ```bash
-pnpm --filter artifact-schema test          # valid + invalid fixtures pass/fail as expected
-pnpm --filter artifact-schema validate <path-to-artifact.yaml>   # on-demand validation
+pnpm --filter @kihub/artifact-schema test          # valid + invalid fixtures pass/fail as expected
+pnpm --filter @kihub/artifact-schema validate <path-to-artifact.yaml>   # on-demand validation
 ```
 
 - **Expect**: a well-formed manifest reports valid; a manifest with a bad `id` (not reverse-DNS),
@@ -66,7 +66,7 @@ npx @kihub/artifact-schema validate skills/*/artifact.yaml prompts/*/artifact.ya
 
 ```bash
 pnpm --filter web test          # employee-gate unit tests + protected-route integration (mocked)
-pnpm --filter artifact-schema test
+pnpm --filter @kihub/artifact-schema test
 ```
 
 ## Done / acceptance
