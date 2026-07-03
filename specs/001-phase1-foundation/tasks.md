@@ -119,12 +119,12 @@ Content lives only in the sibling `ai-artifacts` repository.
 
 ### Implementation for User Story 3
 
-- [ ] T032 [US3] Create the `ai-artifacts` repository structure (repo `README.md`, folders `skills/`, `prompts/`, `mcp/`) — separate repo (depends on T027 for the validator)
-- [ ] T033 [P] [US3] Seed example artifact #1 — a **skill**: `ai-artifacts/skills/<name>/artifact.yaml` (+ `README.md`, `examples/`) conforming to the schema
-- [ ] T034 [P] [US3] Seed example artifact #2 — a **prompt** pack: `ai-artifacts/prompts/<name>/artifact.yaml` (+ `README.md`)
-- [ ] T035 [P] [US3] Seed example artifact #3 — an **mcp** server: `ai-artifacts/mcp/<name>/artifact.yaml` (+ `README.md`) — guarantees ≥2 distinct types
-- [ ] T036 [US3] Validate all seeded manifests with `@kihub/artifact-schema` CLI; confirm 100% pass and ≥2 types represented (depends on T030, T033, T034, T035)
-- [ ] T037 [US3] Verify the `kihub` repo contains zero real artifact content (no skill/prompt/workflow/MCP bodies) — FR-017 / SC-007
+- [X] T032 [US3] Create the `ai-artifacts` repository structure (repo `README.md`, folders `skills/`, `prompts/`, `mcp/`) — separate repo (depends on T027 for the validator)
+- [X] T033 [P] [US3] Seed example artifact #1 — a **skill**: `ai-artifacts/skills/<name>/artifact.yaml` (+ `README.md`, `examples/`) conforming to the schema
+- [X] T034 [P] [US3] Seed example artifact #2 — a **prompt** pack: `ai-artifacts/prompts/<name>/artifact.yaml` (+ `README.md`)
+- [X] T035 [P] [US3] Seed example artifact #3 — an **mcp** server: `ai-artifacts/mcp/<name>/artifact.yaml` (+ `README.md`) — guarantees ≥2 distinct types
+- [X] T036 [US3] Validate all seeded manifests with `@kihub/artifact-schema` CLI; confirm 100% pass and ≥2 types represented (depends on T030, T033, T034, T035)
+- [X] T037 [US3] Verify the `kihub` repo contains zero real artifact content (no skill/prompt/workflow/MCP bodies) — FR-017 / SC-007
 
 **Checkpoint**: All three stories independently functional
 
@@ -132,10 +132,10 @@ Content lives only in the sibling `ai-artifacts` repository.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T038 [P] Write `kihub` root `README.md` (setup, run, test) referencing quickstart.md
-- [ ] T039 [P] Add root convenience scripts (`dev`, `test`, `lint`) documenting pnpm `--filter` usage
-- [ ] T040 Run the full quickstart.md validation (Scenarios A–C) and all automated tests green
-- [ ] T041 [P] Constitution compliance self-check: confirm zero artifact content in platform repo and all UI built from Designsystemet
+- [X] T038 [P] Write `kihub` root `README.md` (setup, run, test) referencing quickstart.md
+- [X] T039 [P] Add root convenience scripts (`dev`, `test`, `lint`) documenting pnpm `--filter` usage
+- [X] T040 Run the full quickstart.md validation (Scenarios A–C) and all automated tests green
+- [X] T041 [P] Constitution compliance self-check: confirm zero artifact content in platform repo and all UI built from Designsystemet
 
 ---
 
