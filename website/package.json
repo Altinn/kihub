@@ -19,7 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "@astrojs/sitemap": "^3.7.2",
-    "@astrojs/starlight": "^0.38.3",
+    "@astrojs/starlight": "^0.41.0",
     "astro": "^6.1.9",
     "choices.js": "^11.1.0",
     "devalue": "^5.7.1",
