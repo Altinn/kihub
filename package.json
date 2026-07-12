@@ -38,7 +38,7 @@
   "author": "GitHub",
   "license": "MIT",
   "devDependencies": {
-    "inquirer": "^13.4.2"
+    "inquirer": "^14.0.0"
   },
   "overrides": {
     "lodash": "^4.18.0"
