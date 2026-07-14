@@ -3,12 +3,18 @@ import Link from 'next/link';
 import { auth, signOut } from '@/auth';
 import { ArtifactCard } from '@/components/ArtifactCard';
 import { CatalogFilters } from '@/components/CatalogFilters';
+import { SearchBar } from '@/components/SearchBar';
 import { listArtifacts } from '@/lib/catalog';
 import { getGovernance } from '@/lib/governance';
+import { searchArtifacts } from '@/lib/search';
 
-type SearchParams = { type?: string; tag?: string | string[] };
+type SearchParams = { type?: string; tag?: string | string[]; q?: string };
 
-/** Phase 2 catalog listing: browse + filter indexed artifacts (US2). */
+/**
+ * Catalog listing. With no `q` it is the Phase 2 browse + filter (US2). With a `q` it runs Phase 5
+ * full-text search over name/description/README, combined with the same filters, governance-safe.
+ * Access is gated by `(app)/layout.tsx` `requireSession()` — adding `q` does not bypass it (FR-007).
+ */
 export default async function CatalogPage({
   searchParams,
 }: {
@@ -16,17 +22,20 @@ export default async function CatalogPage({
 }) {
   const session = await auth();
   const user = session?.user;
-  const { type, tag } = await searchParams;
+  const { type, tag, q } = await searchParams;
   const activeTags = Array.isArray(tag) ? tag : tag ? [tag] : [];
   const activeType = type;
+  const query = (q ?? '').trim();
+  const isSearch = query.length > 0;
+  const filters = { type: activeType, tags: activeTags };
 
-  const [filtered, allActive] = await Promise.all([
-    listArtifacts({ type: activeType, tags: activeTags }),
+  const [results, allActive] = await Promise.all([
+    isSearch ? searchArtifacts(query, filters) : listArtifacts(filters),
     listArtifacts(),
   ]);
   const governanceByArtifactId = new Map(
     await Promise.all(
-      filtered.map(
+      results.map(
         async (a) => [a.artifactId as string, await getGovernance(a.artifactId as string)] as const,
       ),
     ),
@@ -37,6 +46,7 @@ export default async function CatalogPage({
   const availableTags = [
     ...new Set(allActive.flatMap((a) => (a.tags as string[] | undefined) ?? [])),
   ].sort();
+  const hasFilters = Boolean(activeType) || activeTags.length > 0;
 
   return (
     <main style={{ maxWidth: '1040px', margin: '0 auto', padding: '2rem 1rem' }}>
@@ -93,22 +103,35 @@ export default async function CatalogPage({
             activeTags={activeTags}
           />
           <div>
+            <SearchBar initialQuery={query} />
             <Paragraph data-size="sm" style={{ marginBottom: '1rem' }}>
-              {filtered.length} {filtered.length === 1 ? 'artifact' : 'artifacts'}
-              {activeType || activeTags.length ? ' (filtered)' : ''}
+              {results.length} {results.length === 1 ? 'artifact' : 'artifacts'}
+              {isSearch ? ` for “${query}”` : ''}
+              {hasFilters ? ' (filtered)' : ''}
             </Paragraph>
-            {filtered.length === 0 ? (
+            {results.length === 0 ? (
               <Card>
                 <Heading level={2} data-size="sm">
-                  No matching artifacts
+                  {isSearch ? 'No results' : 'No matching artifacts'}
                 </Heading>
                 <Paragraph data-size="sm" style={{ marginTop: '0.5rem' }}>
-                  No artifacts match the active filters. <Link href="/">Clear filters</Link> to see all.
+                  {isSearch ? (
+                    <>
+                      Nothing matches “{query}”
+                      {hasFilters ? ' with the active filters' : ''}. Try different keywords
+                      {hasFilters ? ' or ' : ' — or '}
+                      <Link href="/">clear the search</Link>.
+                    </>
+                  ) : (
+                    <>
+                      No artifacts match the active filters. <Link href="/">Clear filters</Link> to see all.
+                    </>
+                  )}
                 </Paragraph>
               </Card>
             ) : (
               <div style={{ display: 'grid', gap: '1rem' }}>
-                {filtered.map((a) => (
+                {results.map((a) => (
                   <ArtifactCard
                     key={a.artifactId as string}
                     artifact={{

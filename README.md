@@ -4,14 +4,16 @@ Internal AI enablement and governance platform — a catalog and governance laye
 AI artifacts. KI Hub indexes, enriches, reviews, and exposes artifacts; it never stores their
 content (that lives in the sibling [`ai-artifacts`](../ai-artifacts) repository).
 
-> **Status**: Phase 4 — Automated discovery. Discovery now runs itself: a per-source GitHub
-> webhook (HMAC-verified) reconciles the catalog on push, a scheduled scan converges it on a
-> cadence, and an Admin can trigger a run in-app at `/admin/discovery` — all fetching artifact
-> content remotely from GitHub and reusing the Phase 2 reconcile, with Phase 3 governance state
-> preserved. Every run is recorded for observability. The Phase 2 maintainer CLI is retained as a
-> break-glass fallback. No semantic search yet (Phase 5). Phase 3 added governance (five-role
-> model, governance record per artifact, typed reviews, advisory approval, audit trail); Phase 2
-> the indexed catalog; Phase 1 the auth shell + `artifact.yaml` manifest schema.
+> **Status**: Phase 5 — Full-text search. Employees can now search the catalog by keyword: a
+> PostgreSQL full-text query (`to_tsvector`/`websearch_to_tsquery` + `ts_rank`, `english` config)
+> over the live `artifacts` free-text fields (name, description, README), ranked by relevance,
+> governance-safe (active + visibility), and combining with the existing type/tag/category filters —
+> on the database the platform already runs (no new datastore, service, package, or schema change).
+> Semantic / embeddings / Qdrant remain deferred to a later phase (Constitution Principle VII:
+> "full-text search first"). Phase 4 added automated discovery (webhook + scheduled + in-app
+> triggers, remote GitHub fetch); Phase 3 governance (five-role model, governance record per
+> artifact, typed reviews, advisory approval, audit trail); Phase 2 the indexed catalog; Phase 1 the
+> auth shell + `artifact.yaml` manifest schema.
 
 ## Repository layout
 
@@ -25,6 +27,7 @@ specs/001-phase1-foundation/  Spec-kit artifacts — Phase 1 (foundation)
 specs/002-catalog/            Spec-kit artifacts — Phase 2 (catalog)
 specs/003-governance/         Spec-kit artifacts — Phase 3 (governance)
 specs/004-automated-discovery/ Spec-kit artifacts — Phase 4 (automated discovery)
+specs/005-fulltext-search/    Spec-kit artifacts — Phase 5 (full-text search)
 .specify/                     Spec-kit config + constitution
 ```
 
@@ -116,6 +119,22 @@ The local-checkout CLI remains available as a fallback:
 pnpm --filter web index
 ```
 
+### Full-text search (Phase 5)
+
+Type a keyword or phrase into the search box on the catalog (`/?q=…`). KI Hub runs a PostgreSQL
+full-text query over the indexed free-text fields — artifact **name**, **description**, and the
+**README** snapshot — ranked by relevance, and shows a "no results" state when nothing matches.
+Search combines with the existing type/tag/category filters (clearing the query returns to plain
+browse), and only ever returns artifacts you're allowed to see (active + visibility, resolved
+through the same governance rules as browse). Because it reads the live catalog rows that discovery
+keeps current, results are always fresh — there is no separate search index to build or sync.
+
+There is **no new datastore, service, dependency, collection, field, or migration** — search runs on
+the existing PostgreSQL. The searched content (the catalogued tools) is English, so the `english`
+text-search configuration is used (stemming improves recall); the Norwegian application UI is not
+searchable content. Meaning-based / semantic search (embeddings + a vector store) is intentionally
+deferred to a later phase.
+
 ## Scripts
 
 | Command | What it does |
@@ -131,7 +150,7 @@ pnpm --filter web index
 
 > The web integration tests (`users-upsert`, `reconcile`, `governance-access`,
 > `reindex-preserves`, `review-approval-flow`, `discovery-run`, `discovery-webhook`,
-> `discovery-scan`, `discovery-access`, `discovery-serialize`, …) need the database running and
+> `discovery-scan`, `discovery-access`, `discovery-serialize`, `search`, …) need the database running and
 > `apps/web/.env` loaded. `reconcile` and the discovery tests wipe the `artifacts` table as part of
 > their clean-slate strategy — re-run `pnpm --filter web index` afterwards to repopulate the catalog
 > for manual browsing.
@@ -150,5 +169,6 @@ pnpm --filter @kihub/artifact-schema validate ../ai-artifacts/**/artifact.yaml
 This project follows spec-kit (constitution → specify → clarify → plan → tasks → analyze →
 implement). See [`specs/001-phase1-foundation/`](specs/001-phase1-foundation),
 [`specs/002-catalog/`](specs/002-catalog), [`specs/003-governance/`](specs/003-governance),
-[`specs/004-automated-discovery/`](specs/004-automated-discovery), and the
+[`specs/004-automated-discovery/`](specs/004-automated-discovery),
+[`specs/005-fulltext-search/`](specs/005-fulltext-search), and the
 [constitution](.specify/memory/constitution.md).
