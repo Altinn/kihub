@@ -5,6 +5,9 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
 import sharp from 'sharp';
 import { Artifact } from './collections/Artifact';
+import { AuditLog } from './collections/AuditLog';
+import { CatalogEntry } from './collections/CatalogEntry';
+import { Review } from './collections/Review';
 import { Users } from './collections/Users';
 
 const filename = fileURLToPath(import.meta.url);
@@ -14,7 +17,7 @@ export default buildConfig({
   admin: {
     user: Users.slug,
   },
-  collections: [Users, Artifact],
+  collections: [Users, Artifact, CatalogEntry, Review, AuditLog],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET ?? '',
   typescript: {

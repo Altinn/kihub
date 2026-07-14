@@ -25,6 +25,7 @@
     "graphql": "^16.8.1",
     "@kihub/artifact-schema": "workspace:*",
     "@kihub/discovery-core": "workspace:*",
+    "@kihub/governance-core": "workspace:*",
     "next": "16.2.10",
     "next-auth": "5.0.0-beta.31",
     "payload": "3.85.2",

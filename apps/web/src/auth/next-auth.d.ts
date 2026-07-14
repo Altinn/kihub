@@ -13,6 +13,8 @@ declare module 'next-auth' {
     oid?: string;
     tid?: string;
     idtyp?: 'member' | 'guest';
+    /** Dev-only role seed from a mock persona (Phase 3) — never present on a real Entra profile. */
+    roleHint?: 'reader' | 'contributor' | 'reviewer' | 'approver' | 'admin';
   }
 }
 

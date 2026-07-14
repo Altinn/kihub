@@ -7,6 +7,12 @@
       "runtimeArgs": ["run", "dev", "--", "--port", "4323"],
       "port": 4323,
       "cwd": "website"
+    },
+    {
+      "name": "kihub-web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "web", "dev"],
+      "port": 3000
     }
   ]
 }

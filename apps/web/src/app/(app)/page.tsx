@@ -3,6 +3,7 @@ import { auth, signOut } from '@/auth';
 import { ArtifactCard } from '@/components/ArtifactCard';
 import { CatalogFilters } from '@/components/CatalogFilters';
 import { listArtifacts } from '@/lib/catalog';
+import { getGovernance } from '@/lib/governance';
 
 type SearchParams = { type?: string; tag?: string | string[] };
 
@@ -22,6 +23,13 @@ export default async function CatalogPage({
     listArtifacts({ type: activeType, tags: activeTags }),
     listArtifacts(),
   ]);
+  const governanceByArtifactId = new Map(
+    await Promise.all(
+      filtered.map(
+        async (a) => [a.artifactId as string, await getGovernance(a.artifactId as string)] as const,
+      ),
+    ),
+  );
 
   // Facets derived from the full active set so filters stay visible.
   const availableTypes = [...new Set(allActive.map((a) => a.type as string))].sort();
@@ -41,9 +49,14 @@ export default async function CatalogPage({
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{ textAlign: 'right' }}>
             <Paragraph data-size="sm">
-              <strong>{user?.name}</strong>
+              <strong>{user?.name}</strong> <Tag data-size="sm">{user?.role}</Tag>
             </Paragraph>
             <Paragraph data-size="xs">{user?.email}</Paragraph>
+            {user?.role === 'admin' ? (
+              <Paragraph data-size="xs">
+                <a href="/admin/roles">Manage roles</a>
+              </Paragraph>
+            ) : null}
           </div>
           <form
             action={async () => {
@@ -104,6 +117,7 @@ export default async function CatalogPage({
                       description: a.description as string,
                       tags: (a.tags as string[] | undefined) ?? [],
                     }}
+                    governance={governanceByArtifactId.get(a.artifactId as string)}
                   />
                 ))}
               </div>

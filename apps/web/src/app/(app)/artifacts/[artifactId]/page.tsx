@@ -1,21 +1,29 @@
+import type { Role } from '@kihub/governance-core';
 import { Card, Divider, Heading, Paragraph, Tag } from '@digdir/designsystemet-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CopyButton } from '@/components/CopyButton';
+import { GovernancePanel } from '@/components/GovernancePanel';
+import { LifecycleBadge } from '@/components/LifecycleBadge';
 import { Markdown } from '@/components/Markdown';
 import { getArtifact } from '@/lib/catalog';
+import { getCurrentActor, getGovernance } from '@/lib/governance';
 
-/** Artifact detail page (US3): metadata + README + version + copyable install command. */
+/** Artifact detail page (US3 Phase 2 + governance overlay, Phase 3): metadata + README + version
+ * + copyable install command + lifecycle/governance state (FR-011). */
 export default async function ArtifactDetailPage({
   params,
 }: {
   params: Promise<{ artifactId: string }>;
 }) {
-  const { artifactId } = await params;
-  const artifact = await getArtifact(decodeURIComponent(artifactId));
+  const { artifactId: rawArtifactId } = await params;
+  const artifactId = decodeURIComponent(rawArtifactId);
+  const artifact = await getArtifact(artifactId);
   if (!artifact) notFound();
 
-  const a = artifact as Record<string, unknown>;
+  const [governance, actor] = await Promise.all([getGovernance(artifactId), getCurrentActor()]);
+
+  const a = artifact as unknown as Record<string, unknown>;
   const owner = (a.owner as { team?: string; contact?: string } | undefined) ?? {};
   const tags = (a.tags as string[] | undefined) ?? [];
   const installCommand = (a.installCommand as string | undefined) ?? '';
@@ -31,7 +39,10 @@ export default async function ArtifactDetailPage({
         <Heading level={1} data-size="lg">
           {a.name as string}
         </Heading>
-        <Tag data-color="neutral">{a.type as string}</Tag>
+        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+          <Tag data-color="neutral">{a.type as string}</Tag>
+          {governance ? <LifecycleBadge governance={governance} /> : null}
+        </div>
       </div>
       <Paragraph style={{ marginTop: '0.5rem' }}>{a.description as string}</Paragraph>
 
@@ -84,6 +95,10 @@ export default async function ArtifactDetailPage({
       ) : (
         <Paragraph data-size="sm">This artifact has no README.</Paragraph>
       )}
+
+      {governance && actor ? (
+        <GovernancePanel artifactId={artifactId} governance={governance} actorRole={actor.role as Role} />
+      ) : null}
     </main>
   );
 }

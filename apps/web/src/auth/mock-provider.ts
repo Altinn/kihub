@@ -25,6 +25,7 @@ export const mockProvider = Credentials({
       name: claims.name,
       tid: claims.tid,
       idtyp: claims.idtyp,
+      roleHint: claims.roleHint,
     };
   },
 });

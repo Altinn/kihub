@@ -69,6 +69,9 @@ export interface Config {
   collections: {
     users: User;
     artifacts: Artifact;
+    'catalog-entries': CatalogEntry;
+    reviews: Review;
+    'audit-log': AuditLog;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +81,9 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     artifacts: ArtifactsSelect<false> | ArtifactsSelect<true>;
+    'catalog-entries': CatalogEntriesSelect<false> | CatalogEntriesSelect<true>;
+    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    'audit-log': AuditLogSelect<false> | AuditLogSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -166,6 +172,67 @@ export interface Artifact {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "catalog-entries".
+ */
+export interface CatalogEntry {
+  id: number;
+  artifact: number | Artifact;
+  businessOwner?: string | null;
+  technicalOwner?: string | null;
+  riskLevel?: ('low' | 'medium' | 'high') | null;
+  reviewStatus?: ('not-submitted' | 'in-review') | null;
+  approvalState?: ('not-approved' | 'approved' | 'rejected') | null;
+  lifecycleState: 'draft' | 'experimental' | 'in-review' | 'approved' | 'recommended' | 'deprecated' | 'archived';
+  recommended?: boolean | null;
+  featured?: boolean | null;
+  internalNotes?: string | null;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: number;
+  artifact: number | Artifact;
+  type: 'security' | 'privacy-gdpr' | 'technical' | 'accessibility' | 'responsible-ai' | 'operational';
+  reviewer?: (number | null) | User;
+  status?: ('pending' | 'completed') | null;
+  decision?: ('approved' | 'changes-requested' | 'rejected') | null;
+  comments?: string | null;
+  requiredChanges?: string | null;
+  riskLevel?: ('low' | 'medium' | 'high') | null;
+  reviewDate?: string | null;
+  expiryDate: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-log".
+ */
+export interface AuditLog {
+  id: number;
+  actor: number | User;
+  action: 'metadata-edit' | 'lifecycle-transition' | 'review-recorded' | 'approval-decision' | 'role-change';
+  artifact?: (number | null) | Artifact;
+  targetUser?: (number | null) | User;
+  details?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -195,6 +262,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'artifacts';
         value: number | Artifact;
+      } | null)
+    | ({
+        relationTo: 'catalog-entries';
+        value: number | CatalogEntry;
+      } | null)
+    | ({
+        relationTo: 'reviews';
+        value: number | Review;
+      } | null)
+    | ({
+        relationTo: 'audit-log';
+        value: number | AuditLog;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -282,6 +361,56 @@ export interface ArtifactsSelect<T extends boolean = true> {
   lifecycleStatus?: T;
   active?: T;
   lastIndexedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "catalog-entries_select".
+ */
+export interface CatalogEntriesSelect<T extends boolean = true> {
+  artifact?: T;
+  businessOwner?: T;
+  technicalOwner?: T;
+  riskLevel?: T;
+  reviewStatus?: T;
+  approvalState?: T;
+  lifecycleState?: T;
+  recommended?: T;
+  featured?: T;
+  internalNotes?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  artifact?: T;
+  type?: T;
+  reviewer?: T;
+  status?: T;
+  decision?: T;
+  comments?: T;
+  requiredChanges?: T;
+  riskLevel?: T;
+  reviewDate?: T;
+  expiryDate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-log_select".
+ */
+export interface AuditLogSelect<T extends boolean = true> {
+  actor?: T;
+  action?: T;
+  artifact?: T;
+  targetUser?: T;
+  details?: T;
   updatedAt?: T;
   createdAt?: T;
 }

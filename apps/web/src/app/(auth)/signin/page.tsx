@@ -4,7 +4,11 @@ import { signIn } from '@/auth';
 const AUTH_MODE = process.env.AUTH_MODE ?? 'mock';
 
 const PERSONAS: { id: string; label: string; hint: string }[] = [
-  { id: 'member', label: 'Ada Employee (home-tenant member)', hint: 'Allowed — reaches the shell' },
+  { id: 'member', label: 'Ada Employee (Reader)', hint: 'Allowed — reaches the shell' },
+  { id: 'contributor', label: 'Cara Contributor', hint: 'Allowed — edit metadata, submit for review' },
+  { id: 'reviewer', label: 'Rita Reviewer', hint: 'Allowed — record typed reviews' },
+  { id: 'approver', label: 'Aksel Approver', hint: 'Allowed — approve/reject, set lifecycle' },
+  { id: 'admin', label: 'Aria Admin', hint: 'Allowed — everything, incl. role management' },
   { id: 'guest', label: 'Guest Consultant (guest account)', hint: 'Denied — not an employee' },
   {
     id: 'foreign-tenant',

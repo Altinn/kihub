@@ -3,8 +3,9 @@ import type { IdentityClaims } from './claims';
 
 /**
  * Map a verified, gated identity onto a Payload `Users` document (contracts/auth-gating.md).
- * Upsert keyed by `entraOid`: create on first sign-in (baseline role `reader`), otherwise
- * refresh the profile + `lastLoginAt`. This is the only Payload write path in Phase 1.
+ * Upsert keyed by `entraOid`: create on first sign-in (baseline role `reader`, or `roleHint` when
+ * present — dev-mock personas only, research.md §1), otherwise refresh the profile +
+ * `lastLoginAt` (role is never touched again here — only an Admin override changes it, FR-004).
  *
  * Callers MUST gate the claims with `employeeGate` first — this function does not re-check.
  */
@@ -40,7 +41,7 @@ export async function upsertUserFromClaims(payload: Payload, claims: IdentityCla
       email: claims.email,
       name: claims.name,
       tenantId: claims.tid,
-      role: 'reader',
+      role: claims.roleHint ?? 'reader',
       lastLoginAt: now,
     },
     overrideAccess: true,

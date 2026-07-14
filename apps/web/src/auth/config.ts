@@ -39,8 +39,10 @@ export function toClaims(
   const name = (src.name as string | undefined) ?? email;
   const tid = (src.tid as string | undefined) ?? '';
   const idtyp = src.idtyp as IdentityClaims['idtyp'];
+  // Only ever present on the mock provider's user object — a real Entra profile has no such claim.
+  const roleHint = src.roleHint as IdentityClaims['roleHint'];
   if (!oid || !email) return null;
-  return { oid, email, name: name ?? email, tid, idtyp };
+  return { oid, email, name: name ?? email, tid, idtyp, roleHint };
 }
 
 export const authConfig: NextAuthConfig = {

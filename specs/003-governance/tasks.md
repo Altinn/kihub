@@ -32,9 +32,9 @@ in `packages/discovery-core/` (untouched), reused schema in `packages/artifact-s
 
 ## Phase 1: Setup
 
-- [ ] T001 Initialize `packages/governance-core` (`package.json` name `@kihub/governance-core`, `type: module`, `tsconfig.json`, dep-free, dev `vitest`; `test` script)
-- [ ] T002 [P] Extend dev-only mock personas in `apps/web/src/auth/claims.ts`: add `contributor`/`reviewer`/`approver`/`admin` personas (each its own `oid`/`email`) alongside the existing `member`/`guest`/`foreign-tenant`, each carrying a dev-only `roleHint`
-- [ ] T003 [P] Add an optional `roleHint` to `IdentityClaims` (`apps/web/src/auth/claims.ts`), consumed only in `upsertUserFromClaims`'s create path (`apps/web/src/auth/upsert-user.ts`) — real Entra claim mapping (`toClaims` in `apps/web/src/auth/config.ts`) never sets it, so production sign-in is unaffected and every new real user still defaults to `reader`
+- [X] T001 Initialize `packages/governance-core` (`package.json` name `@kihub/governance-core`, `type: module`, `tsconfig.json`, dep-free, dev `vitest`; `test` script)
+- [X] T002 [P] Extend dev-only mock personas in `apps/web/src/auth/claims.ts`: add `contributor`/`reviewer`/`approver`/`admin` personas (each its own `oid`/`email`) alongside the existing `member`/`guest`/`foreign-tenant`, each carrying a dev-only `roleHint`
+- [X] T003 [P] Add an optional `roleHint` to `IdentityClaims` (`apps/web/src/auth/claims.ts`), consumed only in `upsertUserFromClaims`'s create path (`apps/web/src/auth/upsert-user.ts`) — real Entra claim mapping (`toClaims` in `apps/web/src/auth/config.ts`) never sets it, so production sign-in is unaffected and every new real user still defaults to `reader`
 
 ---
 
@@ -45,15 +45,15 @@ access control + audit hooks already wired) must exist before any role-gated act
 
 **⚠️ CRITICAL**: Blocks all user stories
 
-- [ ] T004 [P] Implement `packages/governance-core/src/roles.ts`: `hasPermission(role, action)` per contracts/governance-core.md (Reader=none; Contributor=`edit-metadata`+`submit-for-review`; Reviewer=+`record-review`; Approver=+`decide-approval`+`transition-lifecycle`+`archive`; Admin=all incl. `manage-roles`)
-- [ ] T005 [P] Implement `packages/governance-core/src/lifecycle.ts`: `canTransition(from, to, role)` per the matrix in data-model.md (linear Draft→Experimental→In Review→Approved→Recommended; Deprecated/Archived reachable from any state for Approver/Admin; anything else rejected with a reason)
-- [ ] T006 [P] Implement `packages/governance-core/src/review.ts`: `REVIEW_TYPES` (security/privacy-gdpr/technical/accessibility/responsible-ai/operational) + `isExpired(expiryDate, now)`; re-export all three modules from `packages/governance-core/src/index.ts`
-- [ ] T007 Create the `catalog-entries` Payload collection in `apps/web/src/collections/CatalogEntry.ts` per data-model.md (`artifact` relationship unique, `businessOwner`, `technicalOwner`, `riskLevel`, `reviewStatus`, `approvalState`, `lifecycleState`, `recommended`, `featured`, `internalNotes`, `updatedBy`, `updatedAt`; access: read=authenticated, create/update=`hasPermission(role, 'edit-metadata')`; `beforeChange` hook stamps `updatedBy`/`updatedAt` and calls `canTransition` whenever `lifecycleState` changes, rejecting with a clear reason and no partial write; delete=false)
-- [ ] T008 [P] Create the `reviews` Payload collection in `apps/web/src/collections/Review.ts` per data-model.md (`artifact` relationship, `type`, `reviewer`, `status`, `decision`, `comments`, `requiredChanges`, `riskLevel`, `reviewDate`, `expiryDate`; access: read=authenticated, create/update=`hasPermission(role, 'record-review')`; `beforeChange` hook stamps `reviewer`+`reviewDate`; delete=false)
-- [ ] T009 [P] Create the `audit-log` Payload collection in `apps/web/src/collections/AuditLog.ts` per data-model.md (`actor`, `action`, `artifact`, `targetUser`, `details` json, `createdAt`; access: read=authenticated, create=server-side only via hooks with `overrideAccess`, update/delete=false)
-- [ ] T010 Wire `afterChange` hooks on `CatalogEntry` and `Review` (`apps/web/src/collections/CatalogEntry.ts`, `Review.ts`) to write one `audit-log` entry per mutation (`metadata-edit`/`lifecycle-transition` for CatalogEntry depending on which fields changed; `review-recorded` for Review) (depends on T007, T008, T009)
-- [ ] T011 Register `CatalogEntry`, `Review`, `AuditLog` in `apps/web/src/payload.config.ts` (depends on T007, T008, T009)
-- [ ] T012 [P] Update `apps/web/src/collections/Users.ts` access: `update` restricted so only Admin may change another user's `role` (a user may still update their own non-`role` fields); add an `afterChange` hook writing an `audit-log` entry (`action='role-change'`, `targetUser` set) whenever `role` changes (depends on T009)
+- [X] T004 [P] Implement `packages/governance-core/src/roles.ts`: `hasPermission(role, action)` per contracts/governance-core.md (Reader=none; Contributor=`edit-metadata`+`submit-for-review`; Reviewer=+`record-review`; Approver=+`decide-approval`+`transition-lifecycle`+`archive`; Admin=all incl. `manage-roles`)
+- [X] T005 [P] Implement `packages/governance-core/src/lifecycle.ts`: `canTransition(from, to, role)` per the matrix in data-model.md (linear Draft→Experimental→In Review→Approved→Recommended; Deprecated/Archived reachable from any state for Approver/Admin; anything else rejected with a reason)
+- [X] T006 [P] Implement `packages/governance-core/src/review.ts`: `REVIEW_TYPES` (security/privacy-gdpr/technical/accessibility/responsible-ai/operational) + `isExpired(expiryDate, now)`; re-export all three modules from `packages/governance-core/src/index.ts`
+- [X] T007 Create the `catalog-entries` Payload collection in `apps/web/src/collections/CatalogEntry.ts` per data-model.md (`artifact` relationship unique, `businessOwner`, `technicalOwner`, `riskLevel`, `reviewStatus`, `approvalState`, `lifecycleState`, `recommended`, `featured`, `internalNotes`, `updatedBy`, `updatedAt`; access: read=authenticated, create/update=`hasPermission(role, 'edit-metadata')`; `beforeChange` hook stamps `updatedBy`/`updatedAt` and calls `canTransition` whenever `lifecycleState` changes, rejecting with a clear reason and no partial write; delete=false)
+- [X] T008 [P] Create the `reviews` Payload collection in `apps/web/src/collections/Review.ts` per data-model.md (`artifact` relationship, `type`, `reviewer`, `status`, `decision`, `comments`, `requiredChanges`, `riskLevel`, `reviewDate`, `expiryDate`; access: read=authenticated, create/update=`hasPermission(role, 'record-review')`; `beforeChange` hook stamps `reviewer`+`reviewDate`; delete=false)
+- [X] T009 [P] Create the `audit-log` Payload collection in `apps/web/src/collections/AuditLog.ts` per data-model.md (`actor`, `action`, `artifact`, `targetUser`, `details` json, `createdAt`; access: read=authenticated, create=server-side only via hooks with `overrideAccess`, update/delete=false)
+- [X] T010 Wire `afterChange` hooks on `CatalogEntry` and `Review` (`apps/web/src/collections/CatalogEntry.ts`, `Review.ts`) to write one `audit-log` entry per mutation (`metadata-edit`/`lifecycle-transition` for CatalogEntry depending on which fields changed; `review-recorded` for Review) (depends on T007, T008, T009)
+- [X] T011 Register `CatalogEntry`, `Review`, `AuditLog` in `apps/web/src/payload.config.ts` (depends on T007, T008, T009)
+- [X] T012 [P] Update `apps/web/src/collections/Users.ts` access: `update` restricted so only Admin may change another user's `role` (a user may still update their own non-`role` fields); add an `afterChange` hook writing an `audit-log` entry (`action='role-change'`, `targetUser` set) whenever `role` changes (depends on T009)
 
 **Checkpoint**: Collections + pure logic exist and are access-controlled; user stories can build on them
 
@@ -67,12 +67,12 @@ access control + audit hooks already wired) must exist before any role-gated act
 
 ### Tests for User Story 1 (constitution-mandated) ⚠️ write first, ensure they FAIL
 
-- [ ] T013 [US1] Integration test `apps/web/tests/integration/governance-access.test.ts`: for each of the 5 roles × each gated action (catalog-entries create/update incl. a lifecycle transition, reviews create, users role-change), assert allow/deny matches the contracts/governance-core.md matrix (SC-001, SC-002) by calling Payload directly — not through the UI
+- [X] T013 [US1] Integration test `apps/web/tests/integration/governance-access.test.ts`: for each of the 5 roles × each gated action (catalog-entries create/update incl. a lifecycle transition, reviews create, users role-change), assert allow/deny matches the contracts/governance-core.md matrix (SC-001, SC-002) by calling Payload directly — not through the UI
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Build the Admin-only role management route `apps/web/src/app/(app)/admin/roles/page.tsx`: list users (email, name, role), a role selector whose change calls a server action updating `users.role`, gated server-side via `hasPermission(role, 'manage-roles')` — non-Admins get `notFound()`, not just a hidden nav link (FR-004) (depends on T012)
-- [ ] T015 [US1] Make test T013 pass; walk quickstart Scenario A (all 5 personas' allowed/disallowed actions, a direct-call refusal above role, and an Admin role-override taking effect on the target user's next action without re-login)
+- [X] T014 [US1] Build the Admin-only role management route `apps/web/src/app/(app)/admin/roles/page.tsx`: list users (email, name, role), a role selector whose change calls a server action updating `users.role`, gated server-side via `hasPermission(role, 'manage-roles')` — non-Admins get `notFound()`, not just a hidden nav link (FR-004) (depends on T012)
+- [X] T015 [US1] Make test T013 pass; walk quickstart Scenario A (all 5 personas' allowed/disallowed actions, a direct-call refusal above role, and an Admin role-override taking effect on the target user's next action without re-login)
 
 **Checkpoint**: Role model fully enforced and Admin-manageable — MVP
 
@@ -86,17 +86,17 @@ access control + audit hooks already wired) must exist before any role-gated act
 
 ### Tests for User Story 2 (constitution-mandated) ⚠️ write first, ensure they FAIL
 
-- [ ] T016 [US2] `packages/governance-core/tests/lifecycle.test.ts`: the full transition matrix — valid linear steps, Deprecated/Archived from any state, correct role gating per transition, invalid transitions rejected with a reason
-- [ ] T017 [US2] Integration test `apps/web/tests/integration/reindex-preserves.test.ts`: create a `catalog-entries` doc for an already-indexed artifact, re-run the Phase 2 indexer (`@kihub/discovery-core` reconcile), assert the governance doc is unchanged (FR-010, SC-003)
+- [X] T016 [US2] `packages/governance-core/tests/lifecycle.test.ts`: the full transition matrix — valid linear steps, Deprecated/Archived from any state, correct role gating per transition, invalid transitions rejected with a reason
+- [X] T017 [US2] Integration test `apps/web/tests/integration/reindex-preserves.test.ts`: create a `catalog-entries` doc for an already-indexed artifact, re-run the Phase 2 indexer (`@kihub/discovery-core` reconcile), assert the governance doc is unchanged (FR-010, SC-003)
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US2] Implement `getGovernance(artifactId)` and `updateGovernanceMetadata(artifactId, patch, actor)` in `apps/web/src/lib/governance.ts` (lazy in-memory default per research.md §6 when no `catalog-entries` doc exists yet; Payload Local API calls otherwise) (depends on T007, T011)
-- [ ] T019 [US2] Implement `submitForReview(artifactId, actor)` and `transitionLifecycle(artifactId, to, actor)` in `apps/web/src/lib/governance.ts` (depends on T018)
-- [ ] T020 [P] [US2] Build `LifecycleBadge` in `apps/web/src/components/LifecycleBadge.tsx` (Designsystemet tag: lifecycle state + a recommended/approved indicator)
-- [ ] T021 [P] [US2] Build the metadata + transition-actions portion of `GovernancePanel` in `apps/web/src/components/GovernancePanel.tsx` (owner/risk/notes editing for Contributor+; submit/transition buttons rendered per `hasPermission` and calling the T018/T019 server actions)
-- [ ] T022 [US2] Wire `LifecycleBadge` into the listing (`apps/web/src/app/(app)/page.tsx` / `apps/web/src/components/ArtifactCard.tsx`) and into the detail page alongside `GovernancePanel` (`apps/web/src/app/(app)/artifacts/[artifactId]/page.tsx`) (depends on T020, T021)
-- [ ] T023 [US2] Make tests T016–T017 pass; walk quickstart Scenario B (ungoverned-artifact default with no error, metadata edit + attribution, a full valid transition path, an invalid/unauthorized transition refusal, re-index preservation)
+- [X] T018 [US2] Implement `getGovernance(artifactId)` and `updateGovernanceMetadata(artifactId, patch, actor)` in `apps/web/src/lib/governance.ts` (lazy in-memory default per research.md §6 when no `catalog-entries` doc exists yet; Payload Local API calls otherwise) (depends on T007, T011)
+- [X] T019 [US2] Implement `submitForReview(artifactId, actor)` and `transitionLifecycle(artifactId, to, actor)` in `apps/web/src/lib/governance.ts` (depends on T018)
+- [X] T020 [P] [US2] Build `LifecycleBadge` in `apps/web/src/components/LifecycleBadge.tsx` (Designsystemet tag: lifecycle state + a recommended/approved indicator)
+- [X] T021 [P] [US2] Build the metadata + transition-actions portion of `GovernancePanel` in `apps/web/src/components/GovernancePanel.tsx` (owner/risk/notes editing for Contributor+; submit/transition buttons rendered per `hasPermission` and calling the T018/T019 server actions)
+- [X] T022 [US2] Wire `LifecycleBadge` into the listing (`apps/web/src/app/(app)/page.tsx` / `apps/web/src/components/ArtifactCard.tsx`) and into the detail page alongside `GovernancePanel` (`apps/web/src/app/(app)/artifacts/[artifactId]/page.tsx`) (depends on T020, T021)
+- [X] T023 [US2] Make tests T016–T017 pass; walk quickstart Scenario B (ungoverned-artifact default with no error, metadata edit + attribution, a full valid transition path, an invalid/unauthorized transition refusal, re-index preservation)
 
 **Checkpoint**: Governance metadata + lifecycle fully functional and visible in the catalog — US1 + US2 independently functional
 
@@ -110,15 +110,15 @@ access control + audit hooks already wired) must exist before any role-gated act
 
 ### Tests for User Story 3 (constitution-mandated) ⚠️ write first, ensure they FAIL
 
-- [ ] T024 [P] [US3] `packages/governance-core/tests/review.test.ts`: `isExpired` against past/future/boundary expiry dates
-- [ ] T025 [US3] Integration test `apps/web/tests/integration/review-approval-flow.test.ts`: submit for review → record a typed review → approve, asserting `approvalState`, attribution, and one `audit-log` entry per step; also cover a reject path, an approval *despite* a changes-requested/rejected typed review (proves the advisory, non-blocking policy — FR-017), and a Reader attempting record/approve (refused) (FR-013–FR-020, SC-006–SC-008)
+- [X] T024 [P] [US3] `packages/governance-core/tests/review.test.ts`: `isExpired` against past/future/boundary expiry dates
+- [X] T025 [US3] Integration test `apps/web/tests/integration/review-approval-flow.test.ts`: submit for review → record a typed review → approve, asserting `approvalState`, attribution, and one `audit-log` entry per step; also cover a reject path, an approval *despite* a changes-requested/rejected typed review (proves the advisory, non-blocking policy — FR-017), and a Reader attempting record/approve (refused) (FR-013–FR-020, SC-006–SC-008)
 
 ### Implementation for User Story 3
 
-- [ ] T026 [US3] Implement `recordReview(artifactId, input, actor)` and `decideApproval(artifactId, decision, actor)` in `apps/web/src/lib/governance.ts` (approval is advisory re: typed reviews, per Clarifications) (depends on T018)
-- [ ] T027 [P] [US3] Build `ReviewForm` in `apps/web/src/components/ReviewForm.tsx` (Designsystemet form: type, decision, comments, required changes, risk level, expiry date)
-- [ ] T028 [US3] Extend `GovernancePanel` (`apps/web/src/components/GovernancePanel.tsx`) with the review history (type/reviewer/decision/expiry — expired ones flagged via `isExpired`), the audit history (queries `audit-log` by artifact, newest first), and approve/reject controls for Approver+ (depends on T026, T027)
-- [ ] T029 [US3] Make tests T024–T025 pass; walk quickstart Scenario C (submit, typed review, approve, reject, expired-review flag, Reader refusal)
+- [X] T026 [US3] Implement `recordReview(artifactId, input, actor)` and `decideApproval(artifactId, decision, actor)` in `apps/web/src/lib/governance.ts` (approval is advisory re: typed reviews, per Clarifications) (depends on T018)
+- [X] T027 [P] [US3] Build `ReviewForm` in `apps/web/src/components/ReviewForm.tsx` (Designsystemet form: type, decision, comments, required changes, risk level, expiry date)
+- [X] T028 [US3] Extend `GovernancePanel` (`apps/web/src/components/GovernancePanel.tsx`) with the review history (type/reviewer/decision/expiry — expired ones flagged via `isExpired`), the audit history (queries `audit-log` by artifact, newest first), and approve/reject controls for Approver+ (depends on T026, T027)
+- [X] T029 [US3] Make tests T024–T025 pass; walk quickstart Scenario C (submit, typed review, approve, reject, expired-review flag, Reader refusal)
 
 **Checkpoint**: All three stories independently functional
 
@@ -126,9 +126,9 @@ access control + audit hooks already wired) must exist before any role-gated act
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T030 [P] Update root `README.md` (and Phase 3 quickstart refs) with the role-admin route and the extended mock personas
-- [ ] T031 [P] Constitution self-check: inspect the `catalog_entries`/`reviews`/`audit_log` tables to confirm only enterprise-context fields are stored (no artifact content); confirm all new UI imports only Designsystemet
-- [ ] T032 Run full quickstart Scenarios A–C and the complete test suite (web + governance-core + discovery-core + artifact-schema) green
+- [X] T030 [P] Update root `README.md` (and Phase 3 quickstart refs) with the role-admin route and the extended mock personas
+- [X] T031 [P] Constitution self-check: inspect the `catalog_entries`/`reviews`/`audit_log` tables to confirm only enterprise-context fields are stored (no artifact content); confirm all new UI imports only Designsystemet
+- [X] T032 Run full quickstart Scenarios A–C and the complete test suite (web + governance-core + discovery-core + artifact-schema) green
 
 ---
 

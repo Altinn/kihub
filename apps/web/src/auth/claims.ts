@@ -15,14 +15,28 @@ export interface IdentityClaims {
    * (B2B) accounts are marked "guest". Mirrors the Entra `idtyp`/account-type signal.
    */
   idtyp?: 'member' | 'guest';
+  /**
+   * Dev-only role seed (Phase 3). Set ONLY by the mock provider's personas — never derived
+   * from a real Entra profile (`toClaims`'s real-Entra path never populates it), so production
+   * sign-in always defaults new users to `reader` (research.md §1).
+   */
+  roleHint?: 'reader' | 'contributor' | 'reviewer' | 'approver' | 'admin';
 }
 
 /**
  * Dev-only mock personas. Selected in the sign-in UI when AUTH_MODE=mock. Each emits the
  * same claim shape Entra would, so the whole downstream pipeline is genuinely exercised
- * without a real tenant. `member` is allowed; `guest` and `foreign-tenant` are denied.
+ * without a real tenant. `member`/`contributor`/`reviewer`/`approver`/`admin` are allowed
+ * (home-tenant members, one per role — Phase 3); `guest` and `foreign-tenant` are denied.
  */
-export type MockPersona = 'member' | 'guest' | 'foreign-tenant';
+export type MockPersona =
+  | 'member'
+  | 'contributor'
+  | 'reviewer'
+  | 'approver'
+  | 'admin'
+  | 'guest'
+  | 'foreign-tenant';
 
 const ORG_TENANT_ID = process.env.ORG_TENANT_ID ?? '00000000-0000-0000-0000-000000000000';
 const FOREIGN_TENANT_ID = '11111111-1111-1111-1111-111111111111';
@@ -34,6 +48,38 @@ export const PERSONA_CLAIMS: Record<MockPersona, IdentityClaims> = {
     name: 'Ada Employee',
     tid: ORG_TENANT_ID,
     idtyp: 'member',
+  },
+  contributor: {
+    oid: 'mock-oid-contributor-0004',
+    email: 'cara.contributor@digdir.no',
+    name: 'Cara Contributor',
+    tid: ORG_TENANT_ID,
+    idtyp: 'member',
+    roleHint: 'contributor',
+  },
+  reviewer: {
+    oid: 'mock-oid-reviewer-0005',
+    email: 'rita.reviewer@digdir.no',
+    name: 'Rita Reviewer',
+    tid: ORG_TENANT_ID,
+    idtyp: 'member',
+    roleHint: 'reviewer',
+  },
+  approver: {
+    oid: 'mock-oid-approver-0006',
+    email: 'aksel.approver@digdir.no',
+    name: 'Aksel Approver',
+    tid: ORG_TENANT_ID,
+    idtyp: 'member',
+    roleHint: 'approver',
+  },
+  admin: {
+    oid: 'mock-oid-admin-0007',
+    email: 'aria.admin@digdir.no',
+    name: 'Aria Admin',
+    tid: ORG_TENANT_ID,
+    idtyp: 'member',
+    roleHint: 'admin',
   },
   guest: {
     oid: 'mock-oid-guest-0002',
