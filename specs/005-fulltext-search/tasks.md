@@ -70,7 +70,7 @@ artifact never appears; odd punctuation / a very long query never errors.
 - [ ] T004 [US1] Implement `searchArtifacts(payload, q, filters)` in `apps/web/src/lib/search.ts` per contracts/fulltext-query.md: return `[]` for empty/whitespace `q`; else run the parameterized `to_tsvector('english', coalesce(name,'')||' '||coalesce(description,'')||' '||coalesce(readme,'')) @@ websearch_to_tsquery('english', $1)` query with `ts_rank` ordering and `LIMIT SEARCH_RESULT_LIMIT` on `payload.db.pool` (active rows only), then pass the ranked `artifactId`s to `resolveByArtifactIds(ids, filters)` and return the resolved docs in rank order (depends on T001, T002)
 - [ ] T005 [P] [US1] Unit test `apps/web/tests/unit/search.test.ts`: with a faked query runner (no DB), assert `searchArtifacts` binds the user text as a parameter (never string-interpolated), uses `websearch_to_tsquery`/`english`, short-circuits empty/whitespace `q` to `[]`, and maps result rows → ranked `artifactId`s in order (depends on T004)
 - [ ] T006 [P] [US1] Create `apps/web/src/components/SearchBar.tsx` (client, Designsystemet only): a text input + submit prefilled from the current `q` that navigates to the catalog URL with `q` set (or removed when cleared), preserving the other URL params — mirroring the URL-composition approach of `components/CatalogFilters.tsx`
-- [ ] T007 [US1] Wire `apps/web/src/app/(app)/page.tsx` per contracts/search-ui.md: extend `SearchParams` with `q`; when `q` is non-empty call `searchArtifacts(payload, q, {})` and render the ranked results with the existing `ArtifactCard` (+ `getGovernance`), showing a "no results" empty state when none match; when `q` is empty keep the unchanged Phase 2 browse; render `SearchBar` above the listing (depends on T004, T006)
+- [ ] T007 [US1] Wire `apps/web/src/app/(app)/page.tsx` per contracts/search-ui.md: extend `SearchParams` with `q`; when `q` is non-empty call `searchArtifacts(payload, q, {})` and render the ranked results with the existing `ArtifactCard` (+ `getGovernance`), showing a "no results" empty state when none match; when `q` is empty keep the unchanged Phase 2 browse; render `SearchBar` above the listing; the search entry point MUST stay within the `(app)` route group so the existing `(app)/layout.tsx` `requireSession()` gate applies unchanged (unauthenticated → `/signin`; FR-007) — the `q` param is added to the existing catalog page, no new route is introduced (depends on T004, T006)
 
 **Checkpoint**: US1 fully functional — employees can find artifacts by keyword, governance-safe; deployable MVP
 
@@ -173,6 +173,10 @@ Task: "Wire q-branch + results + no-results state in apps/web/src/app/(app)/page
 - Reuse is deliberate: the `artifacts` shape, `reconcile`, discovery, and every `packages/*` are
   **unchanged**; governance (active + visibility) is enforced once, in the reused `lib/catalog.ts`
   resolver (T002) — search never invents a parallel access model.
+- FR-007 (employee gate) is satisfied by the inherited `(app)/layout.tsx` `requireSession()` gate: the
+  search box only adds a `q` param to the existing catalog page (no new route), so no bypass exists —
+  already covered by `tests/integration/route-protection.test.ts`; T007 keeps the search path inside
+  the `(app)` group.
 - No new dependency, env var, collection, field, migration, GIN index, or external service this phase;
   a persisted `tsvector` column + GIN index and semantic/embeddings/Qdrant are documented later steps.
 - The query is injection-safe and syntax-error-safe (`websearch_to_tsquery` + bound parameter).

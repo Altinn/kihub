@@ -18,7 +18,9 @@ Lives in `apps/web` (`app/(app)/page.tsx`, `components/SearchBar.tsx`). Designsy
   the existing detail page (FR-005) — no new artifact data introduced.
 - Non-empty `q` with no matches → a "no results" empty state (FR-004), distinct from the Phase 2
   "catalog is empty" state.
-- Unauthenticated access still redirects to sign-in (Phase 1 gate — FR-007).
+- Unauthenticated access still redirects to sign-in via the existing `(app)/layout.tsx`
+  `requireSession()` gate — search adds a `q` param to the existing catalog page, not a new route, so
+  the Phase 1 gate applies unchanged (FR-007; covered by `tests/integration/route-protection.test.ts`).
 - Facets (available types/tags) continue to derive from the full active set so filters stay visible
   during a search, consistent with Phase 2.
 
