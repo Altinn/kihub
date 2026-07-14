@@ -70,7 +70,7 @@ describe('scan + reconcile against live Payload (T010)', () => {
       where: { artifactId: { equals: 'digdir.itest-a' } },
       overrideAccess: true,
     });
-    const doc = a.docs[0] as Record<string, unknown>;
+    const doc = a.docs[0] as unknown as Record<string, unknown>;
     expect(doc.type).toBe('skill');
     expect(doc.installCommand).toBe('apm install digdir/itest-a');
     expect(doc.active).toBe(true);
@@ -91,7 +91,7 @@ describe('scan + reconcile against live Payload (T010)', () => {
       overrideAccess: true,
     });
     expect(a.totalDocs).toBe(1);
-    expect((a.docs[0] as Record<string, unknown>).version).toBe('2.0.0');
+    expect((a.docs[0] as unknown as Record<string, unknown>).version).toBe('2.0.0');
   });
 
   it('soft-deactivates an artifact removed from the repo', async () => {
@@ -104,6 +104,6 @@ describe('scan + reconcile against live Payload (T010)', () => {
       where: { artifactId: { equals: 'digdir.itest-b' } },
       overrideAccess: true,
     });
-    expect((b.docs[0] as Record<string, unknown>).active).toBe(false);
+    expect((b.docs[0] as unknown as Record<string, unknown>).active).toBe(false);
   });
 });

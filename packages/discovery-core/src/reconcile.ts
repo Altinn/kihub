@@ -9,14 +9,20 @@ export interface IndexReport {
   duplicates: string[];
 }
 
-/** Minimal Payload Local API surface used by reconcile — kept narrow so it is easy to fake in tests. */
+/**
+ * Minimal Payload Local API surface used by reconcile — kept narrow so it is easy to fake in
+ * tests. `find()`'s return type is intentionally loose (`docs: unknown[]`): the real `Payload`
+ * instance's `find()` is generic over the full collection-slug union, and a narrower return type
+ * here stops structurally matching it as more collections are added elsewhere in the app. Callers
+ * within this file cast each `docs[]` entry to the shape they know the 'artifacts' collection has.
+ */
 export interface PayloadLike {
   find(args: {
     collection: string;
     where?: unknown;
     limit?: number;
     overrideAccess?: boolean;
-  }): Promise<{ docs: Array<{ id: string | number; artifactId: string }> }>;
+  }): Promise<{ docs: unknown[] }>;
   create(args: { collection: string; data: unknown; overrideAccess?: boolean }): Promise<unknown>;
   update(args: {
     collection: string;
@@ -24,6 +30,11 @@ export interface PayloadLike {
     data: unknown;
     overrideAccess?: boolean;
   }): Promise<unknown>;
+}
+
+interface ArtifactDoc {
+  id: string | number;
+  artifactId: string;
 }
 
 /**
@@ -63,11 +74,12 @@ export async function reconcile(payload: PayloadLike, scanned: RawArtifact[]): P
       limit: 1,
       overrideAccess: true,
     });
+    const existingDoc = existing.docs[0] as ArtifactDoc | undefined;
 
-    if (existing.docs[0]) {
+    if (existingDoc) {
       await payload.update({
         collection: 'artifacts',
-        id: existing.docs[0].id,
+        id: existingDoc.id,
         data,
         overrideAccess: true,
       });
@@ -85,7 +97,8 @@ export async function reconcile(payload: PayloadLike, scanned: RawArtifact[]): P
     limit: 1000,
     overrideAccess: true,
   });
-  for (const doc of active.docs) {
+  for (const raw of active.docs) {
+    const doc = raw as ArtifactDoc;
     if (!seen.has(doc.artifactId)) {
       await payload.update({
         collection: 'artifacts',

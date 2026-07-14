@@ -9,7 +9,15 @@ import { listArtifacts } from '@/lib/catalog';
  */
 let payload: Payload;
 
-const seed = [
+const seed: Array<{
+  artifactId: string;
+  type: 'skill' | 'prompt';
+  name: string;
+  description: string;
+  version: string;
+  tags: string[];
+  active: boolean;
+}> = [
   { artifactId: 'digdir.ft-skill-a', type: 'skill', name: 'A', description: 'x', version: '1.0.0', tags: ['security', 'review'], active: true },
   { artifactId: 'digdir.ft-skill-b', type: 'skill', name: 'B', description: 'x', version: '1.0.0', tags: ['review'], active: true },
   { artifactId: 'digdir.ft-prompt-c', type: 'prompt', name: 'C', description: 'x', version: '1.0.0', tags: ['security'], active: true },
@@ -20,7 +28,7 @@ async function wipe() {
   await payload.delete({ collection: 'artifacts', where: { id: { exists: true } }, overrideAccess: true });
 }
 
-const ids = (docs: Array<Record<string, unknown>>) => docs.map((d) => d.artifactId as string).sort();
+const ids = (docs: Array<{ artifactId: string }>) => docs.map((d) => d.artifactId).sort();
 
 beforeAll(async () => {
   payload = await getPayload({ config });

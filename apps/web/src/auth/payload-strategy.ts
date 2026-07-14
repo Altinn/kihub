@@ -36,7 +36,9 @@ export const authStrategy: AuthStrategy = {
       const user = result.docs[0];
       if (!user) return { user: null };
 
-      return { user: { collection: 'users', ...user } };
+      // `user` (a Users doc) already carries its own `collection` field; spread first so the
+      // explicit 'users' below is the one that actually wins, not a silently-overwritten dead value.
+      return { user: { ...user, collection: 'users' } };
     } catch {
       return { user: null };
     }
