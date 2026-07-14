@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Phase 5 — Semantic Search
+# Specification Quality Checklist: Phase 5 — Full-Text Search
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-07-14
@@ -32,7 +32,10 @@
 ## Notes
 
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`.
-- Validation passed on first iteration. The spec deliberately leaves specific technology choices
-  (embedding model, vector store deployment) to `/speckit-plan`, and the meaning-based-vs-keyword
-  fallback relationship is a good candidate for `/speckit-clarify` — it is documented as an
-  assumption rather than a `[NEEDS CLARIFICATION]` marker so the spec stays clean and testable.
+- Validation passed. Scope was revised after review from semantic/vector search to **PostgreSQL
+  full-text search** (Constitution Principle VII "full-text first"; semantic/Qdrant deferred to a
+  later phase) — recorded in the Clarifications section.
+- "PostgreSQL" is named deliberately as a scope constraint (FR-017: no new datastore/service; reuse
+  the existing database), consistent with how prior phase specs name the platform's fixed stack —
+  not a leaked free-choice implementation detail. Query mechanics (`tsvector`/`ts_rank`, text-search
+  config, optional indexing) are left to `/speckit-plan`.
