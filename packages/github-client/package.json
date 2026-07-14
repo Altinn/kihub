@@ -1,9 +1,9 @@
 {
-  "name": "@kihub/discovery-core",
+  "name": "@kihub/github-client",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Reusable, Payload-agnostic indexing core for KI Hub — scan ai-artifacts, build records, reconcile the catalog.",
+  "description": "Pure, Payload-agnostic GitHub repo reader for KI Hub discovery — fetches artifact.yaml/README bytes remotely as a discovery-core RepoReader.",
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -14,8 +14,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@kihub/artifact-schema": "workspace:*",
-    "yaml": "2.9.0"
+    "@kihub/discovery-core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

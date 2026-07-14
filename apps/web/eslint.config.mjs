@@ -1,13 +1,11 @@
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { FlatCompat } from '@eslint/eslintrc';
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const compat = new FlatCompat({ baseDirectory: __dirname });
-
+// eslint-config-next 16 ships native flat configs — spread them directly. (The older
+// FlatCompat(`compat.extends('next/core-web-vitals')`) path crashes under ESLint 9.39 +
+// @eslint/eslintrc, which JSON.stringifies the config and hits a circular ref in the Next plugin.)
 const config = [
-  { ignores: ['.next/**', 'node_modules/**', 'src/app/(payload)/**'] },
-  ...compat.extends('next/core-web-vitals'),
+  { ignores: ['.next/**', 'node_modules/**', 'src/app/(payload)/**', 'src/payload-types.ts'] },
+  ...nextCoreWebVitals,
 ];
 
 export default config;

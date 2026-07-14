@@ -1,4 +1,5 @@
 import { Button, Card, Divider, Heading, Paragraph, Tag } from '@digdir/designsystemet-react';
+import Link from 'next/link';
 import { auth, signOut } from '@/auth';
 import { ArtifactCard } from '@/components/ArtifactCard';
 import { CatalogFilters } from '@/components/CatalogFilters';
@@ -102,7 +103,7 @@ export default async function CatalogPage({
                   No matching artifacts
                 </Heading>
                 <Paragraph data-size="sm" style={{ marginTop: '0.5rem' }}>
-                  No artifacts match the active filters. <a href="/">Clear filters</a> to see all.
+                  No artifacts match the active filters. <Link href="/">Clear filters</Link> to see all.
                 </Paragraph>
               </Card>
             ) : (

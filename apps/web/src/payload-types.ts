@@ -72,6 +72,8 @@ export interface Config {
     'catalog-entries': CatalogEntry;
     reviews: Review;
     'audit-log': AuditLog;
+    'discovery-sources': DiscoverySource;
+    'discovery-runs': DiscoveryRun;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,6 +86,8 @@ export interface Config {
     'catalog-entries': CatalogEntriesSelect<false> | CatalogEntriesSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     'audit-log': AuditLogSelect<false> | AuditLogSelect<true>;
+    'discovery-sources': DiscoverySourcesSelect<false> | DiscoverySourcesSelect<true>;
+    'discovery-runs': DiscoveryRunsSelect<false> | DiscoveryRunsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -233,6 +237,69 @@ export interface AuditLog {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "discovery-sources".
+ */
+export interface DiscoverySource {
+  id: number;
+  name: string;
+  repo: string;
+  ref?: string | null;
+  /**
+   * Name of the env var holding the GitHub token (value never stored here).
+   */
+  tokenEnvVar: string;
+  webhookSecret: string;
+  enabled?: boolean | null;
+  /**
+   * Per-source run lock; set while a run is in progress.
+   */
+  runningSince?: string | null;
+  lastRunAt?: string | null;
+  lastRunOutcome?: ('success' | 'failure') | null;
+  lastRunSummary?: {
+    created?: number | null;
+    updated?: number | null;
+    deactivated?: number | null;
+    skippedInvalid?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "discovery-runs".
+ */
+export interface DiscoveryRun {
+  id: number;
+  source: number | DiscoverySource;
+  trigger: 'webhook' | 'scheduled' | 'manual';
+  triggeredBy?: (number | null) | User;
+  startedAt: string;
+  finishedAt?: string | null;
+  outcome: 'success' | 'failure';
+  failureReason?: string | null;
+  summary?: {
+    created?: number | null;
+    updated?: number | null;
+    deactivated?: number | null;
+    duplicates?: number | null;
+    skippedInvalid?: number | null;
+  };
+  createdIds?: string[] | null;
+  updatedIds?: string[] | null;
+  deactivatedIds?: string[] | null;
+  skippedInvalid?:
+    | {
+        path?: string | null;
+        errors?: string[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -274,6 +341,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'audit-log';
         value: number | AuditLog;
+      } | null)
+    | ({
+        relationTo: 'discovery-sources';
+        value: number | DiscoverySource;
+      } | null)
+    | ({
+        relationTo: 'discovery-runs';
+        value: number | DiscoveryRun;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -411,6 +486,65 @@ export interface AuditLogSelect<T extends boolean = true> {
   artifact?: T;
   targetUser?: T;
   details?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "discovery-sources_select".
+ */
+export interface DiscoverySourcesSelect<T extends boolean = true> {
+  name?: T;
+  repo?: T;
+  ref?: T;
+  tokenEnvVar?: T;
+  webhookSecret?: T;
+  enabled?: T;
+  runningSince?: T;
+  lastRunAt?: T;
+  lastRunOutcome?: T;
+  lastRunSummary?:
+    | T
+    | {
+        created?: T;
+        updated?: T;
+        deactivated?: T;
+        skippedInvalid?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "discovery-runs_select".
+ */
+export interface DiscoveryRunsSelect<T extends boolean = true> {
+  source?: T;
+  trigger?: T;
+  triggeredBy?: T;
+  startedAt?: T;
+  finishedAt?: T;
+  outcome?: T;
+  failureReason?: T;
+  summary?:
+    | T
+    | {
+        created?: T;
+        updated?: T;
+        deactivated?: T;
+        duplicates?: T;
+        skippedInvalid?: T;
+      };
+  createdIds?: T;
+  updatedIds?: T;
+  deactivatedIds?: T;
+  skippedInvalid?:
+    | T
+    | {
+        path?: T;
+        errors?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

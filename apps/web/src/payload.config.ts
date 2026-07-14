@@ -7,6 +7,8 @@ import sharp from 'sharp';
 import { Artifact } from './collections/Artifact';
 import { AuditLog } from './collections/AuditLog';
 import { CatalogEntry } from './collections/CatalogEntry';
+import { DiscoveryRun } from './collections/DiscoveryRun';
+import { DiscoverySource } from './collections/DiscoverySource';
 import { Review } from './collections/Review';
 import { Users } from './collections/Users';
 
@@ -17,7 +19,7 @@ export default buildConfig({
   admin: {
     user: Users.slug,
   },
-  collections: [Users, Artifact, CatalogEntry, Review, AuditLog],
+  collections: [Users, Artifact, CatalogEntry, Review, AuditLog, DiscoverySource, DiscoveryRun],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET ?? '',
   typescript: {
