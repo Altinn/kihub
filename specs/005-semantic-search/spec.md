@@ -8,6 +8,15 @@
 
 **Input**: User description: "Phase 5 — Semantic search for KI Hub: authenticated employees can find catalog artifacts by meaning (natural-language / conceptual queries), not just exact keyword/attribute filters, via semantic (vector) search over the artifact metadata that is already indexed — manifest fields (name, description, tags, type) plus the README snapshot from Phase 2 — never the artifact's executable body (Constitution Principle I). Uses embeddings + a vector store (Qdrant) as the 'semantic search / Qdrant later' seam explicitly deferred by Constitution Principle VII, with PostgreSQL full-text as the already-shipped baseline. Semantic search is integrated into the existing Phase 2 catalog browse/search UI (built with Digdir Designsystemet) and combines with the existing type/tag/category filters. Embeddings are generated/refreshed as part of the Phase 4 discovery/reconcile flow (so a re-scan keeps the vector index in sync, and the catalog stays rebuildable from Git). Search results MUST respect the Phase 3 governance model — visibility and lifecycle/active state — so nothing surfaces that a user shouldn't see. Builds on Phases 1-4 (auth/roles, Artifact technical record + reconcile core, governance, automated discovery). Follows 'Start Simple, Design for Growth': ship the simplest thing that satisfies semantic discovery this phase; defer speculative complexity (re-ranking, hybrid fusion tuning, multi-model, etc.) unless a concrete near-term need justifies it. Continues the same phased Spec Kit flow as Phases 1-4."
 
+## Clarifications
+
+### Session 2026-07-14
+
+- Q: When a discovery run creates/updates an artifact but the embedding service is unavailable, what happens to that run? → A: Catalog reconcile still succeeds and the artifact is catalogued; its embedding is generated best-effort, and if the service is down the artifact is marked "not yet searchable" and retried on the next discovery run (catalog freshness is decoupled from search-backend availability).
+- Q: When semantic search is unavailable (vector store / embedding down), what is the degraded fallback for a text query? → A: Fall back to a simple keyword/substring match over the already-indexed metadata fields (name/description/tags) plus a notice — no PostgreSQL full-text engine is built this phase.
+- Q: What scope of governance visibility does search enforce this phase? → A: Reuse the existing rules as-is — active-state plus the existing `visibility` field (currently all `internal`, so every employee sees every active artifact). No new per-user/per-group visibility tiers this phase; future `visibility` values are respected automatically.
+- Q: Which languages are expected in queries and content (Digdir context)? → A: Both Norwegian and English, cross-lingually (a Norwegian query may match English metadata and vice versa), best-effort via a multilingual embedding model.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Find artifacts by meaning (Priority: P1)
@@ -60,7 +69,7 @@ An employee refines a meaning-based search using the catalog's existing facets: 
 1. **Given** a meaning-based query, **When** the employee also applies a `type` filter, **Then** results are limited to that type and remain ordered by relevance to the query.
 2. **Given** a meaning-based query, **When** the employee applies one or more `tag` filters (and/or a category), **Then** results satisfy all active filters *and* the query.
 3. **Given** an active query and filters, **When** the employee clears the query, **Then** the listing reverts to the Phase 2 filtered browse (no relevance ranking, all matching artifacts), unchanged.
-4. **Given** semantic search is unavailable, **When** the employee uses the catalog, **Then** browsing and attribute filters still function and the UI clearly indicates that meaning-based search is temporarily unavailable (no error page, no empty catalog).
+4. **Given** semantic search is unavailable, **When** the employee uses the catalog, **Then** browsing and attribute filters still function, a text query falls back to a simple keyword/substring match over indexed fields, and the UI clearly indicates that meaning-based search is temporarily degraded (no error page, no empty catalog).
 5. **Given** all search and filter UI, **When** it renders, **Then** it is built with the mandated design system, consistent with the rest of the catalog.
 
 ---
@@ -69,12 +78,13 @@ An employee refines a meaning-based search using the catalog's existing facets: 
 
 - **Empty or whitespace-only query**: Submitting no query (or only whitespace) is treated as "browse", not a failed search — the Phase 2 listing (optionally filtered) is shown.
 - **No relevant results**: A query with no sufficiently relevant matches shows an intentional empty state ("nothing relevant found"), not an error and not a dump of weak matches.
-- **Query in another language / different phrasing**: A query phrased differently from the artifact's wording (synonyms, related concepts, or another language the embedding model supports) can still surface the artifact; exact-match is not required. Cross-lingual quality is best-effort, bounded by the embedding model.
+- **Query in another language / different phrasing**: A query phrased differently from the artifact's wording (synonyms, related concepts, or the other supported language) can still surface the artifact; exact-match is not required. Norwegian ↔ English cross-lingual matching is supported best-effort, bounded by the embedding model.
 - **Artifact with no README / sparse metadata**: An artifact with only a name and description (no README) is still searchable from the metadata it does have; missing README does not exclude it.
 - **Newly discovered artifact not yet searchable**: In the brief window between an artifact being catalogued and its searchable representation being ready, it may not yet appear in meaning-based results; it still appears in normal browse/filter. It becomes searchable once the discovery run's indexing step completes.
 - **Deactivated / removed artifact**: A deactivated or removed artifact never appears in search results, even if a stale searchable entry momentarily lingers (governance/active state is authoritative at query time).
 - **Governance visibility**: An artifact the querying employee is not permitted to see never appears in results, regardless of how well it matches the query.
-- **Semantic search backend unavailable**: If the vector store or embedding step is unreachable, search degrades gracefully (see US3) rather than breaking the catalog.
+- **Semantic search backend unavailable (query time)**: If the vector store or embedding step is unreachable when searching, a text query degrades to a simple keyword match over indexed fields and the UI flags the degraded state (see US3) rather than breaking the catalog.
+- **Embedding service unavailable (discovery time)**: If the embedding service is down while discovery catalogues an artifact, the reconcile still succeeds and the artifact is marked "not yet searchable" (browseable but not yet in meaning-based results); a later discovery run generates its embedding.
 - **Very long / very short query**: An extremely long query or a single-word query both return sensible results without error (long input is handled within model limits; a single concept word still ranks by meaning).
 - **Duplicate-looking results**: Each artifact appears at most once in results (search returns catalog entries by stable artifact ID, never duplicated).
 
@@ -87,6 +97,7 @@ An employee refines a meaning-based search using the catalog's existing facets: 
 - **FR-001**: The system MUST let an authenticated employee search the catalog with a free-text, natural-language query and return artifacts ranked by semantic relevance to that query's meaning (not only exact keyword/attribute matches).
 - **FR-002**: Semantic relevance MUST be derived only from artifact metadata already indexed by the catalog — manifest fields (name, description, tags, type) and the README snapshot — and MUST NOT require or use the artifact's executable body (Principle I).
 - **FR-003**: The system MUST return an artifact whose *meaning* matches the query even when the artifact's name and tags share no literal keywords with the query.
+- **FR-003a**: The system MUST support both Norwegian and English queries and content cross-lingually (a Norwegian query MAY match English metadata and vice versa), on a best-effort basis bounded by the embedding model; exact-language match MUST NOT be required for a relevant result.
 - **FR-004**: The system MUST show an intentional "no relevant results" state (not an error, not a list of weak matches) when no artifact is sufficiently relevant to the query.
 - **FR-005**: Each result MUST identify the artifact and link to its existing detail page; search MUST NOT duplicate or become an alternative store of artifact data.
 - **FR-006**: Search MUST return each matching artifact at most once, keyed by its stable artifact ID (no duplicates).
@@ -94,13 +105,14 @@ An employee refines a meaning-based search using the catalog's existing facets: 
 
 #### Governance-safe results (cross-cutting, applies to all stories)
 
-- **FR-008**: Search results MUST respect the Phase 3 governance model: only artifacts the querying employee is permitted to see (per visibility rules) MAY appear, and deactivated/removed artifacts MUST NEVER appear — regardless of relevance score.
+- **FR-008**: Search results MUST respect the existing governance rules exactly as the Phase 2/3 catalog already applies them — active-state plus the existing `visibility` field (currently all `internal`, so every authenticated employee sees every active artifact) — reusing those rules rather than introducing a parallel access model or new per-user/per-group visibility tiers this phase. Deactivated/removed artifacts MUST NEVER appear regardless of relevance score, and any future `visibility` values MUST be honored automatically because search reuses the same filter.
 - **FR-009**: Governance/active state MUST be authoritative at query time, so an artifact that is no longer active or visible does not surface even if a stale searchable representation exists.
 - **FR-010**: Semantic search MUST NOT expose any governance or technical metadata that the equivalent Phase 2/3 catalog views would not already show to that employee.
 
 #### Index freshness & rebuildability (User Story 2)
 
 - **FR-011**: When discovery (webhook / scheduled / manual / CLI, per Phase 4) creates or updates an artifact, the system MUST create or refresh that artifact's searchable representation as part of the same flow, with no separate manual indexing step required.
+- **FR-011a**: Embedding generation MUST be best-effort within a discovery run and MUST NOT block or fail catalog reconcile: if the embedding service is unavailable when an artifact is created/updated, the catalog reconcile MUST still succeed, the artifact MUST be marked "not yet searchable", and its searchable representation MUST be retried on a subsequent discovery run. (Such an artifact still appears in browse/filter; it is simply not yet returned by meaning-based search.)
 - **FR-012**: When discovery deactivates or removes an artifact, the system MUST ensure that artifact stops appearing in search results.
 - **FR-013**: The searchable index MUST be fully rebuildable from the current catalog / Git state by re-running discovery, and MUST NOT be the canonical store of any artifact data (Principles I & VII) — losing it MUST be recoverable by re-running discovery.
 - **FR-014**: A failed or partial discovery run MUST NOT leave the searchable index inconsistent (e.g. it MUST NOT wipe existing searchable entries on failure), consistent with the Phase 4 reconcile guarantees; invalid/skipped manifests are simply absent from search.
@@ -110,7 +122,7 @@ An employee refines a meaning-based search using the catalog's existing facets: 
 
 - **FR-016**: The system MUST let an employee combine a meaning-based query with the existing catalog filters (type, one or more tags, category), returning results that satisfy all active filters *and* are ranked by relevance to the query.
 - **FR-017**: Clearing the query MUST return the catalog to the unchanged Phase 2 browse/filter behaviour (filtered listing, no relevance ranking); clearing filters MUST return pure meaning-based results.
-- **FR-018**: If semantic search is temporarily unavailable, the catalog MUST remain usable — browse and attribute filters MUST still work and the UI MUST clearly communicate that meaning-based search is degraded (no broken page, no empty catalog).
+- **FR-018**: If semantic search is temporarily unavailable, the catalog MUST remain usable — browse and attribute filters MUST still work, a text query MUST fall back to a simple keyword/substring match over the already-indexed metadata fields (name, description, tags), and the UI MUST clearly communicate that meaning-based search is degraded (no broken page, no empty catalog). A full-text search engine is NOT built this phase.
 - **FR-019**: All search and result UI MUST be built with the mandated design system (constitution) and integrated into the existing catalog surface rather than a separate parallel one.
 
 #### Cross-cutting
@@ -120,7 +132,7 @@ An employee refines a meaning-based search using the catalog's existing facets: 
 
 ### Key Entities *(include if feature involves data)*
 
-- **Searchable representation (embedding + reference)**: For each active artifact, a derived vector representation of its already-indexed metadata (name, description, tags, type, README snapshot) plus the minimal reference needed to resolve back to the catalog artifact by stable artifact ID and to apply governance/visibility filters at query time. Derived data only — rebuildable from Git via discovery, never the canonical store of artifact content.
+- **Searchable representation (embedding + reference)**: For each active artifact, a derived vector representation of its already-indexed metadata (name, description, tags, type, README snapshot) plus the minimal reference needed to resolve back to the catalog artifact by stable artifact ID and to apply governance/visibility filters at query time. Carries a readiness state (searchable vs "not yet searchable") so an artifact catalogued while the embedding service was down can be retried later. Derived data only — rebuildable from Git via discovery, never the canonical store of artifact content.
 - **Search query**: A user-supplied natural-language string, optionally accompanied by the existing catalog facets (type / tags / category), evaluated against the searchable representations to produce a ranked result set.
 - **Search result**: A reference to one catalog artifact (by stable artifact ID) with a relevance ordering, resolved to the artifact's existing catalog/detail data for display — filtered so only artifacts the querying employee may see are returned.
 - **Catalog artifact / governance record (existing)**: The Phase 2 technical record and Phase 3 governance record, unchanged in shape. Search reads from and links to these; it neither modifies them nor stores a second copy.
@@ -129,23 +141,24 @@ An employee refines a meaning-based search using the catalog's existing facets: 
 
 ### Measurable Outcomes
 
-- **SC-001**: For a set of benchmark needs, an employee issuing a natural-language query that shares no literal keywords with the target artifact finds that artifact in the top results in at least 90% of cases.
+- **SC-001**: For a set of benchmark needs, an employee issuing a natural-language query that shares no literal keywords with the target artifact finds that artifact in the top results in at least 90% of cases, including benchmark cases where the query is in Norwegian and the target artifact's metadata is in English (cross-lingual).
 - **SC-002**: For queries unrelated to any catalogued artifact, the system shows a "no relevant results" state (rather than weak matches or an error) in 100% of cases.
 - **SC-003**: 100% of search results respect governance visibility and active state — zero deactivated, removed, or not-permitted artifacts ever appear in any user's results.
 - **SC-004**: After a discovery run that adds, changes, or removes artifacts, search reflects the change with no separate manual step in 100% of runs (added artifacts become findable, changed meaning is reflected, removed artifacts disappear).
 - **SC-005**: The searchable index can be fully rebuilt from Git by re-running discovery, converging to the same search behaviour, in 100% of rebuild attempts, with no artifact content stored outside its metadata representation.
 - **SC-006**: An employee can combine a meaning-based query with a type and a tag filter and reach a relevant artifact's detail page in under 30 seconds.
-- **SC-007**: When the semantic search backend is unavailable, the catalog stays usable (browse + filters) and communicates the degraded state in 100% of such cases — zero broken pages or empty catalogs.
+- **SC-007**: When the semantic search backend is unavailable, the catalog stays usable (browse + filters), a text query still returns keyword-matched results, and the degraded state is communicated in 100% of such cases — zero broken pages or empty catalogs.
 - **SC-008**: A typical meaning-based query returns ranked results fast enough to feel interactive (results shown within about 2 seconds for the expected internal catalog size).
 - **SC-009**: Inspecting the searchable representation reveals zero artifact executable bodies — only derived representations of already-indexed metadata (verifiable by inspection).
 
 ## Assumptions
 
 - **Builds on Phases 1-4**: Reuses Phase 1 auth/employee-gate, the Phase 2 `Artifact` technical record and `scan`/`reconcile` discovery core, the Phase 3 governance model (visibility, lifecycle, active state), and the Phase 4 automated discovery pipeline (webhook / scheduled / manual / CLI). Phase 5 adds *how artifacts are found*, not new governance or a new source of truth.
-- **First text search in the catalog**: Today the catalog supports only attribute filtering (type / tags / category) — free-text and semantic search were explicitly deferred by Phase 2 to this phase. Phase 5 introduces free-text, meaning-based search for the first time; there is no pre-existing free-text search UI to preserve, only the Phase 2 filter UI, into which search is integrated. (The constitution's "PostgreSQL full-text search first" intent is realised here as the meaning-based search seam of Principle VII; whether a plain keyword/full-text path is also offered as the degraded fallback is a design detail for planning/clarification, not a scope expansion.)
+- **First text search in the catalog**: Today the catalog supports only attribute filtering (type / tags / category) — free-text and semantic search were explicitly deferred by Phase 2 to this phase. Phase 5 introduces free-text, meaning-based search for the first time; there is no pre-existing free-text search UI to preserve, only the Phase 2 filter UI, into which search is integrated. The constitution's "PostgreSQL full-text search first" intent is realised here directly as the meaning-based search seam of Principle VII; a dedicated PostgreSQL full-text engine is **not** built this phase — when semantic search is unavailable the degraded path is a simple keyword/substring match over already-indexed fields (per Clarifications).
 - **Content boundary preserved (Principles I & II)**: Search operates only over metadata KI Hub already indexes (manifest fields + README snapshot). The searchable representation is a *derived* mathematical representation of that metadata, rebuildable from Git — it is not the artifact body and does not make KI Hub the canonical store of artifact content.
 - **Embeddings via a vector store**: Meaning-based ranking is provided by embeddings held in a vector store (the "Qdrant later" seam named in Principle VII). The specific embedding model, vector store deployment, and how they are hosted are planning decisions; the spec only requires meaning-based ranking, governance-safe results, and freshness tied to discovery.
 - **Freshness via discovery**: Searchable representations are created/refreshed within the existing Phase 4 discovery/reconcile flow (create/update refreshes; deactivate/remove drops from results), so no bespoke sync job is introduced and the "rebuildable from Git" guarantee holds. A brief lag between cataloguing and searchability is acceptable (browse/filter covers the gap).
 - **Governance is authoritative at query time**: Visibility and active/lifecycle state are enforced when results are returned, so a stale searchable entry can never surface something a user shouldn't see; this reuses the Phase 2/3 rules rather than duplicating them.
+- **Bilingual, cross-lingual (Norwegian + English)**: Queries and content may be in Norwegian or English, and search matches across the two best-effort (a Norwegian query can surface English metadata and vice versa), bounded by the chosen multilingual embedding model — reflecting that KI Hub is a Norwegian public-sector platform whose AI-artifact metadata is frequently in English.
 - **Single connected source**: As in Phase 4, the initial content source remains the `ai-artifacts` repository; multi-source search is supported by construction (results keyed by stable artifact ID) but not a focus this phase.
 - **Scope kept simple (Principle VII)**: Ship the simplest thing that delivers meaning-based discovery. Explicitly out of scope this phase: learned re-ranking, tuned hybrid keyword+vector fusion, multi-model or per-language embedding selection, semantic search over artifact bodies, personalization/recommendation, and analytics on search behaviour. These are deferred unless a concrete near-term need justifies them.
