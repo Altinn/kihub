@@ -21,15 +21,15 @@ Steps:
 
    ```sql
    SELECT artifact_id,
-          ts_rank(DOC, websearch_to_tsquery('simple', $1)) AS rank
+          ts_rank(DOC, websearch_to_tsquery('english', $1)) AS rank
    FROM artifacts
-   WHERE active = true AND DOC @@ websearch_to_tsquery('simple', $1)
+   WHERE active = true AND DOC @@ websearch_to_tsquery('english', $1)
    ORDER BY rank DESC
    LIMIT 50;
-   -- DOC = to_tsvector('simple', coalesce(name,'')||' '||coalesce(description,'')||' '||coalesce(readme,''))
+   -- DOC = to_tsvector('english', coalesce(name,'')||' '||coalesce(description,'')||' '||coalesce(readme,''))
    ```
 
-   - Config `simple` (language-agnostic; research §3).
+   - Config `english` (English stemming/stopwords — content is English; research §3).
    - `websearch_to_tsquery` + bound `$1` → injection-safe and never a syntax error for arbitrary user
      text (FR-008).
 3. **Resolve + authorize (governance authoritative — FR-009/FR-010)**: pass the ranked `artifact_id`s

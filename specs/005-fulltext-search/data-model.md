@@ -26,12 +26,12 @@ Search issues a read-only query; it never writes to `artifacts`.
 Search builds the document vector inline, not as a column (research §1):
 
 ```
-document = to_tsvector('simple', coalesce(name,'') || ' ' || coalesce(description,'') || ' ' || coalesce(readme,''))
-match    = document @@ websearch_to_tsquery('simple', :q)
-rank     = ts_rank(document, websearch_to_tsquery('simple', :q))
+document = to_tsvector('english', coalesce(name,'') || ' ' || coalesce(description,'') || ' ' || coalesce(readme,''))
+match    = document @@ websearch_to_tsquery('english', :q)
+rank     = ts_rank(document, websearch_to_tsquery('english', :q))
 ```
 
-- Config `simple` (language-agnostic tokenization; research §3).
+- Config `english` (English stemming/stopwords — content is English; research §3).
 - `websearch_to_tsquery` for injection-safe, syntax-error-free parsing of arbitrary user text
   (research §2, FR-008).
 - No persisted `tsvector` column, no generated column, no GIN index this phase (a seq scan meets the

@@ -35,7 +35,7 @@ full-text query runs on the existing PostgreSQL via the pg pool the app already 
 
 ## Phase 1: Setup
 
-- [ ] T001 Scaffold `apps/web/src/lib/search.ts` with the Phase 5 config constants and transient types per data-model.md (`SEARCH_RESULT_LIMIT = 50`, `TS_CONFIG = 'simple'`, and the `SearchQuery`/`RankedId` types) — confirming in a top comment that Phase 5 adds **no** new dependency, env var, collection, field, or migration (search reuses the existing PostgreSQL)
+- [ ] T001 Scaffold `apps/web/src/lib/search.ts` with the Phase 5 config constants and transient types per data-model.md (`SEARCH_RESULT_LIMIT = 50`, `TS_CONFIG = 'english'` — searched content is English, per research §3, and the `SearchQuery`/`RankedId` types) — confirming in a top comment that Phase 5 adds **no** new dependency, env var, collection, field, or migration (search reuses the existing PostgreSQL)
 
 ---
 
@@ -63,12 +63,12 @@ artifact never appears; odd punctuation / a very long query never errors.
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T003 [US1] Integration test `apps/web/tests/integration/search.test.ts` (write first, must fail): seed artifacts, then assert — a term in `name`, in `description`, and in `readme` **each** returns the target artifact ranked (FR-001/003); an unrelated query returns an empty result (FR-004, SC-002); a deactivated (`active=false`) artifact and one the user may not see are **excluded** (FR-009/010, SC-003); a query with quotes/`-negation`/punctuation and a ~1000-char query return without error (FR-008); each artifact appears at most once (FR-006)
+- [ ] T003 [US1] Integration test `apps/web/tests/integration/search.test.ts` (write first, must fail): seed artifacts, then assert — a term in `name`, in `description`, and in `readme` **each** returns the target artifact ranked (FR-001/003); an unrelated query returns an empty result (FR-004, SC-002); a deactivated (`active=false`) artifact and one the user may not see are **excluded** (FR-009/010, SC-003); a query with quotes/`-negation`/punctuation and a ~1000-char query return without error (FR-008); each artifact appears at most once (FR-006); an English morphological variant matches via stemming (e.g. a "reviews"/"reviewing" query matches content containing "review") (FR-018)
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] Implement `searchArtifacts(payload, q, filters)` in `apps/web/src/lib/search.ts` per contracts/fulltext-query.md: return `[]` for empty/whitespace `q`; else run the parameterized `to_tsvector('simple', coalesce(name,'')||' '||coalesce(description,'')||' '||coalesce(readme,'')) @@ websearch_to_tsquery('simple', $1)` query with `ts_rank` ordering and `LIMIT SEARCH_RESULT_LIMIT` on `payload.db.pool` (active rows only), then pass the ranked `artifactId`s to `resolveByArtifactIds(ids, filters)` and return the resolved docs in rank order (depends on T001, T002)
-- [ ] T005 [P] [US1] Unit test `apps/web/tests/unit/search.test.ts`: with a faked query runner (no DB), assert `searchArtifacts` binds the user text as a parameter (never string-interpolated), uses `websearch_to_tsquery`/`simple`, short-circuits empty/whitespace `q` to `[]`, and maps result rows → ranked `artifactId`s in order (depends on T004)
+- [ ] T004 [US1] Implement `searchArtifacts(payload, q, filters)` in `apps/web/src/lib/search.ts` per contracts/fulltext-query.md: return `[]` for empty/whitespace `q`; else run the parameterized `to_tsvector('english', coalesce(name,'')||' '||coalesce(description,'')||' '||coalesce(readme,'')) @@ websearch_to_tsquery('english', $1)` query with `ts_rank` ordering and `LIMIT SEARCH_RESULT_LIMIT` on `payload.db.pool` (active rows only), then pass the ranked `artifactId`s to `resolveByArtifactIds(ids, filters)` and return the resolved docs in rank order (depends on T001, T002)
+- [ ] T005 [P] [US1] Unit test `apps/web/tests/unit/search.test.ts`: with a faked query runner (no DB), assert `searchArtifacts` binds the user text as a parameter (never string-interpolated), uses `websearch_to_tsquery`/`english`, short-circuits empty/whitespace `q` to `[]`, and maps result rows → ranked `artifactId`s in order (depends on T004)
 - [ ] T006 [P] [US1] Create `apps/web/src/components/SearchBar.tsx` (client, Designsystemet only): a text input + submit prefilled from the current `q` that navigates to the catalog URL with `q` set (or removed when cleared), preserving the other URL params — mirroring the URL-composition approach of `components/CatalogFilters.tsx`
 - [ ] T007 [US1] Wire `apps/web/src/app/(app)/page.tsx` per contracts/search-ui.md: extend `SearchParams` with `q`; when `q` is non-empty call `searchArtifacts(payload, q, {})` and render the ranked results with the existing `ArtifactCard` (+ `getGovernance`), showing a "no results" empty state when none match; when `q` is empty keep the unchanged Phase 2 browse; render `SearchBar` above the listing (depends on T004, T006)
 

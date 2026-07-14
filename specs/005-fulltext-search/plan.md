@@ -8,8 +8,8 @@
 
 Give employees a keyword/phrase search over the catalog, on the PostgreSQL the platform already
 runs — no new datastore, service, package, or collection field. A new query helper in
-`apps/web/src/lib` runs a PostgreSQL full-text query (`to_tsvector(simple, name ‖ description ‖
-readme) @@ websearch_to_tsquery(simple, $q)`, ranked by `ts_rank`) over the **live** `artifacts`
+`apps/web/src/lib` runs a PostgreSQL full-text query (`to_tsvector('english', name ‖ description ‖
+readme) @@ websearch_to_tsquery('english', $q)`, ranked by `ts_rank`) over the **live** `artifacts`
 rows, using the pg pool the app already accesses (the same `payload.db.pool` used by Phase 4's
 advisory lock). The ranked stable `artifactId`s are **resolved and authorized against the existing
 catalog helpers** (active + visibility) so governance stays authoritative, then the existing
@@ -64,8 +64,9 @@ internal catalog (SC-006). No throughput/index target this phase.
   (FR-009/FR-010).
 - The query MUST be injection-safe and syntax-error-safe: parameterized, and `websearch_to_tsquery`
   (which never throws on arbitrary user text) rather than `to_tsquery` (FR-008, research §2).
-- Language-agnostic `simple` text-search configuration so Norwegian and English terms match literally
-  (FR-018, research §3).
+- `english` text-search configuration (the searched content is English; the Norwegian UI is not
+  searchable content) so English stemming improves recall; cross-lingual matching is deferred with the
+  semantic phase (FR-018, research §3).
 - Freshness by construction — search reads live rows; no index to sync (FR-014).
 - All search UI from Designsystemet, integrated into the existing catalog surface (FR-015).
 - Search stays behind the Phase 1 employee gate (FR-007-auth).

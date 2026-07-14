@@ -13,13 +13,13 @@ building the document `tsvector` **inline** from the live `artifacts` columns:
 ```sql
 SELECT artifact_id,
        ts_rank(
-         to_tsvector('simple', coalesce(name,'') || ' ' || coalesce(description,'') || ' ' || coalesce(readme,'')),
-         websearch_to_tsquery('simple', $1)
+         to_tsvector('english', coalesce(name,'') || ' ' || coalesce(description,'') || ' ' || coalesce(readme,'')),
+         websearch_to_tsquery('english', $1)
        ) AS rank
 FROM artifacts
 WHERE active = true
-  AND to_tsvector('simple', coalesce(name,'') || ' ' || coalesce(description,'') || ' ' || coalesce(readme,''))
-      @@ websearch_to_tsquery('simple', $1)
+  AND to_tsvector('english', coalesce(name,'') || ' ' || coalesce(description,'') || ' ' || coalesce(readme,''))
+      @@ websearch_to_tsquery('english', $1)
 ORDER BY rank DESC
 LIMIT 50;
 ```
@@ -44,7 +44,7 @@ vectors/Qdrant — out of scope this phase (Principle VII "later"); rejected as 
 
 ## §2 — Query parsing safety (`websearch_to_tsquery`)
 
-**Decision**: Parse the user's text with **`websearch_to_tsquery('simple', $1)`** (not `to_tsquery`
+**Decision**: Parse the user's text with **`websearch_to_tsquery('english', $1)`** (not `to_tsquery`
 or `plainto_tsquery`), passed as a bound parameter.
 
 **Rationale**: `websearch_to_tsquery` accepts arbitrary user input — quotes, `or`, `-negation`,
@@ -56,21 +56,25 @@ injection risk. It also gives users familiar web-search semantics (quoted phrase
 for every odd query); `plainto_tsquery` (safe but ANDs all terms and ignores phrase/negation syntax —
 less useful); manual query sanitizing (reinvents what `websearch_to_tsquery` already does).
 
-## §3 — Text-search configuration (`simple`, language handling)
+## §3 — Text-search configuration (`english`)
 
-**Decision**: Use the **`simple`** text-search configuration for both the document and the query
+**Decision**: Use the **`english`** text-search configuration for both the document and the query
 `to_tsvector`/`websearch_to_tsquery`.
 
-**Rationale**: `simple` tokenizes and lowercases without language-specific stemming or stop-word
-removal, so it treats Norwegian and English terms uniformly and matches the literal words present in
-the metadata — the honest capability for a mixed-language catalog (FR-018). Choosing `english` or
-`norwegian` would stem for one language and mis-handle the other, and neither provides cross-lingual
-*meaning* matching anyway (that is the deferred semantic phase). `simple` is the neutral, predictable
-default; a language-specific or `unaccent`-augmented config can be layered later without a data change.
+**Rationale**: The searched content — artifact `name`/`description`/`README` — is English: all
+catalogued tools/artifacts are authored in English, and the application's Norwegian UI is chrome, not
+indexed content. The `english` config applies English stemming and stop-word removal, so a query term
+matches its morphological variants in the content (plurals, verb forms — e.g. "reviews"/"reviewing" ↔
+"review"), materially improving recall over `simple` for uniformly-English text (FR-018). A
+Norwegian-phrased query finding English content by *meaning* is a cross-lingual/semantic capability
+that no full-text configuration provides — correctly deferred to the semantic phase.
 
-**Alternatives considered**: `english`/`norwegian` stemming (helps one language, hurts the other;
-premature for this scale); per-row language detection + per-language vectors (complexity with no
-near-term payoff); `unaccent` normalization (nice-to-have; deferrable, additive later).
+**Alternatives considered**: `simple` (no stemming/stop-words — treats every token literally; the
+right neutral choice for genuinely mixed-language content, but it needlessly misses English
+morphological variants now that we know the content is uniformly English — rejected); `norwegian`
+(wrong — would stem the English content by Norwegian rules); per-row language detection + per-language
+configs (pointless when content is uniformly English); `unaccent` augmentation (nice-to-have,
+additive later, not needed for English).
 
 ## §4 — Ranking, result cap & governance resolution
 
