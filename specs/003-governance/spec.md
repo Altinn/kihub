@@ -81,7 +81,7 @@ Artifacts move through a review workflow: a Contributor submits an artifact for 
 - **No governance record yet**: Viewing an artifact that has never been governed shows a sensible default (e.g., lifecycle from manifest or "Draft", no reviews) rather than an error.
 - **Re-indexing preserves governance**: Phase 2 re-indexing updates technical metadata only and never clobbers governance state; a deactivated (removed-from-repo) artifact retains its governance history.
 - **Invalid lifecycle transition**: Skipping required states or transitioning without the required role is refused with a clear reason.
-- **Approval without required reviews**: Approving when required review types are missing or rejected is either prevented or clearly flagged (per configured policy).
+- **Approval without required reviews**: Approving when required review types are missing or rejected is permitted — approval is advisory with respect to typed reviews (see Clarifications); the missing/rejected reviews remain visible in the review history but do not block the decision.
 - **Expired review**: An approved artifact whose review has expired is surfaced as needing renewal.
 - **Role change mid-flow**: If a user's role changes, their permitted actions change accordingly on the next action.
 - **Conflicting concurrent edits**: Two users editing the same governance record do not silently lose each other's changes — the system applies last-write-wins while retaining every prior value in the audit trail, so no change is lost from history even though concurrent edits are not merged.
@@ -129,7 +129,7 @@ Artifacts move through a review workflow: a Contributor submits an artifact for 
 
 - **Role**: One of Reader, Contributor, Reviewer, Approver, Admin, assigned to a user (derived from identity groups; Admin-manageable within KI Hub). Determines permitted governance actions.
 - **CatalogEntry (governance record)**: The enterprise governance metadata for one artifact, keyed by the same stable artifact ID as the technical Artifact record. Attributes: businessOwner, technicalOwner, riskLevel, reviewStatus, approvalState, lifecycleState (KI-Hub-managed), recommended, featured, internalNotes, plus attribution (updatedBy, updatedAt). Distinct collection from the technical Artifact (Git owns the artifact; Payload owns the enterprise context).
-- **Review**: A typed assessment of an artifact. Attributes: artifactId, type (security/gdpr/technical/accessibility/responsible-ai/operational), reviewer, status, decision, comments, requiredChanges, riskLevel, reviewDate, expiryDate.
+- **Review**: A typed assessment of an artifact. Attributes: artifactId, type (security/privacy-gdpr/technical/accessibility/responsible-ai/operational), reviewer, status, decision, comments, requiredChanges, riskLevel, reviewDate, expiryDate.
 - **Audit entry**: An attributed record of a governance action (actor, action, target artifact, timestamp, details) forming the auditable history for lifecycle transitions, reviews, and approvals.
 
 ## Success Criteria *(mandatory)*
@@ -138,7 +138,7 @@ Artifacts move through a review workflow: a Contributor submits an artifact for 
 
 - **SC-001**: For each of the five roles, 100% of governance actions are correctly permitted or refused according to the role mapping, verified across all action×role combinations.
 - **SC-002**: 100% of attempts to perform a governance action above one's role are refused server-side, even when invoked directly (not via the UI).
-- **SC-003**: A governance record exists and stays linked by artifact ID for 100% of catalogued artifacts, and re-indexing preserves governance state in 100% of runs (zero governance fields lost).
+- **SC-003**: Governance state (a persisted record, or a computed default when none yet exists) is correctly resolved by artifact ID for 100% of catalogued artifacts, and re-indexing preserves any existing governance record in 100% of runs (zero governance fields lost).
 - **SC-004**: 100% of invalid or unauthorized lifecycle transitions are rejected with a reason and no state change.
 - **SC-005**: The catalog listing and detail display the correct lifecycle state and approved/recommended status for 100% of artifacts.
 - **SC-006**: Every governance action (metadata edit, transition, review, approval) is attributed to an actor with a timestamp and appears in the auditable history in 100% of cases.

@@ -111,7 +111,7 @@ access control + audit hooks already wired) must exist before any role-gated act
 ### Tests for User Story 3 (constitution-mandated) ⚠️ write first, ensure they FAIL
 
 - [ ] T024 [P] [US3] `packages/governance-core/tests/review.test.ts`: `isExpired` against past/future/boundary expiry dates
-- [ ] T025 [US3] Integration test `apps/web/tests/integration/review-approval-flow.test.ts`: submit for review → record a typed review → approve, asserting `approvalState`, attribution, and one `audit-log` entry per step; also cover a reject path and a Reader attempting record/approve (refused) (FR-013–FR-020, SC-006–SC-008)
+- [ ] T025 [US3] Integration test `apps/web/tests/integration/review-approval-flow.test.ts`: submit for review → record a typed review → approve, asserting `approvalState`, attribution, and one `audit-log` entry per step; also cover a reject path, an approval *despite* a changes-requested/rejected typed review (proves the advisory, non-blocking policy — FR-017), and a Reader attempting record/approve (refused) (FR-013–FR-020, SC-006–SC-008)
 
 ### Implementation for User Story 3
 

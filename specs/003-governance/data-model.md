@@ -23,7 +23,7 @@ Keyed by a relationship to `artifacts` (one entry per artifact — research.md �
 | `businessOwner` | text | Free text (name/team); optional. |
 | `technicalOwner` | text | Free text (name/team); optional. |
 | `riskLevel` | select | `low \| medium \| high`. |
-| `reviewStatus` | select | `not-submitted \| in-review`. Set to `in-review` on submit-for-review (FR-013); reviews (below) carry their own per-type status. |
+| `reviewStatus` | select | `not-submitted \| in-review`. Set to `in-review` on submit-for-review (FR-013). Intentionally has no terminal value — it stays `in-review` after an approval/rejection decision, since `approvalState` (not `reviewStatus`) is the authoritative decision field. Reviews (below) carry their own per-type status. |
 | `approvalState` | select | `not-approved \| approved \| rejected`. Set only by an Approver decision (FR-016/FR-017). |
 | `lifecycleState` | select | `draft \| experimental \| in-review \| approved \| recommended \| deprecated \| archived`. KI-Hub-managed and authoritative (FR-009). Defaults from the Artifact's manifest `lifecycleStatus` when the entry is first created, else `draft`. |
 | `recommended` | checkbox | Default `false`. Settable by Approver/Admin only (implied by lifecycle gate — `recommended` only meaningful once `lifecycleState = recommended`). |
