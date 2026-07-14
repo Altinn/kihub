@@ -8,6 +8,15 @@
 
 **Input**: User description: "Phase 3 — Governance for KI Hub: layer enterprise governance on top of the Phase 2 catalog. Introduce governance metadata as a CatalogEntry collection separate from the technical Artifact record (keyed by the same stable artifact ID), capturing business & technical owners, risk level, review status, approval state, recommended/featured flags, internal notes, and a KI-Hub-managed lifecycle state (Draft, Experimental, In Review, Approved, Recommended, Deprecated, Archived). Add role-based access — Reader, Contributor, Reviewer, Approver, Admin — mapped from identity groups, gating governance actions. Add structured typed reviews (security, privacy/GDPR, technical, accessibility, responsible AI, operational), each with reviewer, status, decision, comments, required changes, risk level, and expiry. Governance actions (submit for review, record a review decision, approve/reject, lifecycle transitions) MUST be role-gated and auditable. Surface governance state on the catalog listing and detail (lifecycle badge, approved/recommended). Builds on Phase 1 (auth/roles) and Phase 2 (catalog + Artifact record). No automated discovery triggers (Phase 4) and no semantic search (Phase 5)."
 
+## Clarifications
+
+### Session 2026-07-14
+
+- Q: How is a user's role determined relative to Azure Entra group membership vs in-app Admin management (FR-004)? → A: Hybrid — Entra group membership seeds the user's role in KI Hub (Payload) at first sign-in; role checks always read this persisted value, never a live Entra call. An Admin may subsequently override the persisted role in-app, and the override sticks until changed again. Local mock sign-in personas carry the role directly on the persona record.
+- Q: What is the lifecycle transition matrix — which transitions are valid and which role may perform each? → A: Strict linear progression: Draft → Experimental → In Review → Approved → Recommended, in order, with no skipping stages. Deprecated and Archived are reachable from any state. Contributor performs Draft→Experimental and the submit-for-review transition into In Review; Approver performs In Review→Approved and Approved→Recommended; Admin or Approver may set Deprecated or Archived from any state.
+- Q: Are specific typed review types mandatory before an Approver may approve? → A: Advisory — an Approver may approve or reject regardless of the status of individual typed reviews; reviews inform the decision but do not hard-block it.
+- Q: How are concurrent edits to the same governance record handled so no change is silently lost? → A: Last-write-wins, with every prior value retained in the audit trail — no change is silently lost (it remains in history) even though concurrent edits are not merged.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Role-based access to governance actions (Priority: P1)
@@ -75,7 +84,7 @@ Artifacts move through a review workflow: a Contributor submits an artifact for 
 - **Approval without required reviews**: Approving when required review types are missing or rejected is either prevented or clearly flagged (per configured policy).
 - **Expired review**: An approved artifact whose review has expired is surfaced as needing renewal.
 - **Role change mid-flow**: If a user's role changes, their permitted actions change accordingly on the next action.
-- **Conflicting concurrent edits**: Two users editing the same governance record do not silently lose each other's changes.
+- **Conflicting concurrent edits**: Two users editing the same governance record do not silently lose each other's changes — the system applies last-write-wins while retaining every prior value in the audit trail, so no change is lost from history even though concurrent edits are not merged.
 - **Artifact removed from repo but governed**: Governance history is retained even when the technical record is deactivated.
 
 ## Requirements *(mandatory)*
@@ -87,13 +96,13 @@ Artifacts move through a review workflow: a Contributor submits an artifact for 
 - **FR-001**: The system MUST support five roles — Reader, Contributor, Reviewer, Approver, Admin — and assign each authenticated user a role derived from their identity group membership.
 - **FR-002**: The system MUST gate every governance action by role, with (at least) this mapping: Reader = view only; Contributor = edit governance metadata + submit for review; Reviewer = record review decisions; Approver = approve/reject + set Approved/Recommended; Admin = all actions incl. archive and role management.
 - **FR-003**: The system MUST enforce role checks server-side (not only by hiding UI), refusing any action above the actor's role.
-- **FR-004**: An Admin MUST be able to view and manage the role assigned to a user (within KI Hub), and role changes MUST take effect for subsequent actions.
+- **FR-004**: The system MUST persist each user's role in KI Hub, seeded from their Entra group membership at first sign-in; role checks MUST always read this persisted value, not a live Entra lookup. An Admin MUST be able to view and override the persisted role for a user (within KI Hub), and the override MUST take effect for subsequent actions until changed again.
 
 #### Governance record & lifecycle (User Story 2)
 
 - **FR-005**: The system MUST maintain a governance record per artifact, separate from the technical Artifact record but keyed by the same stable artifact ID.
 - **FR-006**: The governance record MUST capture: business owner, technical owner, risk level, review status, approval state, recommended flag, featured flag, internal notes, and a KI-Hub-managed lifecycle state.
-- **FR-007**: The lifecycle state MUST be one of: Draft, Experimental, In Review, Approved, Recommended, Deprecated, Archived; and the system MUST define which transitions are valid and which role may perform each.
+- **FR-007**: The lifecycle state MUST be one of: Draft, Experimental, In Review, Approved, Recommended, Deprecated, Archived. Transitions MUST follow a strict linear progression — Draft → Experimental → In Review → Approved → Recommended, with no skipping stages — except that Deprecated and Archived MUST be reachable from any state. A Contributor may perform Draft→Experimental and the submit-for-review transition into In Review; an Approver performs In Review→Approved and Approved→Recommended; an Admin or Approver may set Deprecated or Archived from any state.
 - **FR-008**: The system MUST reject invalid lifecycle transitions and transitions attempted above the actor's role, with a clear reason and no state change.
 - **FR-009**: The KI-Hub-managed lifecycle state MUST be authoritative for governance/display; it MAY be seeded from the artifact manifest's lifecycle status when a governance record is first created.
 - **FR-010**: Re-indexing the technical record (Phase 2) MUST NOT overwrite governance metadata; governance state persists and stays linked by artifact ID, including for artifacts later deactivated in the repo.
@@ -106,7 +115,7 @@ Artifacts move through a review workflow: a Contributor submits an artifact for 
 - **FR-014**: The system MUST support typed reviews of these types: security, privacy/GDPR, technical, accessibility, responsible AI, operational.
 - **FR-015**: Each review MUST capture: reviewer, status, decision (approved / changes requested / rejected), comments, required changes, risk level, review date, and expiry date.
 - **FR-016**: A Reviewer MUST be able to record a typed review; an Approver MUST be able to record a final approve/reject decision that drives the approval state.
-- **FR-017**: Approval MUST permit the Approved/Recommended lifecycle states; rejection MUST prevent approval and record the reason.
+- **FR-017**: Approval MUST permit the Approved/Recommended lifecycle states; rejection MUST prevent approval and record the reason. Approval is advisory with respect to typed reviews — an Approver MAY approve or reject regardless of the status of individual typed reviews; reviews inform but do not hard-block the decision.
 - **FR-018**: The system MUST flag reviews whose expiry date has passed as expired / needing renewal.
 - **FR-019**: All review and approval actions MUST be attributed to the actor with a timestamp and recorded in an auditable history.
 - **FR-020**: The system MUST refuse review/approval actions by users lacking the required role.
@@ -139,9 +148,9 @@ Artifacts move through a review workflow: a Contributor submits an artifact for 
 ## Assumptions
 
 - **Builds on Phases 1–2**: Reuses Phase 1 authentication and the `role` on the user record, and the Phase 2 `Artifact` technical record + catalog UI. The Phase 1 baseline (all employees = Reader) is extended to the full five-role model here.
-- **Role source**: Roles derive from identity (Entra) group membership when using real sign-in; for local mock sign-in, personas carry a role (and/or an Admin can assign roles in-app) so the model is testable without a live tenant. Exact mechanism is a clarification candidate.
+- **Role source**: Entra group membership seeds the persisted KI Hub role at first sign-in; Admins may override it in-app thereafter (see FR-004 and Clarifications). For local mock sign-in, personas carry a role directly so the model is testable without a live tenant.
 - **Data ownership**: Governance metadata lives in its own collection (CatalogEntry), separate from the technical Artifact record, honoring "Git owns the artifact, Payload owns the enterprise context." No artifact content is stored.
 - **Lifecycle authority**: The KI-Hub-managed lifecycle state is authoritative for governance/display; the manifest's lifecycle status seeds the initial value only.
-- **Approval policy**: By default, approval is an Approver action informed by (but not hard-blocked on) the set of typed reviews; whether specific review types are mandatory before approval is configurable and defaults to advisory. (Clarification candidate.)
+- **Approval policy**: Approval is an Approver action informed by (but not hard-blocked on) the set of typed reviews — advisory by default (see FR-017 and Clarifications).
 - **Auditability**: A change history captures actor, action, target, and timestamp for governance actions; full immutable audit logging/retention beyond this is out of scope for the phase.
 - **Scope**: No automated discovery/scanning (Phase 4) and no semantic search (Phase 5). Governance actions are performed by authenticated employees in-app (and, where noted, via role-gated operations), not by external automation.

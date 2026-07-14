@@ -32,9 +32,9 @@
 ## Notes
 
 - Scope excludes automated discovery (Phase 4) and semantic search (Phase 5) — FR-022.
-- Clarification candidates for `/speckit-clarify`: (a) how roles are assigned (group-mapping only vs
-  in-app Admin assignment, and the local-mock mechanism); (b) whether specific review types are
-  mandatory before approval (advisory default assumed); possibly (c) lifecycle transition matrix
-  specifics. Informed defaults documented in Assumptions.
+- Resolved via `/speckit-clarify` (session 2026-07-14): (a) role assignment — Entra seeds the
+  persisted KI Hub role, Admin can override; (b) approval policy — advisory, not hard-blocked on
+  typed reviews; (c) lifecycle transition matrix — strict linear progression with Deprecated/Archived
+  reachable from any state. See spec's Clarifications section.
 - Governance metadata is a separate collection from the technical Artifact record (Principle II);
   no artifact content stored (Principle I).
