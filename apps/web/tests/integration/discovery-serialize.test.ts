@@ -3,6 +3,7 @@ import type { RepoReader } from '@kihub/discovery-core';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { runDiscovery } from '@/lib/discovery';
+import { wipeArtifacts } from '../helpers/wipe';
 
 /**
  * T012 — two overlapping `runDiscovery` calls for the same source must not both proceed: the
@@ -40,7 +41,7 @@ const reader: RepoReader = {
 
 async function wipe() {
   await payload.delete({ collection: 'discovery-runs', where: { id: { exists: true } }, overrideAccess: true });
-  await payload.delete({ collection: 'artifacts', where: { id: { exists: true } }, overrideAccess: true });
+  await wipeArtifacts(payload);
   await payload.delete({ collection: 'discovery-sources', where: { id: { exists: true } }, overrideAccess: true });
 }
 

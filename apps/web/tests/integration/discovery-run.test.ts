@@ -3,6 +3,7 @@ import type { RepoReader } from '@kihub/discovery-core';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { runDiscovery } from '@/lib/discovery';
+import { wipeArtifacts } from '../helpers/wipe';
 
 /**
  * T011 — one `runDiscovery` records exactly one `discovery-runs` doc, applies the reconcile, and
@@ -49,9 +50,6 @@ function fakeReader(artifacts: Record<string, string>): RepoReader {
   };
 }
 
-async function wipeArtifacts() {
-  await payload.delete({ collection: 'artifacts', where: { id: { exists: true } }, overrideAccess: true });
-}
 async function wipeDiscovery() {
   await payload.delete({ collection: 'discovery-runs', where: { id: { exists: true } }, overrideAccess: true });
   await payload.delete({ collection: 'discovery-sources', where: { id: { exists: true } }, overrideAccess: true });
@@ -59,7 +57,7 @@ async function wipeDiscovery() {
 
 beforeAll(async () => {
   payload = await getPayload({ config });
-  await wipeArtifacts();
+  await wipeArtifacts(payload);
   await wipeDiscovery();
   const source = await payload.create({
     collection: 'discovery-sources',
@@ -78,7 +76,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (payload) {
-    await wipeArtifacts();
+    await wipeArtifacts(payload);
     await wipeDiscovery();
   }
 });

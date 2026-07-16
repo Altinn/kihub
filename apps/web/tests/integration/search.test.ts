@@ -2,6 +2,7 @@ import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { searchArtifacts } from '@/lib/search';
+import { wipeArtifacts } from '../helpers/wipe';
 
 /**
  * T003 / T008 — full-text search behavior against live Payload + Postgres. Seeds artifacts with
@@ -37,7 +38,7 @@ const seed: Array<{
 ];
 
 async function wipe() {
-  await payload.delete({ collection: 'artifacts', where: { id: { exists: true } }, overrideAccess: true });
+  await wipeArtifacts(payload);
 }
 
 const ids = (docs: Array<{ artifactId: string }>) => docs.map((d) => d.artifactId).sort();

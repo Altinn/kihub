@@ -5,6 +5,7 @@ import config from '@payload-config';
 import { reconcile, scan } from '@kihub/discovery-core';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { wipeArtifacts } from '../helpers/wipe';
 
 /**
  * T010 — scan + reconcile against a live Payload+Postgres. Uses a temp ai-artifacts fixture and a
@@ -42,18 +43,14 @@ function writeArtifact(slug: string, manifestText: string, readme = `# ${slug}`)
   writeFileSync(path.join(dir, 'README.md'), readme);
 }
 
-async function wipeArtifacts() {
-  await payload.delete({ collection: 'artifacts', where: { id: { exists: true } }, overrideAccess: true });
-}
-
 beforeAll(async () => {
   payload = await getPayload({ config });
-  await wipeArtifacts();
+  await wipeArtifacts(payload);
   root = mkdtempSync(path.join(tmpdir(), 'kihub-reconcile-'));
 }, 120000);
 
 afterAll(async () => {
-  if (payload) await wipeArtifacts();
+  if (payload) await wipeArtifacts(payload);
   if (root) rmSync(root, { recursive: true, force: true });
 });
 

@@ -4,6 +4,7 @@ import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { POST } from '@/app/api/discovery/scan/route';
 import { runAllEnabledSources } from '@/lib/discovery';
+import { wipeArtifacts } from '../helpers/wipe';
 
 /**
  * T016 — the scheduled scan: the route is key-gated (FR-006, 401 on a bad key with no run), and a
@@ -46,7 +47,7 @@ function scanReq(headers: Record<string, string>): Request {
 
 async function wipe() {
   await payload.delete({ collection: 'discovery-runs', where: { id: { exists: true } }, overrideAccess: true });
-  await payload.delete({ collection: 'artifacts', where: { id: { exists: true } }, overrideAccess: true });
+  await wipeArtifacts(payload);
   await payload.delete({ collection: 'discovery-sources', where: { id: { exists: true } }, overrideAccess: true });
 }
 

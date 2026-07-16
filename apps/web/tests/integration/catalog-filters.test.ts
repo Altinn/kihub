@@ -2,6 +2,7 @@ import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { listArtifacts } from '@/lib/catalog';
+import { wipeArtifacts } from '../helpers/wipe';
 
 /**
  * T015b — filter correctness for `listArtifacts` (SC-007) against live Payload. Seeds a small,
@@ -25,7 +26,7 @@ const seed: Array<{
 ];
 
 async function wipe() {
-  await payload.delete({ collection: 'artifacts', where: { id: { exists: true } }, overrideAccess: true });
+  await wipeArtifacts(payload);
 }
 
 const ids = (docs: Array<{ artifactId: string }>) => docs.map((d) => d.artifactId).sort();
