@@ -63,7 +63,7 @@ their role permits — over the existing data, no migration.
 ### Implementation for User Story 1
 
 - [ ] T005 [US1] Verify the mounted admin lists all seven collections and that the editable ones (`catalog-entries`, `reviews`, `discovery-sources`, `users`) open and save per role; only where a collection lacks sensible admin presentation, set `admin.useAsTitle`/`admin.defaultColumns` in that collection file (no `access` changes) — most already have these from Phases 2-4
-- [ ] T006 [US1] Run quickstart.md Scenario 1 end-to-end: a Contributor+ persona edits a `catalog-entries` record in `/cms` and the change appears on the employee-app artifact detail page (one data layer, FR-004)
+- [ ] T006 [US1] Run quickstart.md Scenario 1 end-to-end: a Contributor+ persona edits a `catalog-entries` record in `/cms` and the change appears on the employee-app artifact detail page (one data layer, FR-004); confirm the edit produces an `audit-log` entry attributed to the acting user via the existing Phase 3 `afterChange` hooks (FR-008)
 
 **Checkpoint**: US1 functional — authorized editors administer platform data; deployable MVP
 
