@@ -22,6 +22,12 @@ export const Users: CollectionConfig = {
     defaultColumns: ['email', 'name', 'role', 'lastLoginAt'],
   },
   access: {
+    // Phase 6 (FR-005/FR-007): server-side admin-panel entry gate for the editor back-office.
+    // Payload calls `access.admin` on the auth collection to decide who may load `/cms`.
+    // Contributor+ may enter (Reviewer/Approver need it for governance actions); Reader and
+    // unauthenticated are refused. Per-action authorization still comes from each collection's
+    // own `access` rules. See contracts/admin-access.md.
+    admin: ({ req }) => Boolean(req.user) && (req.user?.role as Role) !== 'reader',
     update: ({ req }) => {
       if (!req.user) return false;
       if (hasPermission(req.user.role as Role, 'manage-roles')) return true;

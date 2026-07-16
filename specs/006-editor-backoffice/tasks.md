@@ -33,7 +33,7 @@ back-office lives under a new `app/(payload)/` route group. `packages/*` unchang
 
 ## Phase 1: Setup
 
-- [ ] T001 [P] In `apps/web/src/payload.config.ts` add `routes: { admin: '/cms', api: '/payload-api' }` (keep `admin.user: Users.slug`), per contracts/admin-mount.md — the non-colliding base paths for the back-office UI and Payload API; confirm no new dependency is required (`@payloadcms/next` + `withPayload` are already wired)
+- [X] T001 [P] In `apps/web/src/payload.config.ts` add `routes: { admin: '/cms', api: '/payload-api' }` (keep `admin.user: Users.slug`), per contracts/admin-mount.md — the non-colliding base paths for the back-office UI and Payload API; confirm no new dependency is required (`@payloadcms/next` + `withPayload` are already wired)
 
 ---
 
@@ -44,9 +44,9 @@ exercised until the `(payload)` route group exists and entry is gated.
 
 **⚠️ CRITICAL**: Blocks all user stories
 
-- [ ] T002 Scaffold the `apps/web/src/app/(payload)/` route group per contracts/admin-mount.md, aligned to the `/cms` + `/payload-api` routes: `layout.tsx` (re-export `RootLayout` from `@payloadcms/next/layouts` + config + importMap), `cms/[[...segments]]/page.tsx` + `not-found.tsx` (`RootPage`/`NotFoundPage` from `@payloadcms/next/views`), `payload-api/[...slug]/route.ts`, `payload-api/graphql/route.ts`, `payload-api/graphql-playground/route.ts` (handlers from `@payloadcms/next/routes`), optional `custom.scss` — thin re-exports, no bespoke React (depends on T001)
-- [ ] T003 Generate the admin import map (`pnpm --filter web generate:importmap`) and ensure `apps/web/src/app/(payload)/importMap.js` is wired into `(payload)/layout.tsx` so the admin bundle builds (depends on T002)
-- [ ] T004 Add `access.admin` to `apps/web/src/collections/Users.ts` per contracts/admin-access.md: `({ req }) => Boolean(req.user) && (req.user.role as Role) !== 'reader'` — the server-side Contributor+ admin-panel entry gate (import `Role` from `@kihub/governance-core`); no other Users change
+- [X] T002 Scaffold the `apps/web/src/app/(payload)/` route group per contracts/admin-mount.md, aligned to the `/cms` + `/payload-api` routes: `layout.tsx` (re-export `RootLayout` from `@payloadcms/next/layouts` + config + importMap), `cms/[[...segments]]/page.tsx` + `not-found.tsx` (`RootPage`/`NotFoundPage` from `@payloadcms/next/views`), `payload-api/[...slug]/route.ts`, `payload-api/graphql/route.ts`, `payload-api/graphql-playground/route.ts` (handlers from `@payloadcms/next/routes`), optional `custom.scss` — thin re-exports, no bespoke React (depends on T001)
+- [X] T003 Generate the admin import map (`pnpm --filter web generate:importmap`) and ensure `apps/web/src/app/(payload)/importMap.js` is wired into `(payload)/layout.tsx` so the admin bundle builds (depends on T002)
+- [X] T004 Add `access.admin` to `apps/web/src/collections/Users.ts` per contracts/admin-access.md: `({ req }) => Boolean(req.user) && (req.user.role as Role) !== 'reader'` — the server-side Contributor+ admin-panel entry gate (import `Role` from `@kihub/governance-core`); no other Users change
 
 **Checkpoint**: Payload admin loads at `/cms`, gated to Contributor+; triggers/stories can be exercised
 
@@ -62,8 +62,8 @@ their role permits — over the existing data, no migration.
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Verify the mounted admin lists all seven collections and that the editable ones (`catalog-entries`, `reviews`, `discovery-sources`, `users`) open and save per role; only where a collection lacks sensible admin presentation, set `admin.useAsTitle`/`admin.defaultColumns` in that collection file (no `access` changes) — most already have these from Phases 2-4
-- [ ] T006 [US1] Run quickstart.md Scenario 1 end-to-end: a Contributor+ persona edits a `catalog-entries` record in `/cms` and the change appears on the employee-app artifact detail page (one data layer, FR-004); confirm the edit produces an `audit-log` entry attributed to the acting user via the existing Phase 3 `afterChange` hooks (FR-008)
+- [X] T005 [US1] Verify the mounted admin lists all seven collections and that the editable ones (`catalog-entries`, `reviews`, `discovery-sources`, `users`) open and save per role; only where a collection lacks sensible admin presentation, set `admin.useAsTitle`/`admin.defaultColumns` in that collection file (no `access` changes) — most already have these from Phases 2-4
+- [X] T006 [US1] Run quickstart.md Scenario 1 end-to-end: a Contributor+ persona edits a `catalog-entries` record in `/cms` and the change appears on the employee-app artifact detail page (one data layer, FR-004); confirm the edit produces an `audit-log` entry attributed to the acting user via the existing Phase 3 `afterChange` hooks (FR-008)
 
 **Checkpoint**: US1 functional — authorized editors administer platform data; deployable MVP
 
@@ -79,12 +79,12 @@ confirm only permitted actions; confirm `artifacts`/`discovery-runs`/`audit-log`
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T007 [P] [US2] Unit test `apps/web/tests/unit/admin-access.test.ts` (write first, must fail): the `Users.access.admin` predicate returns true for `contributor|reviewer|approver|admin` and false for `reader` and for no user (FR-005)
-- [ ] T008 [P] [US2] Integration test `apps/web/tests/integration/admin-readonly.test.ts` (write first, must fail): with an Admin `req.user`, create/update on `artifacts`, `discovery-runs`, and `audit-log` are rejected (read-only), while a permitted write to `catalog-entries`/`reviews`/`discovery-sources` succeeds — proving the read-only matrix holds via existing `access` (FR-006a, Principle I)
+- [X] T007 [P] [US2] Unit test `apps/web/tests/unit/admin-access.test.ts` (write first, must fail): the `Users.access.admin` predicate returns true for `contributor|reviewer|approver|admin` and false for `reader` and for no user (FR-005)
+- [X] T008 [P] [US2] Integration test `apps/web/tests/integration/admin-readonly.test.ts` (write first, must fail): with an Admin `req.user`, create/update on `artifacts`, `discovery-runs`, and `audit-log` are rejected (read-only), while a permitted write to `catalog-entries`/`reviews`/`discovery-sources` succeeds — proving the read-only matrix holds via existing `access` (FR-006a, Principle I)
 
 ### Implementation / Verification for User Story 2
 
-- [ ] T009 [US2] Confirm the gate + read-only behavior in the running admin via quickstart.md Scenarios 2 & 3: Reader/anonymous refused at `/cms`; `artifacts`/`discovery-runs`/`audit-log` render read-only; `discovery-sources` secret/token material not shown (no code beyond T004 expected — this validates server-side enforcement, FR-007)
+- [X] T009 [US2] Confirm the gate + read-only behavior in the running admin via quickstart.md Scenarios 2 & 3: Reader/anonymous refused at `/cms`; `artifacts`/`discovery-runs`/`audit-log` render read-only; `discovery-sources` secret/token material not shown (no code beyond T004 expected — this validates server-side enforcement, FR-007)
 
 **Checkpoint**: US1 + US2 — the back-office is safe: right people in, right actions only, no drift of Git-derived data
 
@@ -101,11 +101,11 @@ both surfaces.
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T010 [US3] Confirm no regression: run the existing suites (`route-protection`, `governance-access`, `discovery-*`, `search`) — all green — proving the `(payload)` mount did not break the employee app or the `/api/auth`,`/api/discovery` handlers (Payload API is at `/payload-api`)
+- [X] T010 [US3] Confirm no regression: run the existing suites (`route-protection`, `governance-access`, `discovery-*`, `search`) — all green — proving the `(payload)` mount did not break the employee app or the `/api/auth`,`/api/discovery` handlers (Payload API is at `/payload-api`)
 
 ### Verification for User Story 3
 
-- [ ] T011 [P] [US3] Run quickstart.md Scenario 4: `/`, `/artifacts/*`, `/admin/roles`, `/admin/discovery`, `/signin` all load unchanged; `/api/auth/*` and `/api/discovery/*` still respond; a single sign-in is recognized on both the employee app and `/cms` (one session/role, FR-010)
+- [X] T011 [P] [US3] Run quickstart.md Scenario 4: `/`, `/artifacts/*`, `/admin/roles`, `/admin/discovery`, `/signin` all load unchanged; `/api/auth/*` and `/api/discovery/*` still respond; a single sign-in is recognized on both the employee app and `/cms` (one session/role, FR-010)
 
 **Checkpoint**: Both surfaces live and non-interfering — Principle VIII realised
 
@@ -113,8 +113,8 @@ both surfaces.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T012 [P] Update `README.md`: document the editor back-office at `/cms` (Payload admin, Contributor+, Design System exemption per Principle VIII, Git-derived collections read-only) and that News/Events collections + admin customization are deferred to later phases
-- [ ] T013 Workspace typecheck + lint (`tsc --noEmit` + linter across `apps/web`) and the full `pnpm --filter web test` suite green, confirming the mount + gate added no type/lint errors and no regressions
+- [X] T012 [P] Update `README.md`: document the editor back-office at `/cms` (Payload admin, Contributor+, Design System exemption per Principle VIII, Git-derived collections read-only) and that News/Events collections + admin customization are deferred to later phases
+- [X] T013 Workspace typecheck + lint (`tsc --noEmit` + linter across `apps/web`) and the full `pnpm --filter web test` suite green, confirming the mount + gate added no type/lint errors and no regressions
 
 ---
 

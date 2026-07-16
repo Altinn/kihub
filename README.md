@@ -4,21 +4,26 @@ Internal AI enablement and governance platform — a catalog and governance laye
 AI artifacts. KI Hub indexes, enriches, reviews, and exposes artifacts; it never stores their
 content (that lives in the sibling [`ai-artifacts`](../ai-artifacts) repository).
 
-> **Status**: Phase 5 — Full-text search. Employees can now search the catalog by keyword: a
-> PostgreSQL full-text query (`to_tsvector`/`websearch_to_tsquery` + `ts_rank`, `english` config)
-> over the live `artifacts` free-text fields (name, description, README), ranked by relevance,
-> governance-safe (active + visibility), and combining with the existing type/tag/category filters —
-> on the database the platform already runs (no new datastore, service, package, or schema change).
-> Semantic / embeddings / Qdrant remain deferred to a later phase (Constitution Principle VII:
-> "full-text search first"). Phase 4 added automated discovery (webhook + scheduled + in-app
-> triggers, remote GitHub fetch); Phase 3 governance (five-role model, governance record per
-> artifact, typed reviews, advisory approval, audit trail); Phase 2 the indexed catalog; Phase 1 the
-> auth shell + `artifact.yaml` manifest schema.
+> **Status**: Phase 6 — Editor back-office. KI Hub now has its **second surface** (Constitution
+> Principle VIII): the Payload CMS admin is mounted at **`/cms`** as the editor/admin back-office,
+> gated to **Contributor and above** (Readers and anonymous are refused, enforced server-side). It
+> exposes the existing collections over the existing data — no migration — with the Git-derived/system
+> collections (`artifacts`, `discovery-runs`, `audit-log`) rendered **read-only** (Principle I) and
+> `catalog-entries`/`reviews`/`discovery-sources`/`users` editable per the existing role rules. The
+> back-office reuses the Phase 1 Auth.js→Payload session bridge and every collection's `access`
+> rules unchanged; it is **exempt from Designsystemet** (it is Payload's own admin UI). News/Events
+> collections and admin customization are deferred to later phases. Phase 5 added full-text search
+> (`to_tsvector`/`websearch_to_tsquery` + `ts_rank`, `english`) over the live `artifacts` free-text
+> fields; Phase 4 automated discovery (webhook + scheduled + in-app triggers, remote GitHub fetch);
+> Phase 3 governance (five-role model, governance record per artifact, typed reviews, advisory
+> approval, audit trail); Phase 2 the indexed catalog; Phase 1 the auth shell + `artifact.yaml`
+> manifest schema.
 
 ## Repository layout
 
 ```text
-apps/web/                     Next.js 16 (App Router) + embedded Payload CMS 3 (catalog UI + indexer CLI)
+apps/web/                     Next.js 16 (App Router) + embedded Payload CMS 3 — two surfaces:
+                              (app) employee-facing catalog UI, (payload) editor back-office at /cms
 packages/artifact-schema/     @kihub/artifact-schema — the versioned artifact.yaml contract
 packages/discovery-core/      @kihub/discovery-core — scan/scanRepo/buildRecord/reconcile indexing core
 packages/github-client/       @kihub/github-client — remote GitHub repo reader (RepoReader) for automated discovery
@@ -28,11 +33,14 @@ specs/002-catalog/            Spec-kit artifacts — Phase 2 (catalog)
 specs/003-governance/         Spec-kit artifacts — Phase 3 (governance)
 specs/004-automated-discovery/ Spec-kit artifacts — Phase 4 (automated discovery)
 specs/005-fulltext-search/    Spec-kit artifacts — Phase 5 (full-text search)
+specs/006-editor-backoffice/  Spec-kit artifacts — Phase 6 (editor back-office)
 .specify/                     Spec-kit config + constitution
 ```
 
-Built with Next.js + Payload CMS (PostgreSQL), Auth.js (Azure Entra ID), and — for all UI —
-Digdir's [Designsystemet](https://github.com/digdir/designsystemet).
+Built with Next.js + Payload CMS (PostgreSQL) and Auth.js (Azure Entra ID). The **employee-facing**
+UI uses Digdir's [Designsystemet](https://github.com/digdir/designsystemet); the **editor
+back-office** at `/cms` is Payload's own admin UI and is exempt from Designsystemet (Constitution
+Principle VIII — two surfaces sharing one auth, role model, and Payload data layer).
 
 ## Prerequisites
 
@@ -135,6 +143,28 @@ text-search configuration is used (stemming improves recall); the Norwegian appl
 searchable content. Meaning-based / semantic search (embeddings + a vector store) is intentionally
 deferred to a later phase.
 
+### Editor back-office (Phase 6)
+
+The Payload CMS admin is mounted as the **editor/admin back-office** — KI Hub's second surface
+(Constitution Principle VIII) — at **`/cms`** (the Payload REST/GraphQL API lives at `/payload-api`,
+so neither collides with the employee app's `/admin/*` pages or `/api/*` handlers). Sign in once (the
+same Entra/Auth.js session powers both surfaces) and open http://localhost:3000/cms:
+
+- **Entry is gated to Contributor and above**, enforced server-side by `Users.access.admin`. Readers
+  and anonymous visitors are refused ("this user does not have access to the admin panel").
+- **Editable** per the existing role rules: `catalog-entries`, `reviews`, `discovery-sources`, and
+  `users` (a user's role can only be changed by an Admin). Edits flow through the same data layer as
+  the employee app and are attributed in the `audit-log` (visible on the artifact detail page).
+- **Read-only** (view only, no create/edit — Principle I, so indexed metadata can't drift from Git):
+  the Git-derived/system collections `artifacts`, `discovery-runs`, and `audit-log`. Discovery-source
+  secrets/tokens stay hidden here too.
+
+The back-office is Payload's own admin UI and is **exempt from Designsystemet**. It reuses the Phase 1
+Auth.js→Payload session bridge and every collection's `access` rules **unchanged** — the only net-new
+code is the `(payload)` route group (boilerplate), the `routes` config, and the one entry gate. Run
+`pnpm --filter web generate:importmap` after changing admin-registered components. **News/Events
+collections and admin customization are deferred to later phases.**
+
 ## Scripts
 
 | Command | What it does |
@@ -145,12 +175,13 @@ deferred to a later phase.
 | `pnpm lint` | Lint all packages |
 | `pnpm --filter web index` | Index a local `ai-artifacts` checkout (Phase 2 CLI, retained fallback) |
 | `pnpm --filter web discovery:scan` | Trigger the scheduled-scan endpoint against a running dev server (Phase 4) |
+| `pnpm --filter web generate:importmap` | Regenerate the Payload admin import map for the `/cms` back-office (Phase 6) |
 | `pnpm --filter @kihub/artifact-schema validate <artifact.yaml>` | Validate a manifest on demand |
 | `pnpm --filter @kihub/artifact-schema generate:jsonschema` | Regenerate the JSON Schema contract |
 
 > The web integration tests (`users-upsert`, `reconcile`, `governance-access`,
 > `reindex-preserves`, `review-approval-flow`, `discovery-run`, `discovery-webhook`,
-> `discovery-scan`, `discovery-access`, `discovery-serialize`, `search`, …) need the database running and
+> `discovery-scan`, `discovery-access`, `discovery-serialize`, `search`, `admin-readonly`, …) need the database running and
 > `apps/web/.env` loaded. `reconcile` and the discovery tests wipe the `artifacts` table as part of
 > their clean-slate strategy — re-run `pnpm --filter web index` afterwards to repopulate the catalog
 > for manual browsing.
@@ -170,5 +201,6 @@ This project follows spec-kit (constitution → specify → clarify → plan →
 implement). See [`specs/001-phase1-foundation/`](specs/001-phase1-foundation),
 [`specs/002-catalog/`](specs/002-catalog), [`specs/003-governance/`](specs/003-governance),
 [`specs/004-automated-discovery/`](specs/004-automated-discovery),
-[`specs/005-fulltext-search/`](specs/005-fulltext-search), and the
+[`specs/005-fulltext-search/`](specs/005-fulltext-search),
+[`specs/006-editor-backoffice/`](specs/006-editor-backoffice), and the
 [constitution](.specify/memory/constitution.md).
