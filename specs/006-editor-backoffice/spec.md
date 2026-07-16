@@ -8,6 +8,13 @@
 
 **Input**: User description: "Phase 6 — Editor back-office (mount the Payload CMS admin). Realise Constitution Principle VIII by standing up the second surface: the Payload admin back-office where a small set of editors and admins sign in to author and administer platform content, using Payload's own admin UI (exempt from the Designsystemet requirement). The Payload admin is currently NOT mounted (headless) — this phase mounts it, on a path that does not collide with the employee-facing app routes `/admin/roles` and `/admin/discovery` (e.g. `/cms`). Access reuses the existing Entra sign-in + five-role model, enforced server-side through Payload access control; Readers have no back-office access. The back-office exposes the existing collections for administration and is where AI-tool governance/review actions and future News/Events authoring happen. The employee app is unchanged. Content boundary preserved (no AI-artifact bodies). No new datastore. Start-simple: the simplest correct mount, deferring per-collection admin polish and the News/Events collections to later phases."
 
+## Clarifications
+
+### Session 2026-07-14
+
+- Q: What is the minimum role to enter the back-office (`/cms`)? → A: **Contributor and above** (Contributor, Reviewer, Approver, Admin), each scoped to their existing permissions. Reader-level employees and unauthenticated visitors are refused. (Reviewers and Approvers must enter to perform governance actions; Contributors to edit metadata/notes and submit for review.)
+- Q: Are Git-derived / system-owned collections read-only in the back-office? → A: **Yes.** `artifacts` (reconcile-owned technical metadata), `discovery-runs`, and `audit-log` are **read-only** (viewable, not hand-editable). **Editable** (per role) are the governance record (`catalog-entries`), `reviews`, `discovery-sources` configuration, and `users` (role changes Admin-only). This preserves Principle I — hand-editing indexed technical metadata would drift from Git and be overwritten by the next discovery reconcile.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Administer platform data in the back-office (Priority: P1)
@@ -93,6 +100,7 @@ or conflict with any employee-app route.
 - **Reader who guesses the URL**: A Reader navigating directly to the back-office path is refused, not shown a partial interface.
 - **Role changed mid-session**: If a user's role is changed, the back-office reflects the new permissions on the next authorization check (no stale elevated access).
 - **AI-artifact content boundary**: The back-office manages artifact *metadata* and governance records; it MUST NOT become a place to paste/store an artifact's executable body (Principle I).
+- **Hand-editing Git-derived data**: The back-office offers no way to hand-edit reconcile-owned technical metadata (`artifacts`) or machine-written history (`discovery-runs`, `audit-log`) — they are read-only there, so they cannot drift from Git or be silently overwritten by the next reconcile.
 - **Path collision**: The back-office base path must not shadow any current or obvious near-future employee-app route (`/`, `/artifacts/*`, `/admin/roles`, `/admin/discovery`, `/signin`).
 - **Simultaneous edits**: Two editors editing the same record are handled by the admin's normal save behavior (last-write or conflict handling as the admin provides) without data corruption.
 
@@ -109,8 +117,9 @@ or conflict with any employee-app route.
 
 #### Role-gated & safe (User Story 2)
 
-- **FR-005**: Access to the back-office MUST be restricted to editor/admin-capable roles; Reader-level employees and unauthenticated visitors MUST be refused entry.
+- **FR-005**: Access to the back-office MUST be restricted to **Contributor and above** (Contributor, Reviewer, Approver, Admin); Reader-level employees and unauthenticated visitors MUST be refused entry.
 - **FR-006**: Within the back-office, each role MUST be able to perform only the actions its permissions allow, matching the platform's existing five-role model (Reader, Contributor, Reviewer, Approver, Admin).
+- **FR-006a**: Git-derived and system-owned collections MUST be **read-only** in the back-office — `artifacts` (reconcile-owned technical metadata), `discovery-runs`, and `audit-log` are viewable but not hand-editable — so indexed metadata cannot drift from Git (Principle I) or be silently overwritten by the next reconcile. Editable collections (per role) are the governance record (`catalog-entries`), `reviews`, `discovery-sources` configuration, and `users` (role changes Admin-only).
 - **FR-007**: All access and action gating MUST be enforced server-side (not only by hiding interface controls), so a bypassed control still cannot perform an unpermitted action.
 - **FR-008**: Actions taken in the back-office MUST be attributed to the acting user, consistent with the platform's existing attribution/audit expectations for governance actions.
 
@@ -126,7 +135,7 @@ or conflict with any employee-app route.
 ### Key Entities *(include if feature involves data)*
 
 - **Editor back-office (surface)**: The second surface of the one platform — a Payload-based admin interface at its own base path, sharing the platform's auth, role model, and data layer. Not a new datastore; a new *view/authoring surface* over existing collections.
-- **Existing collections (reused, unchanged)**: users, catalog artifacts (technical metadata), governance records, reviews, audit log, discovery sources, discovery runs — exposed for administration. Their shapes and access rules are those established in Phases 1-4; this phase surfaces them, it does not redefine them.
+- **Existing collections (reused, unchanged)**: users, catalog artifacts (technical metadata), governance records, reviews, audit log, discovery sources, discovery runs — exposed for administration. Their shapes and access rules are those established in Phases 1-4; this phase surfaces them, it does not redefine them. **Read-only** in the back-office: `artifacts`, `discovery-runs`, `audit-log` (Git-derived / machine-written). **Editable** (per role): `catalog-entries`, `reviews`, `discovery-sources`, `users` (role changes Admin-only).
 - **Role (reused)**: The five-role model (Reader, Contributor, Reviewer, Approver, Admin) already mapped from work-account groups — now also governs back-office entry and per-collection actions.
 
 ## Success Criteria *(mandatory)*
@@ -145,7 +154,7 @@ or conflict with any employee-app route.
 - **Builds on Phases 1-5**: Reuses Phase 1 auth (Entra + mock mode) and the five-role model, the Phase 2 catalog collection, the Phase 3 governance collections and role rules, and the Phase 4 discovery collections. The back-office is a new surface over these, not a new data model.
 - **Realises Principle VIII**: This is the "editor back-office" surface the amended constitution (v2.0.0) mandates; the employee-facing app remains the branded read/browse surface. The back-office is exempt from the Designsystemet requirement.
 - **Base path**: The back-office is assumed to live at `/cms` (a path with no collision against `/admin/roles`, `/admin/discovery`, or other employee-app routes). The exact path is a detail confirmable in clarification/planning; the requirement is only "no collision".
-- **Who gets in**: Editor/admin-capable roles (assumed Contributor and above — Contributor, Reviewer, Approver, Admin) may enter the back-office, each scoped to their existing permissions; Reader (baseline employee) may not. The precise minimum role for entry is confirmable in clarification.
+- **Who gets in**: Contributor and above (Contributor, Reviewer, Approver, Admin) may enter the back-office, each scoped to their existing permissions; Reader (baseline employee) and unauthenticated visitors may not (see Clarifications).
 - **Governance actions relocate here over time**: The back-office is where AI-tool governance/review actions are intended to live going forward (the role model already maps to admin access); reconciling or retiring the Phase 3 custom governance UI in the employee app is a follow-up, not part of this mount.
 - **Content boundary preserved**: Per Principles I & II, the back-office manages enterprise metadata, governance records, and (later) native content — never AI-artifact bodies.
 - **Scope kept minimal**: This phase delivers the mounted, role-gated admin over existing collections. New collections (News, Events) and admin polish (custom views, dashboards, field grouping, branding) are explicitly out of scope and deferred to their own phases.
