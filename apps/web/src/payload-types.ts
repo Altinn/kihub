@@ -74,6 +74,7 @@ export interface Config {
     'audit-log': AuditLog;
     'discovery-sources': DiscoverySource;
     'discovery-runs': DiscoveryRun;
+    news: News;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,6 +89,7 @@ export interface Config {
     'audit-log': AuditLogSelect<false> | AuditLogSelect<true>;
     'discovery-sources': DiscoverySourcesSelect<false> | DiscoverySourcesSelect<true>;
     'discovery-runs': DiscoveryRunsSelect<false> | DiscoveryRunsSelect<true>;
+    news: NewsSelect<false> | NewsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -300,6 +302,45 @@ export interface DiscoveryRun {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news".
+ */
+export interface News {
+  id: number;
+  title: string;
+  /**
+   * URL handle (/news/<slug>); auto-derived from the title when left blank.
+   */
+  slug?: string | null;
+  /**
+   * Short preview shown in the employee news list.
+   */
+  summary?: string | null;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  author?: (number | null) | User;
+  status: 'draft' | 'published';
+  publishDate?: string | null;
+  tags?: string[] | null;
+  heroImageUrl?: string | null;
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -349,6 +390,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'discovery-runs';
         value: number | DiscoveryRun;
+      } | null)
+    | ({
+        relationTo: 'news';
+        value: number | News;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -545,6 +590,24 @@ export interface DiscoveryRunsSelect<T extends boolean = true> {
         errors?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news_select".
+ */
+export interface NewsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  body?: T;
+  author?: T;
+  status?: T;
+  publishDate?: T;
+  tags?: T;
+  heroImageUrl?: T;
+  featured?: T;
   updatedAt?: T;
   createdAt?: T;
 }

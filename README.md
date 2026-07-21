@@ -4,15 +4,17 @@ Internal AI enablement and governance platform — a catalog and governance laye
 AI artifacts. KI Hub indexes, enriches, reviews, and exposes artifacts; it never stores their
 content (that lives in the sibling [`ai-artifacts`](../ai-artifacts) repository).
 
-> **Status**: Phase 6 — Editor back-office. KI Hub now has its **second surface** (Constitution
-> Principle VIII): the Payload CMS admin is mounted at **`/cms`** as the editor/admin back-office,
-> gated to **Contributor and above** (Readers and anonymous are refused, enforced server-side). It
-> exposes the existing collections over the existing data — no migration — with the Git-derived/system
-> collections (`artifacts`, `discovery-runs`, `audit-log`) rendered **read-only** (Principle I) and
-> `catalog-entries`/`reviews`/`discovery-sources`/`users` editable per the existing role rules. The
-> back-office reuses the Phase 1 Auth.js→Payload session bridge and every collection's `access`
-> rules unchanged; it is **exempt from Designsystemet** (it is Payload's own admin UI). News/Events
-> collections and admin customization are deferred to later phases. Phase 5 added full-text search
+> **Status**: Phase 7 — News. KI Hub gains its first **native-content** module (Constitution
+> Principle II): internal news articles authored in the `/cms` back-office by **Contributor+** editors
+> and read by all employees in the app at **`/news`** (a list of published articles — newest-first,
+> featured surfaced — plus a `/news/<slug>` detail page). News is fully owned by Payload — no Git
+> source, not an artifact; only **published** articles are visible to employees (drafts never leak,
+> enforced by both the read query and the collection's `read` access rule). It reuses the shared
+> foundation (Entra auth, five-role model, the Phase 6 back-office, the lexical editor, the
+> Payload/PostgreSQL data layer) with no new dependency or datastore. Phase 6 mounted the Payload CMS
+> admin at **`/cms`** as the editor/admin back-office (Constitution Principle VIII — the second
+> surface), gated to Contributor+, with Git-derived collections (`artifacts`, `discovery-runs`,
+> `audit-log`) read-only (Principle I); Phase 5 added full-text search
 > (`to_tsvector`/`websearch_to_tsquery` + `ts_rank`, `english`) over the live `artifacts` free-text
 > fields; Phase 4 automated discovery (webhook + scheduled + in-app triggers, remote GitHub fetch);
 > Phase 3 governance (five-role model, governance record per artifact, typed reviews, advisory
@@ -34,6 +36,7 @@ specs/003-governance/         Spec-kit artifacts — Phase 3 (governance)
 specs/004-automated-discovery/ Spec-kit artifacts — Phase 4 (automated discovery)
 specs/005-fulltext-search/    Spec-kit artifacts — Phase 5 (full-text search)
 specs/006-editor-backoffice/  Spec-kit artifacts — Phase 6 (editor back-office)
+specs/007-news/               Spec-kit artifacts — Phase 7 (news)
 .specify/                     Spec-kit config + constitution
 ```
 
@@ -162,8 +165,28 @@ same Entra/Auth.js session powers both surfaces) and open http://localhost:3000/
 The back-office is Payload's own admin UI and is **exempt from Designsystemet**. It reuses the Phase 1
 Auth.js→Payload session bridge and every collection's `access` rules **unchanged** — the only net-new
 code is the `(payload)` route group (boilerplate), the `routes` config, and the one entry gate. Run
-`pnpm --filter web generate:importmap` after changing admin-registered components. **News/Events
-collections and admin customization are deferred to later phases.**
+`pnpm --filter web generate:importmap` after changing admin-registered components.
+
+### News (Phase 7)
+
+News is KI Hub's first **native-content** module (Constitution Principle II): articles authored in the
+back-office and read by all employees — no Git source, not an artifact, fully owned by Payload.
+
+- **Read** (employees): open http://localhost:3000/news for the feed — published articles newest-first
+  with featured items surfaced — and `/news/<slug>` for an article (title, byline, publish date,
+  rich-text body, optional tags/hero image). A "News" link sits in the app header. Unpublished drafts
+  are never visible to employees — not in the list, not by direct URL (a draft slug 404s). This is
+  enforced twice: `lib/news.ts` filters `status: published`, and the collection's `read` access rule
+  constrains non-editors to published (API-path defense in depth).
+- **Author** (`/cms`, Contributor+): create/edit/publish/unpublish/delete in the **News** collection.
+  The `slug` is auto-derived from the title (editable, unique); `author` defaults to the creator (shown
+  as the byline); publishing stamps the publish date. Authoring/publishing is gated to Contributor+
+  server-side; News is intentionally **not** under the Registry's governance lifecycle/reviews.
+
+The body is a lexical rich-text field (the editor already used by the platform), rendered on the
+employee page via `@payloadcms/richtext-lexical/react`. No new dependency or datastore. **Deferred to
+later phases**: managed image uploads (Azure Blob — the hero image is a URL for now), scheduled
+publishing, reader comments, a categories taxonomy, and a home-page news widget.
 
 ## Scripts
 
@@ -181,7 +204,7 @@ collections and admin customization are deferred to later phases.**
 
 > The web integration tests (`users-upsert`, `reconcile`, `governance-access`,
 > `reindex-preserves`, `review-approval-flow`, `discovery-run`, `discovery-webhook`,
-> `discovery-scan`, `discovery-access`, `discovery-serialize`, `search`, `admin-readonly`, …) need the database running and
+> `discovery-scan`, `discovery-access`, `discovery-serialize`, `search`, `admin-readonly`, `news-access`, …) need the database running and
 > `apps/web/.env` loaded. `reconcile` and the discovery tests wipe the `artifacts` table as part of
 > their clean-slate strategy — re-run `pnpm --filter web index` afterwards to repopulate the catalog
 > for manual browsing.
@@ -202,5 +225,6 @@ implement). See [`specs/001-phase1-foundation/`](specs/001-phase1-foundation),
 [`specs/002-catalog/`](specs/002-catalog), [`specs/003-governance/`](specs/003-governance),
 [`specs/004-automated-discovery/`](specs/004-automated-discovery),
 [`specs/005-fulltext-search/`](specs/005-fulltext-search),
-[`specs/006-editor-backoffice/`](specs/006-editor-backoffice), and the
+[`specs/006-editor-backoffice/`](specs/006-editor-backoffice),
+[`specs/007-news/`](specs/007-news), and the
 [constitution](.specify/memory/constitution.md).

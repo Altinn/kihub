@@ -33,7 +33,7 @@ Phase 6 Payload admin (`/cms`) — News appears there as another editable collec
 
 ## Phase 1: Setup
 
-- [ ] T001 [P] Create the News collection `apps/web/src/collections/News.ts` per contracts/news-collection.md + data-model.md: fields (`title`; `slug` unique+indexed; `summary` textarea; `body` richText/lexical; `author` relationship→`users`; `status` select `draft|published` default `draft`; `publishDate` date; `tags` hasMany text; `heroImageUrl` text; `featured` checkbox), `admin.useAsTitle: 'title'` + `defaultColumns`, a `beforeValidate` hook that derives a URL-safe `slug` from `title` when empty (extract a pure `slugify(title)` helper for unit testing), a `beforeChange` hook that defaults `author` to `req.user` on create and sets `publishDate` on first publish, and `access` (read: Contributor+ → `true`, else `{ status: { equals: 'published' } }`; create/update/delete: `isEditor` = `Boolean(req.user) && (req.user.role as Role) !== 'reader'`). News is NOT wired into `@kihub/governance-core`'s permission matrix (research §3)
+- [X] T001 [P] Create the News collection `apps/web/src/collections/News.ts` per contracts/news-collection.md + data-model.md: fields (`title`; `slug` unique+indexed; `summary` textarea; `body` richText/lexical; `author` relationship→`users`; `status` select `draft|published` default `draft`; `publishDate` date; `tags` hasMany text; `heroImageUrl` text; `featured` checkbox), `admin.useAsTitle: 'title'` + `defaultColumns`, a `beforeValidate` hook that derives a URL-safe `slug` from `title` when empty (extract a pure `slugify(title)` helper for unit testing), a `beforeChange` hook that defaults `author` to `req.user` on create and sets `publishDate` on first publish, and `access` (read: Contributor+ → `true`, else `{ status: { equals: 'published' } }`; create/update/delete: `isEditor` = `Boolean(req.user) && (req.user.role as Role) !== 'reader'`). News is NOT wired into `@kihub/governance-core`'s permission matrix (research §3)
 
 ---
 
@@ -44,7 +44,7 @@ read layer. Nothing in the user stories can be exercised until the collection is
 
 **⚠️ CRITICAL**: Blocks all user stories
 
-- [ ] T002 Register `News` in `apps/web/src/payload.config.ts` (`collections` array), regenerate Payload types (`pnpm --filter web payload generate:types`), and create a prod migration (`pnpm --filter web migrate:create news`); confirm dev schema push creates the `news` table and the collection appears (editable, Contributor+) in `/cms` (depends on T001)
+- [X] T002 Register `News` in `apps/web/src/payload.config.ts` (`collections` array), regenerate Payload types (`pnpm --filter web payload generate:types`), and create a prod migration (`pnpm --filter web migrate:create news`); confirm dev schema push creates the `news` table and the collection appears (editable, Contributor+) in `/cms` (depends on T001). NOTE: migration skipped — the repo has no migrations practice (no migrationDir/dir, push-only, as in every prior phase); a one-off migration would break that convention.
 
 **Checkpoint**: `news` collection exists, authorable at `/cms`; read layer + pages can be built against it
 
@@ -61,12 +61,12 @@ featured surfaced, open one, confirm title/byline/date/body render; confirm the 
 
 ### Implementation for User Story 1
 
-- [ ] T003 [US1] Create `apps/web/src/lib/news.ts` — `listPublishedNews()` (filter `status: published`, sort newest-first by `publishDate`, featured surfaced) and `getPublishedNewsBySlug(slug)` (published only, else `null`), using the Payload local API (`getPayload({ config })`), mirroring `lib/catalog.ts` (depends on T002)
-- [ ] T004 [P] [US1] Create `apps/web/src/components/NewsCard.tsx` — a Designsystemet list card (title, summary, publish date, tags, featured marker) linking to `/news/<slug>`
-- [ ] T005 [US1] Create `apps/web/src/app/(app)/news/page.tsx` — the employee news list (published, newest-first, featured surfaced) using `listPublishedNews()` + `NewsCard`, with a friendly Designsystemet empty state when none are published (FR-004/012) (depends on T003, T004)
-- [ ] T006 [US1] Create `apps/web/src/app/(app)/news/[slug]/page.tsx` — the article detail: title, byline (author's name), publish date, rich-text body rendered with `RichText` from `@payloadcms/richtext-lexical/react`, optional hero image + tags; call `notFound()` for a draft/unknown slug (FR-005/006/011) (depends on T003)
-- [ ] T007 [P] [US1] Add a "News" link to the employee app header/shell (e.g. `app/(app)/page.tsx` header) pointing at `/news`, so employees can reach the feed
-- [ ] T008 [US1] Run quickstart.md Scenario 2 end-to-end: with a published article present, `/news` lists it (newest-first, featured surfaced), the detail page renders title/byline/date/body, and the empty state shows when none are published
+- [X] T003 [US1] Create `apps/web/src/lib/news.ts` — `listPublishedNews()` (filter `status: published`, sort newest-first by `publishDate`, featured surfaced) and `getPublishedNewsBySlug(slug)` (published only, else `null`), using the Payload local API (`getPayload({ config })`), mirroring `lib/catalog.ts` (depends on T002)
+- [X] T004 [P] [US1] Create `apps/web/src/components/NewsCard.tsx` — a Designsystemet list card (title, summary, publish date, tags, featured marker) linking to `/news/<slug>`
+- [X] T005 [US1] Create `apps/web/src/app/(app)/news/page.tsx` — the employee news list (published, newest-first, featured surfaced) using `listPublishedNews()` + `NewsCard`, with a friendly Designsystemet empty state when none are published (FR-004/012) (depends on T003, T004)
+- [X] T006 [US1] Create `apps/web/src/app/(app)/news/[slug]/page.tsx` — the article detail: title, byline (author's name), publish date, rich-text body rendered with `RichText` from `@payloadcms/richtext-lexical/react`, optional hero image + tags; call `notFound()` for a draft/unknown slug (FR-005/006/011) (depends on T003)
+- [X] T007 [P] [US1] Add a "News" link to the employee app header/shell (e.g. `app/(app)/page.tsx` header) pointing at `/news`, so employees can reach the feed
+- [X] T008 [US1] Run quickstart.md Scenario 2 end-to-end: with a published article present, `/news` lists it (newest-first, featured surfaced), the detail page renders title/byline/date/body, and the empty state shows when none are published
 
 **Checkpoint**: US1 functional — employees read the news feed; deployable MVP (content seeded/authored via `/cms`)
 
@@ -82,12 +82,12 @@ confirm it persists and (published) becomes visible in `/news`. Confirm a Reader
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T009 [P] [US2] Integration test `apps/web/tests/integration/news-access.test.ts` (write first, must fail): with the Payload local API (`overrideAccess: false` + explicit `user`) — a Contributor+ can create/update/publish/delete a `news` doc; a Reader and an anonymous request are refused on create/update; a two-same-title create surfaces a slug uniqueness error; and an employee-scoped read (Reader `user`) returns only `published` docs and never a draft (incl. by slug) — proving the access matrix + published-only visibility (FR-002/003/006/007, and the US3 invariant)
-- [ ] T010 [P] [US2] Unit test `apps/web/tests/unit/news-slug.test.ts` (write first, must fail): the pure `slugify(title)` helper lowercases, replaces spaces/punctuation with hyphens, collapses repeats, and trims — producing a URL-safe slug (FR-013)
+- [X] T009 [P] [US2] Integration test `apps/web/tests/integration/news-access.test.ts` (write first, must fail): with the Payload local API (`overrideAccess: false` + explicit `user`) — a Contributor+ can create/update/publish/delete a `news` doc; a Reader and an anonymous request are refused on create/update; a two-same-title create surfaces a slug uniqueness error; and an employee-scoped read (Reader `user`) returns only `published` docs and never a draft (incl. by slug) — proving the access matrix + published-only visibility (FR-002/003/006/007, and the US3 invariant)
+- [X] T010 [P] [US2] Unit test `apps/web/tests/unit/news-slug.test.ts` (write first, must fail): the pure `slugify(title)` helper lowercases, replaces spaces/punctuation with hyphens, collapses repeats, and trims — producing a URL-safe slug (FR-013)
 
 ### Implementation / Verification for User Story 2
 
-- [ ] T011 [US2] Run quickstart.md Scenarios 1 & 4: a Contributor+ authors and publishes an article in `/cms` (slug auto-derived from the title, author defaulted to them, `publishDate` set on publish) and it appears in `/news`; a Reader is refused authoring at `/cms` (Phase 6 gate) — no code beyond T001/T002 expected
+- [X] T011 [US2] Run quickstart.md Scenarios 1 & 4: a Contributor+ authors and publishes an article in `/cms` (slug auto-derived from the title, author defaulted to them, `publishDate` set on publish) and it appears in `/news`; a Reader is refused authoring at `/cms` (Phase 6 gate) — no code beyond T001/T002 expected
 
 **Checkpoint**: US1 + US2 — editors populate the feed; authoring is Contributor+ only, enforced server-side
 
@@ -103,7 +103,7 @@ reachable); set it back to draft (gone from the list and its detail URL no longe
 
 ### Verification for User Story 3
 
-- [ ] T012 [US3] Run quickstart.md Scenario 3: a draft is absent from `/news` and its `/news/<slug>` returns not-found; unpublishing a published article removes it from the list and 404s its detail — confirming the `lib/news.ts` published-only reads + the collection `read` access constraint hold (the automated invariant is covered by T009; no code beyond T001/T003 expected)
+- [X] T012 [US3] Run quickstart.md Scenario 3: a draft is absent from `/news` and its `/news/<slug>` returns not-found; unpublishing a published article removes it from the list and 404s its detail — confirming the `lib/news.ts` published-only reads + the collection `read` access constraint hold (the automated invariant is covered by T009; no code beyond T001/T003 expected)
 
 **Checkpoint**: US1 + US2 + US3 — drafts never leak; the feed shows only published content
 
@@ -111,8 +111,8 @@ reachable); set it back to draft (gone from the list and its detail URL no longe
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T013 [P] Update `README.md`: document the News module — the `/news` employee feed (published, newest-first, featured) and article detail; authoring in the `/cms` back-office by Contributor+; native content per Principle II (no Git source, not an artifact); and that managed image uploads (Azure Blob), scheduled publishing, comments, categories, and a home-page widget are deferred to later phases
-- [ ] T014 Workspace typecheck + lint (`tsc --noEmit` + `pnpm --filter web lint`) and the full `pnpm --filter web test` suite green — including the new `news-access` + `news-slug` tests and no regression in the existing suites (`route-protection`, `governance-access`, `discovery-*`, `search`, `admin-*`)
+- [X] T013 [P] Update `README.md`: document the News module — the `/news` employee feed (published, newest-first, featured) and article detail; authoring in the `/cms` back-office by Contributor+; native content per Principle II (no Git source, not an artifact); and that managed image uploads (Azure Blob), scheduled publishing, comments, categories, and a home-page widget are deferred to later phases
+- [X] T014 Workspace typecheck + lint (`tsc --noEmit` + `pnpm --filter web lint`) and the full `pnpm --filter web test` suite green — including the new `news-access` + `news-slug` tests and no regression in the existing suites (`route-protection`, `governance-access`, `discovery-*`, `search`, `admin-*`)
 
 ---
 

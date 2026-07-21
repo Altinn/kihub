@@ -56,6 +56,9 @@ export default async function CatalogPage({
             KI Hub
           </Heading>
           <Paragraph data-size="sm">Internal AI enablement &amp; governance catalog</Paragraph>
+          <Paragraph data-size="sm" style={{ marginTop: '0.25rem' }}>
+            <Link href="/news">News</Link>
+          </Paragraph>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{ textAlign: 'right' }}>
