@@ -18,6 +18,14 @@ employees can read, authored by a small set of editors in the existing `/cms` ba
 the shared foundation established in Phases 1–6 (Entra auth, the five-role model, the two-surface split,
 and the Payload data layer) and adds no new datastore or external service.
 
+## Clarifications
+
+### Session 2026-07-21
+
+- Q: How should a news article be addressed in its employee-facing detail URL? → A: A unique, human-readable **slug** derived from the title (stable, editable) — e.g. `/news/q3-all-hands-recap`.
+- Q: How is a news article's author attributed? → A: A reference to a **KI Hub user**, defaulting to the creator and editable by editors; the employee byline shows that user's name.
+- Q: Who may publish a news article (make it visible to employees)? → A: **Contributor-and-above** may both author and publish; news is intentionally NOT placed under the Registry's AI-governance lifecycle / typed reviews / approval matrix.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Employees read the internal news feed (Priority: P1)
@@ -119,17 +127,19 @@ is no longer accessible).
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST provide a native **News Article** content type with: title, body
-  (rich text), short summary, author, publish date, status (draft or published), optional tags, optional
-  hero image, and a featured flag.
-- **FR-002**: Editors with role **Contributor or above** MUST be able to create, edit, and delete news
-  articles in the `/cms` editor back-office; these actions MUST be gated by role and enforced server-side.
+- **FR-001**: The system MUST provide a native **News Article** content type with: title, a unique
+  URL slug (derived from the title), body (rich text), short summary, author, publish date, status
+  (draft or published), optional tags, optional hero image, and a featured flag.
+- **FR-002**: Editors with role **Contributor or above** MUST be able to create, edit, publish/unpublish,
+  and delete news articles in the `/cms` editor back-office; these actions MUST be gated by role and
+  enforced server-side. (News is not under the Registry's AI-governance lifecycle/reviews — no separate
+  publisher role: any Contributor+ may publish.)
 - **FR-003**: Each article MUST carry a status of **draft** or **published**; only **published** articles
   are visible to employees.
 - **FR-004**: Employees MUST be able to view a list of **published** news articles in the employee-facing
   app, ordered **newest-first** by publish date, with **featured** articles surfaced.
-- **FR-005**: Employees MUST be able to open a published article's detail page showing at least its title,
-  body, author, and publish date.
+- **FR-005**: Employees MUST be able to open a published article's detail page — addressed by its unique,
+  human-readable slug (e.g. `/news/<slug>`) — showing at least its title, body, author, and publish date.
 - **FR-006**: Unpublished (draft) articles MUST NOT be visible or accessible to employees on the employee
   app — not in any list and not via a direct detail URL.
 - **FR-007**: Readers and anonymous users MUST NOT be able to author, edit, publish, or unpublish news;
@@ -142,15 +152,20 @@ is no longer accessible).
   with Designsystemet (the back-office remains Payload's own admin UI, exempt).
 - **FR-010**: Publishing, editing, or unpublishing an article MUST take effect for employees without a
   redeploy (reflected on the next request after save).
-- **FR-011**: Each article MUST record author attribution, shown to employees as a byline on the article.
+- **FR-011**: Each article MUST record author attribution as a reference to a KI Hub user (defaulting to
+  the creator, editable by editors), shown to employees as a byline (that user's name) on the article.
 - **FR-012**: The employee news surfaces MUST show a friendly empty state when no articles are published.
+- **FR-013**: Each article's slug MUST be unique across all articles and derived from the title on
+  creation (editable by an editor); it is the stable public handle used in the employee detail URL.
 
 ### Key Entities *(include if feature involves data)*
 
-- **News Article**: a native, KI-Hub-authored article. Attributes: title; body (rich text); short summary
-  (for list previews); author (attribution to a KI Hub user); publish date; status (draft | published);
-  tags (optional, free-form labels); hero image (optional); featured (boolean). Owned entirely by Payload;
-  no Git source; not an artifact. It has no dependency on the Registry's `Artifact`/`CatalogEntry` records.
+- **News Article**: a native, KI-Hub-authored article. Attributes: title; slug (unique, human-readable,
+  derived from title — the public detail-URL handle); body (rich text); short summary (for list previews);
+  author (a reference to a KI Hub user, defaulting to the creator); publish date; status (draft |
+  published); tags (optional, free-form labels); hero image (optional); featured (boolean). Owned entirely
+  by Payload; no Git source; not an artifact. It has no dependency on the Registry's
+  `Artifact`/`CatalogEntry` records (author is its only relationship, to `users`).
 
 ## Success Criteria *(mandatory)*
 
@@ -170,19 +185,18 @@ is no longer accessible).
 
 ## Assumptions
 
-- **Authoring and publishing role**: Contributor-and-above may both author and publish news. News is native
-  editorial content and is intentionally **not** put under the Registry's AI-governance lifecycle / typed
-  reviews / approval matrix; a finer split (e.g., a dedicated editor/publisher distinction) is deferred until
-  a concrete need arises.
-- **Author attribution**: an article's author is a reference to a KI Hub user, defaulting to the creator and
-  editable by editors; the employee byline shows that user's name.
+- **Authoring/publishing role, author attribution, and article URL/identity** were resolved in
+  Clarifications (Session 2026-07-21) and are now firm requirements: Contributor+ author *and* publish
+  (FR-002); author is a user reference defaulting to the creator (FR-011); the detail URL uses a unique
+  title-derived slug (FR-005/FR-013). A finer editor/publisher role split is deferred until a concrete need.
 - **Publish date**: defaults to the moment of publishing and is editable by an editor; it drives list
   ordering. (Scheduling a *future* publish date to auto-publish is out of scope — see below.)
 - **Reading audience**: news is internal — only signed-in employees may read it (same gate as the rest of the
   employee app); it is not public/anonymous.
-- **Employee route**: the news list lives at `/news` and an article at a per-article detail route under it;
-  this does not collide with existing employee routes (`/`, `/artifacts/*`, `/admin/*`, `/signin`) or the
-  back-office (`/cms`).
+- **Employee route**: the news list lives at `/news` and an article at `/news/<slug>`; this does not collide
+  with existing employee routes (`/`, `/artifacts/*`, `/admin/*`, `/signin`) or the back-office (`/cms`).
+- **List volume / pagination**: at portal scale the news list may show all published articles newest-first;
+  pagination or infinite scroll is a plan-level concern deferred until volume warrants it.
 - **Shared foundation reused unchanged**: Entra/Auth.js session, the five-role model, the Phase 6 back-office
   entry gate, and the Payload/PostgreSQL data layer are reused as-is; no new datastore, service, or
   dependency is introduced.
