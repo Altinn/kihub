@@ -32,10 +32,8 @@
 ## Notes
 
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`.
-- **By design, seven decisions are left open** and captured in the spec's *Open Questions for
-  Clarification* section rather than as inline `[NEEDS CLARIFICATION]` markers: URL identity, location
-  shape, past-event handling & ordering, end-time requirement & all-day scope, timezone handling, module
-  route name, and deferred-feature confirmation. Each carries a working default (from the News precedent /
-  Principle VII) so the spec is internally consistent and testable now; `/speckit-clarify` will confirm or
-  revise them and add a Clarifications section before `/speckit-plan`. The "No [NEEDS CLARIFICATION]
-  markers remain" item passes because these are explicitly provisional defaults, not blocking unknowns.
+- **All previously-open decisions are now resolved** (Clarifications, Session 2026-07-23): `/events/<slug>`
+  route + title-derived slug; location = optional free-text place + optional online-meeting URL; hide past
+  events / upcoming soonest-first; end datetime optional & all-day out of scope; single Europe/Oslo
+  timezone; and the advanced feature set (recurring, RSVP, ICS, month-grid, home widget) deferred. The spec
+  carries no `[NEEDS CLARIFICATION]` markers and is ready for `/speckit-plan`.

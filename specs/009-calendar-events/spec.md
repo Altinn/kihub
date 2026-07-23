@@ -24,36 +24,23 @@ back-office gated to Contributor-and-above. It reuses the shared foundation esta
 (Entra auth, the five-role model, the two-surface split, and the Payload/PostgreSQL data layer) and adds
 no new datastore, service, or dependency.
 
-> **NOTE — provisional decisions pending `/speckit-clarify`**: This specification uses working defaults
-> (drawn from the News precedent) for several decisions the author flagged as open. They are listed in
-> **Open Questions for Clarification** below and are called out inline where they appear. `/speckit-clarify`
-> will confirm or revise them and fold the answers into a Clarifications section before planning. They are
-> intentionally NOT pre-baked as final.
+## Clarifications
 
-## Open Questions for Clarification *(to be resolved in `/speckit-clarify`)*
+### Session 2026-07-23
 
-These are recorded here so they are not lost; the working default in parentheses is what the rest of this
-spec currently assumes. None is treated as final.
-
-1. **URL identity** — Is an event addressed by a unique, human-readable **slug** derived from the title
-   (News precedent), or by an opaque **id**? *(Working default: title-derived slug, e.g. `/events/<slug>`.)*
-2. **Location shape** — Is location a **free-text place**, an **online-meeting URL**, or **both**? Is any
-   of it **required**? *(Working default: a single optional free-text location string; online-meeting URL
-   not separately modeled.)*
-3. **Past events & ordering** — Are past (already-ended) events **hidden**, shown in a **separate "past"
-   section**, or **archived**? What is the list ordering? *(Working default: only upcoming events are
-   listed, ordered soonest-first (ascending by start); past events are hidden.)*
-4. **End time & all-day events** — Is an **end datetime required** or optional? Are **all-day events** in
-   scope for this phase? *(Working default: start datetime required, end datetime optional; all-day events
-   out of scope for this phase — every event has a specific start time.)*
-5. **Timezone** — Single **Europe/Oslo** assumption for all events, or a **stored per-event timezone**?
-   *(Working default: single Europe/Oslo; datetimes are interpreted and displayed in Europe/Oslo.)*
-6. **Module route name** — Is the employee module route `/events` or `/calendar`? *(Working default:
-   `/events`, mirroring the News `/news` convention where the route matches the collection.)*
-7. **Deferred-feature confirmation** — Confirm that recurring events, RSVP/registration, ICS export, a
-   month-grid calendar view, and a home-page events widget are all **deferred** to later phases
-   (Principle VII — simplest useful thing first; Designsystemet ships no calendar-grid component).
-   *(Working default: all deferred.)*
+- Q: URL scheme (route name + identity) for the events module? → A: `/events/<slug>` — route `/events`
+  with a unique, human-readable slug derived from the title (mirrors the News `/news/<slug>` precedent).
+- Q: How is an event's location modeled? → A: Both an optional free-text place and an optional
+  online-meeting URL (neither required) — supports in-person, online, and hybrid events.
+- Q: How are past (already-ended) events handled, and how is the list ordered? → A: Only upcoming events
+  are listed, ordered soonest-first (ascending by start); past events are hidden (no past section this
+  phase).
+- Q: Is the end datetime required, and are all-day events in scope? → A: Start datetime required, end
+  datetime optional; all-day events are out of scope this phase (every event has a specific start time).
+- Q: How are event datetimes handled with respect to timezone? → A: Single Europe/Oslo — all datetimes
+  are interpreted and displayed in Europe/Oslo; no per-event timezone stored.
+- Q: Confirm the deferred feature set? → A: Recurring events, RSVP/registration, ICS export, a month-grid
+  calendar view, and a home-page events widget are all deferred to later phases (Principle VII).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -145,12 +132,12 @@ longer accessible).
 ### Edge Cases
 
 - **No published events**: the list shows a friendly empty state, never an error or a blank page.
-- **Event without an end time, tags, or featured flag**: renders cleanly (these are optional).
+- **Event with no end time, no location/online URL, no tags, or not featured**: renders cleanly (all
+  optional); an online-only event (URL, no place) and a place-only event both render sensibly.
 - **Unpublish while being viewed**: an event set back to draft is removed from employee surfaces on next
   request; a direct URL to it is no longer accessible.
-- **Past events**: an event whose start (and end, if set) is already in the past is not listed in the
-  upcoming list under the working default (see Open Question 3 — `/speckit-clarify` may introduce a past
-  section instead of hiding).
+- **Past events**: an event whose start (and end, if set) is already in the past is not listed (no past
+  section this phase); it drops off the upcoming list automatically once its start time passes.
 - **End before start**: an event whose end datetime precedes its start datetime is invalid and MUST be
   rejected at authoring time (validation rule).
 - **Rich description content**: headings, lists, links, and emphasis in the description render readably on
@@ -164,22 +151,22 @@ longer accessible).
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST provide a native **Event** content type with: title; a unique URL handle
-  (working default: a title-derived slug — see Open Question 1); description (rich text); start datetime
-  (required); end datetime (optional); location; organizer; status (draft or published); optional tags; and
-  a featured flag.
+- **FR-001**: The system MUST provide a native **Event** content type with: title; a unique title-derived
+  URL slug; description (rich text); start datetime (required); end datetime (optional); an optional
+  free-text location (place) and an optional online-meeting URL; organizer; status (draft or published);
+  optional tags; and a featured flag.
 - **FR-002**: Editors with role **Contributor or above** MUST be able to create, edit, publish/unpublish,
   and delete events in the `/cms` editor back-office; these actions MUST be gated by role and enforced
   server-side. (Events are not under the Registry's AI-governance lifecycle/reviews — no separate publisher
   role: any Contributor+ may publish.)
 - **FR-003**: Each event MUST carry a status of **draft** or **published**; only **published** events are
   visible to employees.
-- **FR-004**: Employees MUST be able to view a list of **published** events in the employee-facing app,
-  ordered **soonest-first** by start datetime, with **featured** events surfaced. *(Whether past events are
-  hidden, sectioned, or archived is Open Question 3; the working default lists only upcoming events.)*
-- **FR-005**: Employees MUST be able to open a published event's detail page — addressed by its unique
-  public handle (working default `/events/<slug>` — see Open Questions 1 and 6) — showing at least its
-  title, description, start datetime (and end datetime if set), location, and organizer.
+- **FR-004**: Employees MUST be able to view a list of **published, upcoming** events in the employee-facing
+  app, ordered **soonest-first** by start datetime, with **featured** events surfaced. Past (already-ended)
+  events MUST NOT appear in the list (no past section this phase).
+- **FR-005**: Employees MUST be able to open a published event's detail page — addressed at `/events/<slug>`
+  by its unique title-derived slug — showing at least its title, description, start datetime (and end
+  datetime if set), location (free-text place and/or online-meeting URL, when set), and organizer.
 - **FR-006**: Unpublished (draft) events MUST NOT be visible or accessible to employees on the employee app
   — not in any list and not via a direct detail URL — enforced both in the read library and in the
   collection read-access rule (defense in depth).
@@ -194,29 +181,28 @@ longer accessible).
 - **FR-010**: Publishing, editing, or unpublishing an event MUST take effect for employees without a
   redeploy (reflected on the next request after save).
 - **FR-011**: An event MUST have a required **start datetime**; its **end datetime** is optional. When an
-  end datetime is present it MUST NOT precede the start datetime (rejected at authoring time). *(End-required
-  vs optional, and all-day events, are Open Question 4; the working default keeps end optional and all-day
-  out of scope.)*
-- **FR-012**: The employee events surfaces MUST show a friendly empty state when no events are published
-  (or, under the working default, when none are upcoming).
-- **FR-013**: The event's public handle MUST be unique across all events and stable (working default:
-  derived from the title on creation, editable by an editor — see Open Question 1); it is the handle used in
-  the employee detail URL.
+  end datetime is present it MUST NOT precede the start datetime (rejected at authoring time). All-day
+  (date-only) events are out of scope this phase — every event has a specific start time.
+- **FR-012**: The employee events surfaces MUST show a friendly empty state (not an error) when no
+  published, upcoming events exist.
+- **FR-013**: The event's slug MUST be unique across all events and derived from the title on creation
+  (editable by an editor); it is the stable public handle used in the employee detail URL (`/events/<slug>`).
 - **FR-014**: The employee app header MUST include a navigation link to the events module (as the News
   module added one), placed consistently with the existing header navigation.
-- **FR-015**: Datetimes MUST be interpreted and displayed consistently in a single timezone
-  (working default: Europe/Oslo — see Open Question 5), so an event's stated time is unambiguous to all
-  employees.
+- **FR-015**: Datetimes MUST be interpreted and displayed consistently in a single timezone,
+  **Europe/Oslo**, so an event's stated time is unambiguous to all employees; no per-event timezone is
+  stored.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Event**: a native, KI-Hub-authored calendar event. Attributes: title; public handle (unique — working
-  default a title-derived slug); description (rich text); start datetime (required); end datetime (optional);
-  location (working default a free-text string; shape refined by Open Question 2); organizer (attribution of
-  who runs the event — free-text label or a user reference, resolved in planning); status (draft | published);
-  tags (optional, free-form labels); featured (boolean). Owned entirely by Payload; no Git source; not an
-  artifact. It has no dependency on the Registry's `Artifact`/`CatalogEntry` records; its only potential
-  relationship is an optional organizer/creator reference to `users`.
+- **Event**: a native, KI-Hub-authored calendar event. Attributes: title; slug (unique, title-derived — the
+  public detail-URL handle); description (rich text); start datetime (required); end datetime (optional);
+  location — an optional free-text place and an optional online-meeting URL (either, both, or neither);
+  organizer (attribution of who runs the event — free-text label or a user reference, resolved in planning);
+  status (draft | published); tags (optional, free-form labels); featured (boolean). All datetimes are in
+  Europe/Oslo. Owned entirely by Payload; no Git source; not an artifact. It has no dependency on the
+  Registry's `Artifact`/`CatalogEntry` records; its only potential relationship is an optional
+  organizer/creator reference to `users`.
 
 ## Success Criteria *(mandatory)*
 
@@ -239,11 +225,11 @@ longer accessible).
 
 ## Assumptions
 
-- **Open decisions are provisional**: The seven items in **Open Questions for Clarification** are resolved in
-  `/speckit-clarify`, not here. The working defaults documented above (title-derived slug; single optional
-  free-text location; hide past events, upcoming soonest-first; end optional and all-day out of scope; single
-  Europe/Oslo timezone; `/events` route; all listed advanced features deferred) are placeholders chosen from
-  the News precedent and Principle VII, and may change.
+- **Open decisions resolved**: The previously-open decisions are settled in the Clarifications section above
+  (Session 2026-07-23): `/events/<slug>` route + title-derived slug identity; location = optional free-text
+  place + optional online-meeting URL (neither required); hide past events, list upcoming soonest-first; end
+  datetime optional and all-day out of scope; single Europe/Oslo timezone; and the advanced feature set
+  deferred.
 - **Authoring/publishing role**: Contributor-and-above may both author and publish; events are intentionally
   NOT placed under the Registry's AI-governance lifecycle / typed reviews / approval matrix (mirrors News
   FR-002). A finer editor/publisher role split is deferred until a concrete need.
@@ -253,13 +239,13 @@ longer accessible).
   account is removed.
 - **Reading audience**: events are internal — only signed-in employees may read them (same gate as the rest
   of the employee app); the module is not public/anonymous.
-- **Employee route**: the events list lives at `/events` and an event at `/events/<slug>` under the working
-  default; this does not collide with existing employee routes (`/`, `/artifacts/*`, `/news/*`, `/admin/*`,
-  `/signin`) or the back-office (`/cms`). (Route name is Open Question 6.)
+- **Employee route**: the events list lives at `/events` and an event at `/events/<slug>`; this does not
+  collide with existing employee routes (`/`, `/artifacts/*`, `/news/*`, `/admin/*`, `/signin`) or the
+  back-office (`/cms`).
 - **List volume / pagination**: at portal scale the list may show all published upcoming events soonest-first;
   pagination or infinite scroll is a plan-level concern deferred until volume warrants it.
 - **Shared foundation reused unchanged**: Entra/Auth.js session, the five-role model, the Phase 6 back-office
   entry gate, and the Payload/PostgreSQL data layer are reused as-is; no new datastore, service, or dependency
   is introduced. This is an additive module with zero changes to Registry, governance, or News.
 - **Out of scope (deferred to later phases)**: recurring events, RSVP/registration, ICS/calendar-feed export,
-  a month-grid calendar view, and a home-page/landing events widget (Open Question 7 confirms these).
+  a month-grid calendar view, and a home-page/landing events widget (confirmed deferred in Clarifications).
