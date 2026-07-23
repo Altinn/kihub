@@ -142,9 +142,9 @@ longer accessible).
   rejected at authoring time (validation rule).
 - **Rich description content**: headings, lists, links, and emphasis in the description render readably on
   the detail page.
-- **Organizer no longer active**: if the organizer is modeled as a user reference and that account is later
-  removed, the event still displays a sensible organizer label and does not error. *(Organizer shape —
-  free-text vs user reference — is refined in planning; see Assumptions.)*
+- **Organizer**: the organizer is a free-text label (resolved in planning — research §7), so an event
+  always displays a sensible organizer and there is no account to deactivate; the field is optional and an
+  event with no organizer renders cleanly.
 - **Direct back-office access by a Reader/anonymous**: refused by the existing Phase 6 entry gate.
 
 ## Requirements *(mandatory)*
