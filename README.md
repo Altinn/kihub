@@ -84,22 +84,25 @@ Re-run any time to reconcile (add/update/deactivate). The catalog is rebuildable
 is authored in the app. Then browse at http://localhost:3000 and open an artifact for its detail +
 `apm install …` command.
 
-### Governance (Phase 3)
+### Governance (Phase 3; actions moved to the back-office per constitution v2.0.0)
 
-Open an artifact's detail page to see its governance state (lifecycle badge, approved/recommended)
-and, depending on the signed-in role:
+Open an artifact's detail page to see its governance state **read-only** — the same view for every
+signed-in role: lifecycle state, review/approval status, business/technical owner, risk level, the
+typed-review history (with expiry/expired indicators), and the audit trail. The employee app offers
+no governance actions (Principles VI & VIII: it is a read-first surface, not an admin).
 
-- **Contributor+**: edit owners/risk/notes and submit the artifact for review (Draft → Experimental
-  → In Review).
-- **Reviewer+**: record a typed review (security/GDPR/technical/accessibility/responsible-ai/
-  operational) with a decision, comments, required changes, risk level, and an expiry date.
-- **Approver+**: approve or reject (advisory with respect to typed reviews) and move the lifecycle
-  through Approved/Recommended/Deprecated/Archived.
-- **Admin**: everything above, plus role management at `/admin/roles`.
+All governance **actions** are performed in the `/cms` editor back-office (Contributor+):
 
-Every governance action is attributed and recorded in an audit trail visible on the artifact's
-detail page. All role/action checks are enforced server-side (Payload `access` functions +
-`@kihub/governance-core`), not just hidden in the UI.
+- edit owners/risk/internal-notes/featured on a `catalog-entries` record,
+- move the lifecycle (Draft → Experimental → In Review → Approved/Recommended/Deprecated/Archived,
+  guarded by the `@kihub/governance-core` state machine — invalid transitions are rejected),
+- record typed reviews (security/GDPR/technical/accessibility/responsible-ai/operational) with a
+  decision, comments, required changes, risk level, and an expiry date,
+- record approval decisions (advisory with respect to typed reviews).
+
+Every action is attributed and audit-logged (visible read-only on the artifact's detail page). All
+role/action checks are enforced server-side (Payload `access` functions + `@kihub/governance-core`),
+independent of any UI. Admins additionally manage roles at `/admin/roles`.
 
 ### Automated discovery (Phase 4)
 

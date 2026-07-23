@@ -1,13 +1,6 @@
-import { canTransition, hasPermission, isExpired, LIFECYCLE_STATES, type Role } from '@kihub/governance-core';
-import { Button, Card, Checkbox, Heading, Label, Paragraph, Select, Tag, Textfield } from '@digdir/designsystemet-react';
-import { ReviewForm } from '@/components/ReviewForm';
+import { isExpired } from '@kihub/governance-core';
+import { Card, Heading, Paragraph, Tag } from '@digdir/designsystemet-react';
 import { listAuditLog, listReviews, type Governance } from '@/lib/governance';
-import {
-  decideApprovalAction,
-  submitForReviewAction,
-  transitionLifecycleAction,
-  updateGovernanceMetadataAction,
-} from '@/lib/governance-actions';
 
 const STATE_LABELS: Record<string, string> = {
   draft: 'Draft',
@@ -19,37 +12,38 @@ const STATE_LABELS: Record<string, string> = {
   archived: 'Archived',
 };
 
+const REVIEW_STATUS_LABELS: Record<Governance['reviewStatus'], string> = {
+  'not-submitted': 'Not submitted',
+  'in-review': 'In review',
+};
+
+const APPROVAL_LABELS: Record<Governance['approvalState'], string> = {
+  'not-approved': 'Not approved',
+  approved: 'Approved',
+  rejected: 'Rejected',
+};
+
+const RISK_LABELS: Record<string, string> = {
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+};
+
 /**
- * Owners/risk/notes editing + role-gated lifecycle actions (US2). Actions the role does not
- * permit are simply not rendered (UX only) — the server action re-checks via Payload `access`
- * regardless (FR-003).
+ * Read-only governance state for the employee surface — identical for every role, no action
+ * controls (Constitution Principles VI & VIII). Governance actions are performed only in the
+ * /cms editor back-office; internal notes and the featured flag are editor-only and never
+ * rendered here.
  */
 export async function GovernancePanel({
   artifactId,
   governance,
-  actorRole,
 }: {
   artifactId: string;
   governance: Governance;
-  actorRole: Role;
 }) {
-  const canEditMetadata = hasPermission(actorRole, 'edit-metadata');
-  const canRecordReview = hasPermission(actorRole, 'record-review');
-  const canDecideApproval = hasPermission(actorRole, 'decide-approval');
-  const canSubmit =
-    hasPermission(actorRole, 'submit-for-review') &&
-    (governance.lifecycleState === 'draft' || governance.lifecycleState === 'experimental');
-
   const [reviews, auditLog] = await Promise.all([listReviews(artifactId), listAuditLog(artifactId)]);
   const now = new Date();
-
-  // Reuse `canTransition` (the single source of truth) to enumerate which further transitions
-  // this role may perform from the current state — never duplicate the FSM matrix here.
-  const otherTransitions = LIFECYCLE_STATES.filter(
-    (candidate) =>
-      candidate !== 'in-review' &&
-      canTransition(governance.lifecycleState, candidate, actorRole).allowed,
-  );
 
   return (
     <Card style={{ marginTop: '1.5rem' }}>
@@ -57,90 +51,20 @@ export async function GovernancePanel({
         Governance
       </Heading>
 
-      {canEditMetadata ? (
-        <form action={updateGovernanceMetadataAction} style={{ display: 'grid', gap: '0.75rem', maxWidth: '420px' }}>
-          <input type="hidden" name="artifactId" value={artifactId} />
-          <Textfield
-            label="Business owner"
-            name="businessOwner"
-            defaultValue={governance.businessOwner ?? ''}
-            data-size="sm"
-          />
-          <Textfield
-            label="Technical owner"
-            name="technicalOwner"
-            defaultValue={governance.technicalOwner ?? ''}
-            data-size="sm"
-          />
-          <div>
-            <Label htmlFor="riskLevel">Risk level</Label>
-            <Select id="riskLevel" name="riskLevel" defaultValue={governance.riskLevel ?? ''} data-size="sm">
-              <option value="">Not set</option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </Select>
-          </div>
-          <Textfield
-            label="Internal notes"
-            name="internalNotes"
-            multiline
-            defaultValue={governance.internalNotes ?? ''}
-            data-size="sm"
-          />
-          <Checkbox label="Featured" name="featured" value="on" defaultChecked={governance.featured} />
-          <Button type="submit" data-size="sm" style={{ justifySelf: 'start' }}>
-            Save
-          </Button>
-        </form>
-      ) : (
-        <div>
-          <Paragraph data-size="sm">Business owner: {governance.businessOwner ?? '—'}</Paragraph>
-          <Paragraph data-size="sm">Technical owner: {governance.technicalOwner ?? '—'}</Paragraph>
-          <Paragraph data-size="sm">Risk level: {governance.riskLevel ?? '—'}</Paragraph>
-        </div>
-      )}
-
-      {(canSubmit || otherTransitions.length > 0) && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem' }}>
-          {canSubmit ? (
-            <form action={submitForReviewAction}>
-              <input type="hidden" name="artifactId" value={artifactId} />
-              <Button type="submit" data-size="sm" variant="secondary">
-                Submit for review
-              </Button>
-            </form>
-          ) : null}
-          {otherTransitions.map((to) => (
-            <form key={to} action={transitionLifecycleAction}>
-              <input type="hidden" name="artifactId" value={artifactId} />
-              <input type="hidden" name="to" value={to} />
-              <Button type="submit" data-size="sm" variant="secondary">
-                Move to {STATE_LABELS[to]}
-              </Button>
-            </form>
-          ))}
-        </div>
-      )}
-
-      {canDecideApproval ? (
-        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-          <form action={decideApprovalAction}>
-            <input type="hidden" name="artifactId" value={artifactId} />
-            <input type="hidden" name="decision" value="approved" />
-            <Button type="submit" data-size="sm">
-              Approve
-            </Button>
-          </form>
-          <form action={decideApprovalAction}>
-            <input type="hidden" name="artifactId" value={artifactId} />
-            <input type="hidden" name="decision" value="rejected" />
-            <Button type="submit" data-size="sm" variant="secondary" data-color="danger">
-              Reject
-            </Button>
-          </form>
-        </div>
-      ) : null}
+      <dl style={{ display: 'grid', gridTemplateColumns: 'max-content 1fr', gap: '0.4rem 1.25rem', margin: 0 }}>
+        <dt><strong>Lifecycle state</strong></dt>
+        <dd style={{ margin: 0 }}>{STATE_LABELS[governance.lifecycleState] ?? governance.lifecycleState}</dd>
+        <dt><strong>Review status</strong></dt>
+        <dd style={{ margin: 0 }}>{REVIEW_STATUS_LABELS[governance.reviewStatus]}</dd>
+        <dt><strong>Approval</strong></dt>
+        <dd style={{ margin: 0 }}>{APPROVAL_LABELS[governance.approvalState]}</dd>
+        <dt><strong>Business owner</strong></dt>
+        <dd style={{ margin: 0 }}>{governance.businessOwner ?? '—'}</dd>
+        <dt><strong>Technical owner</strong></dt>
+        <dd style={{ margin: 0 }}>{governance.technicalOwner ?? '—'}</dd>
+        <dt><strong>Risk level</strong></dt>
+        <dd style={{ margin: 0 }}>{governance.riskLevel ? RISK_LABELS[governance.riskLevel] : '—'}</dd>
+      </dl>
 
       <Heading level={3} data-size="2xs" style={{ marginTop: '1.5rem', marginBottom: '0.5rem' }}>
         Reviews
@@ -177,12 +101,6 @@ export async function GovernancePanel({
           })}
         </div>
       )}
-
-      {canRecordReview ? (
-        <div style={{ marginTop: '1rem' }}>
-          <ReviewForm artifactId={artifactId} />
-        </div>
-      ) : null}
 
       <Heading level={3} data-size="2xs" style={{ marginTop: '1.5rem', marginBottom: '0.5rem' }}>
         Audit history
