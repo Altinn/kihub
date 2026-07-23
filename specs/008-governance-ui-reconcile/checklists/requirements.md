@@ -13,9 +13,9 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain — **2 markers, intentionally deferred to
-      `/speckit-clarify` per project workflow** (FR-003: internal notes / featured visibility;
-      FR-004: delete vs retain the dead write path)
+- [x] No [NEEDS CLARIFICATION] markers remain — both markers resolved in the 2026-07-23
+      clarification session (FR-003: internal notes / featured excluded from employee display;
+      FR-004: dead write path deleted outright)
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -33,9 +33,10 @@
 
 ## Notes
 
-- The two [NEEDS CLARIFICATION] markers are the decisions the feature brief explicitly reserved
-  for the clarify step (don't pre-bake); both carry documented working assumptions (notes/featured:
-  exclude; dead write path: delete). Resolve via `/speckit-clarify` before `/speckit-plan`.
+- The two [NEEDS CLARIFICATION] markers reserved for the clarify step were resolved on
+  2026-07-23 (notes/featured: excluded from the employee display; dead write path: delete
+  outright) and are encoded in the spec's Clarifications section, FR-003/FR-004, SC-003, and
+  Assumptions. All checklist items now pass.
 - Brief question "does any other page render governance actions?" was answered during
   specification by code search (no — only the artifact detail page) and is recorded as a verified
   assumption rather than a clarification.

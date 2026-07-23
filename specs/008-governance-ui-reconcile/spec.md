@@ -27,6 +27,17 @@ governance **actions**. It is intentionally a removal/refactor: no server-side r
 new capability, no feature loss — the write path simply lives only where the constitution says it
 belongs. Server-side enforcement is already independent of the removed UI and stays untouched.
 
+## Clarifications
+
+### Session 2026-07-23
+
+- Q: Should the employee-visible read-only governance state include the internal notes and the
+  featured flag? → A: **No** — both are excluded from the employee display; they remain visible
+  and editable only in the editor back-office.
+- Q: Delete the employee app's dead governance write path outright, or retain any of it as an
+  internal API? → A: **Delete outright** — remove the form-handling actions and the write helpers
+  they wrapped; the back-office writes through its own data-layer rules and does not use them.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Employees see governance state, and only state, on the artifact detail page (Priority: P1)
@@ -109,9 +120,8 @@ dead write path in place would invite constitutional drift (an easy path to re-a
 actions) and contradicts the start-simple principle.
 
 **Independent Test**: Inspect the employee app for the previously used governance write
-entry points and confirm they are removed (or, per clarification, explicitly retained by
-decision); confirm automated quality gates (full test suite, type checks, lint) pass with no
-governance verification weakened.
+entry points and confirm they are deleted; confirm automated quality gates (full test suite,
+type checks, lint) pass with no governance verification weakened.
 
 **Acceptance Scenarios**:
 
@@ -150,17 +160,14 @@ governance verification weakened.
 - **FR-002**: The employee app MUST NOT render any governance action control for any role — no
   governance-metadata edit form, no submit-for-review control, no lifecycle-transition controls,
   no approve/reject controls, and no review-recording form.
-- **FR-003**: The employee governance display MUST NOT vary by role. [NEEDS CLARIFICATION:
-  should the employee-visible read-only state include the internal notes and featured flag —
-  fields that today are visible only inside the editors' edit form? Working assumption: NO —
-  internal notes are editor-facing working notes, and featured is a curation lever rather than
-  employee-relevant governance state.]
+- **FR-003**: The employee governance display MUST NOT vary by role, and MUST NOT include the
+  internal notes or the featured flag — those are editor-facing fields that remain visible and
+  editable only in the editor back-office (clarified 2026-07-23).
 - **FR-004**: The employee app's now-unused governance write path (the form-handling actions and
   the write helpers they wrapped: metadata update, submit-for-review, lifecycle transition,
-  review recording, approval decision) MUST be removed from the employee app. [NEEDS
-  CLARIFICATION: delete the dead write path outright (default, per the start-simple principle —
-  the back-office writes through its own data-layer rules and does not use these helpers), or
-  retain any of it as an internal API for future use?]
+  review recording, approval decision) MUST be deleted outright — not retained as an internal
+  API (clarified 2026-07-23, per the start-simple principle; the back-office writes through its
+  own data-layer rules and does not use these helpers).
 - **FR-005**: All governance actions MUST remain fully available in the editor back-office to the
   same roles as before, unchanged: governance-metadata editing, lifecycle transitions (still
   guarded by the lifecycle state machine), typed-review recording, and approval decisions, all
@@ -198,8 +205,8 @@ No data model changes. Entities involved, all pre-existing and unchanged:
   edit, submit for review, lifecycle transition, review recording, approval decision) remain
   performable in the editor back-office by the same roles as before.
 - **SC-003**: Employees retain visibility of all governance state visible to them before the
-  change — lifecycle, owners, risk, review/approval status, reviews, audit history — with any
-  field-level exceptions decided in clarification (internal notes, featured).
+  change — lifecycle, owners, risk, review/approval status, reviews, audit history — excluding
+  the internal notes and featured flag, which stay editor-back-office-only (per clarification).
 - **SC-004**: The complete existing automated verification suite passes after the change, with no
   governance verification removed or weakened (the role×action access matrix and review→approval
   flow checks pass unchanged).
@@ -229,4 +236,4 @@ No data model changes. Entities involved, all pre-existing and unchanged:
   spec-directory number; Calendar will take a later sequential directory when it starts.
 - **The reviews list's current employee-visible content (including reviewer email and comments)
   is acceptable to keep** — it is already shown today to all roles and no concern was raised;
-  only internal notes and featured are open questions.
+  internal notes and the featured flag, by contrast, are excluded per clarification.
