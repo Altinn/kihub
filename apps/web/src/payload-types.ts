@@ -75,6 +75,7 @@ export interface Config {
     'discovery-sources': DiscoverySource;
     'discovery-runs': DiscoveryRun;
     news: News;
+    events: Event;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +91,7 @@ export interface Config {
     'discovery-sources': DiscoverySourcesSelect<false> | DiscoverySourcesSelect<true>;
     'discovery-runs': DiscoveryRunsSelect<false> | DiscoveryRunsSelect<true>;
     news: NewsSelect<false> | NewsSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -341,6 +343,58 @@ export interface News {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  title: string;
+  /**
+   * URL handle (/events/<slug>); auto-derived from the title when left blank.
+   */
+  slug?: string | null;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * When the event starts (Europe/Oslo).
+   */
+  startDateTime: string;
+  /**
+   * Optional end; must not be before the start.
+   */
+  endDateTime?: string | null;
+  /**
+   * Free-text place (optional).
+   */
+  location?: string | null;
+  /**
+   * Optional online-meeting link.
+   */
+  onlineUrl?: string | null;
+  /**
+   * Who runs the event — a person, team, or external party (free text).
+   */
+  organizer?: string | null;
+  status: 'draft' | 'published';
+  tags?: string[] | null;
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -394,6 +448,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'news';
         value: number | News;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: number | Event;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -607,6 +665,25 @@ export interface NewsSelect<T extends boolean = true> {
   publishDate?: T;
   tags?: T;
   heroImageUrl?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  description?: T;
+  startDateTime?: T;
+  endDateTime?: T;
+  location?: T;
+  onlineUrl?: T;
+  organizer?: T;
+  status?: T;
+  tags?: T;
   featured?: T;
   updatedAt?: T;
   createdAt?: T;

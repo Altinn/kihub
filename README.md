@@ -4,14 +4,17 @@ Internal AI enablement and governance platform — a catalog and governance laye
 AI artifacts. KI Hub indexes, enriches, reviews, and exposes artifacts; it never stores their
 content (that lives in the sibling [`ai-artifacts`](../ai-artifacts) repository).
 
-> **Status**: Phase 7 — News. KI Hub gains its first **native-content** module (Constitution
-> Principle II): internal news articles authored in the `/cms` back-office by **Contributor+** editors
-> and read by all employees in the app at **`/news`** (a list of published articles — newest-first,
-> featured surfaced — plus a `/news/<slug>` detail page). News is fully owned by Payload — no Git
-> source, not an artifact; only **published** articles are visible to employees (drafts never leak,
-> enforced by both the read query and the collection's `read` access rule). It reuses the shared
-> foundation (Entra auth, five-role model, the Phase 6 back-office, the lexical editor, the
-> Payload/PostgreSQL data layer) with no new dependency or datastore. Phase 6 mounted the Payload CMS
+> **Status**: Phase 8 — Calendar / Events. KI Hub gains the **third and final** native-content module
+> of the portal charter (Constitution Principle II; Registry + News + Calendar): internal events
+> authored in the `/cms` back-office by **Contributor+** editors and read by all employees in the app
+> at **`/events`** (a list of published **upcoming** events — soonest-first, featured surfaced — plus
+> an `/events/<slug>` detail page; datetimes in Europe/Oslo). Events is fully owned by Payload — no Git
+> source, not an artifact; only **published** events are visible to employees (drafts never leak,
+> enforced by both the read query and the collection's `read` access rule), and past events drop off
+> the list automatically. It reuses the shared foundation (Entra auth, five-role model, the Phase 6
+> back-office, the Phase 7 slug helper, the lexical editor, the Payload/PostgreSQL data layer) with no
+> new dependency, datastore, or migration. Phase 7 added **News** — the first native-content module,
+> the same shape at **`/news`**. Phase 6 mounted the Payload CMS
 > admin at **`/cms`** as the editor/admin back-office (Constitution Principle VIII — the second
 > surface), gated to Contributor+, with Git-derived collections (`artifacts`, `discovery-runs`,
 > `audit-log`) read-only (Principle I); Phase 5 added full-text search
@@ -37,6 +40,8 @@ specs/004-automated-discovery/ Spec-kit artifacts — Phase 4 (automated discove
 specs/005-fulltext-search/    Spec-kit artifacts — Phase 5 (full-text search)
 specs/006-editor-backoffice/  Spec-kit artifacts — Phase 6 (editor back-office)
 specs/007-news/               Spec-kit artifacts — Phase 7 (news)
+specs/008-governance-ui-reconcile/ Spec-kit artifacts — governance-UI reconcile
+specs/009-calendar-events/    Spec-kit artifacts — Phase 8 (calendar / events)
 .specify/                     Spec-kit config + constitution
 ```
 
@@ -191,6 +196,33 @@ employee page via `@payloadcms/richtext-lexical/react`. No new dependency or dat
 later phases**: managed image uploads (Azure Blob — the hero image is a URL for now), scheduled
 publishing, reader comments, a categories taxonomy, and a home-page news widget.
 
+### Calendar / Events (Phase 8)
+
+Events is the **third and final** native-content module of the portal charter (Constitution Principle
+II; Registry + News + Calendar): events authored in the back-office and read by all employees — no Git
+source, not an artifact, fully owned by Payload. It is a structural clone of News.
+
+- **Read** (employees): open http://localhost:3000/events for the list — published **upcoming** events
+  soonest-first with featured items surfaced — and `/events/<slug>` for an event (title; when, in
+  Europe/Oslo; location and/or online-meeting link; organizer; rich-text description; optional tags).
+  An "Events" link sits in the app header beside News. **Past** events drop off the list automatically
+  (upcoming = `(end ?? start) ≥ now`, so an in-progress event stays listed); a published past event is
+  still reachable by its detail URL. Unpublished drafts are never visible to employees — not in the
+  list, not by direct URL (a draft slug 404s). This is enforced twice: `lib/events.ts` filters
+  `status: published`, and the collection's `read` access rule constrains non-editors to published
+  (API-path defense in depth).
+- **Author** (`/cms`, Contributor+): create/edit/publish/unpublish/delete in the **Events** collection.
+  The `slug` is auto-derived from the title (editable, unique); the start datetime is required and the
+  end is optional (an end before the start is rejected on save); organizer is free text.
+  Authoring/publishing is gated to Contributor+ server-side; Events is intentionally **not** under the
+  Registry's governance lifecycle/reviews.
+
+The description is a lexical rich-text field, rendered via `@payloadcms/richtext-lexical/react`. Pure
+date logic (end≥start validation, the upcoming predicate, Europe/Oslo formatting) lives in
+`lib/event-dates.ts` and is unit-tested. No new dependency, datastore, or migration. **Deferred to
+later phases**: recurring events, RSVP/registration, ICS/calendar-feed export, a month-grid calendar
+view, and a home-page events widget.
+
 ## Scripts
 
 | Command | What it does |
@@ -207,7 +239,7 @@ publishing, reader comments, a categories taxonomy, and a home-page news widget.
 
 > The web integration tests (`users-upsert`, `reconcile`, `governance-access`,
 > `reindex-preserves`, `review-approval-flow`, `discovery-run`, `discovery-webhook`,
-> `discovery-scan`, `discovery-access`, `discovery-serialize`, `search`, `admin-readonly`, `news-access`, …) need the database running and
+> `discovery-scan`, `discovery-access`, `discovery-serialize`, `search`, `admin-readonly`, `news-access`, `events-access`, …) need the database running and
 > `apps/web/.env` loaded. `reconcile` and the discovery tests wipe the `artifacts` table as part of
 > their clean-slate strategy — re-run `pnpm --filter web index` afterwards to repopulate the catalog
 > for manual browsing.

@@ -9,6 +9,7 @@ import { AuditLog } from './collections/AuditLog';
 import { CatalogEntry } from './collections/CatalogEntry';
 import { DiscoveryRun } from './collections/DiscoveryRun';
 import { DiscoverySource } from './collections/DiscoverySource';
+import { Event } from './collections/Event';
 import { News } from './collections/News';
 import { Review } from './collections/Review';
 import { Users } from './collections/Users';
@@ -28,7 +29,7 @@ export default buildConfig({
     admin: '/cms',
     api: '/payload-api',
   },
-  collections: [Users, Artifact, CatalogEntry, Review, AuditLog, DiscoverySource, DiscoveryRun, News],
+  collections: [Users, Artifact, CatalogEntry, Review, AuditLog, DiscoverySource, DiscoveryRun, News, Event],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET ?? '',
   typescript: {
