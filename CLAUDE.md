@@ -1,12 +1,12 @@
 <!-- SPECKIT START -->
-Active feature: **010-home-widgets** (in progress — specify done; clarify/plan/tasks/implement to
-follow). It surfaces the deferred home-page widget both News and Calendar/Events left open: an
-additive, employee-app, read-only landing page that shows the latest published news + upcoming
-published events (reusing `lib/news.ts::listPublishedNews`, `lib/events.ts::listUpcomingEvents` and
-the `NewsCard`/`EventCard` components) — ZERO new collections/schema/migrations/deps. For
-requirements read `specs/010-home-widgets/spec.md` (plan/research/data-model/contracts/quickstart to
-follow in the same directory). Highest-impact open question deferred to clarify: what `/` becomes
-(dashboard vs. sidebar vs. catalog-moves-to-a-new-route). Prior phases: Phase 1 (foundation)
+Active feature: **010-home-widgets** (in progress — specify + clarify + plan done; tasks/implement to
+follow). For technologies, structure, and context read the plan: `specs/010-home-widgets/plan.md`
+(with `research.md`, `data-model.md`, `contracts/`, `quickstart.md`; `spec.md` for requirements). It
+surfaces the deferred home-page widget both News and Calendar/Events left open: `/` becomes a pure
+portal **dashboard** with three read-only widgets — latest published news (3), upcoming events (3),
+featured/recommended Registry artifacts (3) — each with a "View all →" link; the Registry catalog +
+full-text search **move to `/registry`**. Additive/read-only, reusing the existing published-only read
+libs + `NewsCard`/`EventCard`/`ArtifactCard` — ZERO new collections/schema/migrations/deps. Prior phases: Phase 1 (foundation)
 `specs/001-phase1-foundation/`; Phase 2 (catalog) `specs/002-catalog/`; Phase 3 (governance)
 `specs/003-governance/`; Phase 4 (automated discovery) `specs/004-automated-discovery/`; Phase 5
 (full-text search) `specs/005-fulltext-search/`; Phase 6 (editor back-office)
