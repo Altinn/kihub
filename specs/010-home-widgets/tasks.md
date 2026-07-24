@@ -38,8 +38,8 @@ collections, schema changes, migrations, or dependencies.**
 
 **Purpose**: The pure, unit-testable widget-selection logic (no Payload runtime), TDD-style.
 
-- [ ] T001 [P] Write failing-first unit test `apps/web/tests/unit/home-select.test.ts` per data-model.md: `takeTopN(items, n)` returns at most `n` items in input order, returns all when `items.length <= n`, returns `[]` for `n <= 0` or empty input, and does not mutate input; `selectRecommendedArtifacts(entries, n)` keeps only entries where `governance.featured === true || governance.recommended === true`, orders featured entries first (stable within groups), caps at `n`, and returns `[]` when none qualify. Must FAIL initially (module absent)
-- [ ] T002 Implement the pure selection module `apps/web/src/lib/home-select.ts` to make T001 pass: `takeTopN<T>(items: T[], n: number): T[]` and `selectRecommendedArtifacts(entries: RecommendedArtifact[], n: number): RecommendedArtifact[]` (filter featured/recommended, stable featured-first, cap `n`). Pure functions only — MUST NOT import `@payload-config` or any Payload runtime (mirrors how `lib/event-dates.ts` is separate from `lib/events.ts`) (depends on T001)
+- [X] T001 [P] Write failing-first unit test `apps/web/tests/unit/home-select.test.ts` per data-model.md: `takeTopN(items, n)` returns at most `n` items in input order, returns all when `items.length <= n`, returns `[]` for `n <= 0` or empty input, and does not mutate input; `selectRecommendedArtifacts(entries, n)` keeps only entries where `governance.featured === true || governance.recommended === true`, orders featured entries first (stable within groups), caps at `n`, and returns `[]` when none qualify. Must FAIL initially (module absent)
+- [X] T002 Implement the pure selection module `apps/web/src/lib/home-select.ts` to make T001 pass: `takeTopN<T>(items: T[], n: number): T[]` and `selectRecommendedArtifacts(entries: RecommendedArtifact[], n: number): RecommendedArtifact[]` (filter featured/recommended, stable featured-first, cap `n`). Pure functions only — MUST NOT import `@payload-config` or any Payload runtime (mirrors how `lib/event-dates.ts` is separate from `lib/events.ts`) (depends on T001)
 
 ---
 
@@ -51,10 +51,10 @@ has moved off it, and every page needs the shared nav.
 
 **⚠️ CRITICAL**: Blocks US1 (the dashboard cannot live at `/` until the catalog moves) and underpins US3.
 
-- [ ] T003 [P] Add a `basePath` prop to `apps/web/src/components/SearchBar.tsx` (default `"/registry"`) and replace the hardcoded `router.push('/…')` navigation with `${basePath}…`, preserving all existing `q`/filter query-param behavior (contracts/registry-route.md)
-- [ ] T004 [P] Add a `basePath` prop to `apps/web/src/components/CatalogFilters.tsx` (default `"/registry"`) and build the `toggleHref` results and the "Clear filters" link from `${basePath}…` instead of `'/…'`, preserving existing filter-toggle behavior (contracts/registry-route.md)
-- [ ] T005 [P] Create the shared `apps/web/src/components/PortalHeader.tsx` (server component) per contracts/registry-route.md: a brand/home link (→ `/`), primary nav **Registry** (`/registry`) · **News** (`/news`) · **Events** (`/events`), the signed-in user's name + role `Tag` + email, the admin-only "Manage roles" (`/admin/roles`) link, and the sign-out form hosting the existing `'use server'` `signOut({ redirectTo: '/signin' })` action — all Designsystemet, lifting the block currently inline in `app/(app)/page.tsx`
-- [ ] T006 Create `apps/web/src/app/(app)/registry/page.tsx` by moving the current catalog page from `app/(app)/page.tsx` **verbatim** (browse via `listArtifacts`, search via `searchArtifacts`, facets, governance badges, empty/no-results states — logic byte-for-byte unchanged): render `PortalHeader` in place of the old inline header, pass `basePath="/registry"` to `SearchBar`/`CatalogFilters`, and retarget its internal "clear the search" / "Clear filters" links from `/` to `/registry` (contracts/registry-route.md) (depends on T003, T004, T005)
+- [X] T003 [P] Add a `basePath` prop to `apps/web/src/components/SearchBar.tsx` (default `"/registry"`) and replace the hardcoded `router.push('/…')` navigation with `${basePath}…`, preserving all existing `q`/filter query-param behavior (contracts/registry-route.md)
+- [X] T004 [P] Add a `basePath` prop to `apps/web/src/components/CatalogFilters.tsx` (default `"/registry"`) and build the `toggleHref` results and the "Clear filters" link from `${basePath}…` instead of `'/…'`, preserving existing filter-toggle behavior (contracts/registry-route.md)
+- [X] T005 [P] Create the shared `apps/web/src/components/PortalHeader.tsx` (server component) per contracts/registry-route.md: a brand/home link (→ `/`), primary nav **Registry** (`/registry`) · **News** (`/news`) · **Events** (`/events`), the signed-in user's name + role `Tag` + email, the admin-only "Manage roles" (`/admin/roles`) link, and the sign-out form hosting the existing `'use server'` `signOut({ redirectTo: '/signin' })` action — all Designsystemet, lifting the block currently inline in `app/(app)/page.tsx`
+- [X] T006 Create `apps/web/src/app/(app)/registry/page.tsx` by moving the current catalog page from `app/(app)/page.tsx` **verbatim** (browse via `listArtifacts`, search via `searchArtifacts`, facets, governance badges, empty/no-results states — logic byte-for-byte unchanged): render `PortalHeader` in place of the old inline header, pass `basePath="/registry"` to `SearchBar`/`CatalogFilters`, and retarget its internal "clear the search" / "Clear filters" links from `/` to `/registry` (contracts/registry-route.md) (depends on T003, T004, T005)
 
 **Checkpoint**: The catalog now lives at `/registry` (unchanged behavior) and `/` is free; the shared header exists. `app/(app)/page.tsx` will be replaced by the dashboard in US1.
 
@@ -73,10 +73,10 @@ to `/news`, `/events`, `/registry`.
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Create the impure read layer `apps/web/src/lib/home.ts` per data-model.md: export `HOME_WIDGET_LIMIT = 3`; `getHomeNews(limit = HOME_WIDGET_LIMIT)` → `takeTopN(await listPublishedNews(), limit)`; `getHomeEvents(limit)` → `takeTopN(await listUpcomingEvents(), limit)`; `getHomeRecommendedArtifacts(limit)` → resolve `listArtifacts()`, attach `getGovernance(artifactId)` per artifact (the pattern the current catalog page uses), then `selectRecommendedArtifacts(entries, limit)`. Reuse existing libs only — no new query path (depends on T002)
-- [ ] T008 [P] [US1] Create the generic `apps/web/src/components/HomeWidget.tsx` wrapper per contracts/home-dashboard.md: Designsystemet section with a heading (`title`), a "View all →" link (`viewAllHref`), a friendly empty-state slot (`isEmpty` + `emptyMessage`, never an error/blank), and a `children` slot for the card list
-- [ ] T009 [US1] Rewrite `apps/web/src/app/(app)/page.tsx` as the dashboard: render `PortalHeader`, then three `HomeWidget`s — News (`getHomeNews` → `NewsCard`, view-all `/news`), Events (`getHomeEvents` → `EventCard`, view-all `/events`), Registry (`getHomeRecommendedArtifacts` → `ArtifactCard` with its `governance`, view-all `/registry`). Do NOT branch on the `q` param; always render the widgets (FR-001/010) (depends on T005, T007, T008)
-- [ ] T010 [US1] Run quickstart.md §3 "Dashboard (`/`)": as Ada (reader), confirm `/` shows the three widgets (not the catalog), each capped at 3 with featured surfaced, and each "View all →" lands on the right module list
+- [X] T007 [US1] Create the impure read layer `apps/web/src/lib/home.ts` per data-model.md: export `HOME_WIDGET_LIMIT = 3`; `getHomeNews(limit = HOME_WIDGET_LIMIT)` → `takeTopN(await listPublishedNews(), limit)`; `getHomeEvents(limit)` → `takeTopN(await listUpcomingEvents(), limit)`; `getHomeRecommendedArtifacts(limit)` → resolve `listArtifacts()`, attach `getGovernance(artifactId)` per artifact (the pattern the current catalog page uses), then `selectRecommendedArtifacts(entries, limit)`. Reuse existing libs only — no new query path (depends on T002)
+- [X] T008 [P] [US1] Create the generic `apps/web/src/components/HomeWidget.tsx` wrapper per contracts/home-dashboard.md: Designsystemet section with a heading (`title`), a "View all →" link (`viewAllHref`), a friendly empty-state slot (`isEmpty` + `emptyMessage`, never an error/blank), and a `children` slot for the card list
+- [X] T009 [US1] Rewrite `apps/web/src/app/(app)/page.tsx` as the dashboard: render `PortalHeader`, then three `HomeWidget`s — News (`getHomeNews` → `NewsCard`, view-all `/news`), Events (`getHomeEvents` → `EventCard`, view-all `/events`), Registry (`getHomeRecommendedArtifacts` → `ArtifactCard` with its `governance`, view-all `/registry`). Do NOT branch on the `q` param; always render the widgets (FR-001/010) (depends on T005, T007, T008)
+- [X] T010 [US1] Run quickstart.md §3 "Dashboard (`/`)": as Ada (reader), confirm `/` shows the three widgets (not the catalog), each capped at 3 with featured surfaced, and each "View all →" lands on the right module list
 
 **Checkpoint**: US1 functional — an employee lands on the dashboard and sees news/events/recommended-tools widgets; deployable MVP (content authored via `/cms` / seeded).
 
@@ -93,7 +93,7 @@ featured-recommended artifacts, confirm each widget shows a friendly empty state
 
 ### Verification for User Story 2
 
-- [ ] T011 [US2] Run quickstart.md §3 "Empty states" and the exclusion checks: draft news, draft/past events, and non-featured/non-recommended artifacts are absent from the widgets; with each source empty the corresponding widget shows a friendly empty state and all-three-empty still renders cleanly. No code beyond US1 is expected — visibility rides on the existing read libs and the `selectRecommendedArtifacts` filter (unit-covered by T001); if any new access/query code seems necessary here, STOP and flag scope growth
+- [X] T011 [US2] Run quickstart.md §3 "Empty states" and the exclusion checks: draft news, draft/past events, and non-featured/non-recommended artifacts are absent from the widgets; with each source empty the corresponding widget shows a friendly empty state and all-three-empty still renders cleanly. No code beyond US1 is expected — visibility rides on the existing read libs and the `selectRecommendedArtifacts` filter (unit-covered by T001); if any new access/query code seems necessary here, STOP and flag scope growth
 
 **Checkpoint**: US1 + US2 — widgets are safe (no draft/past/inactive leak) and resilient (per-widget empty states).
 
@@ -112,8 +112,8 @@ artifact detail page land on `/registry`.
 
 ### Implementation for User Story 3
 
-- [ ] T012 [US3] In `apps/web/src/app/(app)/news/page.tsx`, `apps/web/src/app/(app)/events/page.tsx`, and `apps/web/src/app/(app)/artifacts/[artifactId]/page.tsx`: render the shared `PortalHeader` and retarget the "← Back to catalog" link `href="/"` → `/registry` (FR-012, US3-AS3/AS4). News/Events **detail** pages already back-link to `/news`/`/events` — leave them unchanged (depends on T005)
-- [ ] T013 [US3] Run quickstart.md §3 "Registry route" + "Consistent navigation": `/registry` browse + full-text search + filters + governance badges are identical to the old `/`; the nav (Registry/News/Events) is present and consistent on `/`, `/registry`, `/news`, `/events`, and an artifact detail page; the three back-links land on `/registry`
+- [X] T012 [US3] In `apps/web/src/app/(app)/news/page.tsx`, `apps/web/src/app/(app)/events/page.tsx`, and `apps/web/src/app/(app)/artifacts/[artifactId]/page.tsx`: render the shared `PortalHeader` and retarget the "← Back to catalog" link `href="/"` → `/registry` (FR-012, US3-AS3/AS4). News/Events **detail** pages already back-link to `/news`/`/events` — leave them unchanged (depends on T005)
+- [X] T013 [US3] Run quickstart.md §3 "Registry route" + "Consistent navigation": `/registry` browse + full-text search + filters + governance badges are identical to the old `/`; the nav (Registry/News/Events) is present and consistent on `/`, `/registry`, `/news`, `/events`, and an artifact detail page; the three back-links land on `/registry`
 
 **Checkpoint**: US1 + US2 + US3 — dashboard live at `/`, catalog fully functional at `/registry`, nav consistent everywhere, no regression.
 
@@ -121,8 +121,8 @@ artifact detail page land on `/registry`.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T014 [P] Update `README.md`: `/` is now the portal **dashboard** (three read-only widgets — latest news, upcoming events, featured/recommended Registry tools — each with a "View all →" link); the Registry catalog browse + full-text search now live at `/registry`; note that personalization/per-user config, dismissable/reorderable widgets, real-time updates, and in-widget pagination are deferred
-- [ ] T015 Workspace typecheck + lint + full suite green: `npx tsc --noEmit` (from `apps/web`) and `pnpm -r lint` clean; full test suite green including the new `home-select` unit test and **no regression** in the existing suites (baseline 97/97 across 22 files; the suite may only grow). Run from `apps/web`: `set -a; . ./.env; set +a; NODE_OPTIONS=--no-deprecation npx vitest run`. Then confirm quickstart.md §4 scope assertions: no `migrations/` file, no schema/collection/`payload-types` diff, no new dependency, changes confined to the landing + navigation surface
+- [X] T014 [P] Update `README.md`: `/` is now the portal **dashboard** (three read-only widgets — latest news, upcoming events, featured/recommended Registry tools — each with a "View all →" link); the Registry catalog browse + full-text search now live at `/registry`; note that personalization/per-user config, dismissable/reorderable widgets, real-time updates, and in-widget pagination are deferred
+- [X] T015 Workspace typecheck + lint + full suite green: `npx tsc --noEmit` (from `apps/web`) and `pnpm -r lint` clean; full test suite green including the new `home-select` unit test and **no regression** in the existing suites (baseline 97/97 across 22 files; the suite may only grow). Run from `apps/web`: `set -a; . ./.env; set +a; NODE_OPTIONS=--no-deprecation npx vitest run`. Then confirm quickstart.md §4 scope assertions: no `migrations/` file, no schema/collection/`payload-types` diff, no new dependency, changes confined to the landing + navigation surface
 
 ---
 

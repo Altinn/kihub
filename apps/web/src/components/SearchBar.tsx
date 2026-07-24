@@ -8,8 +8,17 @@ import { useState } from 'react';
  * Catalog keyword search box (Phase 5). Sets/clears the `q` URL param while preserving the existing
  * `type`/`tag` filter params, so search and the Phase 2 filters compose on one catalog surface. It
  * only navigates — the server component re-renders results. Designsystemet only.
+ *
+ * `basePath` is the catalog route it navigates within (default `/registry`, where the catalog lives
+ * since the home-widgets feature moved it off `/`).
  */
-export function SearchBar({ initialQuery = '' }: { initialQuery?: string }) {
+export function SearchBar({
+  initialQuery = '',
+  basePath = '/registry',
+}: {
+  initialQuery?: string;
+  basePath?: string;
+}) {
   const router = useRouter();
   const params = useSearchParams();
   const [value, setValue] = useState(initialQuery);
@@ -20,7 +29,7 @@ export function SearchBar({ initialQuery = '' }: { initialQuery?: string }) {
     if (trimmed) sp.set('q', trimmed);
     else sp.delete('q');
     const qs = sp.toString();
-    router.push(qs ? `/?${qs}` : '/');
+    router.push(qs ? `${basePath}?${qs}` : basePath);
   }
 
   return (

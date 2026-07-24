@@ -1,6 +1,7 @@
 import { Card, Divider, Heading, Paragraph } from '@digdir/designsystemet-react';
 import Link from 'next/link';
 import { EventCard } from '@/components/EventCard';
+import { PortalHeader } from '@/components/PortalHeader';
 import { listUpcomingEvents } from '@/lib/events';
 
 /**
@@ -13,11 +14,15 @@ export default async function EventsListPage() {
 
   return (
     <main style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1rem' }}>
+      <PortalHeader />
+
+      <Divider style={{ margin: '1.5rem 0' }} />
+
       <Paragraph data-size="sm" style={{ marginBottom: '1rem' }}>
-        <Link href="/">← Back to catalog</Link>
+        <Link href="/registry">← Back to catalog</Link>
       </Paragraph>
 
-      <Heading level={1} data-size="lg">
+      <Heading level={2} data-size="lg">
         Events
       </Heading>
       <Paragraph data-size="sm" style={{ marginTop: '0.25rem' }}>

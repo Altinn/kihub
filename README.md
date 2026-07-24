@@ -4,7 +4,17 @@ Internal AI enablement and governance platform — a catalog and governance laye
 AI artifacts. KI Hub indexes, enriches, reviews, and exposes artifacts; it never stores their
 content (that lives in the sibling [`ai-artifacts`](../ai-artifacts) repository).
 
-> **Status**: Phase 8 — Calendar / Events. KI Hub gains the **third and final** native-content module
+> **Status**: Home-page widgets. The employee landing page **`/`** is now a portal **dashboard** with
+> three read-only widgets — the latest published **news** (3), the next upcoming **events** (3), and
+> **featured/recommended** Registry tools (3) — each with a "View all →" link into its module. The
+> Registry catalog **browse + full-text search moved to `/registry`** (its own header nav link); a
+> shared header keeps Registry · News · Events nav consistent across the app. Additive and read-only:
+> it reuses the existing published-only read libs + the `NewsCard`/`EventCard`/`ArtifactCard` cards and
+> the governance `featured`/`recommended` flags, with **zero** new collections, schema changes,
+> migrations, or dependencies. Personalization, dismissable/reorderable widgets, real-time updates, and
+> in-widget pagination are deferred.
+>
+> Previously — Phase 8 — Calendar / Events. KI Hub gained the **third and final** native-content module
 > of the portal charter (Constitution Principle II; Registry + News + Calendar): internal events
 > authored in the `/cms` back-office by **Contributor+** editors and read by all employees in the app
 > at **`/events`** (a list of published **upcoming** events — soonest-first, featured surfaced — plus
@@ -28,7 +38,7 @@ content (that lives in the sibling [`ai-artifacts`](../ai-artifacts) repository)
 
 ```text
 apps/web/                     Next.js 16 (App Router) + embedded Payload CMS 3 — two surfaces:
-                              (app) employee-facing catalog UI, (payload) editor back-office at /cms
+                              (app) employee-facing dashboard + Registry catalog UI, (payload) editor back-office at /cms
 packages/artifact-schema/     @kihub/artifact-schema — the versioned artifact.yaml contract
 packages/discovery-core/      @kihub/discovery-core — scan/scanRepo/buildRecord/reconcile indexing core
 packages/github-client/       @kihub/github-client — remote GitHub repo reader (RepoReader) for automated discovery
@@ -42,6 +52,7 @@ specs/006-editor-backoffice/  Spec-kit artifacts — Phase 6 (editor back-office
 specs/007-news/               Spec-kit artifacts — Phase 7 (news)
 specs/008-governance-ui-reconcile/ Spec-kit artifacts — governance-UI reconcile
 specs/009-calendar-events/    Spec-kit artifacts — Phase 8 (calendar / events)
+specs/010-home-widgets/       Spec-kit artifacts — home-page widgets (dashboard + /registry)
 .specify/                     Spec-kit config + constitution
 ```
 
@@ -140,7 +151,7 @@ pnpm --filter web index
 
 ### Full-text search (Phase 5)
 
-Type a keyword or phrase into the search box on the catalog (`/?q=…`). KI Hub runs a PostgreSQL
+Type a keyword or phrase into the search box on the catalog (`/registry?q=…`). KI Hub runs a PostgreSQL
 full-text query over the indexed free-text fields — artifact **name**, **description**, and the
 **README** snapshot — ranked by relevance, and shows a "no results" state when nothing matches.
 Search combines with the existing type/tag/category filters (clearing the query returns to plain

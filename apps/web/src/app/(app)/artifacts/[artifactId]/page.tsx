@@ -5,6 +5,7 @@ import { CopyButton } from '@/components/CopyButton';
 import { GovernancePanel } from '@/components/GovernancePanel';
 import { LifecycleBadge } from '@/components/LifecycleBadge';
 import { Markdown } from '@/components/Markdown';
+import { PortalHeader } from '@/components/PortalHeader';
 import { getArtifact } from '@/lib/catalog';
 import { getGovernance } from '@/lib/governance';
 
@@ -30,12 +31,16 @@ export default async function ArtifactDetailPage({
 
   return (
     <main style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1rem' }}>
+      <PortalHeader />
+
+      <Divider style={{ margin: '1.5rem 0' }} />
+
       <Paragraph data-size="sm" style={{ marginBottom: '1rem' }}>
-        <Link href="/">← Back to catalog</Link>
+        <Link href="/registry">← Back to catalog</Link>
       </Paragraph>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
-        <Heading level={1} data-size="lg">
+        <Heading level={2} data-size="lg">
           {a.name as string}
         </Heading>
         <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>

@@ -1,157 +1,86 @@
-import { Button, Card, Divider, Heading, Paragraph, Tag } from '@digdir/designsystemet-react';
-import Link from 'next/link';
-import { auth, signOut } from '@/auth';
+import { Divider } from '@digdir/designsystemet-react';
 import { ArtifactCard } from '@/components/ArtifactCard';
-import { CatalogFilters } from '@/components/CatalogFilters';
-import { SearchBar } from '@/components/SearchBar';
-import { listArtifacts } from '@/lib/catalog';
-import { getGovernance } from '@/lib/governance';
-import { searchArtifacts } from '@/lib/search';
-
-type SearchParams = { type?: string; tag?: string | string[]; q?: string };
+import { EventCard } from '@/components/EventCard';
+import { HomeWidget } from '@/components/HomeWidget';
+import { NewsCard } from '@/components/NewsCard';
+import { PortalHeader } from '@/components/PortalHeader';
+import { getHomeEvents, getHomeNews, getHomeRecommendedArtifacts } from '@/lib/home';
 
 /**
- * Catalog listing. With no `q` it is the Phase 2 browse + filter (US2). With a `q` it runs Phase 5
- * full-text search over name/description/README, combined with the same filters, governance-safe.
- * Access is gated by `(app)/layout.tsx` `requireSession()` — adding `q` does not bypass it (FR-007).
+ * Portal dashboard (the employee home). Surfaces the latest published news, the next upcoming
+ * published events, and featured/recommended Registry artifacts — three read-only widgets, each
+ * capped and each with a "View all →" link into its module. It does NOT branch on `q`: full-text
+ * search lives on `/registry` now (FR-001/010). Gated by `(app)/layout.tsx` `requireSession()`.
  */
-export default async function CatalogPage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
-  const session = await auth();
-  const user = session?.user;
-  const { type, tag, q } = await searchParams;
-  const activeTags = Array.isArray(tag) ? tag : tag ? [tag] : [];
-  const activeType = type;
-  const query = (q ?? '').trim();
-  const isSearch = query.length > 0;
-  const filters = { type: activeType, tags: activeTags };
-
-  const [results, allActive] = await Promise.all([
-    isSearch ? searchArtifacts(query, filters) : listArtifacts(filters),
-    listArtifacts(),
+export default async function DashboardPage() {
+  const [news, events, recommended] = await Promise.all([
+    getHomeNews(),
+    getHomeEvents(),
+    getHomeRecommendedArtifacts(),
   ]);
-  const governanceByArtifactId = new Map(
-    await Promise.all(
-      results.map(
-        async (a) => [a.artifactId as string, await getGovernance(a.artifactId as string)] as const,
-      ),
-    ),
-  );
-
-  // Facets derived from the full active set so filters stay visible.
-  const availableTypes = [...new Set(allActive.map((a) => a.type as string))].sort();
-  const availableTags = [
-    ...new Set(allActive.flatMap((a) => (a.tags as string[] | undefined) ?? [])),
-  ].sort();
-  const hasFilters = Boolean(activeType) || activeTags.length > 0;
 
   return (
     <main style={{ maxWidth: '1040px', margin: '0 auto', padding: '2rem 1rem' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
-        <div>
-          <Heading level={1} data-size="lg">
-            KI Hub
-          </Heading>
-          <Paragraph data-size="sm">Internal AI enablement &amp; governance catalog</Paragraph>
-          <Paragraph data-size="sm" style={{ marginTop: '0.25rem' }}>
-            <Link href="/news">News</Link> · <Link href="/events">Events</Link>
-          </Paragraph>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ textAlign: 'right' }}>
-            <Paragraph data-size="sm">
-              <strong>{user?.name}</strong> <Tag data-size="sm">{user?.role}</Tag>
-            </Paragraph>
-            <Paragraph data-size="xs">{user?.email}</Paragraph>
-            {user?.role === 'admin' ? (
-              <Paragraph data-size="xs">
-                <a href="/admin/roles">Manage roles</a>
-              </Paragraph>
-            ) : null}
-          </div>
-          <form
-            action={async () => {
-              'use server';
-              await signOut({ redirectTo: '/signin' });
-            }}
-          >
-            <Button type="submit" variant="secondary" data-size="sm">
-              Sign out
-            </Button>
-          </form>
-        </div>
-      </header>
+      <PortalHeader />
 
       <Divider style={{ margin: '1.5rem 0' }} />
 
-      {allActive.length === 0 ? (
-        <Card>
-          <Heading level={2} data-size="md">
-            Catalog is empty
-          </Heading>
-          <Paragraph data-size="sm" style={{ marginTop: '0.5rem' }}>
-            No artifacts have been indexed yet. Run the indexer (<code>pnpm --filter web index</code>)
-            against a local <code>ai-artifacts</code> checkout.
-          </Paragraph>
-        </Card>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: '2rem', alignItems: 'start' }}>
-          <CatalogFilters
-            availableTypes={availableTypes}
-            availableTags={availableTags}
-            activeType={activeType}
-            activeTags={activeTags}
-          />
-          <div>
-            <SearchBar initialQuery={query} />
-            <Paragraph data-size="sm" style={{ marginBottom: '1rem' }}>
-              {results.length} {results.length === 1 ? 'artifact' : 'artifacts'}
-              {isSearch ? ` for “${query}”` : ''}
-              {hasFilters ? ' (filtered)' : ''}
-            </Paragraph>
-            {results.length === 0 ? (
-              <Card>
-                <Heading level={2} data-size="sm">
-                  {isSearch ? 'No results' : 'No matching artifacts'}
-                </Heading>
-                <Paragraph data-size="sm" style={{ marginTop: '0.5rem' }}>
-                  {isSearch ? (
-                    <>
-                      Nothing matches “{query}”
-                      {hasFilters ? ' with the active filters' : ''}. Try different keywords
-                      {hasFilters ? ' or ' : ' — or '}
-                      <Link href="/">clear the search</Link>.
-                    </>
-                  ) : (
-                    <>
-                      No artifacts match the active filters. <Link href="/">Clear filters</Link> to see all.
-                    </>
-                  )}
-                </Paragraph>
-              </Card>
-            ) : (
-              <div style={{ display: 'grid', gap: '1rem' }}>
-                {results.map((a) => (
-                  <ArtifactCard
-                    key={a.artifactId as string}
-                    artifact={{
-                      artifactId: a.artifactId as string,
-                      name: a.name as string,
-                      type: a.type as string,
-                      description: a.description as string,
-                      tags: (a.tags as string[] | undefined) ?? [],
-                    }}
-                    governance={governanceByArtifactId.get(a.artifactId as string)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <div style={{ display: 'grid', gap: '2.5rem' }}>
+        <HomeWidget
+          title="Latest news"
+          viewAllHref="/news"
+          isEmpty={news.length === 0}
+          emptyMessage="No published news yet. Check back soon."
+        >
+          {news.map((a) => (
+            <NewsCard
+              key={a.id}
+              article={{
+                slug: a.slug ?? '',
+                title: a.title,
+                summary: a.summary,
+                publishDate: a.publishDate,
+                tags: a.tags,
+                featured: a.featured,
+              }}
+            />
+          ))}
+        </HomeWidget>
+
+        <HomeWidget
+          title="Upcoming events"
+          viewAllHref="/events"
+          isEmpty={events.length === 0}
+          emptyMessage="No upcoming events right now. Check back soon."
+        >
+          {events.map((e) => (
+            <EventCard
+              key={e.id}
+              event={{
+                slug: e.slug ?? '',
+                title: e.title,
+                startDateTime: e.startDateTime,
+                endDateTime: e.endDateTime,
+                location: e.location,
+                onlineUrl: e.onlineUrl,
+                tags: e.tags,
+                featured: e.featured,
+              }}
+            />
+          ))}
+        </HomeWidget>
+
+        <HomeWidget
+          title="Recommended tools"
+          viewAllHref="/registry"
+          isEmpty={recommended.length === 0}
+          emptyMessage="No featured or recommended tools yet. Browse the full Registry."
+        >
+          {recommended.map(({ artifact, governance }) => (
+            <ArtifactCard key={artifact.artifactId} artifact={artifact} governance={governance} />
+          ))}
+        </HomeWidget>
+      </div>
     </main>
   );
 }

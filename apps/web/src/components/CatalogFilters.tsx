@@ -6,15 +6,17 @@ interface CatalogFiltersProps {
   availableTags: string[];
   activeType?: string;
   activeTags: string[];
+  /** Catalog route the filter links point at (default `/registry`, where the catalog lives). */
+  basePath?: string;
 }
 
 /** Build a catalog URL toggling one filter value while preserving the others. */
-function toggleHref(params: { type?: string; tags: string[] }): string {
+function toggleHref(basePath: string, params: { type?: string; tags: string[] }): string {
   const sp = new URLSearchParams();
   if (params.type) sp.set('type', params.type);
   for (const t of params.tags) sp.append('tag', t);
   const qs = sp.toString();
-  return qs ? `/?${qs}` : '/';
+  return qs ? `${basePath}?${qs}` : basePath;
 }
 
 /**
@@ -26,6 +28,7 @@ export function CatalogFilters({
   availableTags,
   activeType,
   activeTags,
+  basePath = '/registry',
 }: CatalogFiltersProps) {
   const hasActive = Boolean(activeType) || activeTags.length > 0;
 
@@ -38,7 +41,7 @@ export function CatalogFilters({
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
           {availableTypes.map((t) => {
             const isActive = activeType === t;
-            const href = toggleHref({ type: isActive ? undefined : t, tags: activeTags });
+            const href = toggleHref(basePath, { type: isActive ? undefined : t, tags: activeTags });
             return (
               <Link key={t} href={href} aria-pressed={isActive}>
                 <Tag data-color={isActive ? 'accent' : 'neutral'} data-size="sm">
@@ -62,7 +65,7 @@ export function CatalogFilters({
                 ? activeTags.filter((x) => x !== tag)
                 : [...activeTags, tag];
               return (
-                <Link key={tag} href={toggleHref({ type: activeType, tags: nextTags })} aria-pressed={isActive}>
+                <Link key={tag} href={toggleHref(basePath, { type: activeType, tags: nextTags })} aria-pressed={isActive}>
                   <Tag data-color={isActive ? 'accent' : 'info'} data-size="sm">
                     {tag}
                   </Tag>
@@ -74,7 +77,7 @@ export function CatalogFilters({
       ) : null}
 
       {hasActive ? (
-        <Link href="/">Clear filters</Link>
+        <Link href={basePath}>Clear filters</Link>
       ) : null}
     </section>
   );
