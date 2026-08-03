@@ -13,6 +13,8 @@ import { Event } from './collections/Event';
 import { News } from './collections/News';
 import { Review } from './collections/Review';
 import { Users } from './collections/Users';
+import { Frontpage } from './globals/Frontpage';
+import { SiteChrome } from './globals/SiteChrome';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -30,6 +32,8 @@ export default buildConfig({
     api: '/payload-api',
   },
   collections: [Users, Artifact, CatalogEntry, Review, AuditLog, DiscoverySource, DiscoveryRun, News, Event],
+  // 011: editor-managed chrome + frontpage content (contracts/site-content-globals.md).
+  globals: [SiteChrome, Frontpage],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET ?? '',
   typescript: {

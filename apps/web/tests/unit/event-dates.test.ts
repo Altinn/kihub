@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { formatEventWhen, isUpcoming, validateEventInterval } from '@/lib/event-dates';
+import {
+  formatDayNumeral,
+  formatEventWhen,
+  formatMonthYear,
+  formatTimeHM,
+  formatTimelineDate,
+  formatWeekday,
+  isUpcoming,
+  validateEventInterval,
+} from '@/lib/event-dates';
 
 /** T011 (US2, FR-004/011/015) — the pure date logic used by the Events collection + read layer. */
 describe('validateEventInterval (FR-011)', () => {
@@ -66,5 +75,43 @@ describe('formatEventWhen (FR-015, Europe/Oslo)', () => {
     const when = formatEventWhen('2026-09-01T08:00:00.000Z', '2026-09-01T09:00:00.000Z');
     // 10:00 Oslo to 11:00 Oslo, same day → "…, 10:00–11:00".
     expect(when).toContain('10:00–11:00');
+  });
+});
+
+/**
+ * T003 (011 frontpage, contracts/frontpage-read.md) — the date-part helpers behind the
+ * "Neste arrangement" card and the "Utover måneden" timeline. All parts render in Europe/Oslo /
+ * nb-NO regardless of the server timezone.
+ */
+describe('frontpage date parts (011, Europe/Oslo)', () => {
+  // 08:00 UTC on Fri 3 Jul 2026 = 10:00 in Oslo (CEST, UTC+2).
+  const start = '2026-07-03T08:00:00.000Z';
+
+  it('formatDayNumeral renders the 2-digit Oslo day of month', () => {
+    expect(formatDayNumeral(start)).toBe('03');
+  });
+
+  it('formatMonthYear renders the full Norwegian month + year', () => {
+    expect(formatMonthYear(start)).toBe('juli 2026');
+  });
+
+  it('formatWeekday renders the short Norwegian weekday without a trailing dot', () => {
+    expect(formatWeekday(start)).toBe('fre');
+  });
+
+  it('formatTimeHM renders the Oslo wall-clock time as HH:mm', () => {
+    expect(formatTimeHM(start)).toBe('10:00');
+  });
+
+  it('formatTimelineDate renders "dd. MMM" for timeline rows', () => {
+    expect(formatTimelineDate('2026-07-08T11:00:00.000Z')).toBe('08. jul');
+  });
+
+  it('uses the Oslo date even when UTC is still the previous day', () => {
+    // 22:30 UTC on 3 Jul is 00:30 on 4 Jul in Oslo.
+    const lateUtc = '2026-07-03T22:30:00.000Z';
+    expect(formatDayNumeral(lateUtc)).toBe('04');
+    expect(formatTimeHM(lateUtc)).toBe('00:30');
+    expect(formatTimelineDate(lateUtc)).toBe('04. jul');
   });
 });

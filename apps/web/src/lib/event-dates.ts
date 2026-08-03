@@ -35,6 +35,46 @@ export function isUpcoming(
  * Render an event's when-string for display in nb-NO / Europe/Oslo (FR-015). Shows the start, and
  * the end when present (a compact `start–end` form when both fall on the same Oslo date).
  */
+/**
+ * 011 frontpage — date parts for the "Neste arrangement" card and "Utover måneden" timeline
+ * (contracts/frontpage-read.md). Each helper renders one visual fragment in Europe/Oslo / nb-NO
+ * regardless of server timezone.
+ */
+function osloPart(
+  value: string | Date,
+  options: Intl.DateTimeFormatOptions,
+): string {
+  return new Intl.DateTimeFormat('nb-NO', { timeZone: OSLO_TZ, ...options }).format(
+    new Date(value),
+  );
+}
+
+/** The card's large date numeral, always two digits ("03"). nb-NO appends a dot — strip it. */
+export function formatDayNumeral(value: string | Date): string {
+  return osloPart(value, { day: '2-digit' }).replace(/\.$/, '');
+}
+
+/** The card's "måned år" line ("juli 2026"). */
+export function formatMonthYear(value: string | Date): string {
+  return osloPart(value, { month: 'long', year: 'numeric' });
+}
+
+/** Short Norwegian weekday without the trailing dot ("fre"). */
+export function formatWeekday(value: string | Date): string {
+  return osloPart(value, { weekday: 'short' }).replace(/\.$/, '');
+}
+
+/** Oslo wall-clock time as HH:mm ("10:00"). */
+export function formatTimeHM(value: string | Date): string {
+  return osloPart(value, { hour: '2-digit', minute: '2-digit' });
+}
+
+/** Timeline row date as "dd. MMM" ("08. jul"). */
+export function formatTimelineDate(value: string | Date): string {
+  const month = osloPart(value, { month: 'short' }).replace(/\.$/, '');
+  return `${formatDayNumeral(value)}. ${month}`;
+}
+
 export function formatEventWhen(start: string | Date, end?: string | Date | null): string {
   const startDate = new Date(start);
   const dateFmt = new Intl.DateTimeFormat('nb-NO', {

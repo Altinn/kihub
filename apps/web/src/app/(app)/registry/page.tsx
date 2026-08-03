@@ -1,8 +1,7 @@
-import { Card, Divider, Heading, Paragraph } from '@digdir/designsystemet-react';
+import { Card, Heading, Paragraph } from '@digdir/designsystemet-react';
 import Link from 'next/link';
 import { ArtifactCard } from '@/components/ArtifactCard';
 import { CatalogFilters } from '@/components/CatalogFilters';
-import { PortalHeader } from '@/components/PortalHeader';
 import { SearchBar } from '@/components/SearchBar';
 import { listArtifacts } from '@/lib/catalog';
 import { getGovernance } from '@/lib/governance';
@@ -50,9 +49,6 @@ export default async function RegistryPage({
 
   return (
     <main style={{ maxWidth: '1040px', margin: '0 auto', padding: '2rem 1rem' }}>
-      <PortalHeader />
-
-      <Divider style={{ margin: '1.5rem 0' }} />
 
       <Heading level={2} data-size="md">
         Registry

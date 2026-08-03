@@ -101,8 +101,14 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-chrome': SiteChrome;
+    frontpage: Frontpage;
+  };
+  globalsSelect: {
+    'site-chrome': SiteChromeSelect<false> | SiteChromeSelect<true>;
+    frontpage: FrontpageSelect<false> | FrontpageSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -727,6 +733,167 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-chrome".
+ */
+export interface SiteChrome {
+  id: number;
+  /**
+   * Header navigation, in order.
+   */
+  nav?:
+    | {
+        label: string;
+        href: string;
+        id?: string | null;
+      }[]
+    | null;
+  footer?: {
+    contactLabel?: string | null;
+    contactEmail?: string | null;
+    links?:
+      | {
+          label: string;
+          href: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "frontpage".
+ */
+export interface Frontpage {
+  id: number;
+  hero?: {
+    eyebrow?: string | null;
+    heading?: string | null;
+    /**
+     * Part of the heading rendered in the accent color (must match a substring of the heading).
+     */
+    accentWord?: string | null;
+    lead?: string | null;
+    primaryCta?: {
+      label?: string | null;
+      href?: string | null;
+    };
+    secondaryCta?: {
+      label?: string | null;
+      href?: string | null;
+    };
+  };
+  /**
+   * The two navigation tiles below the hero (fixed count).
+   */
+  tiles?:
+    | {
+        tag?: string | null;
+        title: string;
+        href: string;
+        variant?: ('tinted' | 'accent') | null;
+        id?: string | null;
+      }[]
+    | null;
+  subscriptions?: {
+    eyebrow?: string | null;
+    heading?: string | null;
+    description?: string | null;
+    chips?:
+      | {
+          name: string;
+          href?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-chrome_select".
+ */
+export interface SiteChromeSelect<T extends boolean = true> {
+  nav?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  footer?:
+    | T
+    | {
+        contactLabel?: T;
+        contactEmail?: T;
+        links?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "frontpage_select".
+ */
+export interface FrontpageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        eyebrow?: T;
+        heading?: T;
+        accentWord?: T;
+        lead?: T;
+        primaryCta?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+            };
+        secondaryCta?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+            };
+      };
+  tiles?:
+    | T
+    | {
+        tag?: T;
+        title?: T;
+        href?: T;
+        variant?: T;
+        id?: T;
+      };
+  subscriptions?:
+    | T
+    | {
+        eyebrow?: T;
+        heading?: T;
+        description?: T;
+        chips?:
+          | T
+          | {
+              name?: T;
+              href?: T;
+              id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

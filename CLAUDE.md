@@ -1,6 +1,6 @@
 <!-- SPECKIT START -->
-Active feature: **011-frontpage-redesign** (in progress — specify + clarify + plan done;
-tasks/implement to follow). For technologies, structure, and context read the plan:
+Active feature: **011-frontpage-redesign** (DONE — specify + clarify + plan + tasks + implement
+complete; suite 134/134 across 24 files). For technologies, structure, and context read the plan:
 `specs/011-frontpage-redesign/plan.md` (with `research.md`, `data-model.md`, `contracts/`,
 `quickstart.md`; `spec.md` for requirements). It rebuilds `/` from the 010 widgets dashboard into
 the full portal frontpage (old KI HUB layout, restyled with the **kihub design system** imported

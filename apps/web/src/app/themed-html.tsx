@@ -5,6 +5,8 @@ import '@digdir/designsystemet-css/theme';
 import '@/styles/kihub/tokens.css';
 import '@/styles/kihub/components.css';
 import '@/styles/kihub-fonts.css';
+// 011: structural layout for the shared chrome + frontpage sections (kihub tokens only).
+import '@/styles/portal.css';
 
 import { Inter, Source_Serif_4 } from 'next/font/google';
 
