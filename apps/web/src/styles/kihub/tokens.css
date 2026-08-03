@@ -1,0 +1,113 @@
+/* KI HUB design tokens — direction "1a" (white ground · Digdir blue accent)
+ * Grounded in Designsystemet (digdir) accent + neutral scales.
+ * Import once, at the root of your React app:
+ *   import "@/styles/kihub/tokens.css";
+ */
+
+:root {
+  /* ---------- Ground & surfaces ---------- */
+  --kihub-bg: #FFFFFF;                 /* page ground */
+  --kihub-bg-tinted: #F3F3F4;          /* neutral section, adjacent to ground */
+  --kihub-surface-accent: #EEF4FA;     /* the workhorse tint: tiles, cards, media wells */
+  --kihub-surface-accent-strong: #DDEAF6;
+  --kihub-surface-inverted: #1E2124;
+
+  /* ---------- Ink ---------- */
+  --kihub-text: #1E2124;
+  --kihub-text-subtle: #5B6168;
+  --kihub-text-accent: #002C54;        /* accent text on tinted surface, AA on #EEF4FA */
+  --kihub-text-inverted: #FFFFFF;
+
+  /* ---------- Accent (the only chromatic role) ---------- */
+  --kihub-accent: #0062BA;
+  --kihub-accent-hover: #004F96;
+  --kihub-accent-active: #003D75;
+  --kihub-accent-border: #99C0E3;
+  --kihub-accent-contrast: #FFFFFF;    /* text on accent fill */
+
+  /* ---------- Borders ---------- */
+  --kihub-border-subtle: #D5D8DB;      /* cards, dividers */
+  --kihub-border: #77797B;             /* inputs, controls */
+  --kihub-border-strong: #1E2124;
+
+  /* ---------- Status (use sparingly, never decoratively) ---------- */
+  --kihub-info: #0A71C0;
+  --kihub-info-surface: #DCEBF6;
+  --kihub-success: #068718;
+  --kihub-success-surface: #DAEDDD;
+  --kihub-warning: #EA9B1B;
+  --kihub-warning-surface: #FAE6C6;
+  --kihub-danger: #C01B1B;
+  --kihub-danger-surface: #F8E4E4;
+
+  /* ---------- Focus (never remove — 3px outer + 3px inner ring) ---------- */
+  --kihub-focus-outer: #1E2124;
+  --kihub-focus-inner: #FFFFFF;
+
+  /* ---------- Type ---------- */
+  --kihub-font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --kihub-font-ui: Inter, system-ui, -apple-system, sans-serif;
+
+  --kihub-font-size-h1: 60px;
+  --kihub-font-size-h2: 40px;
+  --kihub-font-size-h3: 30px;
+  --kihub-font-size-h4: 24px;
+  --kihub-font-size-body-lg: 20px;
+  --kihub-font-size-body: 18px;
+  --kihub-font-size-body-sm: 16px;
+  --kihub-font-size-ui: 15px;
+  --kihub-font-size-label: 13px;
+  --kihub-font-size-eyebrow: 12px;
+
+  --kihub-line-height-display: 1.08;
+  --kihub-line-height-heading: 1.25;
+  --kihub-line-height-body: 1.55;
+  --kihub-line-height-long: 1.7;
+
+  --kihub-tracking-display: -0.015em;
+  --kihub-tracking-heading: -0.01em;
+  --kihub-tracking-body: 0em;
+  --kihub-tracking-eyebrow: 0.12em;
+
+  --kihub-weight-regular: 400;
+  --kihub-weight-medium: 500;
+  --kihub-weight-semibold: 600;
+
+  /* ---------- Spacing (4px base) ---------- */
+  --kihub-space-1: 4px;
+  --kihub-space-2: 8px;
+  --kihub-space-3: 12px;
+  --kihub-space-4: 16px;
+  --kihub-space-5: 20px;
+  --kihub-space-6: 24px;
+  --kihub-space-8: 32px;
+  --kihub-space-10: 40px;
+  --kihub-space-14: 56px;
+  --kihub-space-18: 72px;
+  --kihub-space-24: 96px;
+
+  /* ---------- Radii ---------- */
+  --kihub-radius-sm: 2px;
+  --kihub-radius: 4px;                 /* buttons, inputs, tags */
+  --kihub-radius-lg: 8px;
+  --kihub-radius-xl: 12px;
+  --kihub-radius-full: 9999px;
+
+  /* ---------- Elevation ---------- */
+  --kihub-shadow-sm: 0 0 1px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.06);
+  --kihub-shadow-md: 0 0 1px rgba(0,0,0,.04), 0 2px 4px rgba(0,0,0,.06), 0 4px 8px rgba(0,0,0,.06);
+  --kihub-shadow-xl: 0 4px 8px rgba(0,0,0,.08), 0 12px 24px rgba(0,0,0,.10);
+
+  /* ---------- Layout ---------- */
+  --kihub-content-width: 1200px;
+  --kihub-prose-width: 640px;
+}
+
+/* Type is set on body so 1rem stays 16px */
+body {
+  background: var(--kihub-bg);
+  color: var(--kihub-text);
+  font-family: var(--kihub-font-ui);
+  font-size: var(--kihub-font-size-body);
+  line-height: var(--kihub-line-height-body);
+}

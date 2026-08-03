@@ -1,0 +1,8 @@
+/* Local-only override (not part of the synced kihub/ folder): points the kihub font
+ * tokens at the families loaded via next/font in src/app/themed-html.tsx, so the fonts
+ * are self-hosted with no external request or layout shift. Must be imported AFTER
+ * kihub/tokens.css. */
+:root {
+  --kihub-font-display: var(--font-kihub-display), Georgia, "Times New Roman", serif;
+  --kihub-font-ui: var(--font-kihub-ui), system-ui, -apple-system, sans-serif;
+}

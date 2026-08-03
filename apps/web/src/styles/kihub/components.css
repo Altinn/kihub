@@ -1,0 +1,170 @@
+/* KI HUB component classes — depends on tokens.css
+ * import "@/styles/kihub/tokens.css";
+ * import "@/styles/kihub/components.css";
+ */
+
+/* ---------- Focus: the signature interaction. Applies to everything. ---------- */
+.kihub-focusable:focus-visible,
+.kihub-btn:focus-visible,
+.kihub-link:focus-visible,
+.kihub-input:focus-visible,
+.kihub-tile:focus-visible {
+  outline: 3px solid var(--kihub-focus-outer);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px var(--kihub-focus-inner);
+}
+
+/* ---------- Type ---------- */
+.kihub-h1, .kihub-h2, .kihub-h3, .kihub-h4 {
+  font-family: var(--kihub-font-display);
+  font-weight: var(--kihub-weight-regular);
+  color: var(--kihub-text);
+  margin: 0;
+  text-wrap: pretty;
+}
+.kihub-h1 { font-size: var(--kihub-font-size-h1); line-height: var(--kihub-line-height-display); letter-spacing: var(--kihub-tracking-display); }
+.kihub-h2 { font-size: var(--kihub-font-size-h2); line-height: var(--kihub-line-height-heading); letter-spacing: var(--kihub-tracking-heading); }
+.kihub-h3 { font-size: var(--kihub-font-size-h3); line-height: var(--kihub-line-height-heading); }
+.kihub-h4 { font-size: var(--kihub-font-size-h4); line-height: var(--kihub-line-height-heading); }
+.kihub-accent-word { color: var(--kihub-accent); }
+
+.kihub-lead {
+  font-family: var(--kihub-font-display);
+  font-size: var(--kihub-font-size-body-lg);
+  line-height: var(--kihub-line-height-body);
+  color: var(--kihub-text-subtle);
+  max-width: 38ch;
+  margin: 0;
+}
+.kihub-prose {
+  font-family: var(--kihub-font-display);
+  font-size: var(--kihub-font-size-body);
+  line-height: var(--kihub-line-height-long);
+  max-width: var(--kihub-prose-width);
+}
+.kihub-eyebrow {
+  font-family: var(--kihub-font-ui);
+  font-size: var(--kihub-font-size-eyebrow);
+  font-weight: var(--kihub-weight-medium);
+  letter-spacing: var(--kihub-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--kihub-text-subtle);
+}
+.kihub-eyebrow--accent { color: var(--kihub-accent); }
+
+.kihub-link {
+  color: var(--kihub-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  border-radius: var(--kihub-radius-sm);
+}
+.kihub-link:hover { color: var(--kihub-accent-hover); text-decoration-thickness: 2px; }
+
+/* ---------- Buttons ---------- */
+.kihub-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kihub-space-2);
+  font-family: var(--kihub-font-display);
+  font-size: var(--kihub-font-size-ui);
+  line-height: 1.2;
+  padding: 11px 18px;
+  border-radius: var(--kihub-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+}
+.kihub-btn--primary { background: var(--kihub-accent); color: var(--kihub-accent-contrast); }
+.kihub-btn--secondary { background: transparent; color: var(--kihub-text); border-color: var(--kihub-border-subtle); }
+.kihub-btn--tertiary { background: transparent; color: var(--kihub-accent); border-color: transparent; }
+@media (hover: hover) and (pointer: fine) {
+  .kihub-btn--primary:hover { background: var(--kihub-accent-hover); }
+  .kihub-btn--secondary:hover { background: var(--kihub-surface-accent); }
+  .kihub-btn--tertiary:hover { background: var(--kihub-surface-accent); }
+}
+.kihub-btn--primary:active { background: var(--kihub-accent-active); }
+.kihub-btn:disabled { opacity: 30%; cursor: not-allowed; }
+
+/* ---------- Tag / chip ---------- */
+.kihub-tag {
+  display: inline-block;
+  font-family: var(--kihub-font-ui);
+  font-size: var(--kihub-font-size-label);
+  padding: 5px 10px;
+  background: var(--kihub-surface-inverted);
+  color: var(--kihub-text-inverted);
+  border-radius: 0;
+}
+.kihub-tag--tinted { background: var(--kihub-surface-accent); color: var(--kihub-text-accent); }
+.kihub-tag--on-accent { background: rgba(255,255,255,.16); color: var(--kihub-text-inverted); }
+
+/* ---------- Card ---------- */
+.kihub-card {
+  background: var(--kihub-bg);
+  border: 1px solid var(--kihub-border-subtle);
+  border-radius: var(--kihub-radius-lg);
+  padding: var(--kihub-space-6);
+}
+.kihub-card--tinted { background: var(--kihub-surface-accent); border-color: transparent; }
+.kihub-card--raised { border-color: transparent; box-shadow: var(--kihub-shadow-sm); }
+
+/* ---------- Tile (the two-up hero navigation blocks) ---------- */
+.kihub-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--kihub-space-8);
+  padding: var(--kihub-space-6);
+  min-height: 200px;
+  text-decoration: none;
+  color: var(--kihub-text);
+  background: var(--kihub-surface-accent);
+}
+.kihub-tile--accent { background: var(--kihub-accent); color: var(--kihub-text-inverted); }
+.kihub-tile__title {
+  display: flex;
+  align-items: center;
+  gap: var(--kihub-space-3);
+  font-family: var(--kihub-font-display);
+  font-size: var(--kihub-font-size-h3);
+  line-height: var(--kihub-line-height-heading);
+}
+.kihub-tile__arrow {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--kihub-radius-full);
+  background: var(--kihub-accent);
+  color: var(--kihub-accent-contrast);
+  font-size: var(--kihub-font-size-ui);
+}
+.kihub-tile--accent .kihub-tile__arrow { background: var(--kihub-bg); color: var(--kihub-accent); }
+
+/* ---------- Input ---------- */
+.kihub-input {
+  font-family: var(--kihub-font-ui);
+  font-size: var(--kihub-font-size-ui);
+  padding: 10px 12px;
+  background: var(--kihub-bg);
+  color: var(--kihub-text);
+  border: 1px solid var(--kihub-border);
+  border-radius: var(--kihub-radius);
+}
+.kihub-input::placeholder { color: var(--kihub-text-subtle); }
+
+/* ---------- Media well (image / illustration placeholder) ---------- */
+.kihub-media {
+  background: var(--kihub-surface-accent);
+  border-radius: var(--kihub-radius-lg);
+  overflow: hidden;
+}
+.kihub-media--placeholder { border: 1px dashed var(--kihub-accent-border); }
+
+/* ---------- Layout helpers ---------- */
+.kihub-container { max-width: var(--kihub-content-width); margin-inline: auto; padding-inline: var(--kihub-space-6); }
+.kihub-section { padding-block: var(--kihub-space-18); }
+.kihub-stack { display: flex; flex-direction: column; gap: var(--kihub-space-4); }
+.kihub-row { display: flex; align-items: center; gap: var(--kihub-space-3); }
+.kihub-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 2px; }
+.kihub-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: var(--kihub-space-6); }
