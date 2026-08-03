@@ -1,0 +1,50 @@
+{
+  "$schema": "./node_modules/@digdir/designsystemet/dist/config.schema.json",
+  "outDir": "./design-tokens",
+  "themes": {
+    "kihub": {
+      "colors": {
+        "accent": "#0062BA",
+        "neutral": "#1E2124"
+      },
+      "typography": {
+        "fontFamily": "Inter"
+      },
+      "borderRadius": 4,
+      "overrides": {
+        "colors": {
+          "accent": {
+            "background-default": { "light": "#FFFFFF" },
+            "background-tinted": { "light": "#EEF4FA" },
+            "surface-tinted": { "light": "#DDEAF6" },
+            "border-subtle": { "light": "#99C0E3" },
+            "base-default": { "light": "#0062BA" },
+            "base-hover": { "light": "#004F96" },
+            "base-active": { "light": "#003D75" },
+            "base-contrast-default": { "light": "#FFFFFF" },
+            "text-default": { "light": "#002C54" }
+          },
+          "neutral": {
+            "background-default": { "light": "#FFFFFF" },
+            "background-tinted": { "light": "#F3F3F4" },
+            "border-subtle": { "light": "#D5D8DB" },
+            "border-default": { "light": "#77797B" },
+            "border-strong": { "light": "#1E2124" },
+            "text-subtle": { "light": "#5B6168" },
+            "text-default": { "light": "#1E2124" }
+          }
+        },
+        "severity": {
+          "info": "#0A71C0",
+          "success": "#068718",
+          "warning": "#EA9B1B",
+          "danger": "#C01B1B"
+        },
+        "focus": {
+          "outer": { "light": "#1E2124" },
+          "inner": { "light": "#FFFFFF" }
+        }
+      }
+    }
+  }
+}

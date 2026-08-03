@@ -17,6 +17,13 @@ compatible with Digdir services. This layer sits ON TOP of `@digdir/designsystem
 > - Fonts are loaded with `next/font` in `src/app/themed-html.tsx` instead of Google
 >   Fonts `<link>` tags; `../kihub-fonts.css` points the two font tokens at the
 >   `next/font` CSS variables. That override file is local-only, never synced.
+> - **Color values resolve through Designsystemet's official theming pipeline**:
+>   `apps/web/designsystemet.config.json` (which pins this design system's exact hex values as
+>   overrides) generates `design-tokens/` + `design-tokens-build/kihub.css` via
+>   `pnpm --filter web theme:build`; `../kihub-ds-bridge.css` (local-only, never synced)
+>   re-points the `--kihub-*` color tokens at the generated `--ds-*` variables. The literal hex
+>   values in `tokens.css` stay for sync fidelity but are overridden by the bridge — to change a
+>   color, change the config (and the design project), not this folder.
 
 ## Files
 

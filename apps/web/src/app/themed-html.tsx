@@ -1,10 +1,13 @@
-// Designsystemet base component styles + default Digdir theme (constitution: mandatory UI system).
+// Designsystemet base component styles + the generated KI Hub theme (Designsystemet's official
+// theming pipeline: designsystemet.config.json → `designsystemet tokens create/build`).
 import '@digdir/designsystemet-css';
-import '@digdir/designsystemet-css/theme';
+import '../../design-tokens-build/kihub.css';
 // KI HUB design-system layer (direction 1a) on top of Designsystemet — see src/styles/kihub/README.md.
 import '@/styles/kihub/tokens.css';
 import '@/styles/kihub/components.css';
 import '@/styles/kihub-fonts.css';
+// Bridge: kihub color tokens resolve through the generated theme (single value source).
+import '@/styles/kihub-ds-bridge.css';
 // 011: structural layout for the shared chrome + frontpage sections (kihub tokens only).
 import '@/styles/portal.css';
 
@@ -34,7 +37,7 @@ export function ThemedHtml({ children }: { children: React.ReactNode }) {
       lang="nb"
       data-color-scheme="light"
       data-size="md"
-      data-color="brand1"
+      data-color="accent"
       className={`${displayFont.variable} ${uiFont.variable}`}
     >
       <body>{children}</body>

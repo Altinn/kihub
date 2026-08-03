@@ -14,6 +14,7 @@
     "discovery:scan": "cross-env NODE_OPTIONS=--no-deprecation tsx --env-file=.env scripts/discovery-scan.ts",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "theme:build": "designsystemet tokens create --yes --clean && designsystemet tokens build --clean",
     "migrate": "cross-env NODE_OPTIONS=--no-deprecation payload migrate",
     "migrate:create": "cross-env NODE_OPTIONS=--no-deprecation payload migrate:create"
   },
