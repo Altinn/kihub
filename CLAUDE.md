@@ -17,7 +17,8 @@ deps; News/Events read libs unchanged. Prior phases: Phase 1 (foundation)
 `specs/006-editor-backoffice/`; Phase 7 (news) `specs/007-news/`; governance-UI reconcile
 `specs/008-governance-ui-reconcile/`; Phase 8 (calendar/events) `specs/009-calendar-events/`;
 home-page widgets `specs/010-home-widgets/` (superseded by 011 on the `/` route). Governance
-rules: `.specify/memory/constitution.md` (v2.0.0 — KI Hub is an employee portal: Registry + News +
-Calendar, two surfaces; note 011's justified design-system deviation in plan.md Complexity
-Tracking).
+rules: `.specify/memory/constitution.md` (v3.0.0 — KI Hub is an employee portal: Registry + News +
+Calendar, two surfaces; Design System constraint = Designsystemet as FOUNDATION with the generated
+KI Hub theme (`designsystemet.config.json` + `pnpm --filter web theme:build`) + kihub token layer;
+custom presentational components sanctioned on the tokens, 011's deviation resolved).
 <!-- SPECKIT END -->

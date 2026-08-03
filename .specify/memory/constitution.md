@@ -1,32 +1,29 @@
 <!--
 Sync Impact Report
-Version change: 1.1.0 → 2.0.0
-Bump rationale: MAJOR. Redefines the platform's identity and scope (from a narrow AI-artifact
-  catalog to an internal employee portal with multiple modules) and REDEFINES an existing mandatory
-  constraint (Design System now applies to the employee-facing app only; the Payload admin
-  back-office is exempt). Existing AI-artifact principles are preserved but re-scoped. Per the
-  versioning policy, a principle/constraint redefinition ⇒ MAJOR.
+Version change: 2.0.0 → 3.0.0
+Bump rationale: MAJOR. REDEFINES the mandatory Design System constraint (Technology & Architecture
+  Constraints) from "all employee-facing UI MUST be built with Designsystemet React components;
+  custom components only for genuine gaps" to Designsystemet's own prescribed usage model
+  (designsystemet.no): Designsystemet as the mandatory FOUNDATION — an official generated KI Hub
+  theme + a shared token layer — with custom presentational components sanctioned on top.
+  Restyling/forking Designsystemet primitives remains prohibited. Per the versioning policy and
+  the v2.0.0 precedent, a constraint redefinition ⇒ MAJOR.
 Modified principles:
-  - I. "Git is the Source of Truth" → "Git is the Source of Truth for AI Artifacts" (scoped to AI
-    artifacts; native platform content explicitly excluded)
-  - II. "Payload Owns Enterprise Context, Not Content" → "Payload Owns Enterprise Context and Native
-    Content" (now also the store for first-class News/Events content)
-  - III. "Everything is an Artifact" → "Every AI Asset is an Artifact" (scoped to AI asset types;
-    News/Events are NOT artifacts)
-  - VI. "Governance is the Core Value" → "Governance is the Core Value of the Registry" (reframed as
-    the Registry module's differentiator; review/governance actions move to the admin back-office)
-Added sections:
-  - Principle VIII — Two Surfaces: Employee App and Editor Back-Office
-  - "Product Modules" subsection under the platform overview
+  - VIII. Two Surfaces — employee-app sentence now references the Designsystemet FOUNDATION with
+    the KI Hub theme (wording only; the two-surface rule is unchanged)
+Modified sections:
+  - Technology & Architecture Constraints → "Design System" constraint rewritten (foundation +
+    official theming pipeline + token layer + custom-component rules); resolves the justified
+    deviation recorded in specs/011-frontpage-redesign/plan.md Complexity Tracking
+Added sections: none
 Removed sections: none
 Templates requiring updates:
   ✅ .specify/templates/plan-template.md (Constitution Check references gates generically — compatible)
   ✅ .specify/templates/spec-template.md (no mandatory-section conflict)
   ✅ .specify/templates/tasks-template.md (task categories compatible)
+  ✅ CLAUDE.md (SPECKIT block updated to reference v3.0.0 resolution of the 011 deviation)
   ⚠ README.md (still describes KI Hub as an AI-artifact catalog; update when the portal reframing
-    reaches user-facing docs — not blocking)
-  ⚠ CLAUDE.md (managed SPECKIT block points at the active feature; refresh when the next module
-    phase starts)
+    reaches user-facing docs — not blocking, carried over from v2.0.0)
 Follow-up TODOs: none
 -->
 
@@ -154,7 +151,8 @@ KI Hub MUST be built as exactly two surfaces with distinct audiences:
 
 1. **Employee-facing web app** — for ALL employees. Browsing and reading News, the Calendar, and the
    Registry, plus light interaction (search, filters, copy install commands, view governance state).
-   This surface MUST be built with Digdir Designsystemet (see Technology & Architecture Constraints).
+   This surface MUST be built on the Designsystemet foundation with the KI Hub theme (see
+   Technology & Architecture Constraints).
 
 2. **Editor back-office (Payload admin)** — for a small set of editors and admins. Authoring News,
    creating calendar Events, performing tool reviews/governance, and administering the platform. It
@@ -174,12 +172,29 @@ lets each optimize for its audience, and leverages Payload's admin instead of re
   PostgreSQL and Azure Blob Storage. The employee-facing app and the Payload admin back-office are
   the two surfaces of this one application. Shared logic lives in `packages/` (e.g.
   `artifact-schema`, `discovery-core`, `github-client`, `governance-core`).
-- **Design System (MANDATORY for the employee-facing app)**: All **employee-facing** UI MUST be
-  built with Digdir's Designsystemet (https://github.com/digdir/designsystemet) — its React
-  components and design tokens/theme. Custom components are permitted only to fill genuine gaps the
-  design system does not cover, MUST reuse its tokens, and MUST NOT restyle or fork its primitives.
-  The **Payload admin back-office is explicitly EXEMPT** from this requirement (Principle VIII); it
-  uses Payload's own admin UI.
+- **Design System (MANDATORY foundation for the employee-facing app)**: All **employee-facing**
+  UI MUST build on Digdir's Designsystemet (https://github.com/digdir/designsystemet), used the
+  way Designsystemet itself prescribes (designsystemet.no): as a shared foundation that an
+  organization layers its own visual identity and components on top of. Concretely:
+  1. **Theme**: KI Hub's visual profile MUST be defined through Designsystemet's official theming
+     pipeline — `apps/web/designsystemet.config.json` → generated design tokens + theme CSS
+     (regenerate with `pnpm --filter web theme:build`). The app loads the generated KI Hub theme,
+     not the default digdir theme. Brand values in the config are pinned to (and kept in sync
+     with) the "KIHub Design System" design project.
+  2. **Token layer**: the kihub token/component layer (`apps/web/src/styles/kihub/`, synced from
+     the design project) is the styling API for KI Hub's own components. Its color tokens MUST
+     resolve through the generated Designsystemet theme (the `kihub-ds-bridge.css` mapping), so
+     Designsystemet components and KI Hub components provably share one palette with one value
+     source.
+  3. **Components**: custom presentational components are sanctioned and MUST style themselves
+     exclusively via the shared token layer (`--kihub-*` / `--ds-*` tokens — no hardcoded colors,
+     type, or spacing values). Designsystemet React components remain the default choice for
+     behavioral/interactive primitives (form controls, dialogs, complex widgets) unless the
+     approved design requires a custom treatment.
+  4. Restyling or forking Designsystemet primitives remains **PROHIBITED** — when a primitive
+     cannot express the approved design, build a custom component on the tokens instead.
+  The **Payload admin back-office is explicitly EXEMPT** from this requirement (Principle VIII);
+  it uses Payload's own admin UI.
 - **Repositories**: Two-repo model — `kihub` (this platform) and `ai-artifacts` (AI-artifact
   content). The platform repo MUST contain zero real AI artifacts. (News/Events content lives in
   Payload, not in a Git content repo.)
@@ -233,4 +248,4 @@ Versioning policy (semantic):
 Compliance: Plans and reviews MUST check against these principles. Use `CLAUDE.md` and `.specify/`
 templates for runtime development guidance.
 
-**Version**: 2.0.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-14
+**Version**: 3.0.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-08-03

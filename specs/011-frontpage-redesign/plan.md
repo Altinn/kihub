@@ -181,3 +181,8 @@ needs but the read libs don't provide (strict chronology, latest-4) is in pure
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
 | New frontpage/chrome components use the kihub token layer (custom presentational components) instead of Designsystemet React primitives for their look | The approved visual direction (design project "KIHub Design System", imported `2b30418`) specifies serif display type, tile/banner/timeline layouts and button styling that Designsystemet React components cannot express without restyling them — which the constitution forbids more strongly than custom components. The kihub tokens ARE Digdir's accent/neutral scale values, so visual compatibility with Digdir services is preserved by construction. | (a) Restyling Designsystemet primitives — explicitly prohibited ("MUST NOT restyle or fork its primitives"). (b) Building the old layout with stock Designsystemet look — contradicts the user-approved design direction. **Follow-up**: propose a constitution PATCH/MINOR amendment recognizing the kihub brand layer as the sanctioned token source for employee-app presentational components. |
+
+> **Resolved 2026-08-03 by constitution v3.0.0**: the Design System constraint was amended to
+> Designsystemet's own foundation-plus-own-theme model (official theming pipeline via
+> `designsystemet.config.json` + the kihub token layer bridged onto the generated theme). What
+> this table records as a deviation is now the sanctioned pattern; no deviation remains.
