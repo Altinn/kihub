@@ -88,14 +88,22 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy:
-    name: Deploy (placeholder until Phase C)
+    name: Deploy to Azure Container Apps
     needs: build-push
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # OIDC token for azure/login — no stored credentials
     steps:
-      # ── PHASE C PLACEHOLDER ─────────────────────────────────────────────────────
-      # Phase C (documentation/deployment-plan.md) replaces this step with:
-      #   - azure/login using OIDC federated credentials (no publish-profile secrets)
-      #   - az containerapp update --image ghcr.io/altinn/kihub-web:${{ github.sha }}
-      # ────────────────────────────────────────────────────────────────────────────
-      - name: Placeholder
-        run: echo "Deploy step lands in Phase C — image ghcr.io/altinn/kihub-web:${{ github.sha }} is published."
+      # Federated identity: app registration kihub-github-deploy (ai-dev tenant) trusts
+      # repo:Altinn/kihub:ref:refs/heads/main. Its service principal needs Contributor
+      # on rg-kihub-app (see documentation/infrastructure.md).
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Point kihub-web at the freshly pushed image
+        run: |
+          az containerapp update -g rg-kihub-app -n kihub-web \
+            --image ghcr.io/altinn/kihub-web:${{ github.sha }}
