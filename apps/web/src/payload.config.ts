@@ -13,6 +13,7 @@ import { Event } from './collections/Event';
 import { News } from './collections/News';
 import { Review } from './collections/Review';
 import { Users } from './collections/Users';
+import { buildPoolConfig } from './lib/db-auth';
 import { Frontpage } from './globals/Frontpage';
 import { SiteChrome } from './globals/SiteChrome';
 
@@ -40,9 +41,10 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: postgresAdapter({
-    pool: {
-      connectionString: process.env.DATABASE_URI ?? '',
-    },
+    // Pool auth is env-selected: password (local docker) or Entra token callback (Azure).
+    // See src/lib/db-auth.ts and documentation/runtime-config.md.
+    pool: buildPoolConfig(),
+    migrationDir: path.resolve(dirname, 'migrations'),
   }),
   sharp,
 });
