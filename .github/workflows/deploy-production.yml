@@ -1,0 +1,101 @@
+# Production pipeline (deployment-plan.md Phase B): push to main → lint + full test suite
+# against a clean Postgres (baseline migration proven on every run) → build + push the
+# public image ghcr.io/altinn/kihub-web → deploy (Phase C wires the actual az call).
+#
+# NOTE on first publish: GitHub creates the ghcr package PRIVATE by default. Making it
+# public is a one-time manual step (package settings → Change visibility) — an explicit
+# decision recorded in documentation/deployment-plan.md.
+
+name: Deploy production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Lint + test (migrated Postgres)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: kihub
+          POSTGRES_PASSWORD: kihub
+          POSTGRES_DB: kihub
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kihub"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URI: postgres://kihub:kihub@localhost:5432/kihub
+      PAYLOAD_SECRET: ci-only-payload-secret
+      AUTH_SECRET: ci-only-auth-secret
+      AUTH_MODE: mock
+      ORG_TENANT_ID: 00000000-0000-0000-0000-000000000000
+      DISCOVERY_SCAN_KEY: ci-only-scan-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      # Schema comes from the committed migrations, never from dev push-mode — this is
+      # the same path the production container takes on boot.
+      - name: Run migrations against the empty service DB
+        run: pnpm --filter web migrate
+      - name: Lint
+        run: pnpm --filter web lint
+      - name: Test
+        run: pnpm --filter web test
+
+  build-push:
+    name: Build + push ghcr.io/altinn/kihub-web
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/altinn/kihub-web:${{ github.sha }}
+            ghcr.io/altinn/kihub-web:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy (placeholder until Phase C)
+    needs: build-push
+    runs-on: ubuntu-latest
+    steps:
+      # ── PHASE C PLACEHOLDER ─────────────────────────────────────────────────────
+      # Phase C (documentation/deployment-plan.md) replaces this step with:
+      #   - azure/login using OIDC federated credentials (no publish-profile secrets)
+      #   - az containerapp update --image ghcr.io/altinn/kihub-web:${{ github.sha }}
+      # ────────────────────────────────────────────────────────────────────────────
+      - name: Placeholder
+        run: echo "Deploy step lands in Phase C — image ghcr.io/altinn/kihub-web:${{ github.sha }} is published."
