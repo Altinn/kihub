@@ -14,6 +14,7 @@ import { News } from './collections/News';
 import { Review } from './collections/Review';
 import { Users } from './collections/Users';
 import { buildPoolConfig } from './lib/db-auth';
+import { migrations } from './migrations';
 import { Frontpage } from './globals/Frontpage';
 import { SiteChrome } from './globals/SiteChrome';
 
@@ -45,6 +46,11 @@ export default buildConfig({
     // See src/lib/db-auth.ts and documentation/runtime-config.md.
     pool: buildPoolConfig(),
     migrationDir: path.resolve(dirname, 'migrations'),
+    // Bundled migrations run automatically during init when NODE_ENV=production — the
+    // standalone container image has no Payload CLI, so this replaces `payload migrate`
+    // there (src/instrumentation.ts triggers init at boot). Local dev keeps push mode;
+    // this list is inert outside production.
+    prodMigrations: migrations,
   }),
   sharp,
 });

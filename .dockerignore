@@ -1,0 +1,24 @@
+# Build context = repo root (see apps/web/Dockerfile).
+.git
+node_modules
+**/node_modules
+**/.next
+**/tsconfig.tsbuildinfo
+
+# Never bake local secrets/config into the image.
+**/.env
+**/.env.*
+!**/.env.example
+
+# Not needed to build the app.
+.claude
+.specify
+.github
+.vscode
+specs
+documentation
+**/docker-compose.yml
+apps/web/Dockerfile
+CLAUDE.md
+*.md
+!packages/**/*.md
