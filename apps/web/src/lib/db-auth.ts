@@ -55,8 +55,18 @@ export function buildPoolConfig(
   if (resolveDbAuthMode(env) === 'password') {
     return { connectionString };
   }
+  // pg 8.x never invokes a function `password` when the config also carries
+  // `connectionString` — it authenticates with the (empty) password parsed from the URI.
+  // Entra mode therefore decomposes the URI into discrete fields (verified against
+  // Azure PG Flexible Server; deployment Phase C).
+  const url = new URL(connectionString);
   return {
-    connectionString,
+    host: url.hostname,
+    port: url.port ? Number(url.port) : 5432,
+    database: url.pathname.replace(/^\//, ''),
+    user: decodeURIComponent(url.username),
+    // Azure PG requires TLS; its chain is publicly trusted, so full verification works.
+    ssl: true,
     // node-postgres resolves a function `password` per new connection.
     password: fetchToken,
   };

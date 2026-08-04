@@ -28,16 +28,35 @@ describe('buildPoolConfig', () => {
     expect(pool).toEqual({ connectionString: URI });
   });
 
-  it('entra mode: password becomes the async token callback', async () => {
+  it('entra mode: discrete fields (never connectionString) + async token callback', async () => {
     const fetchToken = vi.fn(async () => 'entra-token');
     const pool = buildPoolConfig(
       { DATABASE_URI: URI, DB_AUTH_MODE: 'entra' },
       fetchToken,
     );
-    expect(pool.connectionString).toBe(URI);
+    // pg ignores a function `password` when connectionString is present (it sends the
+    // URI's empty password instead), so entra mode must decompose the URI.
+    expect(pool.connectionString).toBeUndefined();
+    expect(pool.host).toBe('db.example');
+    expect(pool.port).toBe(5432);
+    expect(pool.database).toBe('kihub');
+    expect(pool.user).toBe('kihub');
+    expect(pool.ssl).toBe(true);
     expect(typeof pool.password).toBe('function');
     await expect((pool.password as () => Promise<string>)()).resolves.toBe('entra-token');
     expect(fetchToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('entra mode defaults the port and decodes an encoded user', () => {
+    const pool = buildPoolConfig(
+      {
+        DATABASE_URI: 'postgres://adi.dahl%40digdir.no@db.example/kihub?sslmode=require',
+        DB_AUTH_MODE: 'entra',
+      },
+      async () => 'entra-token',
+    );
+    expect(pool.port).toBe(5432);
+    expect(pool.user).toBe('adi.dahl@digdir.no');
   });
 
   it('entra mode does not eagerly fetch a token (only per connection)', () => {
