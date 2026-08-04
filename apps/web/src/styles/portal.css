@@ -1,0 +1,190 @@
+/* 011 frontpage — structural layout for the portal chrome + frontpage sections. Local app CSS on
+ * top of the kihub layer: every color/space/type value comes from the --kihub-* tokens
+ * (src/styles/kihub/ is synced from the design project and never edited). Only layout that needs
+ * real media queries lives here; simple grids use auto-fit inline. */
+
+/* Footer sits at the bottom even on short pages. */
+.portal-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.portal-shell > main {
+  flex: 1;
+}
+
+/* ---------- Site header ---------- */
+.site-header {
+  border-bottom: 1px solid var(--kihub-border-subtle);
+  background: var(--kihub-bg);
+}
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--kihub-space-4);
+  padding-block: var(--kihub-space-3);
+}
+.site-header__brand {
+  display: flex;
+  align-items: baseline;
+  gap: var(--kihub-space-2);
+  text-decoration: none;
+  color: var(--kihub-text);
+}
+.site-header__user {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--kihub-space-3);
+}
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--kihub-space-2);
+}
+.site-nav__list {
+  display: flex;
+  align-items: center;
+  gap: var(--kihub-space-5);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.site-nav__link {
+  font-family: var(--kihub-font-ui);
+  font-size: var(--kihub-font-size-ui);
+  color: var(--kihub-text);
+  text-decoration: none;
+  border-radius: var(--kihub-radius-sm);
+}
+.site-nav__link:hover {
+  color: var(--kihub-accent);
+}
+.site-nav__toggle {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--kihub-border-subtle);
+  border-radius: var(--kihub-radius);
+  padding: 8px 12px;
+  font-family: var(--kihub-font-ui);
+  font-size: var(--kihub-font-size-ui);
+  color: var(--kihub-text);
+  cursor: pointer;
+}
+@media (max-width: 899px) {
+  .site-header__inner {
+    flex-wrap: wrap;
+  }
+  .site-nav {
+    order: 3;
+    width: 100%;
+  }
+  .site-nav__toggle {
+    display: inline-flex;
+  }
+  .site-nav__list {
+    display: none;
+  }
+  .site-nav__list[data-open='true'] {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 0;
+    padding-block: var(--kihub-space-2);
+  }
+  .site-nav__list[data-open='true'] .site-nav__link {
+    display: block;
+    padding: var(--kihub-space-3) var(--kihub-space-2);
+    border-top: 1px solid var(--kihub-border-subtle);
+  }
+}
+
+/* ---------- Hero ---------- */
+.fp-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: var(--kihub-space-10);
+  align-items: center;
+  padding-block: var(--kihub-space-14);
+}
+@media (max-width: 899px) {
+  .fp-hero {
+    grid-template-columns: 1fr;
+    padding-block: var(--kihub-space-10);
+  }
+  .fp-hero__art {
+    display: none;
+  }
+}
+
+/* ---------- Events section ---------- */
+.fp-events {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--kihub-space-10);
+  align-items: start;
+}
+@media (max-width: 899px) {
+  .fp-events {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- News grid ---------- */
+.fp-news {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--kihub-space-10) var(--kihub-space-6);
+}
+@media (max-width: 719px) {
+  .fp-news {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Section header (eyebrow + heading + action link) ---------- */
+.fp-section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--kihub-space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--kihub-space-8);
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  background: var(--kihub-surface-inverted);
+  color: var(--kihub-text-inverted);
+  margin-top: var(--kihub-space-18);
+}
+.site-footer__inner {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--kihub-space-8);
+  padding-block: var(--kihub-space-14);
+}
+.site-footer a {
+  color: var(--kihub-text-inverted);
+  font-family: var(--kihub-font-display);
+  text-underline-offset: 3px;
+}
+.site-footer__links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kihub-space-3);
+  text-align: right;
+}
+@media (max-width: 719px) {
+  .site-footer__inner {
+    grid-template-columns: 1fr;
+    padding-block: var(--kihub-space-10);
+  }
+  .site-footer__links {
+    text-align: left;
+  }
+}

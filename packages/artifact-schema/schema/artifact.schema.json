@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kihub.digdir.no/schemas/artifact-1.0.0.json",
+  "title": "KI Hub Artifact Manifest",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*\\.[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "skill",
+        "prompt",
+        "workflow",
+        "mcp",
+        "template",
+        "policy",
+        "playbook"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "object",
+      "properties": {
+        "team": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contact": {
+          "type": "string",
+          "format": "email",
+          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+        }
+      },
+      "required": [
+        "team",
+        "contact"
+      ],
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": [
+            "github"
+          ]
+        },
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "provider",
+        "repository",
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "install": {
+      "type": "object",
+      "properties": {
+        "apm": {
+          "type": "object",
+          "properties": {
+            "package": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "package"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      }
+    },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "internal",
+        "public",
+        "restricted"
+      ]
+    },
+    "lifecycle": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "experimental",
+            "in-review",
+            "approved",
+            "recommended",
+            "deprecated",
+            "archived"
+          ]
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "schemaVersion": {
+      "default": "1.0.0",
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    }
+  },
+  "required": [
+    "id",
+    "type",
+    "name",
+    "version",
+    "description",
+    "owner",
+    "source",
+    "visibility",
+    "lifecycle",
+    "schemaVersion"
+  ],
+  "additionalProperties": false
+}

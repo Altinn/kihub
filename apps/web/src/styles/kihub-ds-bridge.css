@@ -1,0 +1,50 @@
+/* Local-only bridge (not part of the synced kihub/ folder): re-points the kihub color tokens at
+ * the generated Designsystemet theme (design-tokens-build/kihub.css, built from
+ * designsystemet.config.json — the single source of truth for color values). The config pins the
+ * design project's exact hex values as overrides, so this is a wiring change, not a visual one:
+ * Designsystemet components and kihub components now provably share one palette. Must be imported
+ * AFTER kihub/tokens.css and the generated theme.
+ *
+ * Deliberately NOT bridged (kihub-specific concepts with no ds. semantic equivalent):
+ * --kihub-surface-inverted / --kihub-text-inverted (ink-as-surface, used by the footer). */
+:root {
+  /* Ground & surfaces */
+  --kihub-bg: var(--ds-color-neutral-background-default);
+  --kihub-bg-tinted: var(--ds-color-neutral-background-tinted);
+  --kihub-surface-accent: var(--ds-color-accent-background-tinted);
+  --kihub-surface-accent-strong: var(--ds-color-accent-surface-tinted);
+
+  /* Ink */
+  --kihub-text: var(--ds-color-neutral-text-default);
+  --kihub-text-subtle: var(--ds-color-neutral-text-subtle);
+  --kihub-text-accent: var(--ds-color-accent-text-default);
+
+  /* Accent */
+  --kihub-accent: var(--ds-color-accent-base-default);
+  --kihub-accent-hover: var(--ds-color-accent-base-hover);
+  --kihub-accent-active: var(--ds-color-accent-base-active);
+  --kihub-accent-border: var(--ds-color-accent-border-subtle);
+  --kihub-accent-contrast: var(--ds-color-accent-base-contrast-default);
+
+  /* Borders */
+  --kihub-border-subtle: var(--ds-color-neutral-border-subtle);
+  --kihub-border: var(--ds-color-neutral-border-default);
+  --kihub-border-strong: var(--ds-color-neutral-border-strong);
+
+  /* Status */
+  --kihub-info: var(--ds-color-info-base-default);
+  --kihub-info-surface: var(--ds-color-info-background-tinted);
+  --kihub-success: var(--ds-color-success-base-default);
+  --kihub-success-surface: var(--ds-color-success-background-tinted);
+  --kihub-warning: var(--ds-color-warning-base-default);
+  --kihub-warning-surface: var(--ds-color-warning-background-tinted);
+  --kihub-danger: var(--ds-color-danger-base-default);
+  --kihub-danger-surface: var(--ds-color-danger-background-tinted);
+
+  /* Focus ring */
+  --kihub-focus-outer: var(--ds-color-focus-outer);
+  --kihub-focus-inner: var(--ds-color-focus-inner);
+
+  /* Designsystemet components use the same self-hosted UI font as the kihub layer. */
+  --ds-font-family: var(--kihub-font-ui);
+}

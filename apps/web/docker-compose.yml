@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:16
+    container_name: kihub-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kihub
+      POSTGRES_PASSWORD: kihub
+      POSTGRES_DB: kihub
+    ports:
+      # Host port 55432 to avoid colliding with any other local Postgres on 5432.
+      - "55432:5432"
+    volumes:
+      - kihub_pgdata:/var/lib/postgresql/data
+
+volumes:
+  kihub_pgdata:
