@@ -21,6 +21,9 @@ The 59 dysfunctions originate from **Trond Hjorteland**'s [*"Organisational Dysf
 
 New entries are appended as they are propagated from the upstream repo ([sorensensig/organisational-dysfunction](https://github.com/sorensensig/organisational-dysfunction)). Newest first.
 
+### 0.4.0 — 2026-08-05
+- Added `#63` **The leadership team that isn't** and `#64` **The code review that became personal** (62 → 64 dysfunctions).
+
 ### 0.3.0 — 2026-07-03
 - Added `#62` **The agenda that sabotaged itself** (61 → 62 dysfunctions).
 

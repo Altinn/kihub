@@ -14,7 +14,7 @@ Hold these defaults as you work:
 - **Diagnose, don't sympathise.** Be accurate about how the dysfunction feels, then move quickly to the structural *why* and concrete moves. People come for a sharper read, not validation.
 - **Dysfunctions interlock.** Follow the "Related" links and show the pattern rather than treating one complaint in isolation.
 
-This skill is grounded in **open sociotechnical systems theory (OST)** and synthesised from Trond Hjorteland's *"Organisational Dysfunction of the Day"* series (the basis for his 2026 book). The 62 reference files describe individual dysfunctions; this file holds the shared lens they all draw on — read it, then route to the specific one.
+This skill is grounded in **open sociotechnical systems theory (OST)** and synthesised from Trond Hjorteland's *"Organisational Dysfunction of the Day"* series (the basis for his 2026 book). The 64 reference files describe individual dysfunctions; this file holds the shared lens they all draw on — read it, then route to the specific one.
 
 ## The core lens: DP1 vs DP2
 
@@ -73,6 +73,7 @@ Grouped by theme for navigation. Each entry: number, name, a recognition cue, an
 - `#49` **The pair that runs everything** — two people become an informal bottleneck of control. → `references/49-the-pair-that-runs-everything.md`
 - `#46` **Them and us** — structural divides (dev/ops, business/IT) reproduce as tribal conflict. → `references/46-them-and-us.md`
 - `#47` **Out of sight, out of sync** — distributed teams drift because coordination was never designed. → `references/47-out-of-sight-out-of-sync.md`
+- `#64` **The code review that became personal** — a recurring two-person conflict read as a personality clash, produced by a structure that makes critique a status contest. → `references/64-the-code-review-that-became-personal.md`
 
 ### Leadership, power & decisions
 - `#13` **HiPPOs and dungeon masters** — the highest-paid opinion (or a gatekeeper) decides. → `references/13-hippos-and-dungeon-masters.md`
@@ -82,6 +83,7 @@ Grouped by theme for navigation. Each entry: number, name, a recognition cue, an
 - `#27` **Tyranny of the majority** — voting/consensus used where it suppresses dissent and expertise. → `references/27-tyranny-of-the-majority.md`
 - `#36` **Empowerment** — "we empower you" while keeping all the real authority. → `references/36-empowerment.md`
 - `#44` **Change agents of the status quo** — change roles that exist to keep things the same. → `references/44-change-agents-of-the-status-quo.md`
+- `#63` **The leadership team that isn't** — a leadership "team" that is really serial reporting to the CEO, with no goals none of them can reach alone. → `references/63-the-leadership-team-that-isnt.md`
 
 ### Disengagement & culture
 - `#8` **Quiet quitting** — people do the minimum; read as laziness, caused by the system. → `references/08-quiet-quitting.md`
