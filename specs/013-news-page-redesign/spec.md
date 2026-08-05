@@ -150,8 +150,9 @@ spacing, Norwegian copy, hero image, tags, body rendering, and the back link.
   never collapses or shifts other cards.
 - **Hero images of varying real aspect ratios**: all cards present the same media proportions, so
   rows stay aligned regardless of source image dimensions.
-- **Article without a publication date**: the date line is omitted; the article still appears and
-  is ordered last among its neighbours rather than disappearing.
+- **Article without a publication date**: the date line is omitted and the article still appears
+  rather than disappearing. Publishing always stamps a date, so this state is unreachable through
+  the back-office (see Assumptions).
 - **Article without a summary**: card ends after the date line, no empty gap.
 - **Article without a usable address handle**: never renders as a broken link on the grid.
 - **Very long headline or summary**: wraps within its card; long unbroken strings do not force
@@ -163,7 +164,7 @@ spacing, Norwegian copy, hero image, tags, body rendering, and the back link.
 - **Timezone boundaries**: an article published at 00:30 Oslo time shows the correct Oslo calendar
   date even when the stored timestamp falls on the previous UTC day.
 - **Featured articles**: receive no special treatment or reordering on this page (see
-  Assumptions); featured remains a frontpage signal.
+  Assumptions).
 
 ## Requirements *(mandatory)*
 
@@ -181,9 +182,10 @@ spacing, Norwegian copy, hero image, tags, body rendering, and the back link.
 - **FR-004**: The grid MUST show two cards per row at desktop widths and one card per row at phone
   widths, with no horizontal scrolling at any viewport width down to 360 px, and cards in a row
   MUST stay aligned regardless of image dimensions or differing text lengths.
-- **FR-005**: Articles MUST be ordered strictly newest-first by publication date. The featured
-  flag MUST NOT reorder this page (it remains a frontpage signal only); articles without a
-  publication date MUST sort last and MUST still be reachable.
+- **FR-005**: Articles MUST be ordered strictly newest-first by publication date, with a
+  deterministic tiebreaker so that pagination never skips or repeats an article across pages. The
+  featured flag MUST NOT reorder this page. An article that somehow lacks a publication date MUST
+  still be reachable (its position among dated articles is unspecified — see Assumptions).
 - **FR-006**: The page MUST paginate at a fixed page size, and every published article MUST be
   reachable by paging — appearing exactly once across the set of pages for a given archive state.
 - **FR-007**: The active page MUST be carried in the page address (`?page=N`) so any page can be
@@ -213,9 +215,9 @@ spacing, Norwegian copy, hero image, tags, body rendering, and the back link.
   new design primitives, and no restyling or forking of Designsystemet primitives.
 - **FR-016**: The feature MUST NOT change the news content model (no new fields) and MUST NOT add
   runtime dependencies.
-- **FR-017**: The frontpage "Siste nytt" section MUST keep working unchanged, including its
-  featured-first selection, and article addresses MUST remain unchanged so existing links keep
-  resolving.
+- **FR-017**: The frontpage "Siste nytt" section MUST keep working unchanged — it already selects
+  the four most recently published articles strictly by date — and article addresses MUST remain
+  unchanged so existing links keep resolving.
 - **FR-018**: Both pages MUST remain server-rendered and MUST stay gated by the existing
   employee-session requirement for the app surface; the feature introduces no new client-side
   interactivity.
@@ -260,7 +262,16 @@ spacing, Norwegian copy, hero image, tags, body rendering, and the back link.
 - **Strictly newest-first, no featured boost on this page.** The current list boosts featured
   articles to the top; combined with pagination that would pin an old featured article to the top
   of page 1 indefinitely, and it contradicts the plainly date-descending order in the reference
-  design. Featured remains meaningful for the frontpage's "Siste nytt" selection.
+  design. **Consequence to accept knowingly**: the news list is the only surface that reads the
+  featured flag today (the frontpage deliberately ignores it and picks the four newest by date), so
+  after this change the flag becomes editorially inert for news. It is kept in the content model —
+  removing it would be a destructive migration, and it is exactly the switch a future
+  featured-hero treatment would use.
+- **An article missing a publication date is treated as an anomaly, not a supported state.**
+  Publishing stamps the date automatically on first publish, so a published article without one
+  cannot be produced through the back-office. Sorting such a row precisely would require raw SQL
+  ordering the platform's data layer does not expose, so the spec guarantees only that the article
+  stays reachable and renders without a date line, not where it lands.
 - **Tags are not shown on the list cards.** The reference design shows image, headline, date and
   summary only; tags remain on the article page. (The current list cards show tag chips and a
   "Featured" chip — both are dropped from the list.)
