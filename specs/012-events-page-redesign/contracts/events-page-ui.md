@@ -41,6 +41,13 @@ kalender: <month nav ‹ › + title> + <legend> + <EventsMonthCalendar/>
   `aria-label="{title}, {type}, {time}"`; > 3 entries → 3 + `"+N flere"` text. Legend above:
   five swatch+label pairs (swatch = `--ev-cat-*` dot, label = type name). Month nav: `‹`/`›`
   links (`aria-label="Forrige måned"/"Neste måned"`) + `formatMonthTitle` heading.
+  **Mobile (< 720px)**: no sideways scrolling — the grid compacts to fit the viewport (day
+  numbers + up to 4 decorative type-colored dots per cell, `aria-hidden`; entry links and
+  "+N flere" hidden) and a month agenda (`.ev-agenda`, reusing `EventsDayList` for the
+  displayed month's events, incl. spans from adjacent months) renders below as the readable,
+  tappable surface; empty month → "Ingen arrangementer denne måneden." Both variants are in
+  the server-rendered DOM; CSS media queries pick one. The page `kihub-h1` steps down to the
+  h2 size < 720px so the heading never forces horizontal page overflow.
 - **EventTypeBadge** — `<span>` uppercase Inter 12px on the type's tinted surface,
   text `--kihub-text`.
 

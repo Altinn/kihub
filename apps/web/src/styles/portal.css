@@ -215,6 +215,16 @@
   flex-wrap: wrap;
   margin-bottom: var(--kihub-space-10);
 }
+@media (max-width: 719px) {
+  /* The 60px display size overflows a phone viewport as one unbreakable word and drags the
+   * whole page wider than the screen — step the heading down instead. */
+  .ev-head .kihub-h1 {
+    font-size: var(--kihub-font-size-h2);
+  }
+  .ev-head {
+    margin-bottom: var(--kihub-space-6);
+  }
+}
 
 .ev-toggle {
   display: inline-flex;
@@ -497,6 +507,68 @@
   color: var(--kihub-text-subtle);
   padding-left: var(--kihub-space-1);
   margin-top: 2px;
+}
+
+/* Mobile-only pieces of the calendar view (hidden on desktop). */
+.ev-cell__dots {
+  display: none;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 2px;
+}
+.ev-cell__dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--kihub-radius-full);
+}
+.ev-agenda {
+  display: none;
+  margin-top: var(--kihub-space-8);
+}
+.ev-agenda__empty {
+  margin: 0;
+  font: 400 var(--kihub-font-size-body-sm) var(--kihub-font-display);
+  color: var(--kihub-text-subtle);
+}
+
+/* Narrow viewports: the full grid would only fit by scrolling sideways — swap it for a
+ * viewport-wide dot overview + the tappable month agenda below (no horizontal scrolling). */
+@media (max-width: 719px) {
+  .ev-cal-scroll {
+    overflow-x: visible;
+  }
+  .ev-cal {
+    min-width: 0;
+  }
+  .ev-cal th {
+    padding: var(--kihub-space-2) 2px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
+  .ev-cell {
+    height: auto;
+    min-height: 44px;
+    padding: var(--kihub-space-1);
+  }
+  .ev-cell__day {
+    min-width: 22px;
+    height: 22px;
+    font-size: var(--kihub-font-size-label);
+    margin-bottom: 0;
+  }
+  .ev-entry,
+  .ev-cell__more {
+    display: none;
+  }
+  .ev-cell__dots {
+    display: flex;
+  }
+  .ev-agenda {
+    display: block;
+  }
+  .ev-legend {
+    justify-content: flex-start;
+  }
 }
 
 /* ---------- Detail page ---------- */

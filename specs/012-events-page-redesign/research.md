@@ -169,8 +169,11 @@ exclusively via `--kihub-*`/`--ev-cat-*` tokens):
 Page-level layout classes (`.ev-*`: toggle, sidebar+list grid, date chips, rows, month grid,
 legend) are added to `apps/web/src/styles/portal.css`, which already owns page-composition CSS
 (`.fp-*` frontpage sections) and is imported once in `themed-html.tsx`. The `--ev-cat-*`
-aliases live at the top of that block. Responsive: sidebar collapses above the list < ~900px;
-the month grid gets horizontal scroll on narrow viewports rather than squeezing.
+aliases live at the top of that block. Responsive: sidebar collapses above the list < ~900px.
+The month grid does NOT sideways-scroll on phones (revised during implementation — scrolling
+hid most of the month): < 720px it compacts to a viewport-wide overview (day numbers +
+type-colored dots, entry links hidden) with the month's events as a tappable agenda list
+below (reusing `EventsDayList`); both variants are server-rendered and CSS-toggled.
 
 **Detail page** (FR-013/014): restyled with `kihub-container`/`kihub-section`, `kihub-h1`,
 `kihub-prose` for the rich text, Norwegian labels, `EventTypeBadge`, form/channel/seats meta,
