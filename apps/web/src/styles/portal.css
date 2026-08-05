@@ -188,3 +188,50 @@
     text-align: left;
   }
 }
+
+/* ==================== 012 /events — Arrangementer ==================== */
+
+/* Categorical event-type colors (contracts/events-page-ui.md): aliases of theme tokens only —
+ * data encoding for "which type is this event", always paired with the type name in text. */
+:root {
+  --ev-cat-webinar: var(--kihub-accent);
+  --ev-cat-webinar-surface: var(--kihub-surface-accent);
+  --ev-cat-verksted: var(--kihub-warning);
+  --ev-cat-verksted-surface: var(--kihub-warning-surface);
+  --ev-cat-kurs: var(--kihub-success);
+  --ev-cat-kurs-surface: var(--kihub-success-surface);
+  --ev-cat-konferanse: var(--kihub-danger);
+  --ev-cat-konferanse-surface: var(--kihub-danger-surface);
+  --ev-cat-internt: var(--kihub-text-subtle);
+  --ev-cat-internt-surface: var(--kihub-bg-tinted);
+}
+
+/* ---------- Page head: H1 + view toggle ---------- */
+.ev-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--kihub-space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--kihub-space-10);
+}
+
+.ev-toggle {
+  display: inline-flex;
+  border: 1px solid var(--kihub-border-subtle);
+  border-radius: var(--kihub-radius);
+  background: var(--kihub-bg-tinted);
+  padding: 2px;
+}
+.ev-toggle a {
+  font: var(--kihub-weight-medium) var(--kihub-font-size-ui) var(--kihub-font-ui);
+  color: var(--kihub-text-subtle);
+  text-decoration: none;
+  padding: var(--kihub-space-2) var(--kihub-space-5);
+  border-radius: var(--kihub-radius-sm);
+}
+.ev-toggle a[aria-current='page'] {
+  background: var(--kihub-bg);
+  color: var(--kihub-text);
+  box-shadow: var(--kihub-shadow-sm);
+}

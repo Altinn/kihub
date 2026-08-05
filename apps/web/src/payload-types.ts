@@ -393,6 +393,20 @@ export interface Event {
    * Who runs the event — a person, team, or external party (free text).
    */
   organizer?: string | null;
+  eventType: 'webinar' | 'verksted' | 'kurs' | 'konferanse' | 'internt';
+  format: 'digitalt' | 'oppmote' | 'hybrid';
+  /**
+   * Delivery channel for digital/hybrid events, e.g. "Teams" (optional).
+   */
+  channel?: string | null;
+  /**
+   * Total seats. Leave blank for open events ("Åpen for alle").
+   */
+  capacity?: number | null;
+  /**
+   * Seats already taken (maintained editorially — no registration flow). Never above capacity.
+   */
+  seatsTaken?: number | null;
   status: 'draft' | 'published';
   tags?: string[] | null;
   featured?: boolean | null;
@@ -688,6 +702,11 @@ export interface EventsSelect<T extends boolean = true> {
   location?: T;
   onlineUrl?: T;
   organizer?: T;
+  eventType?: T;
+  format?: T;
+  channel?: T;
+  capacity?: T;
+  seatsTaken?: T;
   status?: T;
   tags?: T;
   featured?: T;

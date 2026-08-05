@@ -57,6 +57,11 @@ function createEvent(
     endDateTime?: string;
     slug?: string;
     status?: 'draft' | 'published';
+    eventType?: Event['eventType'];
+    format?: Event['format'];
+    location?: string;
+    capacity?: number;
+    seatsTaken?: number;
   },
   user?: Doc,
 ) {
@@ -227,5 +232,83 @@ describe('Events authoring access + visibility (T010)', () => {
       user: users.reader,
     });
     expect(bySlug.docs.length).toBe(0);
+  });
+});
+
+describe('012 event fields: defaults + seat validation (FR-009/012, US3)', () => {
+  it('defaults eventType to internt and format to digitalt when not set (SC-005)', async () => {
+    const created = await createEvent(
+      { title: `Defaults ${testId}`, description: lexical('x'), startDateTime: START },
+      users.contributor,
+    );
+    expect(created.eventType).toBe('internt');
+    expect(created.format).toBe('digitalt');
+    expect(created.capacity ?? null).toBeNull();
+    expect(created.seatsTaken ?? null).toBeNull();
+  });
+
+  it('stores the new fields when set', async () => {
+    const created = await createEvent(
+      {
+        title: `Full fields ${testId}`,
+        description: lexical('x'),
+        startDateTime: START,
+        eventType: 'kurs',
+        format: 'oppmote',
+        location: 'Læringssenteret',
+        capacity: 30,
+        seatsTaken: 22,
+      },
+      users.contributor,
+    );
+    expect(created.eventType).toBe('kurs');
+    expect(created.format).toBe('oppmote');
+    expect(created.capacity).toBe(30);
+    expect(created.seatsTaken).toBe(22);
+  });
+
+  it('rejects seatsTaken above capacity (FR-012)', async () => {
+    await expect(
+      createEvent(
+        {
+          title: `Overbooked ${testId}`,
+          description: lexical('x'),
+          startDateTime: START,
+          capacity: 10,
+          seatsTaken: 11,
+        },
+        users.contributor,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it('rejects zero and fractional capacity (FR-012)', async () => {
+    await expect(
+      createEvent(
+        { title: `ZeroCap ${testId}`, description: lexical('x'), startDateTime: START, capacity: 0 },
+        users.contributor,
+      ),
+    ).rejects.toThrow();
+    await expect(
+      createEvent(
+        { title: `FracCap ${testId}`, description: lexical('x'), startDateTime: START, capacity: 10.5 },
+        users.contributor,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it('rejects negative seatsTaken (FR-012)', async () => {
+    await expect(
+      createEvent(
+        {
+          title: `NegSeats ${testId}`,
+          description: lexical('x'),
+          startDateTime: START,
+          capacity: 10,
+          seatsTaken: -1,
+        },
+        users.contributor,
+      ),
+    ).rejects.toThrow();
   });
 });

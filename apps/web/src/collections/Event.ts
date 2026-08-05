@@ -1,6 +1,7 @@
 import type { Role } from '@kihub/governance-core';
 import type { CollectionConfig } from 'payload';
 import { validateEventInterval } from '../lib/event-dates';
+import { EVENT_FORMAT_LABELS, EVENT_TYPE_LABELS, validateSeatCapacity } from '../lib/events-view';
 import { slugify } from '../lib/slug';
 
 /**
@@ -50,6 +51,11 @@ export const Event: CollectionConfig = {
             data.endDateTime as string | Date | null | undefined,
           );
         }
+        // 012 FR-012: capacity/seatsTaken must be whole numbers in range and seatsTaken ≤ capacity.
+        validateSeatCapacity(
+          data.capacity as number | null | undefined,
+          data.seatsTaken as number | null | undefined,
+        );
         return data;
       },
     ],
@@ -94,6 +100,47 @@ export const Event: CollectionConfig = {
       name: 'organizer',
       type: 'text',
       admin: { description: 'Who runs the event — a person, team, or external party (free text).' },
+    },
+    {
+      // 012 FR-009: closed category set driving the type badge, calendar color, and TYPE filter.
+      name: 'eventType',
+      type: 'select',
+      required: true,
+      defaultValue: 'internt',
+      options: (Object.entries(EVENT_TYPE_LABELS) as [string, string][]).map(
+        ([value, label]) => ({ value, label }),
+      ),
+    },
+    {
+      // 012 FR-009: form of participation driving the FORM filter and the "Digitalt" place text.
+      name: 'format',
+      type: 'select',
+      required: true,
+      defaultValue: 'digitalt',
+      options: (Object.entries(EVENT_FORMAT_LABELS) as [string, string][]).map(
+        ([value, label]) => ({ value, label }),
+      ),
+    },
+    {
+      name: 'channel',
+      type: 'text',
+      admin: { description: 'Delivery channel for digital/hybrid events, e.g. "Teams" (optional).' },
+    },
+    {
+      // Capacity is the switch: set → "X av Y plasser igjen"; unset → "Åpen for alle" (FR-004).
+      name: 'capacity',
+      type: 'number',
+      min: 1,
+      admin: { description: 'Total seats. Leave blank for open events ("Åpen for alle").' },
+    },
+    {
+      name: 'seatsTaken',
+      type: 'number',
+      min: 0,
+      admin: {
+        description:
+          'Seats already taken (maintained editorially — no registration flow). Never above capacity.',
+      },
     },
     {
       name: 'status',

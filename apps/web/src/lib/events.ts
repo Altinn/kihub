@@ -1,5 +1,6 @@
 import config from '@payload-config';
 import { getPayload } from 'payload';
+import type { EventFormatValue, EventTypeValue } from '@/lib/events-view';
 import type { Event } from '@/payload-types';
 
 /**
@@ -13,8 +14,15 @@ async function payloadClient() {
   return getPayload({ config });
 }
 
-/** Published upcoming events, featured first, soonest-first within each group (FR-004). */
-export async function listUpcomingEvents(): Promise<Event[]> {
+/**
+ * Published upcoming events, featured first, soonest-first within each group (FR-004).
+ * 012: optional TYPE/FORM filters are applied in the query itself (FR-005) — the frontpage
+ * keeps calling this with no arguments (byte-identical 011 behavior).
+ */
+export async function listUpcomingEvents(filters?: {
+  types?: EventTypeValue[];
+  form?: EventFormatValue;
+}): Promise<Event[]> {
   const payload = await payloadClient();
   const now = new Date().toISOString();
   const result = await payload.find({
@@ -35,6 +43,8 @@ export async function listUpcomingEvents(): Promise<Event[]> {
             },
           ],
         },
+        ...(filters?.types?.length ? [{ eventType: { in: filters.types } }] : []),
+        ...(filters?.form ? [{ format: { equals: filters.form } }] : []),
       ],
     },
     sort: 'startDateTime',
@@ -46,6 +56,39 @@ export async function listUpcomingEvents(): Promise<Event[]> {
   return [...(result.docs as Event[])].sort(
     (a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)),
   );
+}
+
+/**
+ * 012 FR-007 — published events overlapping [from, to] for the calendar's 6-week grid, past
+ * events included, soonest-first. Overlap: started before the range ends AND not ended before
+ * the range starts (missing end ⇒ the start must fall inside the range).
+ */
+export async function listEventsInRange(fromIso: string, toIso: string): Promise<Event[]> {
+  const payload = await payloadClient();
+  const result = await payload.find({
+    collection: 'events',
+    where: {
+      and: [
+        { status: { equals: 'published' } },
+        { startDateTime: { less_than_equal: toIso } },
+        {
+          or: [
+            { endDateTime: { greater_than_equal: fromIso } },
+            {
+              and: [
+                { endDateTime: { exists: false } },
+                { startDateTime: { greater_than_equal: fromIso } },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    sort: 'startDateTime',
+    limit: 200,
+    overrideAccess: true,
+  });
+  return result.docs as Event[];
 }
 
 /** A single published event by slug, or `null` (draft/unknown → the page returns 404) (FR-005/006). */

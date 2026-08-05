@@ -18,7 +18,7 @@ state/validation rules, and the pure view module is the feature's risk center (d
 
 **Purpose**: Confirm the working baseline before touching schema or pages.
 
-- [ ] T001 Start local DB (`colima start && docker compose up -d`) and verify the existing suite
+- [X] T001 Start local DB (`colima start && docker compose up -d`) and verify the existing suite
       is green: `source apps/web/.env && pnpm --filter web test` (expect 141 passing)
 
 ---
@@ -29,33 +29,33 @@ state/validation rules, and the pure view module is the feature's risk center (d
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T002 Create pure view module `apps/web/src/lib/events-view.ts` per
+- [X] T002 Create pure view module `apps/web/src/lib/events-view.ts` per
       contracts/events-read.md: `EVENT_TYPES`/`EVENT_TYPE_LABELS`,
       `EVENT_FORMATS`/`EVENT_FORMAT_LABELS`, `parseEventsSearchParams` (FR-018 fallbacks),
       `buildMonthGrid` (6×7 Monday-first), `osloDayKey`, `eventDayKeys`, `groupEventsByDay`,
       `formatDateChip`, `formatMonthTitle`, `prevMonth`/`nextMonth`, `gridRange`, `seatsText`,
       `placeText`, `validateSeatCapacity` — no Payload imports
-- [ ] T003 [P] Unit tests `apps/web/tests/unit/events-view.test.ts`: grid shape (Feb, DST
+- [X] T003 [P] Unit tests `apps/web/tests/unit/events-view.test.ts`: grid shape (Feb, DST
       months, Monday-first, today flag), `osloDayKey` across UTC midnight + DST, multi-day
       `eventDayKeys`, grouping order, param-parse fallback matrix, `seatsText`
       (åpen/fullt/floor-at-zero), `formatDateChip`/`formatMonthTitle`, `validateSeatCapacity`
-- [ ] T004 Extend `apps/web/src/collections/Event.ts` per contracts/events-collection-v2.md:
+- [X] T004 Extend `apps/web/src/collections/Event.ts` per contracts/events-collection-v2.md:
       `eventType` (select, required, default `internt`), `format` (select, required, default
       `digitalt`, label "Oppmøte" for `oppmote`), `channel` (text), `capacity` (number, min 1),
       `seatsTaken` (number, min 0); call `validateSeatCapacity` in the existing
       `beforeValidate` hook
-- [ ] T005 Regenerate Payload types: `pnpm --filter web payload generate:types` →
+- [X] T005 Regenerate Payload types: `pnpm --filter web payload generate:types` →
       `apps/web/src/payload-types.ts`
-- [ ] T006 Create production migration `pnpm --filter web migrate:create
+- [X] T006 Create production migration `pnpm --filter web migrate:create
       events_type_format_capacity`, hand-add the `format` inference backfill UPDATE
       (data-model.md Backfill), and register it in `apps/web/src/migrations/index.ts`
-- [ ] T007 Extend `apps/web/src/lib/events.ts` per contracts/events-read.md:
+- [X] T007 Extend `apps/web/src/lib/events.ts` per contracts/events-read.md:
       `listUpcomingEvents(filters?: { types?; form? })` (query-side filtering, featured re-sort
       kept) and new `listEventsInRange(fromIso, toIso)` (published, range-overlap, asc)
-- [ ] T008 Extend `apps/web/tests/integration/events-access.test.ts`: create without new fields
+- [X] T008 Extend `apps/web/tests/integration/events-access.test.ts`: create without new fields
       → defaults internt/digitalt; `seatsTaken > capacity` rejected; fractional/zero capacity
       rejected; draft exclusion still holds for both read functions
-- [ ] T009 Add the events style block to `apps/web/src/styles/portal.css`: `--ev-cat-*` alias
+- [X] T009 Add the events style block to `apps/web/src/styles/portal.css`: `--ev-cat-*` alias
       tokens (contracts/events-page-ui.md) and shared `.ev-head` (h1 + toggle row) styles
 
 **Checkpoint**: Schema + libs + tokens ready — user stories can start.
