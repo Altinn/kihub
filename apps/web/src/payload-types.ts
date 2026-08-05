@@ -393,7 +393,13 @@ export interface Event {
    * Who runs the event — a person, team, or external party (free text).
    */
   organizer?: string | null;
+  /**
+   * Category shown as the badge and the calendar color.
+   */
   eventType: 'webinar' | 'verksted' | 'kurs' | 'konferanse' | 'internt';
+  /**
+   * Form of participation — drives the FORM filter and the "Digitalt" place text.
+   */
   format: 'digitalt' | 'oppmote' | 'hybrid';
   /**
    * Delivery channel for digital/hybrid events, e.g. "Teams" (optional).

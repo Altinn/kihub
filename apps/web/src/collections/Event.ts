@@ -25,7 +25,7 @@ export const Event: CollectionConfig = {
   slug: 'events',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'status', 'startDateTime', 'featured', 'location'],
+    defaultColumns: ['title', 'status', 'startDateTime', 'eventType', 'format', 'location'],
   },
   access: {
     // Contributor+ read everything (drafts + published) in the back-office/API; everyone else is
@@ -110,6 +110,7 @@ export const Event: CollectionConfig = {
       options: (Object.entries(EVENT_TYPE_LABELS) as [string, string][]).map(
         ([value, label]) => ({ value, label }),
       ),
+      admin: { description: 'Category shown as the badge and the calendar color.' },
     },
     {
       // 012 FR-009: form of participation driving the FORM filter and the "Digitalt" place text.
@@ -120,6 +121,9 @@ export const Event: CollectionConfig = {
       options: (Object.entries(EVENT_FORMAT_LABELS) as [string, string][]).map(
         ([value, label]) => ({ value, label }),
       ),
+      admin: {
+        description: 'Form of participation — drives the FORM filter and the "Digitalt" place text.',
+      },
     },
     {
       name: 'channel',

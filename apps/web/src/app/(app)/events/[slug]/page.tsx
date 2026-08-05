@@ -1,62 +1,87 @@
-import { Divider, Heading, Paragraph, Tag } from '@digdir/designsystemet-react';
 import { RichText } from '@payloadcms/richtext-lexical/react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { EventTypeBadge } from '@/components/EventTypeBadge';
 import { formatEventWhen } from '@/lib/event-dates';
 import { getPublishedEventBySlug } from '@/lib/events';
+import {
+  EVENT_FORMAT_LABELS,
+  placeText,
+  seatsText,
+  type EventFormatValue,
+  type EventTypeValue,
+} from '@/lib/events-view';
 
 /**
- * Employee event detail (US1, FR-005/006/015): title, when (Europe/Oslo), location + online link,
- * organizer, tags, and the rich-text description. A draft or unknown slug resolves to `null` → 404
- * (no draft leaks). A published PAST event is still reachable here (past-hiding is list-only).
+ * 012 US4 (FR-013/014) — the event detail page on the kihub token layer, Norwegian copy: type
+ * badge, when + organizer, meta block (place/form, channel, online link, seats), ICS download
+ * (the existing /events/<slug>/ics route, unchanged), rich-text description. A draft or unknown
+ * slug resolves to `null` → 404 (no draft leaks, FR-016); a published PAST event stays reachable.
  */
 export default async function EventDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const event = await getPublishedEventBySlug(decodeURIComponent(slug));
   if (!event) notFound();
 
-  const tags = (event.tags ?? []).filter((t): t is string => Boolean(t));
-  const when = formatEventWhen(event.startDateTime, event.endDateTime);
+  const format = event.format as EventFormatValue;
+  const metaItems: Array<[string, React.ReactNode]> = [
+    ['Når', `${formatEventWhen(event.startDateTime, event.endDateTime)}`],
+    ['Hvor', placeText(event)],
+    ['Form', EVENT_FORMAT_LABELS[format]],
+    ...(event.channel ? ([['Kanal', event.channel]] as Array<[string, React.ReactNode]>) : []),
+    ['Plasser', seatsText(event.capacity, event.seatsTaken)],
+    ...(event.organizer
+      ? ([['Arrangør', event.organizer]] as Array<[string, React.ReactNode]>)
+      : []),
+    ...(event.onlineUrl
+      ? ([
+          [
+            'Lenke',
+            <a
+              key="online"
+              href={event.onlineUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="kihub-link"
+            >
+              Delta digitalt
+            </a>,
+          ],
+        ] as Array<[string, React.ReactNode]>)
+      : []),
+  ];
 
   return (
-    <main style={{ maxWidth: '760px', margin: '0 auto', padding: '2rem 1rem' }}>
-      <Paragraph data-size="sm" style={{ marginBottom: '1rem' }}>
-        <Link href="/events">← Back to events</Link>
-      </Paragraph>
+    <main className="kihub-container">
+      <article className="kihub-section ev-detail">
+        <p className="ev-detail__back">
+          <Link href="/events" className="kihub-link">
+            ← Til arrangementer
+          </Link>
+        </p>
 
-      <Heading level={1} data-size="lg">
-        {event.title}
-      </Heading>
-      <Paragraph data-size="sm" style={{ marginTop: '0.5rem' }}>
-        {when}
-        {event.organizer ? ` · ${event.organizer}` : ''}
-      </Paragraph>
+        <EventTypeBadge type={event.eventType as EventTypeValue} />
+        <h1 className="kihub-h1 ev-detail__title">{event.title}</h1>
 
-      {event.location || event.onlineUrl ? (
-        <Paragraph data-size="sm" style={{ marginTop: '0.25rem' }}>
-          {event.location ?? ''}
-          {event.location && event.onlineUrl ? ' · ' : ''}
-          {event.onlineUrl ? (
-            <a href={event.onlineUrl} target="_blank" rel="noopener noreferrer">
-              Join online
-            </a>
-          ) : null}
-        </Paragraph>
-      ) : null}
-
-      {tags.length ? (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.75rem' }}>
-          {tags.map((t) => (
-            <Tag key={t} data-color="info" data-size="sm">
-              {t}
-            </Tag>
+        <dl className="ev-detail__meta">
+          {metaItems.map(([label, value]) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
           ))}
+        </dl>
+
+        <p>
+          <a href={`/events/${event.slug ?? ''}/ics`} className="kihub-btn kihub-btn--secondary">
+            + Legg til i kalender
+          </a>
+        </p>
+
+        <div className="kihub-prose ev-detail__body">
+          <RichText data={event.description} />
         </div>
-      ) : null}
-
-      <Divider style={{ margin: '1.5rem 0' }} />
-
-      <RichText data={event.description} />
+      </article>
     </main>
   );
 }

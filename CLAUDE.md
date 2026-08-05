@@ -1,6 +1,7 @@
 <!-- SPECKIT START -->
-Active feature: **012-events-page-redesign** (planned — specify + plan complete; tasks/implement
-next). For technologies, structure, and context read the plan:
+Active feature: **012-events-page-redesign** (DONE — specify + plan + tasks + implement complete;
+suite 187/187 across 27 files, lint + prod build green). For technologies, structure, and context
+read the plan:
 `specs/012-events-page-redesign/plan.md` (with `research.md`, `data-model.md`, `contracts/`,
 `quickstart.md`; `spec.md` for requirements). It rebuilds `/events` ("Arrangementer") into the old
 KI HUB app's calendar page restyled on the **kihub design system**: a Kalender | Liste segmented

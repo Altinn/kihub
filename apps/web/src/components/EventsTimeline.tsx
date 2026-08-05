@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Event } from '@/payload-types';
 import { formatTimeHM, formatTimelineDate } from '@/lib/event-dates';
+import { EVENT_TYPE_LABELS, type EventTypeValue } from '@/lib/events-view';
 
 /**
  * 011 US2 — the "Utover måneden" timeline (contracts/frontpage-read.md): the next 4 upcoming
@@ -18,7 +19,11 @@ const DOT_COLORS = [
 
 /** "type · location" from the parts that exist — never a dangling separator. */
 function typeLine(event: Event): string {
-  return [event.tags?.[0], event.location ?? (event.onlineUrl ? 'Digitalt' : null)]
+  // 012 FR-015: the type is the closed eventType category, no longer the first free tag.
+  return [
+    EVENT_TYPE_LABELS[event.eventType as EventTypeValue],
+    event.location ?? (event.onlineUrl ? 'Digitalt' : null),
+  ]
     .filter(Boolean)
     .join(' · ');
 }

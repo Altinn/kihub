@@ -2,6 +2,7 @@ import type { Role } from '@kihub/governance-core';
 import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { listEventsInRange, listUpcomingEvents } from '@/lib/events';
 import type { Event } from '@/payload-types';
 
 /**
@@ -310,5 +311,99 @@ describe('012 event fields: defaults + seat validation (FR-009/012, US3)', () =>
         users.contributor,
       ),
     ).rejects.toThrow();
+  });
+});
+
+describe('012 read layer: filters + range query (FR-005/007/016, US1/US2)', () => {
+  /** Only this suite's events — the shared dev DB may hold unrelated rows. */
+  const mine = (docs: Event[]) => docs.filter((d) => d.title.includes(testId));
+
+  beforeAll(async () => {
+    const make = (
+      title: string,
+      data: Partial<Parameters<typeof createEvent>[0]> & { startDateTime: string },
+    ) =>
+      createEvent(
+        { title: `${title} ${testId}`, description: lexical('x'), status: 'published', ...data },
+        users.contributor,
+      );
+
+    // Upcoming events for the filter cases (2030 = safely in the future).
+    await make('Filter webinar', {
+      startDateTime: '2030-03-05T10:00:00.000Z',
+      eventType: 'webinar',
+      format: 'digitalt',
+    });
+    await make('Filter kurs', {
+      startDateTime: '2030-03-06T10:00:00.000Z',
+      eventType: 'kurs',
+      format: 'oppmote',
+      location: 'Læringssenteret',
+    });
+    await make('Filter konferanse', {
+      startDateTime: '2030-03-07T10:00:00.000Z',
+      eventType: 'konferanse',
+      format: 'hybrid',
+      location: 'Oslo Kongressenter',
+    });
+
+    // A past month (March 2020) for the range cases — the calendar shows past events (FR-007).
+    await make('Range inside', { startDateTime: '2020-03-10T10:00:00.000Z' });
+    await make('Range spanning', {
+      startDateTime: '2020-02-27T10:00:00.000Z',
+      endDateTime: '2020-03-02T10:00:00.000Z',
+    });
+    await make('Range outside', { startDateTime: '2020-04-10T10:00:00.000Z' });
+    await make('Range draft', {
+      startDateTime: '2020-03-15T10:00:00.000Z',
+      status: 'draft',
+    });
+  }, 60000);
+
+  it('filters by a single type', async () => {
+    const titles = mine(await listUpcomingEvents({ types: ['webinar'] })).map((d) => d.title);
+    expect(titles).toEqual([`Filter webinar ${testId}`]);
+  });
+
+  it('filters by multiple types (OR within TYPE)', async () => {
+    const titles = mine(await listUpcomingEvents({ types: ['webinar', 'kurs'] })).map(
+      (d) => d.title,
+    );
+    expect(titles).toEqual([`Filter webinar ${testId}`, `Filter kurs ${testId}`]);
+  });
+
+  it('filters by form, and combines type+form (AND across groups)', async () => {
+    const byForm = mine(await listUpcomingEvents({ form: 'oppmote' })).map((d) => d.title);
+    expect(byForm).toEqual([`Filter kurs ${testId}`]);
+
+    const combined = mine(
+      await listUpcomingEvents({ types: ['kurs', 'konferanse'], form: 'hybrid' }),
+    ).map((d) => d.title);
+    expect(combined).toEqual([`Filter konferanse ${testId}`]);
+  });
+
+  it('returns all upcoming events when no filter is given (011 frontpage contract)', async () => {
+    const titles = mine(await listUpcomingEvents()).map((d) => d.title);
+    expect(titles).toContain(`Filter webinar ${testId}`);
+    expect(titles).toContain(`Filter kurs ${testId}`);
+    expect(titles).toContain(`Filter konferanse ${testId}`);
+    // Past events stay hidden from the upcoming list (FR-002).
+    expect(titles.some((t) => t.startsWith('Range'))).toBe(false);
+  });
+
+  it('range query includes past-in-month and spanning events, ascending', async () => {
+    const titles = mine(
+      await listEventsInRange('2020-03-01T00:00:00.000Z', '2020-03-31T23:59:59.999Z'),
+    ).map((d) => d.title);
+    expect(titles).toEqual([`Range spanning ${testId}`, `Range inside ${testId}`]);
+  });
+
+  it('range query excludes out-of-range events and drafts (FR-016)', async () => {
+    const docs = mine(
+      await listEventsInRange('2020-03-01T00:00:00.000Z', '2020-03-31T23:59:59.999Z'),
+    );
+    expect(docs.some((d) => d.title === `Range outside ${testId}`)).toBe(false);
+    expect(docs.some((d) => d.title === `Range draft ${testId}`)).toBe(false);
+    expect(docs.every((d) => d.status === 'published')).toBe(true);
   });
 });

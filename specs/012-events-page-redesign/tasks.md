@@ -73,25 +73,25 @@ draft/past exclusion (spec US1 acceptance scenarios 1–8).
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Create `apps/web/src/components/EventTypeBadge.tsx` — uppercase label on
+- [X] T010 [P] [US1] Create `apps/web/src/components/EventTypeBadge.tsx` — uppercase label on
       the type's `--ev-cat-*-surface`, text `--kihub-text`
-- [ ] T011 [P] [US1] Create `apps/web/src/components/EventsViewToggle.tsx` — Kalender | Liste
+- [X] T011 [P] [US1] Create `apps/web/src/components/EventsViewToggle.tsx` — Kalender | Liste
       segmented links, `aria-current` on active
-- [ ] T012 [P] [US1] Create `apps/web/src/components/EventsFilters.tsx` — link-based TYPE
+- [X] T012 [P] [US1] Create `apps/web/src/components/EventsFilters.tsx` — link-based TYPE
       checkboxes (multi, `aria-pressed`) + FORM radios (single, Alle default) + "Nullstill
       filtre", CatalogFilters URL-toggle pattern, kihub-styled
-- [ ] T013 [P] [US1] Create `apps/web/src/components/EventsDayList.tsx` — date chips via
+- [X] T013 [P] [US1] Create `apps/web/src/components/EventsDayList.tsx` — date chips via
       `formatDateChip` + rows (formatTimeHM · linked title · `placeText · channel? ·
       seatsText` · EventTypeBadge · → affordance); empty-state variants (ingen kommende /
       ingen treff + reset link)
-- [ ] T014 [US1] Rebuild `apps/web/src/app/(app)/events/page.tsx` — await `searchParams`,
+- [X] T014 [US1] Rebuild `apps/web/src/app/(app)/events/page.tsx` — await `searchParams`,
       `parseEventsSearchParams`, list branch: `listUpcomingEvents({ types, form })` →
       `groupEventsByDay` → sidebar + `EventsDayList`; Norwegian copy; kihub container/heading
-- [ ] T015 [US1] Add list-view styles to `apps/web/src/styles/portal.css`: `.ev-layout`
+- [X] T015 [US1] Add list-view styles to `apps/web/src/styles/portal.css`: `.ev-layout`
       (~260px sidebar | 1fr, collapses < 900px), `.ev-datechip`, `.ev-row`, filter rows
-- [ ] T016 [US1] Delete `apps/web/src/components/EventCard.tsx` (only consumer was the old
+- [X] T016 [US1] Delete `apps/web/src/components/EventCard.tsx` (only consumer was the old
       `/events` page); verify with a repo-wide import search
-- [ ] T017 [US1] Extend `apps/web/tests/integration/events-access.test.ts`: filtered
+- [X] T017 [US1] Extend `apps/web/tests/integration/events-access.test.ts`: filtered
       `listUpcomingEvents` — single type, multi type, form, type+form, no-filter = all
 
 **Checkpoint**: List view fully functional — MVP shippable.
@@ -109,17 +109,17 @@ month nav both directions, malformed `month` fallback (spec US2 scenarios 1–7)
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US2] Create `apps/web/src/components/EventsMonthCalendar.tsx` — legend (5 swatch +
+- [X] T018 [US2] Create `apps/web/src/components/EventsMonthCalendar.tsx` — legend (5 swatch +
       label pairs), weekday header MAN–SØN, 6×7 grid from `buildMonthGrid`, entries as links
       (type dot + HH:mm + truncated title, `aria-label` with type), cap 3 + "+N flere",
       `.ev-cell--dim`/`--today` states
-- [ ] T019 [US2] Extend `apps/web/src/app/(app)/events/page.tsx` — kalender branch:
+- [X] T019 [US2] Extend `apps/web/src/app/(app)/events/page.tsx` — kalender branch:
       `gridRange` → `listEventsInRange`, place events via `eventDayKeys`, month title +
       `‹`/`›` links (`prevMonth`/`nextMonth`, aria-labels "Forrige/Neste måned")
-- [ ] T020 [US2] Add calendar styles to `apps/web/src/styles/portal.css`: `.ev-cal` grid,
+- [X] T020 [US2] Add calendar styles to `apps/web/src/styles/portal.css`: `.ev-cal` grid,
       header row, cell min-height, entry chips, legend, today disc, dim state, horizontal
       scroll wrapper for narrow viewports
-- [ ] T021 [US2] Extend `apps/web/tests/integration/events-access.test.ts`:
+- [X] T021 [US2] Extend `apps/web/tests/integration/events-access.test.ts`:
       `listEventsInRange` — past-in-month included, span-overlap included, outside-range and
       draft excluded, ascending order
 
@@ -138,10 +138,10 @@ drive list row, calendar color, detail; clear fields → defaults; Reader writes
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Polish the admin config in `apps/web/src/collections/Event.ts`: Norwegian
+- [X] T022 [US3] Polish the admin config in `apps/web/src/collections/Event.ts`: Norwegian
       option labels (incl. "Oppmøte"), field descriptions (channel/capacity/seatsTaken
       editorial guidance), add `eventType` + `format` to `admin.defaultColumns`
-- [ ] T023 [US3] Validate the migration path: run `pnpm --filter web migrate` against a scratch
+- [X] T023 [US3] Validate the migration path: run `pnpm --filter web migrate` against a scratch
       database seeded with pre-012 rows and confirm `event_type='internt'`, inferred `format`
       (hybrid/oppmote/digitalt matrix), NULL capacity (quickstart "Production migration check")
 
@@ -160,7 +160,7 @@ draft slug → 404 (spec US4 scenarios 1–4).
 
 ### Implementation for User Story 4
 
-- [ ] T024 [US4] Restyle `apps/web/src/app/(app)/events/[slug]/page.tsx` per
+- [X] T024 [US4] Restyle `apps/web/src/app/(app)/events/[slug]/page.tsx` per
       contracts/events-page-ui.md: kihub container/h1/prose, `EventTypeBadge`,
       `formatEventWhen` + organizer, meta block (`placeText`, channel, onlineUrl "Delta
       digitalt" link, `seatsText`), "+ Legg til i kalender" → `/events/[slug]/ics`,
@@ -173,15 +173,15 @@ draft slug → 404 (spec US4 scenarios 1–4).
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T025 [P] Frontpage FR-015: swap `event.tags?.[0]` for
+- [X] T025 [P] Frontpage FR-015: swap `event.tags?.[0]` for
       `EVENT_TYPE_LABELS[event.eventType]` in `apps/web/src/components/NextEventCard.tsx` and
       `apps/web/src/components/EventsTimeline.tsx` (meta/type lines only; ICS + selection
       untouched)
-- [ ] T026 Full verification: `source apps/web/.env && pnpm --filter web test` (all suites
+- [X] T026 Full verification: `source apps/web/.env && pnpm --filter web test` (all suites
       green), `pnpm --filter web lint`, `pnpm --filter web build`
-- [ ] T027 Manual quickstart validation (quickstart.md scenarios 1–8) against the dev server,
+- [X] T027 Manual quickstart validation (quickstart.md scenarios 1–8) against the dev server,
       including the no-JS check and a browser screenshot of both views
-- [ ] T028 Update CLAUDE.md SPECKIT block status to implemented + final suite count
+- [X] T028 Update CLAUDE.md SPECKIT block status to implemented + final suite count
 
 ---
 

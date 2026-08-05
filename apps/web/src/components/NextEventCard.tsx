@@ -6,6 +6,7 @@ import {
   formatTimeHM,
   formatWeekday,
 } from '@/lib/event-dates';
+import { EVENT_TYPE_LABELS, type EventTypeValue } from '@/lib/events-view';
 
 /**
  * 011 US2 — the "Neste arrangement" card (contracts/frontpage-read.md): tinted date zone with the
@@ -22,7 +23,8 @@ function metaLine(event: Event): string {
 
 export function NextEventCard({ event }: { event: Event }) {
   const slug = event.slug ?? '';
-  const tag = event.tags?.[0];
+  // 012 FR-015: the badge shows the event TYPE (closed category) instead of the first free tag.
+  const tag = EVENT_TYPE_LABELS[event.eventType as EventTypeValue];
   const meta = metaLine(event);
 
   return (

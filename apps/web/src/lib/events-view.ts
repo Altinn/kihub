@@ -51,7 +51,7 @@ export function osloDayKey(value: string | Date): string {
 
 /** Day-key helpers work on pure calendar days; UTC ms is only the arithmetic carrier. */
 function keyToUtcMs(dayKey: string): number {
-  const [y, m, d] = dayKey.split('-').map(Number);
+  const [y = 0, m = 1, d = 1] = dayKey.split('-').map(Number);
   return Date.UTC(y, m - 1, d);
 }
 
@@ -182,13 +182,16 @@ function osloWallTimeToUtcMs(y: number, m: number, d: number, h = 0, min = 0): n
  * adjacent-month cells get their events too (spec edge case).
  */
 export function gridRange(year: number, month: number): { fromIso: string; toIso: string } {
-  const grid = buildMonthGrid(year, month, '');
-  const firstKey = grid[0][0].dayKey;
-  const lastKey = grid[5][6].dayKey;
-  const [fy, fm, fd] = firstKey.split('-').map(Number);
-  const afterLastMs = keyToUtcMs(lastKey) + DAY_MS;
-  const after = new Date(afterLastMs);
-  const from = osloWallTimeToUtcMs(fy, fm, fd);
+  // Same start-of-grid arithmetic as buildMonthGrid; 42 cells later is the day after the grid.
+  const firstOfMonth = Date.UTC(year, month - 1, 1);
+  const mondayOffset = (new Date(firstOfMonth).getUTCDay() + 6) % 7;
+  const first = new Date(firstOfMonth - mondayOffset * DAY_MS);
+  const after = new Date(first.getTime() + 42 * DAY_MS);
+  const from = osloWallTimeToUtcMs(
+    first.getUTCFullYear(),
+    first.getUTCMonth() + 1,
+    first.getUTCDate(),
+  );
   const to =
     osloWallTimeToUtcMs(after.getUTCFullYear(), after.getUTCMonth() + 1, after.getUTCDate()) - 1;
   return { fromIso: new Date(from).toISOString(), toIso: new Date(to).toISOString() };
