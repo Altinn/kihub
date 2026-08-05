@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { EventsTimeline } from '@/components/EventsTimeline';
 import { FrontpageHero } from '@/components/FrontpageHero';
-import { FrontpageNewsCard } from '@/components/FrontpageNewsCard';
 import { FrontpageTile } from '@/components/FrontpageTile';
+import { NewsCard } from '@/components/NewsCard';
 import { NextEventCard } from '@/components/NextEventCard';
 import { SubscriptionsBanner } from '@/components/SubscriptionsBanner';
 import { listUpcomingEvents } from '@/lib/events';
@@ -90,7 +90,7 @@ export default async function FrontPage() {
         {latestNews.length ? (
           <div className="fp-news">
             {latestNews.map((article) => (
-              <FrontpageNewsCard key={article.id} article={article} />
+              <NewsCard key={article.id} article={article} headingLevel={3} />
             ))}
           </div>
         ) : (

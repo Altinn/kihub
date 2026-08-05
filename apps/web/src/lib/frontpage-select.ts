@@ -1,9 +1,11 @@
 /**
  * 011 frontpage — pure selection helpers for the "Hva skjer i BOD" and "Siste nytt" sections
- * (FR-006/008, contracts/frontpage-read.md). The shared read libs return featured-first ordering
- * for the /events and /news pages; the frontpage is strictly chronological, so these helpers
- * re-sort WITHOUT touching the shared libs. Structural generics + no Payload imports keep the
- * module unit-testable in isolation (mirrors `lib/event-dates.ts` / `lib/slug.ts`).
+ * (FR-006/008, contracts/frontpage-read.md). `lib/events.ts` returns featured-first ordering for the
+ * /events page; the frontpage is strictly chronological, so these helpers re-sort WITHOUT touching
+ * the shared libs. (`lib/news.ts` is itself strictly newest-first since 013, so `selectLatestNews`
+ * now re-sorts an already-sorted list — kept because the ordering guarantee belongs to the caller
+ * that depends on it.) Structural generics + no Payload imports keep the module unit-testable in
+ * isolation (mirrors `lib/event-dates.ts` / `lib/slug.ts`).
  */
 
 /** Timeline rows shown beside the next-event card (clarification: next 4, month-agnostic). */
@@ -30,7 +32,7 @@ export function selectEventsSection<
 }
 
 /**
- * The `n` most recently published articles, newest first, IGNORING the `featured` boost (FR-008:
+ * The `n` most recently published articles, newest first, IGNORING any `featured` boost (FR-008:
  * "most recently published" — a featured-but-older article must not outrank a newer one).
  * Articles without a `publishDate` sort last.
  */

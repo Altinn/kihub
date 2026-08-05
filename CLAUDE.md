@@ -1,6 +1,7 @@
 <!-- SPECKIT START -->
-Active feature: **013-news-page-redesign** (specify + plan complete; tasks + implement pending).
-For technologies, structure, and context read the plan:
+Active feature: **013-news-page-redesign** (DONE — specify + plan + tasks + implement complete;
+suite 212/212 across 28 files, lint + prod build green). For technologies, structure, and context
+read the plan:
 `specs/013-news-page-redesign/plan.md` (with `research.md`, `data-model.md`, `contracts/`,
 `quickstart.md`; `spec.md` for requirements). It rebuilds `/news` ("Nyheter") into the old KI HUB
 app's editorial news grid restyled on the **kihub design system**: cards of a 16:10 media well

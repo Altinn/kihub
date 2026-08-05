@@ -1,57 +1,50 @@
-import { Card, Divider, Heading, Paragraph } from '@digdir/designsystemet-react';
-import Link from 'next/link';
 import { NewsCard } from '@/components/NewsCard';
-import { listPublishedNews } from '@/lib/news';
+import { NewsPagination } from '@/components/NewsPagination';
+import { listPublishedNewsPage } from '@/lib/news';
+import { buildPagination, parseNewsPageParam } from '@/lib/news-view';
 
 /**
- * Employee news list (US1, FR-004/012): published articles, featured surfaced, newest-first, with a
- * friendly empty state. Access is gated by `(app)/layout.tsx` `requireSession()` — employees only.
+ * 013 — "Nyheter" (contracts/news-page-ui.md §B.3). One server component: the editorial card grid
+ * of published articles, newest-first, paginated entirely through the `?page=` search param
+ * (FR-002/005/007) so it works with client-side scripting disabled (SC-003). Access is gated by
+ * `(app)/layout.tsx` `requireSession()` — employees only; drafts can never appear (FR-012).
  */
-export default async function NewsListPage() {
-  const articles = await listPublishedNews();
+
+type SearchParams = Record<string, string | string[] | undefined>;
+
+export default async function NewsListPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  // `page` is the only param this surface reads; malformed values fall back to page 1 (FR-010).
+  const requested = parseNewsPageParam((await searchParams).page);
+  const { articles, page, totalPages, totalDocs } = await listPublishedNewsPage(requested);
+  // Built from the RETURNED page, so an out-of-range request labels the page it actually rendered.
+  const pagination = buildPagination(page, totalPages, totalDocs);
 
   return (
-    <main style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1rem' }}>
+    <main className="kihub-container">
+      <div className="kihub-section">
+        <h1 className="kihub-h1">Nyheter</h1>
 
-      <Paragraph data-size="sm" style={{ marginBottom: '1rem' }}>
-        <Link href="/registry">← Back to catalog</Link>
-      </Paragraph>
+        {articles.length === 0 ? (
+          <div className="news-empty">
+            <p className="kihub-h3">Ingen nyheter ennå</p>
+            <p style={{ margin: 0, color: 'var(--kihub-text-subtle)' }}>
+              Det er ingen publiserte nyheter akkurat nå. Kom tilbake senere.
+            </p>
+          </div>
+        ) : (
+          <div className="news-grid">
+            {articles.map((article) => (
+              <NewsCard key={article.id} article={article} />
+            ))}
+          </div>
+        )}
 
-      <Heading level={2} data-size="lg">
-        News
-      </Heading>
-      <Paragraph data-size="sm" style={{ marginTop: '0.25rem' }}>
-        Internal news and announcements.
-      </Paragraph>
-
-      <Divider style={{ margin: '1.5rem 0' }} />
-
-      {articles.length === 0 ? (
-        <Card>
-          <Heading level={2} data-size="sm">
-            No news yet
-          </Heading>
-          <Paragraph data-size="sm" style={{ marginTop: '0.5rem' }}>
-            There are no published news articles right now. Check back soon.
-          </Paragraph>
-        </Card>
-      ) : (
-        <div style={{ display: 'grid', gap: '1rem' }}>
-          {articles.map((a) => (
-            <NewsCard
-              key={a.id}
-              article={{
-                slug: a.slug ?? '',
-                title: a.title,
-                summary: a.summary,
-                publishDate: a.publishDate,
-                tags: a.tags,
-                featured: a.featured,
-              }}
-            />
-          ))}
-        </div>
-      )}
+        <NewsPagination pagination={pagination} />
+      </div>
     </main>
   );
 }

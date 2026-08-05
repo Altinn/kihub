@@ -24,10 +24,28 @@ set -a; source apps/web/.env; set +a && pnpm --filter web test
 ```
 
 Expected: full suite green — 187 pre-existing tests plus the new `unit/news-view.test.ts` cases and
-the extended `integration/news-access.test.ts` pagination cases. Then lint and type check:
+the extended `integration/news-access.test.ts` pagination cases (212 total across 28 files). Then
+lint:
 
 ```bash
-pnpm --filter web lint && pnpm --filter web build
+pnpm --filter web lint
+```
+
+The production build needs two overrides locally, because `next build` runs with
+`NODE_ENV=production`: the dev `.env` sets `AUTH_MODE=mock` (rejected in production), and
+`prodMigrations` prompts interactively when it meets a database that dev push-mode created. Point it
+at a throwaway database:
+
+```bash
+docker exec kihub-postgres psql -U kihub -d postgres -c "DROP DATABASE IF EXISTS kihub_buildcheck;" -c "CREATE DATABASE kihub_buildcheck OWNER kihub;"
+```
+
+```bash
+set -a; source apps/web/.env; set +a; DATABASE_URI=postgres://kihub:kihub@localhost:55432/kihub_buildcheck AUTH_MODE=entra ENTRA_CLIENT_ID=build-check ENTRA_CLIENT_SECRET=build-check ENTRA_TENANT_ID=00000000-0000-0000-0000-000000000000 pnpm --filter web build
+```
+
+```bash
+docker exec kihub-postgres psql -U kihub -d postgres -c "DROP DATABASE IF EXISTS kihub_buildcheck;"
 ```
 
 ## Seeding

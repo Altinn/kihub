@@ -1,53 +1,73 @@
-import { Card, Heading, Paragraph, Tag } from '@digdir/designsystemet-react';
 import Link from 'next/link';
+import { formatNewsDate } from '@/lib/news-view';
+import type { News } from '@/payload-types';
 
-export interface NewsCardData {
-  slug: string;
-  title: string;
-  summary?: string | null;
-  publishDate?: string | null;
-  tags?: (string | null)[] | null;
-  featured?: boolean | null;
-}
+/**
+ * One news card (013 FR-002/003, contracts/news-page-ui.md §B.1): 16:10 media well (image or
+ * design-system placeholder), serif title, nb-NO date line and summary. The whole card is a single
+ * link to the article — no competing nested links.
+ *
+ * Shared by BOTH news surfaces: the frontpage "Siste nytt" section (011 US3, `headingLevel={3}`
+ * under its "Siste nytt" `<h2>`) and the /news grid (013 US1, `headingLevel={2}` under the page
+ * `<h1>`). 013 consolidated the frontpage-only `FrontpageNewsCard` into this file so the two
+ * surfaces cannot drift apart.
+ */
+export function NewsCard({
+  article,
+  headingLevel = 2,
+}: {
+  article: News;
+  headingLevel?: 2 | 3;
+}) {
+  const date = formatNewsDate(article.publishDate);
+  const Heading = headingLevel === 3 ? 'h3' : 'h2';
 
-/** Listing card for one news article (Designsystemet). Links to the detail page. */
-export function NewsCard({ article }: { article: NewsCardData }) {
-  const tags = (article.tags ?? []).filter((t): t is string => Boolean(t));
   return (
-    <Card>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
-        <Heading level={2} data-size="xs">
-          <Link href={`/news/${article.slug}`}>{article.title}</Link>
-        </Heading>
-        {article.featured ? (
-          <Tag data-color="warning" data-size="sm">
-            Featured
-          </Tag>
-        ) : null}
-      </div>
-      {article.publishDate ? (
-        <Paragraph data-size="xs" style={{ marginTop: '0.25rem' }}>
-          {new Date(article.publishDate).toLocaleDateString('nb-NO', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </Paragraph>
-      ) : null}
-      {article.summary ? (
-        <Paragraph data-size="sm" style={{ marginTop: '0.5rem' }}>
-          {article.summary}
-        </Paragraph>
-      ) : null}
-      {tags.length ? (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.75rem' }}>
-          {tags.map((t) => (
-            <Tag key={t} data-color="info" data-size="sm">
-              {t}
-            </Tag>
-          ))}
+    <Link
+      href={`/news/${article.slug ?? ''}`}
+      className="kihub-focusable"
+      style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+    >
+      <article className="kihub-stack" style={{ gap: 'var(--kihub-space-3)' }}>
+        <div
+          className={`kihub-media${article.heroImageUrl ? '' : ' kihub-media--placeholder'}`}
+          style={{ aspectRatio: '16 / 10' }}
+        >
+          {article.heroImageUrl ? (
+            // Image URLs are editor-provided strings (no Media collection); a broken URL leaves
+            // the tinted well visible behind it, matching the placeholder look.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={article.heroImageUrl}
+              alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          ) : null}
         </div>
-      ) : null}
-    </Card>
+        <Heading className="kihub-h4">{article.title}</Heading>
+        {date ? (
+          <p
+            style={{
+              margin: 0,
+              font: '400 13px var(--kihub-font-ui)',
+              color: 'var(--kihub-text-subtle)',
+            }}
+          >
+            {date}
+          </p>
+        ) : null}
+        {article.summary ? (
+          <p
+            style={{
+              margin: 0,
+              font: '400 16px/1.55 var(--kihub-font-display)',
+              color: 'var(--kihub-text-subtle)',
+            }}
+          >
+            {article.summary}
+          </p>
+        ) : null}
+      </article>
+    </Link>
   );
 }

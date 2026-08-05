@@ -2,6 +2,8 @@ import type { Role } from '@kihub/governance-core';
 import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { listPublishedNewsPage } from '@/lib/news';
+import { NEWS_PAGE_SIZE } from '@/lib/news-view';
 import type { News } from '@/payload-types';
 
 /**
@@ -49,7 +51,13 @@ function lexical(text: string): News['body'] {
  * hook-derived `slug` typing is stricter than what we hand-build here).
  */
 function createNews(
-  data: { title: string; body: News['body']; slug?: string; status?: 'draft' | 'published' },
+  data: {
+    title: string;
+    body: News['body'];
+    slug?: string;
+    status?: 'draft' | 'published';
+    publishDate?: string;
+  },
   user?: Doc,
 ) {
   return payload.create({
@@ -202,5 +210,106 @@ describe('News authoring access + visibility (T009)', () => {
       user: users.reader,
     });
     expect(bySlug.docs.length).toBe(0);
+  });
+});
+
+/**
+ * T010/T014 (013 US1/US2, FR-005/006/007/010/012) — the paginated read path.
+ *
+ * `listPublishedNewsPage` reads the whole collection by design, and this suite runs against the
+ * shared local dev database, so every assertion here is RELATIVE (invariants that hold whatever else
+ * is published) rather than absolute counts. Seeding more than one page's worth guarantees at least
+ * two pages regardless of pre-existing content.
+ */
+describe('Paginated news reads (013 T010/T014)', () => {
+  const seeded: number[] = [];
+  const SEED_COUNT = NEWS_PAGE_SIZE + 2;
+  /** Two articles deliberately share this timestamp to exercise the sort tiebreaker. */
+  const SHARED_DATE = '2026-03-15T09:00:00.000Z';
+
+  beforeAll(async () => {
+    for (let i = 0; i < SEED_COUNT; i++) {
+      const doc = await createNews(
+        {
+          title: `Paged ${String(i).padStart(2, '0')} ${testId}`,
+          body: lexical(`paged body ${i}`),
+          status: 'published',
+          // Descending, distinct dates — except the last two, which collide on purpose.
+          publishDate:
+            i >= SEED_COUNT - 2
+              ? SHARED_DATE
+              : new Date(Date.UTC(2026, 4, 20 - i, 9, 0, 0)).toISOString(),
+        },
+        users.contributor,
+      );
+      seeded.push(doc.id);
+    }
+  }, 120000);
+
+  /** Walk every page once and return the flattened result plus the totals reported on page 1. */
+  async function walkAllPages() {
+    const first = await listPublishedNewsPage(1);
+    const all: News[] = [...first.articles];
+    for (let p = 2; p <= first.totalPages; p++) {
+      const next = await listPublishedNewsPage(p);
+      all.push(...next.articles);
+    }
+    return { all, totalPages: first.totalPages, totalDocs: first.totalDocs };
+  }
+
+  it('returns at most one page of articles and reports coherent totals (FR-006)', async () => {
+    const page1 = await listPublishedNewsPage(1);
+    expect(page1.page).toBe(1);
+    expect(page1.articles.length).toBeLessThanOrEqual(NEWS_PAGE_SIZE);
+    // The seed guarantees more than one page exists, whatever else is published.
+    expect(page1.totalDocs).toBeGreaterThan(NEWS_PAGE_SIZE);
+    expect(page1.totalPages).toBeGreaterThan(1);
+    expect(page1.articles.length).toBe(NEWS_PAGE_SIZE);
+  });
+
+  it('yields every published article exactly once across pages (SC-001)', async () => {
+    const { all, totalDocs } = await walkAllPages();
+    const ids = all.map((a) => a.id);
+    // No duplicate at any page boundary, and nothing skipped.
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids.length).toBe(totalDocs);
+    // Every seeded article is reachable by paging.
+    for (const id of seeded) expect(ids).toContain(id);
+  });
+
+  it('orders strictly newest-first across page boundaries (FR-005)', async () => {
+    const { all } = await walkAllPages();
+    const times = all.map((a) => (a.publishDate ? new Date(a.publishDate).getTime() : 0));
+    for (let i = 1; i < times.length; i++) {
+      expect(times[i - 1]).toBeGreaterThanOrEqual(times[i] as number);
+    }
+  });
+
+  it('never returns a draft on any page (FR-012)', async () => {
+    const { all } = await walkAllPages();
+    expect(all.every((a) => a.status === 'published')).toBe(true);
+    expect(all.some((a) => a.id === draftId)).toBe(false);
+  });
+
+  it('clamps an out-of-range page to the last page instead of erroring or emptying (FR-010)', async () => {
+    const { totalPages } = await walkAllPages();
+    const beyond = await listPublishedNewsPage(totalPages + 50);
+    expect(beyond.page).toBe(totalPages);
+    expect(beyond.articles.length).toBeGreaterThan(0);
+    expect(beyond.totalPages).toBe(totalPages);
+
+    const last = await listPublishedNewsPage(totalPages);
+    expect(beyond.articles.map((a) => a.id)).toEqual(last.articles.map((a) => a.id));
+  });
+
+  it('keeps same-date articles in a stable order between requests (the -createdAt tiebreaker)', async () => {
+    // Two seeded articles share SHARED_DATE; without a deterministic tiebreaker they could swap
+    // between requests, which would let offset paging skip or repeat one of them.
+    const a = await walkAllPages();
+    const b = await walkAllPages();
+    expect(a.all.map((x) => x.id)).toEqual(b.all.map((x) => x.id));
+
+    const sameDate = a.all.filter((x) => x.publishDate === SHARED_DATE).map((x) => x.id);
+    expect(sameDate.length).toBeGreaterThanOrEqual(2);
   });
 });

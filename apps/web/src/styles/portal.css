@@ -611,3 +611,105 @@
 .ev-detail__body {
   margin-top: var(--kihub-space-8);
 }
+
+/* ==========================================================================
+   013 — /news ("Nyheter"): editorial card grid, pagination, article page
+   ========================================================================== */
+
+/* ---------- Liste: the card grid (FR-002/004) ---------- */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--kihub-space-10) var(--kihub-space-6);
+  margin-top: var(--kihub-space-10);
+}
+/* `minmax(0, 1fr)` above plus wrapping below is what keeps a long unbroken headline from forcing a
+   horizontal scrollbar instead of wrapping inside its card (SC-004). */
+.news-grid h2,
+.news-grid h3,
+.news-grid p {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 719px) {
+  .news-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.news-empty {
+  display: grid;
+  gap: var(--kihub-space-3);
+  margin-top: var(--kihub-space-10);
+  max-width: var(--kihub-prose-width);
+}
+
+/* ---------- Pagination (FR-008/009) ---------- */
+.news-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--kihub-space-4);
+  margin-top: var(--kihub-space-14);
+  padding-top: var(--kihub-space-6);
+  border-top: 1px solid var(--kihub-border-subtle);
+}
+.news-pagination__btn {
+  font: var(--kihub-weight-medium) var(--kihub-font-size-ui) var(--kihub-font-ui);
+  color: var(--kihub-accent);
+  text-decoration: none;
+  padding: var(--kihub-space-2) var(--kihub-space-4);
+  border-radius: var(--kihub-radius);
+}
+a.news-pagination__btn:hover {
+  background: var(--kihub-surface-accent);
+  color: var(--kihub-accent-hover);
+}
+/* The unavailable direction is a non-focusable span, not a disabled link (contract §E). */
+.news-pagination__btn--off {
+  color: var(--kihub-text-subtle);
+  cursor: default;
+}
+.news-pagination__label {
+  font: 400 var(--kihub-font-size-ui) var(--kihub-font-ui);
+  color: var(--kihub-text-subtle);
+}
+
+/* ---------- Article page (FR-014) ---------- */
+.news-detail {
+  max-width: var(--kihub-prose-width);
+}
+.news-detail__back {
+  margin: 0 0 var(--kihub-space-8);
+  font: 400 var(--kihub-font-size-ui) var(--kihub-font-ui);
+}
+.news-detail__title {
+  font-size: var(--kihub-font-size-h2);
+  margin: 0 0 var(--kihub-space-4);
+}
+.news-detail__meta {
+  margin: 0;
+  font: 400 var(--kihub-font-size-ui) var(--kihub-font-ui);
+  color: var(--kihub-text-subtle);
+}
+.news-detail__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kihub-space-2);
+  list-style: none;
+  margin: var(--kihub-space-6) 0 0;
+  padding: 0;
+}
+.news-detail__tags li {
+  font: var(--kihub-weight-medium) var(--kihub-font-size-label) var(--kihub-font-ui);
+  color: var(--kihub-text-accent);
+  background: var(--kihub-surface-accent);
+  border-radius: var(--kihub-radius);
+  padding: var(--kihub-space-1) var(--kihub-space-3);
+}
+.news-detail__hero {
+  margin-top: var(--kihub-space-8);
+}
+.news-detail__body {
+  margin-top: var(--kihub-space-8);
+}
