@@ -21,6 +21,9 @@ The 59 dysfunctions originate from **Trond Hjorteland**'s [*"Organisational Dysf
 
 New entries are appended as they are propagated from the upstream repo ([sorensensig/organisational-dysfunction](https://github.com/sorensensig/organisational-dysfunction)). Newest first.
 
+### 0.6.0 — 2026-08-07
+- Added `#66` **Everything is fine** (65 → 66 dysfunctions).
+
 ### 0.5.0 — 2026-08-05
 - Added `#65` **The facilitator's toolkit** (64 → 65 dysfunctions).
 
