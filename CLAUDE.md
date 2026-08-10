@@ -1,6 +1,7 @@
 <!-- SPECKIT START -->
-Active feature: **014-learning-pages** (specify + plan complete; tasks + implement PENDING). For
-technologies, structure, and context read the plan:
+Active feature: **014-learning-pages** (DONE — specify + plan + tasks + implement complete; suite
+**328/328 across 37 files**, lint clean, prod build compiles + typechecks + generates all routes).
+For technologies, structure, and context read the plan:
 `specs/014-learning-pages/plan.md` (with `research.md`, `data-model.md`, `contracts/`,
 `quickstart.md`; `spec.md` for requirements). It adds **KI Læring** — the constitution's fourth
 module (v3.1.0) — as a learning library: editors curate categories → subcategories → pages in
@@ -17,8 +18,28 @@ event-colour pattern, `portal.css:194`) — the one recorded Design System devia
 native `<details>` (works with JS off, FR-005) so the feature adds ZERO client components; explicit
 `order` field, NOT Payload's `@experimental` `orderable`; flat addresses `/laering/<slug>` so
 reorganising never breaks links; tree = 3 queries at `depth: 0` + a pure `buildLearningTree`.
-Blocked externally: durable image storage needs an Azure blob container from the platform team —
-deployed envs run `MEDIA_STORAGE_MODE=disk` (ephemeral) until then; local dev unblocked.
+Shipped shape: `lib/learning.ts` (read layer, 3 queries at `depth: 0`) + pure `lib/learning-view.ts`
+(`buildLearningTree` / `learningPageHref` / `formatLearningUpdated` / `LEARNING_CODE_LANGUAGES`) +
+`lib/learning-code.ts` (sync shiki singleton, `highlightCode` with the REQUIRED unloaded-language
+guard) + `lib/media-storage.ts` (`MEDIA_STORAGE_MODE`); components `LearningShell` / `LearningNav` /
+`LearningBody` / `LearningCodeBlock` / `LearningImage`; routes `/laering` + `/laering/[slug]`;
+`portal.css` section `014 /laering` incl. the `--shiki-token-*` aliases. TWO migrations
+(`..._learning_pages`, `..._media_uploads`), both hand-patched with `IF EXISTS` on the constraint /
+index drops — the generated `down` drops tables with CASCADE and then drops the same FKs by name,
+which aborts the transaction (first new-collection migration since baseline, so it had not surfaced).
+`CopyButton` gained a `copiedLabel` prop (was hardcoded English).
+Gotchas worth remembering: a Next layout cannot see a CHILD segment's `[slug]`, so the shell is a
+COMPONENT not `layout.tsx`; `payload migrate` against the local push-mode DB PROMPTS "data loss will
+occur" — verify migrations on a scratch DB instead; `@payloadcms/storage-azure` requires
+`baseURL` (non-optional, despite the docs table) so `AZURE_STORAGE_ACCOUNT_BASEURL` is mandatory in
+azure mode; `next build` is the ONLY gate that caught two implicit-`any`/type errors (vitest + eslint
+both passed), and in this environment it needs a migrated scratch DB + non-mock AUTH_MODE, while
+`next/font` cannot reach Google Fonts at all (pre-existing — `196380d` fails identically).
+Release notes: (1) editors must add the "KI Læring" nav entry in `/cms` → Site Chrome in any env whose
+`site-chrome` global was already saved — `mergeSiteChrome` treats a saved nav as authoritative and no
+migration touches editor-owned content; (2) blocked externally: durable image storage needs an Azure
+blob container from the platform team — deployed envs run `MEDIA_STORAGE_MODE=disk` (ephemeral, and
+images uploaded meanwhile are NOT migrated) until then; local dev unblocked.
 Prior: **013-news-page-redesign** (DONE — suite 212/212 across 28 files, lint + prod build green),
 `specs/013-news-page-redesign/plan.md`. It rebuilt `/news` ("Nyheter") as a kihub-restyled editorial
 card grid (16:10 media well + serif headline + nb-NO date + summary, 2-up/1-up, each card ONE link)

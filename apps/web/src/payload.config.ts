@@ -13,10 +13,12 @@ import { Event } from './collections/Event';
 import { LearningCategory } from './collections/LearningCategory';
 import { LearningPage } from './collections/LearningPage';
 import { LearningSubcategory } from './collections/LearningSubcategory';
+import { Media } from './collections/Media';
 import { News } from './collections/News';
 import { Review } from './collections/Review';
 import { Users } from './collections/Users';
 import { buildPoolConfig } from './lib/db-auth';
+import { buildMediaStoragePlugins } from './lib/media-storage';
 import { migrations } from './migrations';
 import { Frontpage } from './globals/Frontpage';
 import { SiteChrome } from './globals/SiteChrome';
@@ -50,7 +52,12 @@ export default buildConfig({
     LearningCategory,
     LearningSubcategory,
     LearningPage,
+    Media,
   ],
+  // 014: media storage is env-selected (MEDIA_STORAGE_MODE) — empty in `disk` mode, the Azure Blob
+  // adapter in `azure` mode, throwing at startup when that mode is misconfigured (FR-024/025).
+  // This is the config's first `plugins` entry.
+  plugins: buildMediaStoragePlugins(),
   // 011: editor-managed chrome + frontpage content (contracts/site-content-globals.md).
   globals: [SiteChrome, Frontpage],
   editor: lexicalEditor(),

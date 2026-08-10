@@ -27,3 +27,7 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 *.swp
+
+# 014: locally uploaded media (MEDIA_STORAGE_MODE=disk). Payload writes uploads and their generated
+# sizes here; in deployed environments they live in Azure Blob Storage instead. Never committed.
+apps/web/media/

@@ -58,9 +58,16 @@ Added to `.env.example` with the same commenting style as the existing blocks:
 | Variable | Mode | Meaning |
 |---|---|---|
 | `MEDIA_STORAGE_MODE` | both | `disk` (default, local dev) or `azure` |
-| `AZURE_STORAGE_CONNECTION_STRING` | azure | required; the container's connection string |
-| `AZURE_STORAGE_CONTAINER_NAME` | azure | required; the blob container |
-| `AZURE_STORAGE_ACCOUNT_BASEURL` | azure | optional; public base URL for served blobs |
+| `AZURE_STORAGE_CONNECTION_STRING` | azure | **required**; the container's connection string |
+| `AZURE_STORAGE_CONTAINER_NAME` | azure | **required**; the blob container |
+| `AZURE_STORAGE_ACCOUNT_BASEURL` | azure | **required**; public base URL for served blobs |
+
+**Correction found during implementation**: `AZURE_STORAGE_ACCOUNT_BASEURL` is **required**, not
+optional. Payload's documentation table reads as though it were optional, but
+`@payloadcms/storage-azure@3.85.2` declares `baseURL: string` (non-optional) in `AzureStorageOptions`
+— omitting it is a type error, caught by `next build`'s type check rather than by tests. All three
+variables are therefore validated together, and the platform team must supply the base URL alongside
+the connection string and container name.
 
 `allowContainerCreate` is **not** exposed and stays `false`: the container is provisioned by the
 platform team, and the app should not hold container-creation rights it never needs.

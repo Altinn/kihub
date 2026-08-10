@@ -930,3 +930,99 @@ a.news-pagination__btn:hover {
 .lp-page__body {
   margin-top: var(--kihub-space-8);
 }
+
+/* ---------- Code blocks (contract §B2/§C) ---------- */
+
+/* Syntax-highlighting palette. shiki's CSS-variables theme emits `var(--shiki-…)` instead of hex,
+ * and these aliases resolve them through the token layer — the same technique the 012 event-type
+ * colours use above (aliases of theme tokens only, no new colour value in the system).
+ *
+ * FOUR roles only. The design system's rules are "one accent" and "status colours are for status,
+ * never decoration"; a nine-hue rainbow would break both. This is the recorded, narrowed deviation
+ * (plan.md Complexity Tracking) and it is confined inside a code block.
+ *
+ * Aliased to Designsystemet's *-text-* roles, NOT the *-base-* fills: base colours are tuned for
+ * surfaces and are not guaranteed to reach 4.5:1 as small text (FR-035).
+ *
+ * EVERY variable the theme emits is given a value — an unset one would fall back to the browser
+ * default rather than inheriting the code colour. */
+:root {
+  --shiki-foreground: var(--kihub-text);
+  --shiki-background: transparent;
+
+  /* 1. Keywords carry the one accent. */
+  --shiki-token-keyword: var(--kihub-text-accent);
+
+  /* 2. Literals get the single second hue. */
+  --shiki-token-string: var(--ds-color-success-text-default);
+  --shiki-token-string-expression: var(--ds-color-success-text-default);
+  --shiki-token-constant: var(--ds-color-success-text-default);
+
+  /* 3. Comments recede (the italic comes from the token's fontStyle). */
+  --shiki-token-comment: var(--kihub-text-subtle);
+
+  /* 4. Everything else is plain ink. */
+  --shiki-token-punctuation: var(--kihub-text);
+  --shiki-token-function: var(--kihub-text);
+  --shiki-token-parameter: var(--kihub-text);
+  --shiki-token-link: var(--kihub-text);
+}
+
+.lp-code {
+  /* The kihub layer has no monospace token — this is the one local font value, a system stack rather
+   * than a new design decision. Colour, size and spacing still come from tokens. */
+  --lp-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  margin: var(--kihub-space-6) 0;
+  border: 1px solid var(--kihub-border-subtle);
+  border-radius: var(--kihub-radius);
+  background: var(--kihub-bg-tinted);
+  overflow: hidden;
+}
+.lp-code__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--kihub-space-3);
+  padding: var(--kihub-space-2) var(--kihub-space-3);
+  border-bottom: 1px solid var(--kihub-border-subtle);
+}
+.lp-code__lang {
+  font: var(--kihub-weight-medium) var(--kihub-font-size-label) var(--kihub-font-ui);
+  letter-spacing: var(--kihub-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--kihub-text-subtle);
+}
+.lp-code__pre {
+  /* Overflow is contained INSIDE the block; combined with `min-width: 0` on the shell's content
+   * column, a long line never makes the page scroll sideways (contract B2.7). */
+  overflow-x: auto;
+  margin: 0;
+  padding: var(--kihub-space-4);
+  /* `pre` preserves the authored indentation and blank lines exactly (contract B2.1). */
+  white-space: pre;
+  tab-size: 2;
+  color: var(--shiki-foreground);
+  background: var(--shiki-background);
+}
+.lp-code__pre code {
+  font-family: var(--lp-font-mono);
+  font-size: var(--kihub-font-size-body-sm);
+  line-height: var(--kihub-line-height-body);
+}
+.lp-code__line {
+  display: block;
+  min-height: 1lh;
+}
+
+/* ---------- Inline images (contract §B1) ---------- */
+.lp-figure {
+  margin: var(--kihub-space-8) 0;
+}
+.lp-figure img {
+  display: block;
+  /* Never wider than the content column, at any viewport (contract B1.4). The height:auto keeps the
+   * intrinsic aspect ratio while width/height attributes reserve space against layout shift. */
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--kihub-radius-lg);
+}

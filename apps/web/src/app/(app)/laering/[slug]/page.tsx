@@ -1,6 +1,6 @@
-import { RichText } from '@payloadcms/richtext-lexical/react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { LearningBody } from '@/components/LearningBody';
 import { LearningShell } from '@/components/LearningShell';
 import { getPublishedLearningPageBySlug, readLearningLibrary } from '@/lib/learning';
 import { buildLearningTree, formatLearningUpdated } from '@/lib/learning-view';
@@ -61,9 +61,7 @@ export default async function LearningPageRoute({
 
         {page.summary ? <p className="kihub-lead lp-page__summary">{page.summary}</p> : null}
 
-        <div className="lp-page__body kihub-prose">
-          <RichText data={page.body} />
-        </div>
+        <LearningBody body={page.body} />
       </article>
     </LearningShell>
   );
