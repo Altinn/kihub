@@ -29,6 +29,8 @@
     "@payloadcms/db-postgres": "3.85.2",
     "@payloadcms/next": "3.85.2",
     "@payloadcms/richtext-lexical": "3.85.2",
+    "@payloadcms/storage-azure": "3.85.2",
+    "@shikijs/langs": "4.4.3",
     "graphql": "^16.8.1",
     "next": "16.2.11",
     "next-auth": "5.0.0-beta.32",
@@ -37,7 +39,8 @@
     "react-dom": "19.2.7",
     "react-markdown": "10.1.0",
     "remark-gfm": "4.0.1",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.3",
+    "shiki": "4.4.3"
   },
   "devDependencies": {
     "@digdir/designsystemet": "1.18.0",

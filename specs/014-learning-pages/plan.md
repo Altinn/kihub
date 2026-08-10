@@ -40,9 +40,17 @@ the two places the spec's requirements pushed back on the obvious implementation
 **Primary Dependencies**: Next.js 16.2.11 (App Router) + Payload CMS 3.85.2 in `apps/web`;
 `@payloadcms/richtext-lexical@3.85.2`; `@digdir/designsystemet-react@1.18.0` + the generated KI Hub
 theme + the `styles/kihub/` token layer; React 19.2.7.
-**New**: `shiki@4.4.3` (syntax highlighting) and `@payloadcms/storage-azure@3.85.2` (blob storage —
-an exact peer pin against Payload 3.85.2, verified on npm). `sharp` is already present for image
-sizes.
+**New**: `shiki@4.4.3` + `@shikijs/langs@4.4.3` (syntax highlighting) and
+`@payloadcms/storage-azure@3.85.2` (blob storage). `@shikijs/langs` is listed explicitly because it is
+a *transitive* dependency of shiki and pnpm does not hoist — `@shikijs/langs/shell` does not resolve
+from `apps/web` without it (verified; see learning-editor.md §B3). No `@shikijs/themes` is needed, as
+the theme is generated rather than imported.
+All three are written into `package.json` as **exact versions with no caret or tilde** — the same
+convention the Payload/Next/React/Designsystemet entries already follow, and not the `^` style used
+by the incidental dev dependencies. For `@payloadcms/storage-azure` this is not a style choice: its
+`peerDependencies` is `{ payload: "3.85.2" }` exactly, so a range would resolve to something that
+violates the peer constraint (latest is already 3.87.1). It must move in lockstep with any future
+Payload bump. `sharp` is already present, so image sizes need no new package.
 
 **Storage**: PostgreSQL via `@payloadcms/db-postgres` (four new tables, one additive migration
 registered in `src/migrations/index.ts` for `prodMigrations`); uploaded media on the local filesystem
@@ -123,10 +131,10 @@ specs/014-learning-pages/
 apps/web/
 ├── src/
 │   ├── collections/
-│   │   ├── LearningCategory.ts        # NEW  title, slug, description, order + beforeDelete
-│   │   ├── LearningSubcategory.ts     # NEW  + required category ref + beforeDelete
-│   │   ├── LearningPage.ts            # NEW  body richText, status, refs, filterOptions + hooks
-│   │   └── Media.ts                   # NEW  upload collection: mimeTypes, imageSizes, alt
+│   │   ├── LearningCategory.ts        # NEW  title, description, order + beforeDelete (no slug)
+│   │   ├── LearningSubcategory.ts     # NEW  title, order, required category ref + beforeDelete
+│   │   ├── LearningPage.ts            # NEW  body richText, status, slug, refs, filterOptions + hooks
+│   │   └── Media.ts                   # NEW  upload collection: mimeTypes, 2 imageSizes, alt only
 │   ├── lib/
 │   │   ├── learning.ts                # NEW  read layer — 3 queries, always PUBLISHED
 │   │   ├── learning-view.ts           # NEW  pure: buildLearningTree, hrefs, nb-NO date, lang map
@@ -169,13 +177,51 @@ the `lib/news.ts` + `lib/news-view.ts` pattern (so the tree logic is testable wi
 `lib/media-storage.ts` is a separate small module for the same reason `lib/db-auth.ts` is — it is the
 unit test's seam for an environment-selected behaviour.
 
+## Reuse and simplicity ledger
+
+Confirmed with the user before task breakdown: reuse whatever already exists, and keep the new
+surface as small as the requirements allow. What that means concretely — the tasks phase should not
+reinvent anything in the left column.
+
+### Reused as-is (no new code)
+
+| Existing thing | Used for |
+|---|---|
+| `lib/slug.ts` `slugify()` | page handle derivation (FR-011) — already handles æ/ø/å |
+| `collections/News.ts` access posture (`isEditor`, published-only `read`) | copied shape for all four collections (FR-031/032) |
+| `lib/news.ts` / `lib/news-view.ts` split | the read-layer / pure-helper structure for learning |
+| `formatNewsDate`'s Oslo + nb-NO recipe | `formatLearningUpdated` (FR-018) |
+| `kihub-prose` class | the learning body wrapper — already styles news article bodies |
+| `CopyButton.tsx` | the code-block copy control (FR-029); edit is Norwegian labels only |
+| Designsystemet `Button` (inside `CopyButton`) | unchanged, not restyled (FR-034) |
+| `sharp` | generated image sizes (FR-023) |
+| Payload's premade `CodeBlock` | the whole code-authoring UX (research §2) |
+| Payload's built-in `updatedAt` | "Sist oppdatert" (FR-018) — no date field of our own |
+| `requireSession` via the `(app)` route group | session gating (FR-033), zero new code |
+| `instrumentation.ts` boot-time Payload init | makes FR-025's misconfiguration crash loudly, no new machinery |
+| `portal.css` per-feature section convention | all new CSS, one section |
+| `lib/search.ts` | untouched — learning is unreachable from it by construction (FR-039) |
+
+### Deliberately not built
+
+| Omitted | Why |
+|---|---|
+| `slug` on categories and subcategories | nothing addresses them; the overview links to a category's first *page*. A field, a unique index and a migration column per collection for routes that do not exist |
+| `caption` on media | no requirement; a caption is the paragraph under the image, which rich text already does |
+| A third `thumb` image size | `adminThumbnail` reuses the `content` size instead of generating another derivative of every upload |
+| A `publishDate` field | `updatedAt` already answers the only date question the surface asks |
+| Focal point / crop on uploads | no requirement behind either |
+| Any new client component | native `<details>` covers the sidebar; `CopyButton` is the only client component involved |
+| A tree-caching layer | three `depth: 0` queries is already the cheap path; caching would be speculative (Principle VII) |
+| `orderable: true` | `@experimental` with "frequent breaking changes"; an integer `order` is inspectable and testable (research §8) |
+
 ## Complexity Tracking
 
 > Fill ONLY if Constitution Check has violations that must be justified
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |---|---|---|
-| **Syntax highlighting uses more than one chromatic role**, against the kihub design system's stated rules ("One accent — `--kihub-accent` is the only chromatic colour in the UI"; "Status colours are for status only, never decoration") | The user explicitly chose syntax highlighting over plain monospace. A learning library about AI tooling is mostly commands and configuration, and highlighting is what makes those samples scannable. | *Monochrome code* (ink weights + italic comments only) was the constitution-cleanest option and was rejected because it does not deliver what was asked for. *A full 9-role shiki palette* was rejected as a real violation. The chosen middle path narrows the deviation to the minimum that still reads as highlighting: **four roles** (keyword = accent, string/constant = one second hue, comment = subtle ink + italic, everything else = default ink), expressed **only as aliases of existing Designsystemet text-role tokens** — so no new colour value enters the system, nothing needs syncing back into the design project, and the deviation is confined inside the code block, which is a distinct reading surface rather than UI chrome. This is the same mechanism 012 used for categorical event-type colours (`portal.css:194`), which the constitution has already lived with. |
+| **Syntax highlighting uses more than one chromatic role**, against the kihub design system's stated rules ("One accent — `--kihub-accent` is the only chromatic colour in the UI"; "Status colours are for status only, never decoration") | The user explicitly chose syntax highlighting over plain monospace, and **confirmed the four-role palette below** after it was presented as a deviation. A learning library about AI tooling is mostly commands and configuration, and highlighting is what makes those samples scannable. | *Monochrome code* (ink weights + italic comments only) was the constitution-cleanest option and was rejected because it does not deliver what was asked for. *A full 9-role shiki palette* was rejected as a real violation. The chosen middle path narrows the deviation to the minimum that still reads as highlighting: **four roles** (keyword = accent, string/constant = one second hue, comment = subtle ink + italic, everything else = default ink), expressed **only as aliases of existing Designsystemet text-role tokens** — so no new colour value enters the system, nothing needs syncing back into the design project, and the deviation is confined inside the code block, which is a distinct reading surface rather than UI chrome. This is the same mechanism 012 used for categorical event-type colours (`portal.css:194`), which the constitution has already lived with. |
 | **A new `plugins` array and a cloud-storage dependency** in `payload.config.ts` | FR-024 requires uploaded images to survive restarts; the Azure Container Apps filesystem is ephemeral, so durable object storage is the requirement, not a preference. | *Filesystem storage only* loses every image on redeploy — a silent data-loss bug on a content surface. *Keeping News's `heroImageUrl` approach (paste a URL)* was rejected by the user's up-front decision and is a worse authoring experience for a library that is image-heavy by nature. The complexity is bounded: one plugin, registered only when `MEDIA_STORAGE_MODE=azure`, behind a selector module that mirrors `lib/db-auth.ts`. |
 
 Two notes that are **not** deviations but are recorded so the tasks phase does not relitigate them:

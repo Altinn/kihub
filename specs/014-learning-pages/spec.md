@@ -387,10 +387,11 @@ write.
 
 ### Key Entities
 
-- **Learning category** (new): a top-level grouping in the library — title, address handle, a short
-  description used on the overview, and a display order. Contains subcategories and pages.
+- **Learning category** (new): a top-level grouping in the library — title, a short description used
+  on the overview, and a display order. Contains subcategories and pages. Not itself addressable (see
+  Assumptions).
 - **Learning subcategory** (new): a second-level grouping belonging to exactly one category — title,
-  address handle, display order.
+  display order. Not itself addressable.
 - **Learning page** (new): the unit employees read — title, stable address handle, owning category,
   optional subcategory of that category, rich body (prose, images, code samples), publication state,
   last-updated timestamp, display order, and author attribution.
@@ -439,6 +440,11 @@ write.
   has already shared (FR-010). Breadcrumbs and the sidebar derive grouping from the page record, not
   from the address. The route segment is ASCII (`laering`, not `læring`) to keep addresses
   copy-paste-safe; the visible label is "KI Læring".
+- **Only learning pages are addressable; categories and subcategories are not.** Nothing links to a
+  category or subcategory as a destination — the overview links straight into a category's first page,
+  and the sidebar links to pages. Giving the grouping records their own address handles would be a
+  field, a uniqueness constraint and a migration column each, in service of routes that do not exist.
+  Adding them later, if a category landing page is ever wanted, is a purely additive change.
 - **The overview at the module root is derived from category descriptions**, not separately authored
   content. This matches the reference design (a heading plus a described section per category) and
   avoids introducing another editor-managed page. If editors later want a hand-written introduction,

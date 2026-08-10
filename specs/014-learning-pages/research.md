@@ -224,7 +224,7 @@ Rendering: the `upload` converter (registered alongside `blocks`, §3) renders
 | SVG | **excluded** — script-carrying, served same-origin | FR-022, spec Assumption 6 |
 | Max size | 5 MB, enforced by `upload.filesRequiredOnCreate` + a `validate` on size | FR-022 |
 | `alt` | required text field, with the `decorative` escape hatch on the node (§5) | FR-021 |
-| Sizes | `imageSizes` at content-column widths (≈760 CSS px ⇒ 760 / 1520 for 2×) + a small thumb for the admin list; `sharp` is **already** a dependency (`package.json`) | FR-023 |
+| Sizes | two `imageSizes` at content-column widths (760 and 1520 for 2×), with `adminThumbnail` reusing `content` rather than generating a third derivative; `sharp` is **already** a dependency (`package.json`) | FR-023 |
 | Focal point / crop | not enabled — out of scope, adds editor surface with no requirement behind it | Principle VII |
 
 ### Storage target selection
@@ -455,7 +455,7 @@ exported first: `set -a; source apps/web/.env; set +a`.
 | Test | Kind | Covers |
 |---|---|---|
 | `learning-view.test.ts` | unit | `buildLearningTree` — grouping, order + tiebreak, empty-group pruning, ungrouped-before-grouped, current-page/ancestor flags |
-| `learning-slug.test.ts` | unit | handle derivation + stability (extends the `news-slug` pattern to the three collections) |
+| `learning-slug.test.ts` | unit | page handle derivation + stability (the `news-slug` pattern; pages are the only collection with a handle) |
 | `learning-date.test.ts` | unit | nb-NO Oslo "last updated", incl. a 00:30-Oslo / previous-UTC-day case (FR-018) |
 | `learning-code.test.ts` | unit | highlighter: known language tokenises, unknown language falls back to plain (FR-028), token colours are `var(--shiki-token-*)` references not hex (FR-034) |
 | `learning-access.test.ts` | integration | Reader refused writes on all four collections; Contributor+ allowed; drafts absent for non-editors (FR-031/032) — the `news-access.test.ts` shape |

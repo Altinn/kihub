@@ -114,7 +114,7 @@ scrolling** — especially on the page with code blocks. Verify a long unbroken 
 ### 4.6 Images
 
 - The image renders at content width with its alt text, and does not overflow at 360 px (B1.4).
-- Mark it `decorative` on the node → `alt=""`, caption still shown if set (B1.2).
+- Mark it `decorative` on the node → the rendered `alt` becomes `""` (B1.2).
 - Try uploading an **SVG** and a **>5 MB** file: both refused with a clear message (FR-022).
 - Delete the media document while a published page still references it → the page still renders, just
   without the image (B1.5).

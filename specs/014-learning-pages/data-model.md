@@ -23,11 +23,14 @@ Top-level grouping. Its `description` is what the `/laering` overview renders (F
 | Field | Type | Rules |
 |---|---|---|
 | `title` | text | required |
-| `slug` | text | unique, indexed; derived from `title` by `beforeValidate` when blank (FR-011) |
 | `description` | textarea | optional; shown on the overview. Empty ⇒ the overview shows the title only |
 | `order` | number | `defaultValue: 100`, admin sidebar (FR-015, research §8) |
 
-- **useAsTitle**: `title`. **defaultColumns**: `title`, `order`, `slug`.
+**No `slug`.** Categories are not addressable (spec Assumptions) — the overview links into a
+category's first *page*, and the sidebar links to pages. A handle here would be a field, a unique
+index and a migration column serving no route.
+
+- **useAsTitle**: `title`. **defaultColumns**: `title`, `order`.
 - **Sort**: `['order', 'title']` everywhere.
 - **Access**: read → everyone; create/update/delete → Contributor+ (`isEditor`).
 - **`beforeDelete`**: refuse when any `learning-subcategories` or `learning-pages` reference it,
@@ -40,9 +43,10 @@ Second and final level of grouping.
 | Field | Type | Rules |
 |---|---|---|
 | `title` | text | required |
-| `slug` | text | unique, indexed; derived from `title` when blank |
 | `category` | relationship → `learning-categories` | **required**, `hasMany: false` — a subcategory belongs to exactly one category (FR-013) |
 | `order` | number | `defaultValue: 100` |
+
+**No `slug`**, for the same reason as categories.
 
 - **Access**: as above. **`beforeDelete`**: refuse when any page references it (FR-016).
 - There is deliberately **no** `subcategory` field here — that absence is what makes deeper nesting
@@ -91,10 +95,15 @@ General platform capability; this feature is its first consumer (spec Assumption
 |---|---|---|
 | *(file)* | upload | `mimeTypes: ['image/png','image/jpeg','image/webp','image/avif']` — raster only, **no SVG** (FR-022) |
 | `alt` | text | **required** — the asset's intrinsic description (FR-021) |
-| `caption` | text | optional, rendered as `<figcaption>` |
 
-- **`upload` config**: `imageSizes` for the content column (≈760 / 1520 px wide) + an admin thumb;
-  `focalPoint: false`; `crop: false`; 5 MB size limit (FR-022, FR-023).
+`alt` is the **only** field. No `caption`: no requirement asks for one, and `<figcaption>` markup plus
+a field plus a column is real surface for a nicety. Editors can write a caption as the paragraph
+beneath the image, which the rich text already supports.
+
+- **`upload` config**: two `imageSizes` — `content` (760 px, the reading column) and `content2x`
+  (1520 px, retina) — `focalPoint: false`, `crop: false`, 5 MB limit (FR-022, FR-023). No separate
+  admin thumbnail: `admin.upload.adminThumbnail` points at `content`, so the admin list reuses a size
+  that already exists instead of generating a third derivative of every upload.
 - **Access**: `read` → everyone (an image referenced by a published page must be fetchable);
   `create`/`update`/`delete` → Contributor+ (FR-031).
 - **Storage**: env-selected, `MEDIA_STORAGE_MODE=disk|azure` — see
@@ -114,7 +123,7 @@ import, unit-testable (research §9).
 interface LearningTreePage   { title: string; slug: string; href: string; isCurrent: boolean }
 interface LearningTreeGroup  { title: string; pages: LearningTreePage[] }          // a subcategory
 interface LearningTreeCategory {
-  title: string; slug: string; description: string;
+  title: string; description: string;
   pages: LearningTreePage[];        // pages directly under the category, before the groups
   groups: LearningTreeGroup[];      // subcategory groups
   containsCurrent: boolean;         // drives <details open> (FR-004)
@@ -143,14 +152,14 @@ type LearningTree = LearningTreeCategory[];
 | `/laering/<page-slug>` | that learning page + the sidebar |
 
 The category and subcategory are **not** in the address — moving a page between groups never breaks
-a shared link (spec Assumption 1). Category/subcategory `slug`s exist for stable identity and
-possible future addressing, and are unused by the router today.
+a shared link (spec Assumption 1). There is no category or subcategory address at all, which is why
+those collections carry no `slug`.
 
 ## Validation rules → requirement map
 
 | Rule | Where enforced | Requirement |
 |---|---|---|
-| Slug derived, unique, stable | `beforeValidate` + `unique: true` | FR-011 |
+| Page slug derived, unique, stable (pages only) | `beforeValidate` + `unique: true` | FR-011 |
 | Exactly two grouping levels | no `subcategory` field on subcategories; `hasMany: false` refs | FR-013 |
 | Subcategory belongs to page's category | `filterOptions` (UX) + `beforeValidate` (API) | FR-014 |
 | Deterministic order | `sort: ['order','title']`, `defaultValue: 100` | FR-015 |

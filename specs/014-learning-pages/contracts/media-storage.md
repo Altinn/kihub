@@ -14,10 +14,9 @@ Blob Storage as the platform's object store, so no new constraint is introduced.
 |---|---|---|
 | `upload.mimeTypes` | `['image/png','image/jpeg','image/webp','image/avif']` | FR-022 |
 | Max file size | 5 MB, refused with a Norwegian message | FR-022 |
-| `upload.imageSizes` | `content` (760 w) and `content2x` (1520 w) for the reading column, `thumb` (300 w) for the admin list | FR-023 |
+| `upload.imageSizes` | exactly two — `content` (760 w, the reading column) and `content2x` (1520 w, retina). `admin.upload.adminThumbnail` reuses `content` rather than generating a third derivative | FR-023 |
 | `upload.focalPoint` / `crop` | `false` — no requirement behind them | Principle VII |
-| `alt` | required `text` field | FR-021 |
-| `caption` | optional `text` field | FR-019 |
+| `alt` | required `text` field — the collection's **only** field (no caption; see data-model.md) | FR-021 |
 | `access.read` | everyone (a published page's image must be fetchable) | FR-020 |
 | `access.create/update/delete` | Contributor+ (`isEditor`, the News posture) | FR-031 |
 
