@@ -11,18 +11,35 @@ import '@/styles/kihub-ds-bridge.css';
 // 011: structural layout for the shared chrome + frontpage sections (kihub tokens only).
 import '@/styles/portal.css';
 
-import { Inter, Source_Serif_4 } from 'next/font/google';
+import localFont from 'next/font/local';
 
-// Self-hosted via next/font; kihub-fonts.css maps these variables onto the kihub font tokens.
-const displayFont = Source_Serif_4({
-  subsets: ['latin'],
-  weight: ['400', '600'],
+/**
+ * Self-hosted from files committed in `src/fonts/` (see its README), not fetched from Google Fonts.
+ *
+ * `next/font/google` self-hosts at runtime but downloads at BUILD time, so `next build` required
+ * network access to fonts.gstatic.com and failed without it. These are the same latin variable woff2
+ * files Google was serving — Google returns one variable file per family and points every requested
+ * static weight at it — so this is a build-reliability change, not a visual one.
+ *
+ * `kihub-fonts.css` maps these two variables onto the kihub font tokens; the names are unchanged, so
+ * nothing else needed touching.
+ */
+const displayFont = localFont({
+  src: '../fonts/SourceSerif4-Variable.woff2',
+  // A variable font: one file covering the range, declared as a range rather than per-weight files.
+  weight: '400 600',
+  style: 'normal',
+  display: 'swap',
   variable: '--font-kihub-display',
+  fallback: ['Georgia', 'Times New Roman', 'serif'],
 });
-const uiFont = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
+const uiFont = localFont({
+  src: '../fonts/Inter-Variable.woff2',
+  weight: '400 600',
+  style: 'normal',
+  display: 'swap',
   variable: '--font-kihub-ui',
+  fallback: ['system-ui', '-apple-system', 'sans-serif'],
 });
 
 /**

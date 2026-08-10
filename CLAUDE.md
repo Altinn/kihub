@@ -33,8 +33,13 @@ COMPONENT not `layout.tsx`; `payload migrate` against the local push-mode DB PRO
 occur" — verify migrations on a scratch DB instead; `@payloadcms/storage-azure` requires
 `baseURL` (non-optional, despite the docs table) so `AZURE_STORAGE_ACCOUNT_BASEURL` is mandatory in
 azure mode; `next build` is the ONLY gate that caught two implicit-`any`/type errors (vitest + eslint
-both passed), and in this environment it needs a migrated scratch DB + non-mock AUTH_MODE, while
-`next/font` cannot reach Google Fonts at all (pre-existing — `196380d` fails identically).
+both passed), and in this environment it still needs a migrated scratch DB + non-mock AUTH_MODE
+(`prodMigrations` prompts against a push-mode DB; the app rejects `AUTH_MODE=mock` in production).
+**Fonts are now self-hosted from files** (`apps/web/src/fonts/`, `next/font/local`, latin variable
+woff2 + OFL licences) — `next build` no longer needs network at all, verified with the sandbox on.
+Google served ONE variable file per family for every requested static weight, so the committed files
+are byte-identical to what `next/font/google` was fetching: a build-reliability change, not a visual
+one, and `kihub-fonts.css` needed no edit because the CSS variable names are unchanged.
 Release notes: (1) editors must add the "KI Læring" nav entry in `/cms` → Site Chrome in any env whose
 `site-chrome` global was already saved — `mergeSiteChrome` treats a saved nav as authoritative and no
 migration touches editor-owned content; (2) blocked externally: durable image storage needs an Azure
