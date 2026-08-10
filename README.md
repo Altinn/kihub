@@ -1,23 +1,55 @@
 # KI Hub
 
-Internal AI enablement and governance platform — a catalog and governance layer over Git-based
-AI artifacts. KI Hub indexes, enriches, reviews, and exposes artifacts; it never stores their
-content (that lives in the sibling [`ai-artifacts`](../ai-artifacts) repository).
+Internal employee portal for Digdir. It brings together, in one place for all employees, four
+modules: an **AI-tool Registry** (a catalog and governance layer over Git-based AI artifacts),
+**News**, a **Calendar** of events, and **KI Læring** — a curated learning library that teaches
+employees how to work with AI tooling. The Registry indexes, enriches, reviews, and exposes
+artifacts; it never stores their content (that lives in the sibling
+[`ai-artifacts`](../ai-artifacts) repository). News, Calendar and Learning are native platform
+content, authored directly in KI Hub with no Git source.
 
-> **Status**: Home-page widgets. The employee landing page **`/`** is now a portal **dashboard** with
-> three read-only widgets — the latest published **news** (3), the next upcoming **events** (3), and
-> **featured/recommended** Registry tools (3) — each with a "View all →" link into its module. The
-> Registry catalog **browse + full-text search moved to `/registry`** (its own header nav link); a
-> shared header keeps Registry · News · Events nav consistent across the app. Additive and read-only:
-> it reuses the existing published-only read libs + the `NewsCard`/`EventCard`/`ArtifactCard` cards and
-> the governance `featured`/`recommended` flags, with **zero** new collections, schema changes,
-> migrations, or dependencies. Personalization, dismissable/reorderable widgets, real-time updates, and
-> in-widget pagination are deferred.
+> **Status**: KI Læring (learning pages). KI Hub gained a **fourth** native-content module
+> (Constitution v3.1.0, Principle II) alongside Registry, News and Calendar/Events: an
+> editor-curated library of **categories → subcategories → learning pages**, authored in `/cms` by
+> **Contributor+** editors and read by all employees at **`/laering`** behind a persistent
+> left-hand resource navigation (native `<details>`, so it works with client-side scripting
+> disabled). Page bodies support rich text (headings, lists, links, blockquotes); images are
+> placed by dragging them into the editor, backed by a new **`media`** collection — KI Hub's first
+> managed uploads, stored on the local filesystem in development and Azure Blob Storage in
+> deployed environments (`MEDIA_STORAGE_MODE=disk|azure`); code samples get a language selector
+> and **display-only** syntax highlighting (server-side, via `shiki` — never executed). Page
+> addresses are flat (`/laering/<slug>`), so reorganising the library never breaks a shared link.
+> Two new dependencies (`shiki`, `@payloadcms/storage-azure`) and one additive schema migration.
+> Durable image storage is **provisioned** — a private Azure Blob container wired into the
+> `kihub-web` container app — but deployment of the module itself is still pending two outstanding
+> identity items with digdir IT (a sign-in app registration and a deploy-service-principal role
+> grant); `kihub-web` currently runs a pre-014 image.
 >
-> Previously — Phase 8 — Calendar / Events. KI Hub gained the **third and final** native-content module
-> of the portal charter (Constitution Principle II; Registry + News + Calendar): internal events
-> authored in the `/cms` back-office by **Contributor+** editors and read by all employees in the app
-> at **`/events`** (a list of published **upcoming** events — soonest-first, featured surfaced — plus
+> Previously — News page redesign (013): `/news` ("Nyheter") became a kihub-restyled editorial
+> card grid (16:10 media well, serif headline, Norwegian date, summary) with server-rendered
+> `?page=N` pagination, plus a matching article-page restyle.
+>
+> Previously — Events page redesign (012): `/events` ("Arrangementer") became a segmented
+> **Kalender | Liste** experience — a month-grid calendar view and a Norwegian date-grouped list
+> view with type/format filters — modelled on the old KI HUB app's calendar page.
+>
+> Previously — Frontpage redesign (011): `/` was rebuilt to match the old KI HUB site's layout
+> (CMS-managed header, hero, navigation tiles, subscriptions banner, events + news sections,
+> footer), restyled on the kihub design system, replacing the widgets dashboard below.
+>
+> Previously — home-page widgets (010). The employee landing page **`/`** became a portal
+> **dashboard** with three read-only widgets — the latest published **news** (3), the next
+> upcoming **events** (3), and **featured/recommended** Registry tools (3) — each with a "View
+> all →" link into its module. The Registry catalog **browse + full-text search moved to
+> `/registry`** (its own header nav link); a shared header keeps Registry · News · Events · **KI
+> Læring** nav consistent across the app. It reused the existing published-only read libs + the
+> `NewsCard`/`EventCard`/`ArtifactCard` cards and the governance `featured`/`recommended` flags,
+> with **zero** new collections, schema changes, migrations, or dependencies at the time.
+>
+> Previously — Phase 8 — Calendar / Events. KI Hub gained the **third** native-content module
+> of the portal charter (Constitution Principle II; Registry + News + Calendar) at the time:
+> internal events authored in the `/cms` back-office by **Contributor+** editors and read by all
+> employees in the app at **`/events`** (a list of published **upcoming** events — soonest-first, featured surfaced — plus
 > an `/events/<slug>` detail page; datetimes in Europe/Oslo). Events is fully owned by Payload — no Git
 > source, not an artifact; only **published** events are visible to employees (drafts never leak,
 > enforced by both the read query and the collection's `read` access rule), and past events drop off
@@ -53,6 +85,10 @@ specs/007-news/               Spec-kit artifacts — Phase 7 (news)
 specs/008-governance-ui-reconcile/ Spec-kit artifacts — governance-UI reconcile
 specs/009-calendar-events/    Spec-kit artifacts — Phase 8 (calendar / events)
 specs/010-home-widgets/       Spec-kit artifacts — home-page widgets (dashboard + /registry)
+specs/011-frontpage-redesign/ Spec-kit artifacts — frontpage redesign
+specs/012-events-page-redesign/ Spec-kit artifacts — events page redesign
+specs/013-news-page-redesign/ Spec-kit artifacts — news page redesign
+specs/014-learning-pages/     Spec-kit artifacts — learning pages (KI Læring)
 .specify/                     Spec-kit config + constitution
 ```
 
@@ -65,6 +101,9 @@ Principle VIII — two surfaces sharing one auth, role model, and Payload data l
 
 - Node.js ≥ 22 and `pnpm`
 - Docker (Colima or Docker Desktop) for local PostgreSQL
+
+Fonts are self-hosted from `apps/web/src/fonts/` (`next/font/local`) — `pnpm build` needs no
+network access to Google Fonts.
 
 ## Quick start
 
@@ -209,9 +248,10 @@ publishing, reader comments, a categories taxonomy, and a home-page news widget.
 
 ### Calendar / Events (Phase 8)
 
-Events is the **third and final** native-content module of the portal charter (Constitution Principle
-II; Registry + News + Calendar): events authored in the back-office and read by all employees — no Git
-source, not an artifact, fully owned by Payload. It is a structural clone of News.
+Events is the **third** native-content module of the portal charter (Constitution Principle
+II; Registry + News + Calendar at the time — Learning followed as the fourth): events authored in
+the back-office and read by all employees — no Git source, not an artifact, fully owned by
+Payload. It is a structural clone of News.
 
 - **Read** (employees): open http://localhost:3000/events for the list — published **upcoming** events
   soonest-first with featured items surfaced — and `/events/<slug>` for an event (title; when, in
@@ -234,6 +274,51 @@ date logic (end≥start validation, the upcoming predicate, Europe/Oslo formatti
 later phases**: recurring events, RSVP/registration, ICS/calendar-feed export, a month-grid calendar
 view, and a home-page events widget.
 
+### KI Læring (Learning)
+
+Learning is KI Hub's **fourth** native-content module (Constitution v3.1.0, Principle II): a
+Contributor+-curated library of **categories → subcategories → learning pages** that teaches
+employees how to work with AI tooling — no Git source, not an artifact, fully owned by Payload.
+The Registry's principles (Git-source-of-truth, the artifact model, stable identity, APM
+distribution, governance) do not apply to it.
+
+- **Read** (employees): open http://localhost:3000/laering for the overview — a Norwegian heading
+  plus one section per published category — and a persistent left-hand resource navigation
+  listing every published category (grouped under subcategory headings where the editor has
+  created them) with its pages beneath. Selecting a page opens it at **`/laering/<slug>`** with
+  its containing group already expanded and the current page marked, both visually and to
+  assistive technology. The sidebar is a native `<details>` tree, so browsing and
+  expanding/collapsing groups all work with client-side scripting disabled (the feature adds
+  **zero** client components). At phone widths the sidebar collapses behind a single Norwegian
+  disclosure control above the content. Unpublished drafts are never visible — not in the tree,
+  not by direct address.
+- **Author** (`/cms`, Contributor+): create categories, optionally divide them into
+  subcategories, and write pages inside them. Ordering is an explicit `order` field the editor
+  controls (not alphabetical, and not Payload's `@experimental` orderable). A page's slug is
+  derived from its title and stays stable if the title later changes, so reorganising the library
+  never breaks a link a colleague has already shared. Deleting a category or subcategory that
+  still holds content is refused with a clear explanation.
+- **Rich content**: page bodies are lexical rich text (headings, paragraphs, lists, links,
+  blockquotes). Images are placed by dragging them straight into the editor, backed by a new
+  **`media`** collection — KI Hub's first managed uploads (raster formats only, 5 MB max, alt text
+  or an explicit decorative marking required before save). Files are stored on the local
+  filesystem in development and in Azure Blob Storage in deployed environments, selected by
+  `MEDIA_STORAGE_MODE=disk|azure` (see `apps/web/.env.example`). Code samples get a language
+  selector and render **display-only** with syntax highlighting — rendered server-side with
+  `shiki`, colours resolved through the shared `--shiki-token-*` design-token aliases (never a
+  vendor theme's fixed palette) — nothing in a sample is ever executed, and an unsupported
+  language falls back to plain monospace text.
+
+All learning UI is Norwegian (bokmål) and styled exclusively through the kihub token layer. Two
+new dependencies (`shiki`, `@payloadcms/storage-azure`) and one additive schema migration; no
+existing Registry, News or Events data is touched. Durable image storage is **provisioned** — a
+private Azure Blob container (`kihub-media`) is wired into the `kihub-web` container app — but
+**deployment of the Learning module itself** is still pending two outstanding identity items with
+digdir IT (a sign-in app registration and a deploy-service-principal role grant); `kihub-web`
+currently runs a pre-014 image that ignores the new env vars. In any environment whose site
+navigation was already customised by an editor, the "KI Læring" entry does not appear
+automatically — an editor adds it once in `/cms` → Site Chrome.
+
 ## Scripts
 
 | Command | What it does |
@@ -250,7 +335,7 @@ view, and a home-page events widget.
 
 > The web integration tests (`users-upsert`, `reconcile`, `governance-access`,
 > `reindex-preserves`, `review-approval-flow`, `discovery-run`, `discovery-webhook`,
-> `discovery-scan`, `discovery-access`, `discovery-serialize`, `search`, `admin-readonly`, `news-access`, `events-access`, …) need the database running and
+> `discovery-scan`, `discovery-access`, `discovery-serialize`, `search`, `admin-readonly`, `news-access`, `events-access`, `learning-access`, `learning-hierarchy`, …) need the database running and
 > `apps/web/.env` loaded. `reconcile` and the discovery tests wipe the `artifacts` table as part of
 > their clean-slate strategy — re-run `pnpm --filter web index` afterwards to repopulate the catalog
 > for manual browsing.
@@ -272,5 +357,12 @@ implement). See [`specs/001-phase1-foundation/`](specs/001-phase1-foundation),
 [`specs/004-automated-discovery/`](specs/004-automated-discovery),
 [`specs/005-fulltext-search/`](specs/005-fulltext-search),
 [`specs/006-editor-backoffice/`](specs/006-editor-backoffice),
-[`specs/007-news/`](specs/007-news), and the
+[`specs/007-news/`](specs/007-news),
+[`specs/008-governance-ui-reconcile/`](specs/008-governance-ui-reconcile),
+[`specs/009-calendar-events/`](specs/009-calendar-events),
+[`specs/010-home-widgets/`](specs/010-home-widgets),
+[`specs/011-frontpage-redesign/`](specs/011-frontpage-redesign),
+[`specs/012-events-page-redesign/`](specs/012-events-page-redesign),
+[`specs/013-news-page-redesign/`](specs/013-news-page-redesign),
+[`specs/014-learning-pages/`](specs/014-learning-pages), and the
 [constitution](.specify/memory/constitution.md).

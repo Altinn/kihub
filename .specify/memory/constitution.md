@@ -35,9 +35,9 @@ Templates requiring updates:
   ✅ .specify/templates/spec-template.md (no mandatory-section conflict)
   ✅ .specify/templates/tasks-template.md (task categories compatible)
   ✅ CLAUDE.md (SPECKIT block updated to v3.1.0 + the four-module list)
-  ⚠ README.md (still describes KI Hub as an AI-artifact catalog, and two passages paraphrase the
-    charter as "Registry + News + Calendar" — both to be corrected when the portal reframing reaches
-    user-facing docs / when the Learning module ships; not blocking, carried over from v2.0.0)
+  ✅ README.md (updated 2026-08-10: opening paragraph now describes the four-module employee
+    portal, the "third and final" / "Registry + News + Calendar" passages no longer claim
+    finality, the Status block leads with 014, and a "KI Læring (Learning)" section was added)
 Follow-up TODOs: none
 -->
 
