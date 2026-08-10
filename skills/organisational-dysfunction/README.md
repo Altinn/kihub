@@ -21,6 +21,9 @@ The 59 dysfunctions originate from **Trond Hjorteland**'s [*"Organisational Dysf
 
 New entries are appended as they are propagated from the upstream repo ([sorensensig/organisational-dysfunction](https://github.com/sorensensig/organisational-dysfunction)). Newest first.
 
+### 0.8.0 — 2026-08-10
+- Added `#68` **The bureaucracy that became the work** (67 → 68 dysfunctions).
+
 ### 0.7.0 — 2026-08-10
 - Added `#67` **The IT-business divide** (66 → 67 dysfunctions).
 
