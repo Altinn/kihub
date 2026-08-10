@@ -63,9 +63,15 @@ export interface FrontpageContent {
 }
 
 export const DEFAULT_SITE_CHROME: SiteChrome = {
+  // 014: "KI Læring" is part of the seeded defaults, so a FRESH environment links to the module out
+  // of the box. NOTE: `mergeSiteChrome` treats a SAVED nav section as authoritative wholesale, so an
+  // environment where an editor has already customised the navigation will NOT gain this entry
+  // automatically — an editor adds it in /cms (research §11, quickstart.md §6.1). Nothing here
+  // writes to editor-owned content.
   nav: [
     { label: 'Hjem', href: '/' },
     { label: 'Verktøy', href: '/registry' },
+    { label: 'KI Læring', href: '/laering' },
     { label: 'Nyheter', href: '/news' },
     { label: 'Arrangementer', href: '/events' },
   ],
@@ -74,6 +80,7 @@ export const DEFAULT_SITE_CHROME: SiteChrome = {
     contactEmail: 'kitt@digdir.no',
     links: [
       { label: 'Verktøy', href: '/registry' },
+      { label: 'KI Læring', href: '/laering' },
       { label: 'Nyheter', href: '/news' },
       { label: 'Arrangementer', href: '/events' },
     ],

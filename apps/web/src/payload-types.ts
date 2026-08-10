@@ -76,6 +76,9 @@ export interface Config {
     'discovery-runs': DiscoveryRun;
     news: News;
     events: Event;
+    'learning-categories': LearningCategory;
+    'learning-subcategories': LearningSubcategory;
+    'learning-pages': LearningPage;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +95,9 @@ export interface Config {
     'discovery-runs': DiscoveryRunsSelect<false> | DiscoveryRunsSelect<true>;
     news: NewsSelect<false> | NewsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
+    'learning-categories': LearningCategoriesSelect<false> | LearningCategoriesSelect<true>;
+    'learning-subcategories': LearningSubcategoriesSelect<false> | LearningSubcategoriesSelect<true>;
+    'learning-pages': LearningPagesSelect<false> | LearningPagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -421,6 +427,83 @@ export interface Event {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "learning-categories".
+ */
+export interface LearningCategory {
+  id: number;
+  title: string;
+  /**
+   * Vises under kategorien på oversikten /laering. Tom beskrivelse gir bare tittel og lenke.
+   */
+  description?: string | null;
+  /**
+   * Lav verdi først. Kategorier med samme verdi sorteres alfabetisk, så rekkefølgen er alltid forutsigbar.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "learning-subcategories".
+ */
+export interface LearningSubcategory {
+  id: number;
+  title: string;
+  category: number | LearningCategory;
+  /**
+   * Lav verdi først; like verdier sorteres alfabetisk.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "learning-pages".
+ */
+export interface LearningPage {
+  id: number;
+  title: string;
+  /**
+   * URL-håndtak (/laering/<adresse>). Utledes fra tittelen når feltet står tomt, og endres ikke når tittelen endres.
+   */
+  slug?: string | null;
+  category: number | LearningCategory;
+  /**
+   * Valgfritt. Kun underkategorier som hører til den valgte kategorien.
+   */
+  subcategory?: (number | null) | LearningSubcategory;
+  /**
+   * Kort ingress øverst på siden.
+   */
+  summary?: string | null;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  status: 'draft' | 'published';
+  /**
+   * Lav verdi først innenfor kategorien/underkategorien; like verdier alfabetisk.
+   */
+  order?: number | null;
+  author?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -478,6 +561,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'events';
         value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'learning-categories';
+        value: number | LearningCategory;
+      } | null)
+    | ({
+        relationTo: 'learning-subcategories';
+        value: number | LearningSubcategory;
+      } | null)
+    | ({
+        relationTo: 'learning-pages';
+        value: number | LearningPage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -716,6 +811,45 @@ export interface EventsSelect<T extends boolean = true> {
   status?: T;
   tags?: T;
   featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "learning-categories_select".
+ */
+export interface LearningCategoriesSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "learning-subcategories_select".
+ */
+export interface LearningSubcategoriesSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "learning-pages_select".
+ */
+export interface LearningPagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  category?: T;
+  subcategory?: T;
+  summary?: T;
+  body?: T;
+  status?: T;
+  order?: T;
+  author?: T;
   updatedAt?: T;
   createdAt?: T;
 }

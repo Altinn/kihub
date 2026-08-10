@@ -713,3 +713,220 @@ a.news-pagination__btn:hover {
 .news-detail__body {
   margin-top: var(--kihub-space-8);
 }
+
+/* ==================== 014 /laering — KI Læring ====================
+ *
+ * Two-column shell + resource navigation. Every value resolves through the --kihub-* tokens;
+ * src/styles/kihub/ is synced verbatim from the design project and is never edited (its README).
+ *
+ * The 899px breakpoint matches the rest of the portal (the site header and the 012 liste sidebar).
+ */
+
+/* ---------- Shell (contract §A) ---------- */
+.lp-shell {
+  padding-block: var(--kihub-space-10);
+}
+.lp-shell[data-nav] {
+  display: grid;
+  /* `minmax(0, 1fr)` on the content column is load-bearing: without the 0 minimum, a wide <pre> or
+   * table sets the column's min-content width and widens the whole PAGE instead of scrolling inside
+   * its own block (the same lesson recorded for the news grid above). */
+  grid-template-columns: 15rem minmax(0, 1fr);
+  gap: var(--kihub-space-10);
+  align-items: start;
+}
+.lp-shell__aside {
+  /* Desktop: the navigation stays reachable while a long page scrolls (contract A3). */
+  position: sticky;
+  top: var(--kihub-space-6);
+}
+.lp-shell__content {
+  min-width: 0;
+}
+
+/* ---------- Phone-level disclosure (contract A4, FR-006) ---------- */
+
+/* Desktop: the single disclosure is not a control at all — the navigation simply stands open.
+ * Two rules, because engines implement the closed state differently: older ones hide the
+ * non-summary children, newer ones use the ::details-content pseudo-element. */
+@media (min-width: 900px) {
+  .lp-shell__disclosure > summary {
+    display: none;
+  }
+  .lp-shell__disclosure > .lp-nav {
+    display: block;
+  }
+  .lp-shell__disclosure::details-content {
+    content-visibility: visible;
+    block-size: auto;
+  }
+}
+.lp-shell__disclosure-title {
+  cursor: pointer;
+  list-style: none;
+  font: var(--kihub-weight-semibold) var(--kihub-font-size-ui) / var(--kihub-line-height-body)
+    var(--kihub-font-ui);
+  color: var(--kihub-text);
+  padding: var(--kihub-space-3) var(--kihub-space-4);
+  border: 1px solid var(--kihub-border);
+  border-radius: var(--kihub-radius);
+  background: var(--kihub-bg-tinted);
+}
+.lp-shell__disclosure-title::-webkit-details-marker {
+  display: none;
+}
+.lp-shell__disclosure-title::after {
+  content: '▾';
+  float: right;
+  color: var(--kihub-text-subtle);
+}
+.lp-shell__disclosure[open] > .lp-shell__disclosure-title::after {
+  content: '▴';
+}
+
+@media (max-width: 899px) {
+  .lp-shell[data-nav] {
+    /* Single column — the desktop layout is REPLACED, not squeezed (the 012 approach). */
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--kihub-space-6);
+  }
+  .lp-shell__aside {
+    position: static;
+  }
+}
+
+/* ---------- Resource navigation (contract §B) ---------- */
+.lp-nav {
+  font-family: var(--kihub-font-ui);
+}
+.lp-nav__group {
+  border-bottom: 1px solid var(--kihub-border-subtle);
+}
+.lp-nav__group-title {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--kihub-space-2);
+  font: var(--kihub-weight-semibold) var(--kihub-font-size-ui) / var(--kihub-line-height-body)
+    var(--kihub-font-ui);
+  color: var(--kihub-text);
+  padding: var(--kihub-space-3) 0;
+}
+.lp-nav__group-title::-webkit-details-marker {
+  display: none;
+}
+.lp-nav__group-title::after {
+  content: '▾';
+  color: var(--kihub-text-subtle);
+  font-size: var(--kihub-font-size-body-sm);
+}
+.lp-nav__group[open] > .lp-nav__group-title::after {
+  content: '▴';
+}
+.lp-nav__list {
+  list-style: none;
+  margin: 0 0 var(--kihub-space-3);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.lp-nav__link {
+  display: block;
+  /* Long titles wrap inside the sidebar rather than forcing a horizontal scroll (contract B9). */
+  overflow-wrap: anywhere;
+  font: var(--kihub-weight-regular) var(--kihub-font-size-body-sm) / var(--kihub-line-height-body)
+    var(--kihub-font-ui);
+  color: var(--kihub-text-subtle);
+  text-decoration: none;
+  padding: var(--kihub-space-2) var(--kihub-space-3);
+  border-left: 2px solid transparent;
+}
+.lp-nav__link:hover {
+  color: var(--kihub-text);
+  background: var(--kihub-bg-tinted);
+}
+/* The current page is keyed off aria-current, so the visible state and the state announced to
+ * assistive technology can never disagree (contract B2). Weight + rule + colour, never colour
+ * alone. */
+.lp-nav__link[aria-current='page'] {
+  color: var(--kihub-text-accent);
+  font-weight: var(--kihub-weight-semibold);
+  border-left-color: var(--kihub-accent);
+  background: var(--kihub-surface-accent);
+}
+.lp-nav__subgroup {
+  margin-bottom: var(--kihub-space-3);
+}
+.lp-nav__subgroup-title {
+  margin: var(--kihub-space-2) 0 var(--kihub-space-1);
+  font: var(--kihub-weight-semibold) var(--kihub-font-size-eyebrow) / var(--kihub-line-height-body)
+    var(--kihub-font-ui);
+  letter-spacing: var(--kihub-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--kihub-text-subtle);
+}
+.lp-nav__subgroup .lp-nav__link {
+  padding-left: var(--kihub-space-5);
+}
+
+/* ---------- Overview (contract §C) ---------- */
+.lp-title {
+  margin: 0;
+}
+.lp-lead {
+  margin: var(--kihub-space-4) 0 0;
+  max-width: var(--kihub-prose-width);
+}
+.lp-overview {
+  margin-top: var(--kihub-space-10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kihub-space-10);
+}
+.lp-overview__heading {
+  margin: 0;
+}
+.lp-overview__description {
+  margin: var(--kihub-space-3) 0 0;
+  max-width: var(--kihub-prose-width);
+  color: var(--kihub-text-subtle);
+}
+.lp-overview__action {
+  margin: var(--kihub-space-3) 0 0;
+}
+.lp-empty {
+  margin-top: var(--kihub-space-8);
+  max-width: var(--kihub-prose-width);
+}
+
+/* ---------- Page (contract §D) ---------- */
+.lp-page {
+  max-width: var(--kihub-prose-width);
+}
+.lp-page__back {
+  margin: 0 0 var(--kihub-space-6);
+}
+.lp-page__context {
+  margin: 0 0 var(--kihub-space-2);
+  font: var(--kihub-weight-medium) var(--kihub-font-size-eyebrow) / var(--kihub-line-height-body)
+    var(--kihub-font-ui);
+  letter-spacing: var(--kihub-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--kihub-text-subtle);
+}
+.lp-page__title {
+  margin: 0;
+}
+.lp-page__meta {
+  margin: var(--kihub-space-3) 0 0;
+  font: var(--kihub-weight-regular) var(--kihub-font-size-body-sm) / var(--kihub-line-height-body)
+    var(--kihub-font-ui);
+  color: var(--kihub-text-subtle);
+}
+.lp-page__summary {
+  margin: var(--kihub-space-6) 0 0;
+}
+.lp-page__body {
+  margin-top: var(--kihub-space-8);
+}

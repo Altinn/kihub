@@ -10,6 +10,9 @@ import { CatalogEntry } from './collections/CatalogEntry';
 import { DiscoveryRun } from './collections/DiscoveryRun';
 import { DiscoverySource } from './collections/DiscoverySource';
 import { Event } from './collections/Event';
+import { LearningCategory } from './collections/LearningCategory';
+import { LearningPage } from './collections/LearningPage';
+import { LearningSubcategory } from './collections/LearningSubcategory';
 import { News } from './collections/News';
 import { Review } from './collections/Review';
 import { Users } from './collections/Users';
@@ -33,7 +36,21 @@ export default buildConfig({
     admin: '/cms',
     api: '/payload-api',
   },
-  collections: [Users, Artifact, CatalogEntry, Review, AuditLog, DiscoverySource, DiscoveryRun, News, Event],
+  // 014: the KI Læring collections are appended, keeping the existing order stable.
+  collections: [
+    Users,
+    Artifact,
+    CatalogEntry,
+    Review,
+    AuditLog,
+    DiscoverySource,
+    DiscoveryRun,
+    News,
+    Event,
+    LearningCategory,
+    LearningSubcategory,
+    LearningPage,
+  ],
   // 011: editor-managed chrome + frontpage content (contracts/site-content-globals.md).
   globals: [SiteChrome, Frontpage],
   editor: lexicalEditor(),
