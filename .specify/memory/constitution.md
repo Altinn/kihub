@@ -1,29 +1,43 @@
 <!--
 Sync Impact Report
-Version change: 2.0.0 → 3.0.0
-Bump rationale: MAJOR. REDEFINES the mandatory Design System constraint (Technology & Architecture
-  Constraints) from "all employee-facing UI MUST be built with Designsystemet React components;
-  custom components only for genuine gaps" to Designsystemet's own prescribed usage model
-  (designsystemet.no): Designsystemet as the mandatory FOUNDATION — an official generated KI Hub
-  theme + a shared token layer — with custom presentational components sanctioned on top.
-  Restyling/forking Designsystemet primitives remains prohibited. Per the versioning policy and
-  the v2.0.0 precedent, a constraint redefinition ⇒ MAJOR.
+Version change: 3.0.0 → 3.1.0
+Bump rationale: MINOR. ADDS **Learning** as a fourth Product Module (alongside Registry, News and
+  Calendar/Events) so the module enumeration stays accurate once specs/014-learning-pages ships,
+  and extends the existing native-platform-content scoping to cover it. Purely additive: no
+  principle is removed or redefined, the Registry principles' substance is untouched, and the
+  Design System constraint is unchanged. Per the versioning policy, a new section/materially
+  expanded enumeration ⇒ MINOR. (The constitution already permitted new modules — "New modules are
+  added as new Payload collections + employee-facing pages + admin authoring" — so no prior feature
+  was non-compliant; this amendment keeps the enumeration truthful.)
 Modified principles:
-  - VIII. Two Surfaces — employee-app sentence now references the Designsystemet FOUNDATION with
-    the KI Hub theme (wording only; the two-surface rule is unchanged)
+  - I. Git is the Source of Truth — scoping sentence now excludes Learning alongside News/Events
+  - II. Payload Owns Enterprise Context and Native Content — native-content clause now names
+    Learning content and the media assets uploaded for native content
+  - III. Every AI Asset is an Artifact — scoping sentence now states Learning content is NOT an
+    artifact alongside News/Events
+  - VIII. Two Surfaces — employee-app bullet adds Learning content (and copying code samples to the
+    light-interaction list); back-office bullet adds curating Learning content and its media assets
 Modified sections:
-  - Technology & Architecture Constraints → "Design System" constraint rewritten (foundation +
-    official theming pipeline + token layer + custom-component rules); resolves the justified
-    deviation recorded in specs/011-frontpage-redesign/plan.md Complexity Tracking
-Added sections: none
+  - Opening summary — Learning added to what the portal brings together
+  - Product Modules — new **Learning** bullet (categories → subcategories → learning pages; native
+    content; Registry principles I, III, IV, V, VI do not apply)
+  - Security, Governance & Compliance → Data ownership — Learning content and its uploaded media
+    named as native Payload-owned data
+  - Development Workflow & Quality Gates → Testing — Learning added to the new-module testing gate
+Added sections: none (the Learning module is a bullet within existing Product Modules)
 Removed sections: none
+Notes on constraints deliberately NOT changed:
+  - Managed media uploads for native content need no new constraint: Technology & Architecture
+    Constraints already name Azure Blob Storage as the platform's object store.
+  - Design System constraint unchanged; Learning's employee-facing UI is bound by it as-is.
 Templates requiring updates:
   ✅ .specify/templates/plan-template.md (Constitution Check references gates generically — compatible)
   ✅ .specify/templates/spec-template.md (no mandatory-section conflict)
   ✅ .specify/templates/tasks-template.md (task categories compatible)
-  ✅ CLAUDE.md (SPECKIT block updated to reference v3.0.0 resolution of the 011 deviation)
-  ⚠ README.md (still describes KI Hub as an AI-artifact catalog; update when the portal reframing
-    reaches user-facing docs — not blocking, carried over from v2.0.0)
+  ✅ CLAUDE.md (SPECKIT block updated to v3.1.0 + the four-module list)
+  ⚠ README.md (still describes KI Hub as an AI-artifact catalog, and two passages paraphrase the
+    charter as "Registry + News + Calendar" — both to be corrected when the portal reframing reaches
+    user-facing docs / when the Learning module ships; not blocking, carried over from v2.0.0)
 Follow-up TODOs: none
 -->
 
@@ -31,8 +45,9 @@ Follow-up TODOs: none
 
 KI Hub is an internal employee portal for Digdir. It brings together, in one place for all
 employees, an **AI-tool Registry** (a catalog and governance layer over Git-based AI artifacts),
-**News**, and a **Calendar** of events. Its differentiating value in the AI space is structured
-governance of AI tools; its everyday value is being the internal home employees actually visit.
+**News**, a **Calendar** of events, and **Learning** content that teaches employees how to work with
+AI tooling. Its differentiating value in the AI space is structured governance of AI tools; its
+everyday value is being the internal home employees actually visit.
 
 KI Hub is delivered as **two surfaces**: an employee-facing web app for everyone, and a Payload CMS
 admin back-office for a small set of editors and admins (see Principle VIII).
@@ -46,6 +61,10 @@ admin back-office for a small set of editors and admins (see Principle VIII).
   II); not an "artifact" and not sourced from Git.
 - **Calendar / Events** — internal events authored in KI Hub. First-class native platform content
   (Principle II); not an "artifact".
+- **Learning** — structured internal learning content authored in KI Hub: an editor-curated library
+  of categories, subcategories and learning pages that teach employees how to use AI tooling.
+  First-class native platform content (Principle II); not an "artifact", and the Registry principles
+  (I, III, IV, V, VI) do not apply to it.
 
 New modules are added as new Payload collections + employee-facing pages + admin authoring, reusing
 the shared foundation (auth, roles, Designsystemet, the two-surface split) — not as parallel apps.
@@ -61,7 +80,7 @@ never becomes its canonical home. Any feature that would require KI Hub to be th
 AI-artifact content is out of scope and MUST be rejected at design time.
 
 This principle governs **AI artifacts specifically**. It does NOT apply to native platform content
-(News, Events), which has no Git source and is authored in KI Hub — see Principle II.
+(News, Events, Learning), which has no Git source and is authored in KI Hub — see Principle II.
 
 Rationale: Keeping artifact content in Git preserves versioning, review history, and tooling
 compatibility (APM, CI) while letting KI Hub focus on enterprise context.
@@ -79,11 +98,12 @@ Payload CMS is KI Hub's data layer. It stores two kinds of data:
    Git owns the AI artifact.     Payload owns the enterprise context around it.
    ```
 
-2. **Native platform content** — News articles and calendar Events are authored in KI Hub, have no
-   external source of truth, and are correctly and fully owned by Payload (content and all).
+2. **Native platform content** — News articles, calendar Events and Learning content are authored in
+   KI Hub, have no external source of truth, and are correctly and fully owned by Payload (content
+   and all), including any media assets uploaded for them.
 
 Rationale: A clean data-ownership boundary prevents drift and keeps the Registry rebuildable from
-Git, while native content (news/events) legitimately lives in Payload as its home.
+Git, while native content (news/events/learning) legitimately lives in Payload as its home.
 
 ### III. Every AI Asset is an Artifact
 
@@ -92,8 +112,8 @@ policy, playbook, evaluation dataset, agent definition — MUST be modeled as a 
 `Artifact` concept differentiated by a `type` field. Building separate subsystems per AI asset type
 is prohibited; new AI asset types are added as new `type` values, not new collections or services.
 
-This principle is scoped to **AI assets**. News and Events are NOT artifacts and MUST NOT be forced
-into the artifact model — they are their own collections/entities.
+This principle is scoped to **AI assets**. News, Events and Learning content are NOT artifacts and
+MUST NOT be forced into the artifact model — they are their own collections/entities.
 
 Rationale: A unified model keeps the Registry future-proof and avoids combinatorial complexity as AI
 asset types grow, without over-generalizing unrelated content types.
@@ -149,13 +169,15 @@ principles preserve the ability to grow without rewrites.
 
 KI Hub MUST be built as exactly two surfaces with distinct audiences:
 
-1. **Employee-facing web app** — for ALL employees. Browsing and reading News, the Calendar, and the
-   Registry, plus light interaction (search, filters, copy install commands, view governance state).
+1. **Employee-facing web app** — for ALL employees. Browsing and reading News, the Calendar,
+   Learning content, and the Registry, plus light interaction (search, filters, copy install
+   commands and code samples, view governance state).
    This surface MUST be built on the Designsystemet foundation with the KI Hub theme (see
    Technology & Architecture Constraints).
 
 2. **Editor back-office (Payload admin)** — for a small set of editors and admins. Authoring News,
-   creating calendar Events, performing tool reviews/governance, and administering the platform. It
+   creating calendar Events, curating Learning content and its media assets, performing tool
+   reviews/governance, and administering the platform. It
    is the Payload CMS admin UI and is EXEMPT from the Designsystemet requirement — it is a vendor
    editor tool for an internal editorial audience, and its off-brand look is acceptable.
 
@@ -218,7 +240,8 @@ lets each optimize for its audience, and leverages Payload's admin instead of re
 - **Reviews** (Registry): Typed reviews carry reviewer, status, date, comments, decision, required
   changes, risk level, and expiry. Approval state MUST be auditable.
 - **Data ownership**: Per Principles I & II, no AI-artifact content is persisted in KI Hub (only
-  metadata and governance records); News/Events content is native Payload-owned data.
+  metadata and governance records); News, Events and Learning content — including media uploaded for
+  them — is native Payload-owned data.
 
 ## Development Workflow & Quality Gates
 
@@ -229,7 +252,7 @@ lets each optimize for its audience, and leverages Payload's admin instead of re
   changes to them require explicit versioning and updates to dependent packages.
 - **Testing**: Discovery/validation logic, manifest schema validation, and governance
   state-transition rules MUST have automated tests. Integration tests cover manifest parsing and
-  Payload write paths. New modules (News, Events) MUST test their access control and any
+  Payload write paths. New modules (News, Events, Learning) MUST test their access control and any
   state/validation rules.
 - **Reviews**: All PRs MUST verify constitution compliance; any added complexity MUST be justified
   against a concrete phase requirement.
@@ -248,4 +271,4 @@ Versioning policy (semantic):
 Compliance: Plans and reviews MUST check against these principles. Use `CLAUDE.md` and `.specify/`
 templates for runtime development guidance.
 
-**Version**: 3.0.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-08-03
+**Version**: 3.1.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-08-10

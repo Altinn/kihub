@@ -24,8 +24,10 @@ home-page widgets `specs/010-home-widgets/`; frontpage redesign `specs/011-front
 (DONE, suite 134/134 → now 141/141 with deploy-phase tests); events page redesign
 `specs/012-events-page-redesign/` (DONE, suite 187/187 across 27 files, lint + prod build green).
 Governance rules:
-`.specify/memory/constitution.md` (v3.0.0 — KI Hub is an employee portal: Registry + News +
-Calendar, two surfaces; Design System constraint = Designsystemet as FOUNDATION with the generated
+`.specify/memory/constitution.md` (v3.1.0 — KI Hub is an employee portal: Registry + News +
+Calendar + Learning, two surfaces; Learning is native Payload content, NOT an artifact, and the
+Registry principles I/III/IV/V/VI do not apply to it; Design System constraint = Designsystemet as
+FOUNDATION with the generated
 KI Hub theme (`designsystemet.config.json` + `pnpm --filter web theme:build`) + kihub token layer;
 custom presentational components sanctioned on the tokens).
 <!-- SPECKIT END -->
