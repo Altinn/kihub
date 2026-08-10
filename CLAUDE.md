@@ -42,9 +42,16 @@ are byte-identical to what `next/font/google` was fetching: a build-reliability 
 one, and `kihub-fonts.css` needed no edit because the CSS variable names are unchanged.
 Release notes: (1) editors must add the "KI Læring" nav entry in `/cms` → Site Chrome in any env whose
 `site-chrome` global was already saved — `mergeSiteChrome` treats a saved nav as authoritative and no
-migration touches editor-owned content; (2) blocked externally: durable image storage needs an Azure
-blob container from the platform team — deployed envs run `MEDIA_STORAGE_MODE=disk` (ephemeral, and
-images uploaded meanwhile are NOT migrated) until then; local dev unblocked.
+migration touches editor-owned content; (2) **durable image storage is DONE (2026-08-10)** and never
+needed the platform team — the account has Contributor at subscription + RG scope, so a private
+`kihub-media` container was created on `stkihubmedia` (`rg-kihub-app`, `norwayeast`) and `kihub-web`
+already carries `MEDIA_STORAGE_MODE=azure` + the three settings, connection string as a container-app
+secret (revision `--0000002`, Healthy). Verified by write/read/delete round-trip; anonymous blob GET
+returns 409, so files are only reachable via Payload's authenticated route. `Microsoft.Storage` had to
+be registered on the subscription first — before that even `az storage account check-name` fails with
+a misleading `SubscriptionNotFound`. Local dev still defaults to `disk`. Deployment of 014 itself is
+still blocked on the TWO remaining identity items (digdir sign-in app registration, deploy-SP role
+grant) — `kihub-web` runs a pre-014 image that ignores the new vars.
 Prior: **013-news-page-redesign** (DONE — suite 212/212 across 28 files, lint + prod build green),
 `specs/013-news-page-redesign/plan.md`. It rebuilt `/news` ("Nyheter") as a kihub-restyled editorial
 card grid (16:10 media well + serif headline + nb-NO date + summary, 2-up/1-up, each card ONE link)

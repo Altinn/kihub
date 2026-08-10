@@ -500,13 +500,15 @@ Explicitly excluded from this feature, and nothing here may preclude adding them
 ## Dependencies
 
 - **Durable object storage for uploads in deployed environments.** FR-024 requires images to survive
-  restarts, which the container filesystem cannot provide. Deployed environments therefore need a
-  storage container and credentials provisioned in Azure. This is currently **pending with the
-  platform team** alongside the outstanding sign-in registration and deploy-role grant. Local
-  development is not blocked: the local filesystem target lets the entire feature be built, tested
-  and demonstrated locally, and the deployed environment gains durable images as soon as the
-  container exists. Until then, images uploaded in the deployed environment must be treated as
-  ephemeral — and per FR-025 the misconfiguration must be loud rather than silent.
+  restarts, which the container filesystem cannot provide. **RESOLVED 2026-08-10 — and it never
+  required the platform team.** The account holder has Contributor at subscription and resource-group
+  scope, which covers creating storage, creating containers and reading account keys; only role
+  assignments are out of reach, and this adapter uses a connection string rather than a managed
+  identity. A private `kihub-media` container now exists on `stkihubmedia` (`rg-kihub-app`,
+  `norwayeast`), and `kihub-web` carries the three settings with the connection string held as a
+  container-app secret. Verified by a write/read/delete round-trip, plus an anonymous request that
+  correctly returned 409. See [contracts/media-storage.md §C](./contracts/media-storage.md). Local
+  development was never blocked and still defaults to `disk`.
 - **Existing shared foundation**: employee sign-in and the Entra-mapped role model, the back-office
   surface, the generated Designsystemet KI Hub theme and the kihub token layer, and the editor-managed
   site navigation — all reused as-is, with no changes to their contracts.

@@ -167,18 +167,35 @@ The build is not ceremony here: it is what proves shiki's fine-grained bundle tr
 item — label `KI Læring`, href `/laering` — and the same to the footer links. One edit; the module is
 reachable by URL meanwhile.
 
-### 6.2 Durable image storage
+### 6.2 Durable image storage — already provisioned
 
-Until the platform team provisions the blob container, deployed environments run
-`MEDIA_STORAGE_MODE=disk` and **uploaded images are ephemeral** — they disappear on restart
-(media-storage.md §C). Flipping to durable storage is configuration only, no code change:
+**Done as of 2026-08-10**, and it did not need the platform team (Contributor covers it — see
+media-storage.md §C). A private `kihub-media` container exists on the `stkihubmedia` account in
+`rg-kihub-app`/`norwayeast`, and `kihub-web` already carries:
 
 ```
 MEDIA_STORAGE_MODE=azure
-AZURE_STORAGE_CONNECTION_STRING=<from the platform team>
-AZURE_STORAGE_CONTAINER_NAME=<container>
+AZURE_STORAGE_CONNECTION_STRING=secretref:azure-storage-connection-string
+AZURE_STORAGE_CONTAINER_NAME=kihub-media
+AZURE_STORAGE_ACCOUNT_BASEURL=https://stkihubmedia.blob.core.windows.net/kihub-media
 ```
 
-Set these **before** editors start filling the library — files uploaded during the `disk` period are
-not migrated and must be re-uploaded. A misconfigured `azure` mode crash-loops the container at boot
-with a named error rather than silently serving broken images (media-storage.md §B1).
+So there is no `disk` period to migrate away from: the first upload after 014 deploys goes straight to
+blob storage. A misconfigured `azure` mode crash-loops the container at boot with a named error rather
+than silently serving broken images (media-storage.md §B1).
+
+To recreate this from scratch in another subscription — note `Microsoft.Storage` must be registered
+first, or `check-name` fails with a misleading `SubscriptionNotFound`:
+
+```bash
+az provider register --namespace Microsoft.Storage --wait
+az storage account create -n <account> -g rg-kihub-app --location norwayeast \
+  --sku Standard_LRS --kind StorageV2 --allow-blob-public-access false \
+  --min-tls-version TLS1_2 --https-only true
+az storage container create -n kihub-media --account-name <account> \
+  --account-key "$(az storage account keys list -g rg-kihub-app -n <account> --query '[0].value' -o tsv)" \
+  --public-access off
+```
+
+Keep the container **private**: Payload proxies every file through its own authenticated route, so
+public blob access would bypass the employee sign-in gate for internal screenshots.

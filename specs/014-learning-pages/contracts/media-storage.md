@@ -87,25 +87,49 @@ config-resolution throw rides the same path.
 
 ---
 
-## §C Durability and the external dependency
+## §C Durability — PROVISIONED (2026-08-10)
 
 FR-024 requires uploads to survive restarts and redeployments. The Azure Container Apps filesystem is
 ephemeral, so `disk` mode **is not durable in a deployed environment** — that is the entire reason the
 mode exists as a switch.
 
-**Current state**: the blob container and its credentials are pending with the platform team, tracked
-in [spec.md → Dependencies](../spec.md#dependencies) alongside the outstanding sign-in registration and
-deploy-SP role grant.
+**This is no longer blocked, and it never needed the platform team.** The account holder turned out to
+have **Contributor at both subscription and resource-group scope** on `Altinn-KITT-TestDev`, which
+covers everything required here (create storage, create containers, read account keys). The only thing
+Contributor cannot do is create role assignments — irrelevant, because this adapter authenticates with
+a connection string rather than a managed identity.
 
-**Consequences, stated plainly:**
+### What exists
 
-- Local development is fully unblocked: `disk` mode exercises every requirement except FR-024, and the
-  entire feature can be built, tested and demonstrated.
-- The deployed environment runs `disk` until the container exists. Images uploaded there before the
-  switch **must be treated as ephemeral** — they will disappear on the next restart. Per B1.1 this is a
-  deliberate configuration state, not a silent failure.
-- Flipping to durable storage is one environment change plus a restart: set `MEDIA_STORAGE_MODE=azure`
-  and the two required variables. No code change, no migration, no content change.
-- Files uploaded during the `disk` period are not migrated automatically; editors re-upload them. With
-  no real content authored yet, this is acceptable — and it is the reason to set the variables **before**
-  editors start filling the library.
+| Resource | Value |
+|---|---|
+| Subscription | `Altinn-KITT-TestDev` (`a21239a6-…`) |
+| Resource group | `rg-kihub-app` — the same group as `kihub-web`, `kihub-env`, `kihub-pg` |
+| Storage account | `stkihubmedia`, `norwayeast`, `Standard_LRS`, `StorageV2` |
+| Container | `kihub-media`, **private** (`publicAccess: null`) |
+| Account settings | `allowBlobPublicAccess: false`, `minimumTlsVersion: TLS1_2`, `httpsOnly: true` |
+| `AZURE_STORAGE_ACCOUNT_BASEURL` | `https://stkihubmedia.blob.core.windows.net/kihub-media` |
+
+`Microsoft.Storage` had to be registered on the subscription first — until then even
+`az storage account check-name` fails with a misleading `SubscriptionNotFound`.
+
+### Wiring on `kihub-web`
+
+`MEDIA_STORAGE_MODE=azure`, `AZURE_STORAGE_CONTAINER_NAME`, `AZURE_STORAGE_ACCOUNT_BASEURL` are plain
+env vars; the connection string is a container-app **secret** (`azure-storage-connection-string`,
+referenced as `secretref:`), never plain configuration. Setting them created revision
+`kihub-web--0000002`, which came up `Healthy`.
+
+### Verified, not assumed
+
+A write → list → read → delete round-trip against `kihub-media` using the exact connection string the
+app holds: upload returned an etag, the downloaded bytes matched, and the container was left empty.
+An **anonymous** `GET` of the blob URL returned **409 PublicAccessNotPermitted** — confirming the
+container is genuinely private and that files are only reachable through Payload's authenticated route.
+
+### One caveat that remains
+
+The 014 code is **not deployed yet** (deployment is blocked on the two outstanding identity items:
+the digdir sign-in app registration and the deploy-SP role grant). `kihub-web` currently runs a
+pre-014 image, which ignores these variables. The moment 014 deploys, uploads go straight to blob
+storage — there is no `disk` period to migrate away from, so nothing will need re-uploading.
