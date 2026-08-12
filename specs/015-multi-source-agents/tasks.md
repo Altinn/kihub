@@ -138,11 +138,11 @@ removed → section disappears.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T034 [P] Update packages/artifact-schema/docs/artifact-manifest.md: schema version 1.1.0, `agent` in the type row, the type↔directory consistency rule, and a new "Agent card (`agent-card.json`)" section documenting the sibling-file convention and tolerant validation (per [contracts/manifest-v1.1.md](contracts/manifest-v1.1.md) + [contracts/agent-card.md](contracts/agent-card.md))
-- [ ] T035 Full suites green: `pnpm -r test` with env exported — expect the package suites plus web suite (baseline 328 + new tests), zero regressions
-- [ ] T036 `pnpm --filter web lint` clean
-- [ ] T037 Production build gate against the migrated scratch DB from T008 with non-mock auth: verify the accepted non-mock `AUTH_MODE` value in the auth config first (analyze finding A2), then `DATABASE_URI=<kihub_migtest> AUTH_MODE=<non-mock> pnpm --filter web build` — compiles, typechecks, generates all routes (recorded gotcha: this is the only gate that has caught implicit-`any` errors)
-- [ ] T038 Manual end-to-end per [quickstart.md](quickstart.md) §4: real second repo with an agent + card, register source in `/cms`, "Run now" on `/admin/discovery`, verify no cross-damage to the first source, Norwegian type chips in `/registry`, card panel on the detail page, card errors in the run view after breaking the card
+- [x] T034 [P] Update packages/artifact-schema/docs/artifact-manifest.md: schema version 1.1.0, `agent` in the type row, the type↔directory consistency rule, and a new "Agent card (`agent-card.json`)" section documenting the sibling-file convention and tolerant validation (per [contracts/manifest-v1.1.md](contracts/manifest-v1.1.md) + [contracts/agent-card.md](contracts/agent-card.md))
+- [x] T035 Full suites green: `pnpm -r test` with env exported — expect the package suites plus web suite (baseline 328 + new tests), zero regressions
+- [x] T036 `pnpm --filter web lint` clean
+- [x] T037 Production build gate against the migrated scratch DB from T008 with non-mock auth: verify the accepted non-mock `AUTH_MODE` value in the auth config first (analyze finding A2), then `DATABASE_URI=<kihub_migtest> AUTH_MODE=<non-mock> pnpm --filter web build` — compiles, typechecks, generates all routes (recorded gotcha: this is the only gate that has caught implicit-`any` errors)
+- [ ] T038 (PARTIAL — local half done 2026-08-12: agent + card seeded through the real scan+reconcile path, browser-verified: Norwegian type chips on /registry, full Agentkort panel on the detail page, zero console errors; REMAINING: the real-GitHub-second-repo pass, needs the user's repo + PAT) Manual end-to-end per [quickstart.md](quickstart.md) §4: real second repo with an agent + card, register source in `/cms`, "Run now" on `/admin/discovery`, verify no cross-damage to the first source, Norwegian type chips in `/registry`, card panel on the detail page, card errors in the run view after breaking the card
 
 ---
 

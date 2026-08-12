@@ -1,6 +1,10 @@
 <!-- SPECKIT START -->
-Active feature: **015-multi-source-agents** (specify + plan DONE; next: `/speckit-tasks`).
-For technologies, structure, and context read the plan:
+Active feature: **015-multi-source-agents** (DONE — specify + plan + tasks + analyze + implement
+complete 2026-08-12; tasks 37/38, T038 half-done: local browser e2e verified, the
+real-GitHub-second-repo pass still needs the user's repo + PAT per quickstart §4. Suites:
+**web 346/346 across 42 files**, packages 63 (schema 17, discovery-core 24, github-client 5,
+governance-core 17), lint clean, prod build green vs migrated scratch `kihub_migtest` +
+`AUTH_MODE=entra`). For technologies, structure, and context read the plan:
 `specs/015-multi-source-agents/plan.md` (with `research.md` R1–R12, `data-model.md`,
 `contracts/` ×3, `quickstart.md`; `spec.md` for requirements). Two capabilities: (1)
 **source-scoped reconcile** — `artifacts` gains a nullable indexed `discoverySource`
@@ -22,11 +26,22 @@ today — UI renders raw enum values; wire CatalogFilters/ArtifactCard/detail/Ar
 options). ONE additive migration (enum ADD VALUE 'agent' is txn-safe on PG≥12 because unused in
 same txn; down needs the 014 IF EXISTS hand-patch). No constitution amendment — Principle III
 already names "agent definition". Search untouched (type not in tsvector; card search deferred).
-Constitution Check: PASS, no violations. Key gotchas inherited: verify migrations on scratch DB
-(push-mode dev DB prompts "data loss"), `next build` needs migrated scratch DB + non-mock
-AUTH_MODE and is the only gate that catches implicit-any errors, discovery-core's fake payload
-must learn `and:` where-shapes + `depth: 0`, search.test.ts:17 has a `'skill'|'prompt'` literal
-union that needs `'agent'` if seeding one.
+Constitution Check: PASS, no violations.
+Implementation notes worth keeping: reconcile reads the row's previous owner BEFORE the update
+(the update overwrites it — the in-memory test fake returns live references and caught this);
+`ReconcileOptions.sourceId: null` is the explicit break-glass mode (upserts leave ownership
+untouched, zero deactivation) used by `scripts/index-artifacts.ts`; the type↔dir consistency
+check lives in `toRawArtifact` via a `DIR_FOR_TYPE` map (policies→policy means no naive
+'s'-strip); the generated migration
+(`20260812_131624_agents_multisource`) got the usual `IF EXISTS` down hand-patch and its
+`ALTER TYPE ADD VALUE 'agent'` runs fine inside Payload's txn on PG16 (value added, never used
+in-txn); its `down` recreates the enum WITHOUT 'agent' so it fails by design if agent rows
+exist; zod v4 `.loose()` objects preserve unknown card fields; card errors use the
+validateManifest `"path: message"` format; two integration tests migrated to the new reconcile
+signature (`reconcile.test.ts` got a real source row because it asserts deactivation;
+`reindex-preserves.test.ts` uses `sourceId: null`). Local dev DB currently holds 015 demo data
+(`digdir.security-review` + `digdir.support-copilot` agent with card, source `demo-015`
+disabled) seeded for the T038 visual check.
 Prior: **014-learning-pages** (DONE — specify + plan + tasks + implement complete; suite
 **328/328 across 37 files**, lint clean, prod build compiles + typechecks + generates all routes;
 `specs/014-learning-pages/plan.md`). It adds **KI Læring** — the constitution's fourth
