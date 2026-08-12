@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { type ArtifactManifest, validateManifest } from '@kihub/artifact-schema';
+import { type ArtifactManifest, validateAgentCard, validateManifest } from '@kihub/artifact-schema';
 
 /** Type directories walked under the repo root; each subfolder with an artifact.yaml is one artifact. */
 export const TYPE_DIRS = [
@@ -21,6 +21,10 @@ export interface RawArtifact {
   readme?: string;
   valid: boolean;
   errors?: string[];
+  /** Parsed valid agent-card.json (015 US3) — set only for valid agents that ship one. */
+  agentCard?: Record<string, unknown>;
+  /** Card validation errors — the artifact itself stays valid (FR-012). */
+  agentCardErrors?: string[];
 }
 
 /**
@@ -71,6 +75,20 @@ function toRawArtifact(relPath: string, manifestText: string, readme: string | u
 }
 
 /**
+ * Attach the optional sibling agent-card.json to a valid agent's RawArtifact (015 US3).
+ * Cards are only ever consulted for valid `type: agent` manifests (FR-014); an absent file is
+ * normal, and an invalid card records errors WITHOUT invalidating the artifact (FR-012).
+ */
+function attachAgentCard(raw: RawArtifact, cardText: string | undefined): RawArtifact {
+  if (cardText === undefined) return raw;
+  const res = validateAgentCard(cardText);
+  if (res.valid) return { ...raw, agentCard: res.data as Record<string, unknown> };
+  return { ...raw, agentCardErrors: res.errors };
+}
+
+const isAgent = (raw: RawArtifact) => raw.valid && raw.manifest?.type === 'agent';
+
+/**
  * Scan a local ai-artifacts checkout at `rootPath`. Reads each artifact's `artifact.yaml` and
  * sibling `README.md`, validating the manifest with `@kihub/artifact-schema`. Invalid manifests are
  * returned with `valid:false` + errors (never thrown); a missing README is fine. Synchronous and
@@ -94,7 +112,12 @@ export function scan(rootPath: string): RawArtifact[] {
       const readmePath = path.join(artifactDir, 'README.md');
       const readme = existsSync(readmePath) ? readFileSync(readmePath, 'utf8') : undefined;
 
-      results.push(toRawArtifact(relPath, readFileSync(manifestPath, 'utf8'), readme));
+      let raw = toRawArtifact(relPath, readFileSync(manifestPath, 'utf8'), readme);
+      if (isAgent(raw)) {
+        const cardPath = path.join(artifactDir, 'agent-card.json');
+        raw = attachAgentCard(raw, existsSync(cardPath) ? readFileSync(cardPath, 'utf8') : undefined);
+      }
+      results.push(raw);
     }
   }
 
@@ -137,7 +160,12 @@ export async function scanRepo(reader: RepoReader): Promise<RawArtifact[]> {
     const manifestText = await reader.readFile(`${relPath}/artifact.yaml`);
     if (manifestText === undefined) continue;
     const readme = await reader.readFile(`${relPath}/README.md`);
-    results.push(toRawArtifact(relPath, manifestText, readme));
+    let raw = toRawArtifact(relPath, manifestText, readme);
+    if (isAgent(raw)) {
+      // One extra read per AGENT only (never for other types — FR-014); 404 → undefined → no card.
+      raw = attachAgentCard(raw, await reader.readFile(`${relPath}/agent-card.json`));
+    }
+    results.push(raw);
   }
   return results;
 }

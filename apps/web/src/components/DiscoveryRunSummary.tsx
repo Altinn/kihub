@@ -14,6 +14,7 @@ export function DiscoveryRunSummary({ run }: { run: DiscoveryRun }) {
         s.duplicates ? `${s.duplicates} duplikater i kilden` : null,
         s.adopted ? `${s.adopted} adoptert (uten kilde)` : null,
         s.reassigned ? `${s.reassigned} overtatt fra annen kilde` : null,
+        s.cardIssues ? `${s.cardIssues} agentkort med feil` : null,
       ].filter(Boolean)
     : [];
   const counts = extras.length ? `${base} · ${extras.join(' · ')}` : base;

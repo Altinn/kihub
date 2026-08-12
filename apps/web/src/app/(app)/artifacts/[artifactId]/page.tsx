@@ -1,6 +1,7 @@
 import { Card, Divider, Heading, Paragraph, Tag } from '@digdir/designsystemet-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { AgentCardPanel } from '@/components/AgentCardPanel';
 import { CopyButton } from '@/components/CopyButton';
 import { GovernancePanel } from '@/components/GovernancePanel';
 import { LifecycleBadge } from '@/components/LifecycleBadge';
@@ -87,6 +88,8 @@ export default async function ArtifactDetailPage({
           </Paragraph>
         )}
       </Card>
+
+      {a.agentCard ? <AgentCardPanel card={a.agentCard} /> : null}
 
       <Heading level={2} data-size="md" style={{ marginTop: '2rem', marginBottom: '0.75rem' }}>
         README

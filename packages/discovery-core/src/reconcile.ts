@@ -11,6 +11,8 @@ export interface IndexReport {
   adopted: string[];
   /** Ids taken over from another source — a move or a cross-source duplicate (015 FR-004/005). */
   reassigned: string[];
+  /** Agent-card validation problems per path — the artifact itself registered (015 FR-012). */
+  cardIssues: { path: string; errors: string[] }[];
 }
 
 /**
@@ -84,11 +86,15 @@ export async function reconcile(
     duplicates: [],
     adopted: [],
     reassigned: [],
+    cardIssues: [],
   };
   const { sourceId } = opts;
 
   for (const s of scanned) {
     if (!s.valid) report.skippedInvalid.push({ path: s.path, errors: s.errors ?? [] });
+    else if (s.agentCardErrors?.length) {
+      report.cardIssues.push({ path: s.path, errors: s.agentCardErrors });
+    }
   }
 
   const seen = new Set<string>();
@@ -107,6 +113,9 @@ export async function reconcile(
       ...buildRecord(s.manifest, s.readme ?? ''),
       active: true,
       lastIndexedAt: now,
+      // Card storage on EVERY upsert (015 FR-011/012 + analyze C2): non-agents and agents with a
+      // missing/invalid card get null — stale cards survive neither a re-scan nor a type change.
+      agentCard: s.agentCard ?? null,
     };
     if (sourceId !== null) data.discoverySource = sourceId;
 

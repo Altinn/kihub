@@ -165,6 +165,50 @@ describe('reconcile (source-scoped)', () => {
     expect(rows).toHaveLength(1);
   });
 
+  it('stores, clears, and reports agent cards through the full lifecycle (015 US3)', async () => {
+    const { payload, rows } = fakePayload();
+    const agent = (card?: Record<string, unknown>, cardErrors?: string[]): RawArtifact => ({
+      path: 'agents/a',
+      manifest: { ...manifest('digdir.agent'), type: 'agent' },
+      valid: true,
+      ...(card ? { agentCard: card } : {}),
+      ...(cardErrors ? { agentCardErrors: cardErrors } : {}),
+    });
+
+    // Valid card → stored.
+    let report = await reconcile(payload, [agent({ name: 'A' })], { sourceId: SRC_A });
+    expect(report.cardIssues).toEqual([]);
+    expect(byId(rows, 'digdir.agent')?.agentCard).toEqual({ name: 'A' });
+
+    // Invalid card → cleared + reported per path; the artifact stays registered/active.
+    report = await reconcile(payload, [agent(undefined, ['name: required'])], { sourceId: SRC_A });
+    expect(report.updated).toEqual(['digdir.agent']);
+    expect(report.cardIssues).toEqual([{ path: 'agents/a', errors: ['name: required'] }]);
+    expect(byId(rows, 'digdir.agent')?.agentCard).toBeNull();
+    expect(byId(rows, 'digdir.agent')?.active).toBe(true);
+
+    // Card restored, then file removed → cleared again, no issues.
+    await reconcile(payload, [agent({ name: 'A2' })], { sourceId: SRC_A });
+    expect(byId(rows, 'digdir.agent')?.agentCard).toEqual({ name: 'A2' });
+    report = await reconcile(payload, [agent()], { sourceId: SRC_A });
+    expect(report.cardIssues).toEqual([]);
+    expect(byId(rows, 'digdir.agent')?.agentCard).toBeNull();
+  });
+
+  it('a type change away from agent clears any stale card (analyze C2)', async () => {
+    const { payload, rows } = fakePayload();
+    await reconcile(
+      payload,
+      [{ path: 'agents/x', manifest: { ...manifest('digdir.x'), type: 'agent' }, valid: true, agentCard: { name: 'X' } }],
+      { sourceId: SRC_A },
+    );
+    expect(byId(rows, 'digdir.x')?.agentCard).toEqual({ name: 'X' });
+
+    // Same id re-registered as a skill (from skills/) — the card must not survive.
+    await reconcile(payload, [valid('digdir.x')], { sourceId: SRC_A });
+    expect(byId(rows, 'digdir.x')?.agentCard).toBeNull();
+  });
+
   it('passes through invalid manifests as skipped', async () => {
     const { payload } = fakePayload();
     const report = await reconcile(

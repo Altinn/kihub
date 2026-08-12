@@ -136,6 +136,7 @@ async function runLocked(
           skippedInvalid: report.skippedInvalid.length,
           adopted: report.adopted.length,
           reassigned: report.reassigned.length,
+          cardIssues: report.cardIssues.length,
         },
         createdIds: report.created,
         updatedIds: report.updated,
@@ -143,6 +144,7 @@ async function runLocked(
         adoptedIds: report.adopted,
         reassignedIds: report.reassigned,
         skippedInvalid: report.skippedInvalid.map((s) => ({ path: s.path, errors: s.errors })),
+        cardIssues: report.cardIssues.map((c) => ({ path: c.path, errors: c.errors })),
       },
       overrideAccess: true,
     });
