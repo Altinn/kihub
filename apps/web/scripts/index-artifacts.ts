@@ -25,7 +25,9 @@ if (!existsSync(absRoot)) {
 console.log(`Indexing artifacts from ${absRoot} …`);
 const scanned = scan(absRoot);
 const payload = await getPayload({ config });
-const report = await reconcile(payload, scanned);
+// Break-glass mode (015 R12): this local indexer owns no discovery source, so `sourceId: null` —
+// upserts leave ownership untouched (new rows stay unowned/adoptable) and nothing is deactivated.
+const report = await reconcile(payload, scanned, { sourceId: null });
 
 const line = (label: string, ids: string[]) =>
   console.log(`  ${label.padEnd(13)} ${ids.length}${ids.length ? `  (${ids.join(', ')})` : ''}`);

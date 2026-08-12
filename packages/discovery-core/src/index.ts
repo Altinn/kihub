@@ -7,4 +7,4 @@ export {
   type RepoReader,
 } from './scan';
 export { buildRecord, deriveInstallCommand, type ArtifactRecord } from './record';
-export { reconcile, type IndexReport, type PayloadLike } from './reconcile';
+export { reconcile, type IndexReport, type PayloadLike, type ReconcileOptions } from './reconcile';

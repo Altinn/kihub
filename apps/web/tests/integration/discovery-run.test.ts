@@ -101,6 +101,11 @@ describe('runDiscovery against live Payload (T011)', () => {
     expect(run.outcome).toBe('success');
     expect(run.summary?.created).toBe(2);
     expect((run.createdIds ?? []).sort()).toEqual(['digdir.run-a', 'digdir.run-b']);
+    // 015: ownership accounting is recorded on every run (zero here — fresh creates).
+    expect(run.summary?.adopted).toBe(0);
+    expect(run.summary?.reassigned).toBe(0);
+    expect(run.adoptedIds ?? []).toEqual([]);
+    expect(run.reassignedIds ?? []).toEqual([]);
 
     const source = await payload.findByID({ collection: 'discovery-sources', id: sourceId, overrideAccess: true });
     expect(source.lastRunOutcome).toBe('success');

@@ -14,23 +14,35 @@ function manifest(id: string): ArtifactManifest {
     source: { provider: 'github', repository: 'digdir/ai-artifacts', path: `skills/${id}` },
     visibility: 'internal',
     lifecycle: { status: 'draft' },
-    schemaVersion: '1.0.0',
+    schemaVersion: '1.1.0',
   };
 }
 
 const valid = (id: string): RawArtifact => ({ path: `skills/${id}`, manifest: manifest(id), valid: true });
 
-/** In-memory fake of the Payload Local API surface reconcile uses. */
-function fakePayload() {
-  const rows: Array<Record<string, unknown> & { id: number; artifactId: string; active: boolean }> = [];
+const SRC_A = 1;
+const SRC_B = 2;
+
+/** Recursive where-matcher for the two shapes reconcile uses: `{field:{equals}}` and `{and:[…]}`. */
+function rowMatches(row: Record<string, unknown>, where: unknown): boolean {
+  const w = (where ?? {}) as Record<string, unknown>;
+  if (Array.isArray(w.and)) return w.and.every((clause) => rowMatches(row, clause));
+  for (const [field, cond] of Object.entries(w)) {
+    if (cond && typeof cond === 'object' && 'equals' in (cond as object)) {
+      if (row[field] !== (cond as { equals: unknown }).equals) return false;
+    }
+  }
+  return true;
+}
+
+/** In-memory fake of the Payload Local API surface reconcile uses (incl. and:/depth). */
+function fakePayload(seed: Array<Record<string, unknown>> = []) {
+  const rows: Array<Record<string, unknown> & { id: number }> = [];
   let seq = 1;
+  for (const s of seed) rows.push({ id: seq++, ...s });
   const payload: PayloadLike = {
     async find({ where }: any) {
-      let docs = rows as any[];
-      const w = where ?? {};
-      if (w.artifactId?.equals) docs = docs.filter((r) => r.artifactId === w.artifactId.equals);
-      if (w.active?.equals !== undefined) docs = docs.filter((r) => r.active === w.active.equals);
-      return { docs };
+      return { docs: rows.filter((r) => rowMatches(r, where)) };
     },
     async create({ data }: any) {
       const row = { id: seq++, ...(data as object) } as any;
@@ -46,36 +58,108 @@ function fakePayload() {
   return { payload, rows };
 }
 
-describe('reconcile', () => {
-  it('creates new records on first run', async () => {
+const byId = (rows: Array<Record<string, unknown>>, artifactId: string) =>
+  rows.find((r) => r.artifactId === artifactId);
+
+describe('reconcile (source-scoped)', () => {
+  it('creates new records on first run, stamped with the scanned source', async () => {
     const { payload, rows } = fakePayload();
-    const report = await reconcile(payload, [valid('digdir.a'), valid('digdir.b')]);
+    const report = await reconcile(payload, [valid('digdir.a'), valid('digdir.b')], { sourceId: SRC_A });
     expect(report.created.sort()).toEqual(['digdir.a', 'digdir.b']);
     expect(rows).toHaveLength(2);
     expect(rows.every((r) => r.active)).toBe(true);
+    expect(rows.every((r) => r.discoverySource === SRC_A)).toBe(true);
   });
 
   it('updates in place on re-run (no duplicates)', async () => {
     const { payload, rows } = fakePayload();
-    await reconcile(payload, [valid('digdir.a')]);
-    const report = await reconcile(payload, [valid('digdir.a')]);
+    await reconcile(payload, [valid('digdir.a')], { sourceId: SRC_A });
+    const report = await reconcile(payload, [valid('digdir.a')], { sourceId: SRC_A });
     expect(report.updated).toEqual(['digdir.a']);
     expect(report.created).toEqual([]);
+    expect(report.adopted).toEqual([]);
+    expect(report.reassigned).toEqual([]);
     expect(rows).toHaveLength(1);
   });
 
-  it('soft-deactivates artifacts removed from the repo', async () => {
+  it('soft-deactivates artifacts removed from the repo — but only its own source’s', async () => {
     const { payload, rows } = fakePayload();
-    await reconcile(payload, [valid('digdir.a'), valid('digdir.b')]);
-    const report = await reconcile(payload, [valid('digdir.a')]);
+    await reconcile(payload, [valid('digdir.a'), valid('digdir.b')], { sourceId: SRC_A });
+    await reconcile(payload, [valid('digdir.other')], { sourceId: SRC_B });
+    const report = await reconcile(payload, [valid('digdir.a')], { sourceId: SRC_A });
     expect(report.deactivated).toEqual(['digdir.b']);
-    expect(rows.find((r) => r.artifactId === 'digdir.b')?.active).toBe(false);
-    expect(rows.find((r) => r.artifactId === 'digdir.a')?.active).toBe(true);
+    expect(byId(rows, 'digdir.b')?.active).toBe(false);
+    expect(byId(rows, 'digdir.a')?.active).toBe(true);
+    // Source B's artifact is untouched by A's scan (FR-002).
+    expect(byId(rows, 'digdir.other')?.active).toBe(true);
+  });
+
+  it('never deactivates unowned (legacy) rows', async () => {
+    const { payload, rows } = fakePayload([
+      { artifactId: 'digdir.legacy', active: true, discoverySource: null },
+    ]);
+    const report = await reconcile(payload, [valid('digdir.a')], { sourceId: SRC_A });
+    expect(report.deactivated).toEqual([]);
+    expect(byId(rows, 'digdir.legacy')?.active).toBe(true);
+    expect(byId(rows, 'digdir.legacy')?.discoverySource).toBeNull();
+  });
+
+  it('adopts a previously-unowned row when its id is found (reported in `adopted`)', async () => {
+    const { payload, rows } = fakePayload([
+      { artifactId: 'digdir.a', active: true, discoverySource: null },
+    ]);
+    const report = await reconcile(payload, [valid('digdir.a')], { sourceId: SRC_A });
+    expect(report.updated).toEqual(['digdir.a']);
+    expect(report.adopted).toEqual(['digdir.a']);
+    expect(report.reassigned).toEqual([]);
+    expect(byId(rows, 'digdir.a')?.discoverySource).toBe(SRC_A);
+  });
+
+  it('reassigns a row owned by another source (reported in `reassigned`, ownership-by-last-sighting)', async () => {
+    const { payload, rows } = fakePayload([
+      { artifactId: 'digdir.a', active: true, discoverySource: SRC_B },
+    ]);
+    const report = await reconcile(payload, [valid('digdir.a')], { sourceId: SRC_A });
+    expect(report.reassigned).toEqual(['digdir.a']);
+    expect(report.adopted).toEqual([]);
+    expect(byId(rows, 'digdir.a')?.discoverySource).toBe(SRC_A);
+    // …and B's next empty scan no longer touches it (it is A's now).
+    const bReport = await reconcile(payload, [], { sourceId: SRC_B });
+    expect(bReport.deactivated).toEqual([]);
+    expect(byId(rows, 'digdir.a')?.active).toBe(true);
+  });
+
+  it('reads populated relationship values (object with id) as the owner', async () => {
+    const { payload, rows } = fakePayload([
+      { artifactId: 'digdir.a', active: true, discoverySource: { id: SRC_A } },
+    ]);
+    const report = await reconcile(payload, [valid('digdir.a')], { sourceId: SRC_A });
+    expect(report.adopted).toEqual([]);
+    expect(report.reassigned).toEqual([]);
+    expect(byId(rows, 'digdir.a')?.discoverySource).toBe(SRC_A);
+  });
+
+  it('break-glass mode (sourceId: null): leaves ownership untouched and deactivates nothing', async () => {
+    const { payload, rows } = fakePayload([
+      { artifactId: 'digdir.owned', active: true, discoverySource: SRC_B },
+      { artifactId: 'digdir.gone', active: true, discoverySource: SRC_B },
+    ]);
+    const report = await reconcile(payload, [valid('digdir.owned'), valid('digdir.new')], {
+      sourceId: null,
+    });
+    expect(report.created).toEqual(['digdir.new']);
+    expect(report.deactivated).toEqual([]);
+    expect(report.adopted).toEqual([]);
+    expect(report.reassigned).toEqual([]);
+    // Existing ownership is preserved; the new row is unowned.
+    expect(byId(rows, 'digdir.owned')?.discoverySource).toBe(SRC_B);
+    expect(byId(rows, 'digdir.new')?.discoverySource ?? null).toBeNull();
+    expect(byId(rows, 'digdir.gone')?.active).toBe(true);
   });
 
   it('detects duplicate ids in one run (first wins)', async () => {
     const { payload, rows } = fakePayload();
-    const report = await reconcile(payload, [valid('digdir.a'), valid('digdir.a')]);
+    const report = await reconcile(payload, [valid('digdir.a'), valid('digdir.a')], { sourceId: SRC_A });
     expect(report.created).toEqual(['digdir.a']);
     expect(report.duplicates).toEqual(['digdir.a']);
     expect(rows).toHaveLength(1);
@@ -83,10 +167,11 @@ describe('reconcile', () => {
 
   it('passes through invalid manifests as skipped', async () => {
     const { payload } = fakePayload();
-    const report = await reconcile(payload, [
-      valid('digdir.a'),
-      { path: 'prompts/bad', valid: false, errors: ['type: invalid'] },
-    ]);
+    const report = await reconcile(
+      payload,
+      [valid('digdir.a'), { path: 'prompts/bad', valid: false, errors: ['type: invalid'] }],
+      { sourceId: SRC_A },
+    );
     expect(report.created).toEqual(['digdir.a']);
     expect(report.skippedInvalid).toEqual([{ path: 'prompts/bad', errors: ['type: invalid'] }]);
   });

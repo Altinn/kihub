@@ -7,6 +7,10 @@ export interface IndexReport {
   deactivated: string[];
   skippedInvalid: { path: string; errors: string[] }[];
   duplicates: string[];
+  /** Previously-unowned (legacy) ids stamped with this scan's source (015 FR-003). */
+  adopted: string[];
+  /** Ids taken over from another source — a move or a cross-source duplicate (015 FR-004/005). */
+  reassigned: string[];
 }
 
 /**
@@ -21,6 +25,7 @@ export interface PayloadLike {
     collection: string;
     where?: unknown;
     limit?: number;
+    depth?: number;
     overrideAccess?: boolean;
   }): Promise<{ docs: unknown[] }>;
   create(args: { collection: string; data: unknown; overrideAccess?: boolean }): Promise<unknown>;
@@ -32,24 +37,55 @@ export interface PayloadLike {
   }): Promise<unknown>;
 }
 
+export interface ReconcileOptions {
+  /**
+   * The discovery source whose repo was just scanned (015 contract: source-scoped reconcile).
+   * Required so a forgotten value can never silently restore the pre-015 global deactivation.
+   * Upserts are stamped with it (ownership-by-last-sighting) and deactivation is scoped to it.
+   * Pass `null` ONLY for the break-glass local indexer: upserts then leave ownership untouched
+   * (new rows stay unowned/adoptable) and nothing is ever deactivated.
+   */
+  sourceId: number | string | null;
+}
+
 interface ArtifactDoc {
   id: string | number;
   artifactId: string;
+  /** Scalar id at depth 0; tolerated as a populated `{ id }` object for safety. */
+  discoverySource?: number | string | { id: number | string } | null;
 }
 
+/** The row's owning source id, normalising a populated relationship down to its id. */
+function ownerIdOf(doc: ArtifactDoc): number | string | null {
+  const v = doc.discoverySource;
+  if (v && typeof v === 'object') return v.id ?? null;
+  return v ?? null;
+}
+
+const sameId = (a: number | string, b: number | string) => String(a) === String(b);
+
 /**
- * Reconcile the catalog with a scan (contracts/indexer.md): create/update by stable artifactId,
- * soft-deactivate artifacts no longer present, detect duplicate ids (first wins), pass through
- * invalid manifests. Idempotent; never deletes.
+ * Reconcile the catalog with a scan of ONE source (contracts/reconcile.md): create/update by
+ * stable artifactId, stamp `discoverySource` on every upsert (adopting unowned rows, reassigning
+ * moved ones), soft-deactivate only this source's artifacts that are no longer present, detect
+ * duplicate ids (first wins), pass through invalid manifests. Idempotent; never deletes; never
+ * touches other sources' or unowned rows in the deactivation pass.
  */
-export async function reconcile(payload: PayloadLike, scanned: RawArtifact[]): Promise<IndexReport> {
+export async function reconcile(
+  payload: PayloadLike,
+  scanned: RawArtifact[],
+  opts: ReconcileOptions,
+): Promise<IndexReport> {
   const report: IndexReport = {
     created: [],
     updated: [],
     deactivated: [],
     skippedInvalid: [],
     duplicates: [],
+    adopted: [],
+    reassigned: [],
   };
+  const { sourceId } = opts;
 
   for (const s of scanned) {
     if (!s.valid) report.skippedInvalid.push({ path: s.path, errors: s.errors ?? [] });
@@ -67,16 +103,25 @@ export async function reconcile(payload: PayloadLike, scanned: RawArtifact[]): P
     }
     seen.add(id);
 
-    const data = { ...buildRecord(s.manifest, s.readme ?? ''), active: true, lastIndexedAt: now };
+    const data: Record<string, unknown> = {
+      ...buildRecord(s.manifest, s.readme ?? ''),
+      active: true,
+      lastIndexedAt: now,
+    };
+    if (sourceId !== null) data.discoverySource = sourceId;
+
     const existing = await payload.find({
       collection: 'artifacts',
       where: { artifactId: { equals: id } },
       limit: 1,
+      depth: 0,
       overrideAccess: true,
     });
     const existingDoc = existing.docs[0] as ArtifactDoc | undefined;
 
     if (existingDoc) {
+      // Read the previous owner BEFORE the update — the update overwrites it.
+      const prevOwner = ownerIdOf(existingDoc);
       await payload.update({
         collection: 'artifacts',
         id: existingDoc.id,
@@ -84,29 +129,38 @@ export async function reconcile(payload: PayloadLike, scanned: RawArtifact[]): P
         overrideAccess: true,
       });
       report.updated.push(id);
+      if (sourceId !== null) {
+        if (prevOwner === null) report.adopted.push(id);
+        else if (!sameId(prevOwner, sourceId)) report.reassigned.push(id);
+      }
     } else {
       await payload.create({ collection: 'artifacts', data, overrideAccess: true });
       report.created.push(id);
     }
   }
 
-  // Soft-deactivate previously-active artifacts not seen in this run.
-  const active = await payload.find({
-    collection: 'artifacts',
-    where: { active: { equals: true } },
-    limit: 1000,
-    overrideAccess: true,
-  });
-  for (const raw of active.docs) {
-    const doc = raw as ArtifactDoc;
-    if (!seen.has(doc.artifactId)) {
-      await payload.update({
-        collection: 'artifacts',
-        id: doc.id,
-        data: { active: false },
-        overrideAccess: true,
-      });
-      report.deactivated.push(doc.artifactId);
+  // Soft-deactivate previously-active artifacts not seen in this run — scoped to the scanned
+  // source. Rows owned by other sources or unowned (legacy) rows are never candidates (FR-002),
+  // and the break-glass mode (sourceId null) owns no source, so it deactivates nothing.
+  if (sourceId !== null) {
+    const active = await payload.find({
+      collection: 'artifacts',
+      where: { and: [{ active: { equals: true } }, { discoverySource: { equals: sourceId } }] },
+      limit: 1000,
+      depth: 0,
+      overrideAccess: true,
+    });
+    for (const raw of active.docs) {
+      const doc = raw as ArtifactDoc;
+      if (!seen.has(doc.artifactId)) {
+        await payload.update({
+          collection: 'artifacts',
+          id: doc.id,
+          data: { active: false },
+          overrideAccess: true,
+        });
+        report.deactivated.push(doc.artifactId);
+      }
     }
   }
 

@@ -1,12 +1,22 @@
 import { Tag } from '@digdir/designsystemet-react';
 import type { DiscoveryRun } from '@/payload-types';
 
-/** One run's outcome + change summary (FR-010) — created/updated/deactivated/skipped counts. */
+/** One run's outcome + change summary (FR-010, 015 FR-005/006) — counts incl. ownership changes. */
 export function DiscoveryRunSummary({ run }: { run: DiscoveryRun }) {
   const s = run.summary;
-  const counts = s
+  const base = s
     ? `+${s.created ?? 0} created · ${s.updated ?? 0} updated · ${s.deactivated ?? 0} deactivated · ${s.skippedInvalid ?? 0} skipped`
     : '—';
+  // Situational counts, shown only when non-zero: within-scan duplicates, legacy adoptions, and
+  // ownership takeovers («overtatt fra annen kilde» — a move OR a cross-source duplicate).
+  const extras = s
+    ? [
+        s.duplicates ? `${s.duplicates} duplikater i kilden` : null,
+        s.adopted ? `${s.adopted} adoptert (uten kilde)` : null,
+        s.reassigned ? `${s.reassigned} overtatt fra annen kilde` : null,
+      ].filter(Boolean)
+    : [];
+  const counts = extras.length ? `${base} · ${extras.join(' · ')}` : base;
 
   return (
     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>

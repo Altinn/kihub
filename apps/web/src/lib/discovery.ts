@@ -115,7 +115,9 @@ async function runLocked(
 
   try {
     const scanned = await scanRepo(createReader(source));
-    const report = await reconcile(payload, scanned);
+    // Source-scoped reconcile (015): ownership stamped on every upsert, deactivation limited to
+    // this source's own artifacts — other sources' and unowned rows are never touched.
+    const report = await reconcile(payload, scanned, { sourceId: source.id });
 
     const run = await payload.create({
       collection: 'discovery-runs',
@@ -132,10 +134,14 @@ async function runLocked(
           deactivated: report.deactivated.length,
           duplicates: report.duplicates.length,
           skippedInvalid: report.skippedInvalid.length,
+          adopted: report.adopted.length,
+          reassigned: report.reassigned.length,
         },
         createdIds: report.created,
         updatedIds: report.updated,
         deactivatedIds: report.deactivated,
+        adoptedIds: report.adopted,
+        reassignedIds: report.reassigned,
         skippedInvalid: report.skippedInvalid.map((s) => ({ path: s.path, errors: s.errors })),
       },
       overrideAccess: true,

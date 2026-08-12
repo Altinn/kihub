@@ -64,7 +64,7 @@ beforeAll(async () => {
   mkdirSync(dir, { recursive: true });
   writeFileSync(path.join(dir, 'artifact.yaml'), manifest());
   writeFileSync(path.join(dir, 'README.md'), `# ${testSlug}`);
-  await reconcile(payload, scan(root));
+  await reconcile(payload, scan(root), { sourceId: null });
 }, 120000);
 
 afterAll(async () => {
@@ -97,7 +97,7 @@ describe('re-indexing preserves governance state (T017, FR-010, SC-003)', () => 
     // Re-run the Phase 2 indexer, including a manifest edit (version bump) — technical metadata
     // updates, governance must not.
     writeFileSync(path.join(root, 'skills', testSlug, 'artifact.yaml'), manifest('2.0.0'));
-    const report = await reconcile(payload, scan(root));
+    const report = await reconcile(payload, scan(root), { sourceId: null });
     expect(report.updated).toContain(artifactId);
 
     const after = await payload.findByID({

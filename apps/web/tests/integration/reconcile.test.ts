@@ -13,6 +13,7 @@ import { wipeArtifacts } from '../helpers/wipe';
  */
 let payload: Payload;
 let root: string;
+let sourceId: number;
 
 function manifest(id: string, slug: string, version = '1.0.0') {
   return `id: ${id}
@@ -47,10 +48,30 @@ beforeAll(async () => {
   payload = await getPayload({ config });
   await wipeArtifacts(payload);
   root = mkdtempSync(path.join(tmpdir(), 'kihub-reconcile-'));
+  // 015: reconcile is source-scoped — this suite reconciles on behalf of one test source.
+  const source = await payload.create({
+    collection: 'discovery-sources',
+    data: {
+      name: 'itest-reconcile-source',
+      repo: 'digdir/ai-artifacts',
+      tokenEnvVar: 'ITEST_UNUSED_TOKEN',
+      webhookSecret: 'itest-secret',
+      enabled: false,
+    },
+    overrideAccess: true,
+  });
+  sourceId = source.id;
 }, 120000);
 
 afterAll(async () => {
-  if (payload) await wipeArtifacts(payload);
+  if (payload) {
+    await wipeArtifacts(payload);
+    await payload.delete({
+      collection: 'discovery-sources',
+      where: { name: { equals: 'itest-reconcile-source' } },
+      overrideAccess: true,
+    });
+  }
   if (root) rmSync(root, { recursive: true, force: true });
 });
 
@@ -59,7 +80,7 @@ describe('scan + reconcile against live Payload (T010)', () => {
     writeArtifact('itest-a', manifest('digdir.itest-a', 'itest-a'));
     writeArtifact('itest-b', manifest('digdir.itest-b', 'itest-b'));
 
-    const report = await reconcile(payload, scan(root));
+    const report = await reconcile(payload, scan(root), { sourceId });
     expect(report.created.sort()).toEqual(['digdir.itest-a', 'digdir.itest-b']);
 
     const a = await payload.find({
@@ -78,7 +99,7 @@ describe('scan + reconcile against live Payload (T010)', () => {
 
   it('updates in place on re-run (no duplicate) and reflects manifest changes', async () => {
     writeArtifact('itest-a', manifest('digdir.itest-a', 'itest-a', '2.0.0'));
-    const report = await reconcile(payload, scan(root));
+    const report = await reconcile(payload, scan(root), { sourceId });
     expect(report.updated).toContain('digdir.itest-a');
     expect(report.created).not.toContain('digdir.itest-a');
 
@@ -93,7 +114,7 @@ describe('scan + reconcile against live Payload (T010)', () => {
 
   it('soft-deactivates an artifact removed from the repo', async () => {
     rmSync(path.join(root, 'skills', 'itest-b'), { recursive: true, force: true });
-    const report = await reconcile(payload, scan(root));
+    const report = await reconcile(payload, scan(root), { sourceId });
     expect(report.deactivated).toContain('digdir.itest-b');
 
     const b = await payload.find({
