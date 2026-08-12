@@ -1,7 +1,8 @@
 <!-- SPECKIT START -->
 Active feature: **015-multi-source-agents** (DONE — specify + plan + tasks + analyze + implement
-complete 2026-08-12; tasks 37/38, T038 half-done: local browser e2e verified, the
-real-GitHub-second-repo pass still needs the user's repo + PAT per quickstart §4. Suites:
+complete 2026-08-12; tasks 38/38 — T038's real-repo pass done against Altinn/team-kitt: PAT
+must be ≤366d (Altinn org policy), scan succeeded with a live ownership takeover ('1 overtatt
+fra annen kilde') because the repo's agent shares its id with the local demo seed. Suites:
 **web 346/346 across 42 files**, packages 63 (schema 17, discovery-core 24, github-client 5,
 governance-core 17), lint clean, prod build green vs migrated scratch `kihub_migtest` +
 `AUTH_MODE=entra`). For technologies, structure, and context read the plan:
@@ -39,9 +40,14 @@ in-txn); its `down` recreates the enum WITHOUT 'agent' so it fails by design if 
 exist; zod v4 `.loose()` objects preserve unknown card fields; card errors use the
 validateManifest `"path: message"` format; two integration tests migrated to the new reconcile
 signature (`reconcile.test.ts` got a real source row because it asserts deactivation;
-`reindex-preserves.test.ts` uses `sourceId: null`). Local dev DB currently holds 015 demo data
-(`digdir.security-review` + `digdir.support-copilot` agent with card, source `demo-015`
-disabled) seeded for the T038 visual check.
+`reindex-preserves.test.ts` uses `sourceId: null`). Local dev DB holds 015 demo data (`digdir.security-review` owned by disabled source
+`demo-015`) plus the REAL source `team-kitt` (Altinn/team-kitt@main, tokenEnvVar
+GITHUB_TOKEN_AGENTS in apps/web/.env, 90-day fine-grained PAT) which now owns
+`digdir.support-copilot` with its card. Field gotchas from the real-repo test worth remembering:
+a manifest filename with a TRAILING SPACE ('artifact.yaml ') and files at the wrong depth
+(agents/artifact.yaml instead of agents/<slug>/artifact.yaml) are both silently invisible to
+discovery — the tree regex simply never matches; also apps/web/.env line 21 emits a harmless
+'tenant-id: no such file or directory' when shell-sourced (unquoted value, worth fixing).
 Prior: **014-learning-pages** (DONE — specify + plan + tasks + implement complete; suite
 **328/328 across 37 files**, lint clean, prod build compiles + typechecks + generates all routes;
 `specs/014-learning-pages/plan.md`). It adds **KI Læring** — the constitution's fourth
