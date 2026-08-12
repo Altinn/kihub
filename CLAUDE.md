@@ -1,9 +1,35 @@
 <!-- SPECKIT START -->
-Active feature: **014-learning-pages** (DONE — specify + plan + tasks + implement complete; suite
-**328/328 across 37 files**, lint clean, prod build compiles + typechecks + generates all routes).
+Active feature: **015-multi-source-agents** (specify + plan DONE; next: `/speckit-tasks`).
 For technologies, structure, and context read the plan:
-`specs/014-learning-pages/plan.md` (with `research.md`, `data-model.md`, `contracts/`,
-`quickstart.md`; `spec.md` for requirements). It adds **KI Læring** — the constitution's fourth
+`specs/015-multi-source-agents/plan.md` (with `research.md` R1–R12, `data-model.md`,
+`contracts/` ×3, `quickstart.md`; `spec.md` for requirements). Two capabilities: (1)
+**source-scoped reconcile** — `artifacts` gains a nullable indexed `discoverySource`
+relationship (FK ON DELETE SET NULL; do NOT name it `source`, that's the manifest group);
+`reconcile(payload, scanned, {sourceId})` (REQUIRED third param) stamps ownership on every
+upsert (ownership-by-last-sighting: null→`adopted`, other→`reassigned`, both new IndexReport
+fields + persisted on `discovery-runs`) and deactivates ONLY
+`active AND discoverySource=sourceId AND ∉seen` — legacy null-source rows are never deactivated,
+no migration backfill (adoption converges on first scan). (2) **`agent` artifact type** —
+`ARTIFACT_TYPES`+`'agent'`, `TYPE_DIRS`+`'agents'` (github-client needs ZERO changes, its
+TYPE_DIR_SET derives), manifest schema 1.0.0→1.1.0 (regenerate committed JSON schema + docs),
+optional sibling `agents/<slug>/agent-card.json` (A2A v1.0) fetched in `scanRepo` ONLY for valid
+type=agent manifests, validated TOLERANTLY (new `artifact-schema/src/agent-card.ts`, only `name`
+required, unknown keys pass through, 256KB cap), stored verbatim jsonb `artifacts.agentCard`
+(cleared to null when card missing/invalid — never blocks registration, errors →
+`cardIssues` on the run), rendered by new server-only `AgentCardPanel` between Install and
+README. Plus greenfield Norwegian type-label map `lib/registry-view.ts` (NO label map exists
+today — UI renders raw enum values; wire CatalogFilters/ArtifactCard/detail/Artifact.ts
+options). ONE additive migration (enum ADD VALUE 'agent' is txn-safe on PG≥12 because unused in
+same txn; down needs the 014 IF EXISTS hand-patch). No constitution amendment — Principle III
+already names "agent definition". Search untouched (type not in tsvector; card search deferred).
+Constitution Check: PASS, no violations. Key gotchas inherited: verify migrations on scratch DB
+(push-mode dev DB prompts "data loss"), `next build` needs migrated scratch DB + non-mock
+AUTH_MODE and is the only gate that catches implicit-any errors, discovery-core's fake payload
+must learn `and:` where-shapes + `depth: 0`, search.test.ts:17 has a `'skill'|'prompt'` literal
+union that needs `'agent'` if seeding one.
+Prior: **014-learning-pages** (DONE — specify + plan + tasks + implement complete; suite
+**328/328 across 37 files**, lint clean, prod build compiles + typechecks + generates all routes;
+`specs/014-learning-pages/plan.md`). It adds **KI Læring** — the constitution's fourth
 module (v3.1.0) — as a learning library: editors curate categories → subcategories → pages in
 `/cms`, employees read at `/laering` behind a persistent left sidebar tree, kihub-restyled,
 Norwegian. **4 new collections** (`learning-categories`, `learning-subcategories`,
