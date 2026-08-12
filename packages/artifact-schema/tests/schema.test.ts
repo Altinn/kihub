@@ -32,7 +32,7 @@ describe('artifact manifest schema', () => {
     if (result.valid) {
       expect(result.data.id).toBe('digdir.security-review');
       expect(result.data.type).toBe('skill');
-      expect(result.data.schemaVersion).toBe('1.0.0');
+      expect(result.data.schemaVersion).toBe('1.1.0');
     }
   });
 

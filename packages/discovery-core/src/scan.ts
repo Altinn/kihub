@@ -11,6 +11,7 @@ export const TYPE_DIRS = [
   'templates',
   'policies',
   'playbooks',
+  'agents',
 ] as const;
 
 export interface RawArtifact {

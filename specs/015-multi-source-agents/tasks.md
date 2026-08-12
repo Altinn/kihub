@@ -31,7 +31,7 @@ source-deletion case.
 
 **Purpose**: Confirm the baseline is green so every later failure is ours.
 
-- [ ] T001 Export env (`set -a; source apps/web/.env; set +a`) and run `pnpm -r test` — confirm the pre-feature baseline (packages 43, web 328/328 across 37 files) before touching anything
+- [x] T001 Export env (`set -a; source apps/web/.env; set +a`) and run `pnpm -r test` — confirm the pre-feature baseline (packages 43, web 328/328 across 37 files) before touching anything
 
 ---
 
@@ -43,14 +43,14 @@ stories depend on these columns/types existing.
 **⚠️ CRITICAL**: T002 → T005/T006 → T007 → T008 → T009 is a strict chain (Payload derives
 migration DDL from the collection configs; the enum option spread needs the new type first).
 
-- [ ] T002 Add `'agent'` to `ARTIFACT_TYPES` and bump the `schemaVersion` default to `'1.1.0'` in packages/artifact-schema/src/schema.ts (contract: [manifest-v1.1.md](contracts/manifest-v1.1.md))
-- [ ] T003 [P] Update `$id` to `…/artifact-1.1.0.json` in packages/artifact-schema/scripts/generate-json-schema.ts and regenerate the committed packages/artifact-schema/schema/artifact.schema.json (after T002)
-- [ ] T004 [P] Add `'agents'` to `TYPE_DIRS` in packages/discovery-core/src/scan.ts (github-client needs zero changes — its `TYPE_DIR_SET` derives from this)
-- [ ] T005 Add `discoverySource` (relationship → `discovery-sources`, `hasMany: false`, nullable, `index: true`) and `agentCard` (`type: 'json'`, nullable) fields to apps/web/src/collections/Artifact.ts (do NOT rename the existing manifest `source` group — R1 naming note)
-- [ ] T006 [P] Add `summary.adopted`/`summary.reassigned`/`summary.cardIssues` (number), `adoptedIds`/`reassignedIds` (text `hasMany`), and `cardIssues` array (`{path, errors: text hasMany}`, same shape as `skippedInvalid`) to apps/web/src/collections/DiscoveryRun.ts
-- [ ] T007 Generate the migration with `pnpm --filter web migrate:create agents_multisource` (local DB up), review the DDL against the checklist in [data-model.md](data-model.md) §Migration (enum ADD VALUE, `discovery_source_id` FK `ON DELETE SET NULL` + index, `agent_card` jsonb, discovery_runs additions), hand-patch the `down` with `IF EXISTS` on constraint/index drops (the 014 pattern — see apps/web/src/migrations/20260810_093128_media_uploads.ts), and register it in apps/web/src/migrations/index.ts
-- [ ] T008 Verify the migration chain on a scratch DB per [quickstart.md](quickstart.md) §2: create `kihub_migtest`, `migrate` → `migrate:down` → `migrate` all clean, enum shows 8 values ending `agent`, new columns exist and are all-NULL (invariant I4). Keep the scratch DB for T037
-- [ ] T009 Regenerate apps/web/src/payload-types.ts (`pnpm --filter web payload generate:types`) and confirm the workspace still compiles and the full suite is still green
+- [x] T002 Add `'agent'` to `ARTIFACT_TYPES` and bump the `schemaVersion` default to `'1.1.0'` in packages/artifact-schema/src/schema.ts (contract: [manifest-v1.1.md](contracts/manifest-v1.1.md))
+- [x] T003 [P] Update `$id` to `…/artifact-1.1.0.json` in packages/artifact-schema/scripts/generate-json-schema.ts and regenerate the committed packages/artifact-schema/schema/artifact.schema.json (after T002)
+- [x] T004 [P] Add `'agents'` to `TYPE_DIRS` in packages/discovery-core/src/scan.ts (github-client needs zero changes — its `TYPE_DIR_SET` derives from this)
+- [x] T005 Add `discoverySource` (relationship → `discovery-sources`, `hasMany: false`, nullable, `index: true`) and `agentCard` (`type: 'json'`, nullable) fields to apps/web/src/collections/Artifact.ts (do NOT rename the existing manifest `source` group — R1 naming note)
+- [x] T006 [P] Add `summary.adopted`/`summary.reassigned`/`summary.cardIssues` (number), `adoptedIds`/`reassignedIds` (text `hasMany`), and `cardIssues` array (`{path, errors: text hasMany}`, same shape as `skippedInvalid`) to apps/web/src/collections/DiscoveryRun.ts
+- [x] T007 Generate the migration with `pnpm --filter web migrate:create agents_multisource` (local DB up), review the DDL against the checklist in [data-model.md](data-model.md) §Migration (enum ADD VALUE, `discovery_source_id` FK `ON DELETE SET NULL` + index, `agent_card` jsonb, discovery_runs additions), hand-patch the `down` with `IF EXISTS` on constraint/index drops (the 014 pattern — see apps/web/src/migrations/20260810_093128_media_uploads.ts), and register it in apps/web/src/migrations/index.ts
+- [x] T008 Verify the migration chain on a scratch DB per [quickstart.md](quickstart.md) §2: create `kihub_migtest`, `migrate` → `migrate:down` → `migrate` all clean, enum shows 8 values ending `agent`, new columns exist and are all-NULL (invariant I4). Keep the scratch DB for T037
+- [x] T009 Regenerate apps/web/src/payload-types.ts (`pnpm --filter web payload generate:types`) and confirm the workspace still compiles and the full suite is still green
 
 **Checkpoint**: Schema v1.1.0 live, columns exist, migration verified — story work can begin.
 

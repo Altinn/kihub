@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kihub.digdir.no/schemas/artifact-1.0.0.json",
+  "$id": "https://kihub.digdir.no/schemas/artifact-1.1.0.json",
   "title": "KI Hub Artifact Manifest",
   "type": "object",
   "properties": {
@@ -17,7 +17,8 @@
         "mcp",
         "template",
         "policy",
-        "playbook"
+        "playbook",
+        "agent"
       ]
     },
     "name": {
@@ -132,7 +133,7 @@
       "additionalProperties": false
     },
     "schemaVersion": {
-      "default": "1.0.0",
+      "default": "1.1.0",
       "type": "string",
       "pattern": "^\\d+\\.\\d+\\.\\d+$"
     }

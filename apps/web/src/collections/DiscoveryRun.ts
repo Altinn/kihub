@@ -37,13 +37,26 @@ export const DiscoveryRun: CollectionConfig = {
         { name: 'deactivated', type: 'number' },
         { name: 'duplicates', type: 'number' },
         { name: 'skippedInvalid', type: 'number' },
+        { name: 'adopted', type: 'number' },
+        { name: 'reassigned', type: 'number' },
+        { name: 'cardIssues', type: 'number' },
       ],
     },
     { name: 'createdIds', type: 'text', hasMany: true },
     { name: 'updatedIds', type: 'text', hasMany: true },
     { name: 'deactivatedIds', type: 'text', hasMany: true },
+    { name: 'adoptedIds', type: 'text', hasMany: true },
+    { name: 'reassignedIds', type: 'text', hasMany: true },
     {
       name: 'skippedInvalid',
+      type: 'array',
+      fields: [
+        { name: 'path', type: 'text' },
+        { name: 'errors', type: 'text', hasMany: true },
+      ],
+    },
+    {
+      name: 'cardIssues',
       type: 'array',
       fields: [
         { name: 'path', type: 'text' },

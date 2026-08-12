@@ -49,5 +49,18 @@ export const Artifact: CollectionConfig = {
     { name: 'lifecycleStatus', type: 'select', options: [...LIFECYCLE_STATUSES] },
     { name: 'active', type: 'checkbox', defaultValue: true, index: true },
     { name: 'lastIndexedAt', type: 'date' },
+    // 015: which discovery source registered/last saw this artifact (ownership-by-last-sighting).
+    // Nullable: legacy/unowned rows are excluded from every deactivation and adoptable by any scan.
+    // Deliberately NOT named `source` — that group above is the manifest's own source metadata.
+    {
+      name: 'discoverySource',
+      type: 'relationship',
+      relationTo: 'discovery-sources',
+      hasMany: false,
+      index: true,
+    },
+    // 015: verbatim A2A v1.0 agent card snapshot (agents only) — indexed metadata like `readme`,
+    // refreshed by every scan of the owning source and cleared when the card is missing/invalid.
+    { name: 'agentCard', type: 'json' },
   ],
 };

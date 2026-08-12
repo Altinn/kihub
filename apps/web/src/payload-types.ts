@@ -168,7 +168,7 @@ export interface User {
 export interface Artifact {
   id: number;
   artifactId: string;
-  type: 'skill' | 'prompt' | 'workflow' | 'mcp' | 'template' | 'policy' | 'playbook';
+  type: 'skill' | 'prompt' | 'workflow' | 'mcp' | 'template' | 'policy' | 'playbook' | 'agent';
   name: string;
   description: string;
   version: string;
@@ -189,6 +189,46 @@ export interface Artifact {
     ('draft' | 'experimental' | 'in-review' | 'approved' | 'recommended' | 'deprecated' | 'archived') | null;
   active?: boolean | null;
   lastIndexedAt?: string | null;
+  discoverySource?: (number | null) | DiscoverySource;
+  agentCard?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "discovery-sources".
+ */
+export interface DiscoverySource {
+  id: number;
+  name: string;
+  repo: string;
+  ref?: string | null;
+  /**
+   * Name of the env var holding the GitHub token (value never stored here).
+   */
+  tokenEnvVar: string;
+  webhookSecret: string;
+  enabled?: boolean | null;
+  /**
+   * Per-source run lock; set while a run is in progress.
+   */
+  runningSince?: string | null;
+  lastRunAt?: string | null;
+  lastRunOutcome?: ('success' | 'failure') | null;
+  lastRunSummary?: {
+    created?: number | null;
+    updated?: number | null;
+    deactivated?: number | null;
+    skippedInvalid?: number | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -255,36 +295,6 @@ export interface AuditLog {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "discovery-sources".
- */
-export interface DiscoverySource {
-  id: number;
-  name: string;
-  repo: string;
-  ref?: string | null;
-  /**
-   * Name of the env var holding the GitHub token (value never stored here).
-   */
-  tokenEnvVar: string;
-  webhookSecret: string;
-  enabled?: boolean | null;
-  /**
-   * Per-source run lock; set while a run is in progress.
-   */
-  runningSince?: string | null;
-  lastRunAt?: string | null;
-  lastRunOutcome?: ('success' | 'failure') | null;
-  lastRunSummary?: {
-    created?: number | null;
-    updated?: number | null;
-    deactivated?: number | null;
-    skippedInvalid?: number | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "discovery-runs".
  */
 export interface DiscoveryRun {
@@ -302,11 +312,23 @@ export interface DiscoveryRun {
     deactivated?: number | null;
     duplicates?: number | null;
     skippedInvalid?: number | null;
+    adopted?: number | null;
+    reassigned?: number | null;
+    cardIssues?: number | null;
   };
   createdIds?: string[] | null;
   updatedIds?: string[] | null;
   deactivatedIds?: string[] | null;
+  adoptedIds?: string[] | null;
+  reassignedIds?: string[] | null;
   skippedInvalid?:
+    | {
+        path?: string | null;
+        errors?: string[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  cardIssues?:
     | {
         path?: string | null;
         errors?: string[] | null;
@@ -706,6 +728,8 @@ export interface ArtifactsSelect<T extends boolean = true> {
   lifecycleStatus?: T;
   active?: T;
   lastIndexedAt?: T;
+  discoverySource?: T;
+  agentCard?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -804,11 +828,23 @@ export interface DiscoveryRunsSelect<T extends boolean = true> {
         deactivated?: T;
         duplicates?: T;
         skippedInvalid?: T;
+        adopted?: T;
+        reassigned?: T;
+        cardIssues?: T;
       };
   createdIds?: T;
   updatedIds?: T;
   deactivatedIds?: T;
+  adoptedIds?: T;
+  reassignedIds?: T;
   skippedInvalid?:
+    | T
+    | {
+        path?: T;
+        errors?: T;
+        id?: T;
+      };
+  cardIssues?:
     | T
     | {
         path?: T;

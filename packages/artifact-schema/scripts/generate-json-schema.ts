@@ -16,7 +16,7 @@ const outFile = path.join(outDir, 'artifact.schema.json');
 const jsonSchema = z.toJSONSchema(artifactManifestSchema, { target: 'draft-2020-12' });
 const withMeta = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
-  $id: 'https://kihub.digdir.no/schemas/artifact-1.0.0.json',
+  $id: 'https://kihub.digdir.no/schemas/artifact-1.1.0.json',
   title: 'KI Hub Artifact Manifest',
   ...jsonSchema,
 };

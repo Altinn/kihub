@@ -9,6 +9,7 @@ export const ARTIFACT_TYPES = [
   'template',
   'policy',
   'playbook',
+  'agent',
 ] as const;
 
 /** Allowed lifecycle states (Principle VI / governance). */
@@ -30,7 +31,7 @@ export const ARTIFACT_ID_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*\.[a-z0-9]+(-[a-z0-9]
 const SEMVER_PATTERN = /^\d+\.\d+\.\d+$/;
 const TAG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-/** The `artifact.yaml` manifest contract (schema version 1.0.0). See docs/artifact-manifest.md. */
+/** The `artifact.yaml` manifest contract (schema version 1.1.0). See docs/artifact-manifest.md. */
 export const artifactManifestSchema = z
   .object({
     id: z
@@ -76,7 +77,7 @@ export const artifactManifestSchema = z
         status: z.enum(LIFECYCLE_STATUSES),
       })
       .strict(),
-    schemaVersion: z.string().regex(SEMVER_PATTERN).default('1.0.0'),
+    schemaVersion: z.string().regex(SEMVER_PATTERN).default('1.1.0'),
   })
   .strict();
 
