@@ -16,8 +16,9 @@ Only deltas are listed; unchanged fields are omitted. All changes are additive.
 - Every reconcile upsert stamps `discoverySource = scannedSourceId` (adoption when previously
   null, reassignment when previously another source — both reported, R2/R3).
 - Deactivation predicate: `active = true AND discoverySource = scannedSourceId AND artifactId ∉ seen`.
-- `agentCard` is set to the fetched+validated card, else explicitly `null`, on every agent
-  upsert — stale cards cannot survive a scan (spec US3 scenario 4).
+- `agentCard` is set to the fetched+validated card, else explicitly `null`, on **every** upsert
+  (non-agents always `null`) — stale cards survive neither a re-scan nor a type change away
+  from `agent` (spec US3 scenario 4; analyze finding C2).
 
 ## `discovery-runs` collection (apps/web/src/collections/DiscoveryRun.ts)
 

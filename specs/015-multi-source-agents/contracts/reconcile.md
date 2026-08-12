@@ -19,7 +19,7 @@ Let S = the scanned source, `seen` = valid manifest ids found in this scan.
 | # | Rule | Spec |
 |---|---|---|
 | 1 | Invalid manifests → `skippedInvalid`; within-scan duplicate ids → first wins, rest → `duplicates`. (Unchanged.) | FR-006 |
-| 2 | Every upsert stamps `discoverySource = S` and, for agents, `agentCard = validCard \| null`. | FR-001, FR-011 |
+| 2 | Every upsert stamps `discoverySource = S` and sets `agentCard = validCard ?? null` — on **every** upsert, not only agents, so a type change away from `agent` clears any stale card. | FR-001, FR-011 |
 | 3 | Upsert of a row whose `discoverySource` was **null** → id appended to `adopted`. | FR-003 |
 | 4 | Upsert of a row whose `discoverySource` was **another source** → id appended to `reassigned` (move and simultaneous-duplicate are indistinguishable in one scan; both are flagged, duplicates surface as repeated reassignments across run history). | FR-004, FR-005 |
 | 5 | Deactivation: only rows with `active = true AND discoverySource = S AND artifactId ∉ seen`. Rows owned by other sources or unowned are **never** deactivated. | FR-002 |

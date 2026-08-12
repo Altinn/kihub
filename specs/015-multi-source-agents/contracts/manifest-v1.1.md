@@ -13,7 +13,10 @@ manifest is a valid 1.1.0 manifest)
    A2A v1.0 Agent Card (see [agent-card.md](agent-card.md)). The manifest remains the sole
    registration contract; the card never creates, identifies, or governs an artifact. Card
    files next to non-agent manifests are ignored.
-4. `schemaVersion` default becomes `1.1.0`. Manifests declaring `1.0.0` (or omitting the field)
+4. **Type ↔ directory consistency** (new validation rule, all types): a manifest whose `type`
+   does not match its type directory (e.g. `type: agent` under `skills/`, or `type: skill`
+   under `agents/`) is reported as an invalid manifest for that path and is not registered.
+5. `schemaVersion` default becomes `1.1.0`. Manifests declaring `1.0.0` (or omitting the field)
    remain valid.
 
 ## Unchanged
