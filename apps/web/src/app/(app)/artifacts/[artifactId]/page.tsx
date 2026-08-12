@@ -7,6 +7,7 @@ import { LifecycleBadge } from '@/components/LifecycleBadge';
 import { Markdown } from '@/components/Markdown';
 import { getArtifact } from '@/lib/catalog';
 import { getGovernance } from '@/lib/governance';
+import { artifactTypeLabel } from '@/lib/registry-view';
 
 /** Artifact detail page (US3 Phase 2 + governance overlay, Phase 3): metadata + README + version
  * + copyable install command + lifecycle/governance state (FR-011). */
@@ -40,7 +41,7 @@ export default async function ArtifactDetailPage({
           {a.name as string}
         </Heading>
         <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-          <Tag data-color="neutral">{a.type as string}</Tag>
+          <Tag data-color="neutral">{artifactTypeLabel(a.type as string)}</Tag>
           {governance ? <LifecycleBadge governance={governance} /> : null}
         </div>
       </div>

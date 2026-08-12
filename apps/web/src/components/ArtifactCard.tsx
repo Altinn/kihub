@@ -1,6 +1,7 @@
 import { Card, Heading, Paragraph, Tag } from '@digdir/designsystemet-react';
 import Link from 'next/link';
 import type { Governance } from '@/lib/governance';
+import { artifactTypeLabel } from '@/lib/registry-view';
 import { LifecycleBadge } from './LifecycleBadge';
 
 export interface ArtifactCardData {
@@ -27,7 +28,7 @@ export function ArtifactCard({
         </Heading>
         <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
           <Tag data-color="neutral" data-size="sm">
-            {artifact.type}
+            {artifactTypeLabel(artifact.type)}
           </Tag>
           {governance ? <LifecycleBadge governance={governance} /> : null}
         </div>

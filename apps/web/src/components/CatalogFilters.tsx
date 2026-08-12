@@ -1,5 +1,6 @@
 import { Heading, Tag } from '@digdir/designsystemet-react';
 import Link from 'next/link';
+import { artifactTypeLabel } from '@/lib/registry-view';
 
 interface CatalogFiltersProps {
   availableTypes: string[];
@@ -45,7 +46,7 @@ export function CatalogFilters({
             return (
               <Link key={t} href={href} aria-pressed={isActive}>
                 <Tag data-color={isActive ? 'accent' : 'neutral'} data-size="sm">
-                  {t}
+                  {artifactTypeLabel(t)}
                 </Tag>
               </Link>
             );

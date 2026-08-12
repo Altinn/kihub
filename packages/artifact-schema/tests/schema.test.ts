@@ -120,4 +120,33 @@ describe('artifact manifest schema', () => {
     expect(result.valid).toBe(false);
     if (!result.valid) expect(result.errors[0]).toContain('YAML parse error');
   });
+
+  it('accepts a well-formed agent manifest (015, schema 1.1.0)', () => {
+    // The contract example from specs/015-multi-source-agents/contracts/manifest-v1.1.md.
+    const result = validateManifest(`
+id: digdir.support-agent
+type: agent
+name: Support Agent
+version: 1.0.0
+description: Svarer på interne supportspørsmål og eskalerer uløste saker.
+owner:
+  team: AI Enablement
+  contact: ai-team@digdir.no
+source:
+  provider: github
+  repository: digdir/ai-artifacts
+  path: agents/support-agent
+tags:
+  - support
+  - agent
+visibility: internal
+lifecycle:
+  status: experimental
+`);
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.data.type).toBe('agent');
+      expect(result.data.schemaVersion).toBe('1.1.0');
+    }
+  });
 });

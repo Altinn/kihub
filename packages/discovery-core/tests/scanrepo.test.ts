@@ -37,6 +37,9 @@ beforeAll(() => {
   writeArtifact('skills/security-review', VALID, '# Security Review');
   writeArtifact('prompts/bad', INVALID); // invalid, no README
   mkdirSync(path.join(root, 'skills/not-an-artifact'), { recursive: true }); // no artifact.yaml
+  // 015: an agent and a type↔dir mismatch — the parity test proves scanRepo matches scan on both.
+  writeArtifact('agents/support-agent', VALID.replace('type: skill', 'type: agent').replace('id: digdir.security-review', 'id: digdir.support-agent'));
+  writeArtifact('skills/misplaced-agent', VALID.replace('type: skill', 'type: agent').replace('id: digdir.security-review', 'id: digdir.misplaced'));
 });
 
 afterAll(() => rmSync(root, { recursive: true, force: true }));

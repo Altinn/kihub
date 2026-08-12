@@ -1,5 +1,6 @@
-import { ARTIFACT_TYPES, LIFECYCLE_STATUSES, VISIBILITIES } from '@kihub/artifact-schema';
+import { LIFECYCLE_STATUSES, VISIBILITIES } from '@kihub/artifact-schema';
 import type { CollectionConfig } from 'payload';
+import { artifactTypeOptions } from '../lib/registry-view';
 
 /**
  * Indexed technical metadata for one artifact (data-model.md), keyed by the stable `artifactId`.
@@ -21,7 +22,8 @@ export const Artifact: CollectionConfig = {
   },
   fields: [
     { name: 'artifactId', type: 'text', required: true, unique: true, index: true },
-    { name: 'type', type: 'select', required: true, options: [...ARTIFACT_TYPES] },
+    // Norwegian labels in /cms too — same map as the employee-facing UI (015 FR-010).
+    { name: 'type', type: 'select', required: true, options: artifactTypeOptions() },
     { name: 'name', type: 'text', required: true },
     { name: 'description', type: 'text', required: true },
     { name: 'version', type: 'text', required: true },

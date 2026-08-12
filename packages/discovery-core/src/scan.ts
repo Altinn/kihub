@@ -35,11 +35,39 @@ export interface RepoReader {
   readFile(relPath: string): Promise<string | undefined>;
 }
 
-/** Validate one artifact dir's manifest (+ optional README) into a RawArtifact. Never throws. */
+/** The type directory each artifact type must live under (015 manifest contract rule 4). */
+const DIR_FOR_TYPE: Record<ArtifactManifest['type'], (typeof TYPE_DIRS)[number]> = {
+  skill: 'skills',
+  prompt: 'prompts',
+  workflow: 'workflows',
+  mcp: 'mcp',
+  template: 'templates',
+  policy: 'policies',
+  playbook: 'playbooks',
+  agent: 'agents',
+};
+
+/**
+ * Validate one artifact dir's manifest (+ optional README) into a RawArtifact. Never throws.
+ * A schema-valid manifest whose `type` does not match its type directory is reported invalid
+ * (015 US2-3): the directory decides where discovery looks, so a mismatch is always an authoring
+ * error rather than something to silently register.
+ */
 function toRawArtifact(relPath: string, manifestText: string, readme: string | undefined): RawArtifact {
   const res = validateManifest(manifestText);
-  if (res.valid) return { path: relPath, manifest: res.data, readme, valid: true };
-  return { path: relPath, readme, valid: false, errors: res.errors };
+  if (!res.valid) return { path: relPath, readme, valid: false, errors: res.errors };
+
+  const dir = relPath.split('/')[0] ?? '';
+  const expected = DIR_FOR_TYPE[res.data.type];
+  if (dir !== expected) {
+    return {
+      path: relPath,
+      readme,
+      valid: false,
+      errors: [`type: type '${res.data.type}' does not match directory '${dir}/' (expected '${expected}/')`],
+    };
+  }
+  return { path: relPath, manifest: res.data, readme, valid: true };
 }
 
 /**
