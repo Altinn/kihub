@@ -21,11 +21,11 @@
   },
   "dependencies": {
     "yaml": "2.9.0",
-    "zod": "4.4.3"
+    "zod": "4.5.4"
   },
   "devDependencies": {
     "tsx": "^4.19.2",
     "typescript": "^5.7.0",
-    "vitest": "4.1.9"
+    "vitest": "4.1.11"
   }
 }
