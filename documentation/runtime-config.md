@@ -29,6 +29,7 @@ is configured with — Azure Container Apps sets these; local dev uses `apps/web
 | `AUTH_MICROSOFT_ENTRA_ID_SECRET` | with `entra` | client secret | ACA secret. |
 | `AUTH_MICROSOFT_ENTRA_ID_ISSUER` | with `entra` | `https://login.microsoftonline.com/<tenant-id>/v2.0` | |
 | `AUTH_TRUST_HOST` | yes in prod | `true` | Auth.js runs behind ACA's ingress proxy and must trust `x-forwarded-*` to build callback URLs. Read directly by Auth.js (not in app code). |
+| `AUTH_URL` | yes in prod | `https://<public-fqdn>` | Canonical origin for Auth.js redirects. Read directly by Auth.js. Without it, error redirects are built from the container-internal `0.0.0.0:3000`. Update on a custom-domain move (together with the app registration's redirect URI). |
 
 ## Discovery (Phase 4 module)
 
