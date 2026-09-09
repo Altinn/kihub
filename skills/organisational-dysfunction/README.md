@@ -1,6 +1,6 @@
 # Organisational Dysfunction
 
-Diagnose recurring organisational and team dysfunctions through **open sociotechnical systems theory** (the DP1 top-down vs DP2 self-managing distinction). The router `SKILL.md` carries the shared lens and indexes 88 named dysfunctions; each `references/NN-*.md` gives how it shows up, the sociotechnical diagnosis, and concrete remedies.
+Diagnose recurring organisational and team dysfunctions through **open sociotechnical systems theory** (the DP1 top-down vs DP2 self-managing distinction). The router `SKILL.md` carries the shared lens and indexes 89 named dysfunctions; each `references/NN-*.md` gives how it shows up, the sociotechnical diagnosis, and concrete remedies.
 
 ## Install / use
 
@@ -15,11 +15,14 @@ It then activates **automatically** whenever you describe an org/team dysfunctio
 
 ## Attribution
 
-The 88 dysfunctions originate from **Trond Hjorteland**'s [*"Organisational Dysfunction of the Day"*](https://www.linkedin.com/pulse/organisational-dysfunction-day-full-list-trond-hjorteland-gxrze/) series. Content is **synthesised and paraphrased** (not copied) through the OST framing he uses, and each reference file links its specific source post.
+The 89 dysfunctions originate from **Trond Hjorteland**'s [*"Organisational Dysfunction of the Day"*](https://www.linkedin.com/pulse/organisational-dysfunction-day-full-list-trond-hjorteland-gxrze/) series. Content is **synthesised and paraphrased** (not copied) through the OST framing he uses, and each reference file links its specific source post.
 
 ## Changelog
 
 New entries are appended as they are propagated from the upstream repo ([sorensensig/organisational-dysfunction](https://github.com/sorensensig/organisational-dysfunction)). Newest first.
+
+### 0.21.0 — 2026-09-09
+- Added `#89` **We need a resource** (88 → 89 dysfunctions). Router `SKILL.md` synced with upstream.
 
 ### 0.20.0 — 2026-09-08
 - Catch-up propagation of four upstream entries (84 → 88 dysfunctions): `#85` **The enterprise architect**, `#86` **Removing management**, `#87` **It took an outsider to say it**, and `#88` **The gates they removed**. Router `SKILL.md` synced with upstream.
