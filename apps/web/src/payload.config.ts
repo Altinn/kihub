@@ -29,11 +29,16 @@ const dirname = path.dirname(filename);
 export default buildConfig({
   admin: {
     user: Users.slug,
+    // Local custom admin components (e.g. `/components/cms/...` in DiscoverySource) resolve
+    // relative to `src/`. Regenerate the importMap after changing components — with
+    // MEDIA_STORAGE_MODE=azure forced, see documentation/infrastructure.md "CMS back-office".
+    importMap: { baseDir: path.resolve(dirname) },
   },
   // Phase 6: mount the editor back-office (Payload admin) on non-colliding base paths.
-  // The employee app owns `/admin/roles`, `/admin/discovery` and `/api/auth`, `/api/discovery`,
-  // so the admin UI lives at `/cms` and the Payload REST/GraphQL API at `/payload-api`
-  // (the `(payload)` route-group folders mirror these paths). See contracts/admin-mount.md.
+  // The employee app owns `/api/auth` and `/api/discovery`, so the admin UI lives at `/cms` and
+  // the Payload REST/GraphQL API at `/payload-api` (the `(payload)` route-group folders mirror
+  // these paths). See contracts/admin-mount.md. The former employee-app `/admin/roles` and
+  // `/admin/discovery` pages moved INTO /cms (Users collection + DiscoveryScanPanel).
   routes: {
     admin: '/cms',
     api: '/payload-api',

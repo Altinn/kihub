@@ -48,12 +48,14 @@ export async function SiteHeader() {
                 }}
               >
                 {user.name}
-                {user.role === 'admin' ? (
+                {user.role !== 'reader' ? (
                   <>
                     {' · '}
-                    <a href="/admin/roles" className="kihub-link">
-                      Roller
-                    </a>
+                    {/* Contributor+ may enter the back-office (Users.access.admin) — role
+                        management and discovery triggers both live there now. */}
+                    <Link href="/cms" className="kihub-link">
+                      Admin
+                    </Link>
                   </>
                 ) : null}
               </span>

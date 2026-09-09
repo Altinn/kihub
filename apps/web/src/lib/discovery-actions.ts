@@ -7,9 +7,10 @@ import { getCurrentActor } from './governance';
 import { triggerDiscovery } from './discovery';
 
 /**
- * Admin-only "Run now" form action for the discovery admin page (FR-012). Resolves the live actor
- * (never a cached session claim), delegates to the Admin-gated `triggerDiscovery`, then refreshes
- * the page so the new run appears. A non-Admin is refused inside `triggerDiscovery` (SC-008).
+ * Admin-only "Run now" form action for the /cms Discovery Sources list panel (FR-012). Resolves the
+ * live actor (never a cached session claim), delegates to the Admin-gated `triggerDiscovery`, then
+ * refreshes the list so the run outcome appears. A non-Admin is refused inside `triggerDiscovery`
+ * (SC-008).
  */
 export async function triggerDiscoveryAction(formData: FormData) {
   const sourceId = String(formData.get('sourceId') ?? '');
@@ -17,5 +18,5 @@ export async function triggerDiscoveryAction(formData: FormData) {
   const actor = await getCurrentActor();
   const payload = await getPayload({ config });
   await triggerDiscovery(payload, sourceId, actor);
-  revalidatePath('/admin/discovery');
+  revalidatePath('/cms/collections/discovery-sources');
 }

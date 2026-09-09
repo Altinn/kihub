@@ -18,6 +18,10 @@ export const DiscoverySource: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'repo', 'enabled', 'lastRunAt', 'lastRunOutcome'],
+    components: {
+      // "Run now" triggers above the list — admin actions live in /cms (Principle VIII).
+      beforeListTable: ['/components/cms/DiscoveryScanPanel#DiscoveryScanPanel'],
+    },
   },
   access: {
     read: ({ req }) => isAdmin(req.user?.role as Role | undefined),
