@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import type { Role } from '@kihub/governance-core';
 import type { CollectionConfig } from 'payload';
 
@@ -39,7 +40,10 @@ export const DiscoverySource: CollectionConfig = {
       name: 'webhookSecret',
       type: 'text',
       required: true,
-      // Server-only: never returned by the API, never shown in admin (research §5).
+      // Server-only: never returned by the API, never shown in admin (research §5). Because the
+      // field is both hidden and unreadable, no admin form can ever supply it — so it must
+      // auto-generate on create, or creating a source in /cms fails validation.
+      defaultValue: () => randomBytes(32).toString('hex'),
       access: { read: () => false },
       admin: { hidden: true },
     },
