@@ -98,7 +98,7 @@ export const DEFAULT_FRONTPAGE: FrontpageContent = {
   },
   tiles: [
     { tag: 'Katalog', title: 'Verktøy', href: '/registry', variant: 'tinted' },
-    { tag: 'Oversikt', title: 'KI Prosjekter i BOD', href: '/registry', variant: 'accent' },
+    { tag: 'Oversikt', title: 'KI Prosjekter i BOD', href: '/prosjekter', variant: 'accent' },
   ],
   subscriptions: {
     eyebrow: 'Tilgjengelige abonnementer',
