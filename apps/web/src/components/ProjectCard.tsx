@@ -19,7 +19,7 @@ export function ProjectCard({ project }: { project: Project }) {
           <p
             style={{
               margin: 0,
-              font: '400 16px/1.55 var(--kihub-font-display)',
+              font: '400 var(--kihub-font-size-body-sm)/var(--kihub-line-height-body) var(--kihub-font-display)',
               color: 'var(--kihub-text-subtle)',
             }}
           >

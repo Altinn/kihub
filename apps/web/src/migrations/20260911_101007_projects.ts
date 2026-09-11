@@ -21,6 +21,15 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "projects_created_at_idx" ON "projects" USING btree ("created_at");
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_projects_fk" FOREIGN KEY ("projects_id") REFERENCES "public"."projects"("id") ON DELETE cascade ON UPDATE no action;
   CREATE INDEX "payload_locked_documents_rels_projects_id_idx" ON "payload_locked_documents_rels" USING btree ("projects_id");`)
+
+  // Data backfill (Altinn/kihub#135): `mergeFrontpage` (lib/site-content.ts) reads a SAVED
+  // `frontpage` doc's tiles verbatim, never consulting the updated `DEFAULT_FRONTPAGE.tiles` code
+  // default — so an environment where the frontpage global was already saved with the old href
+  // would keep serving `/registry` for this tile forever, code change or not. Fix the persisted
+  // row directly, idempotently (only touches rows still pointing at the old href).
+  await db.execute(sql`
+    UPDATE "frontpage_tiles" SET "href" = '/prosjekter'
+    WHERE "title" = 'KI Prosjekter i BOD' AND "href" = '/registry';`)
 }
 
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {

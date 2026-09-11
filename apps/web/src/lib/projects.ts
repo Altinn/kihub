@@ -1,5 +1,6 @@
 import config from '@payload-config';
 import { getPayload } from 'payload';
+import { PUBLISHED } from './payload-queries';
 import type { Project } from '@/payload-types';
 
 /**
@@ -12,15 +13,17 @@ async function payloadClient() {
   return getPayload({ config });
 }
 
-const PUBLISHED = { status: { equals: 'published' } } as const;
-
-/** Published projects, ordered by the editor-controlled `order` field (ascending). */
+/**
+ * Published projects, ordered by the editor-controlled `order` field (ascending). Most projects
+ * share the default `order` (100), so the secondary key is explicit rather than relying on
+ * whatever tie-break the adapter happens to apply.
+ */
 export async function listPublishedProjects(): Promise<Project[]> {
   const payload = await payloadClient();
   const result = await payload.find({
     collection: 'projects',
     where: PUBLISHED,
-    sort: 'order',
+    sort: ['order', 'createdAt'],
     limit: 200,
     overrideAccess: true,
   });

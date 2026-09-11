@@ -617,7 +617,10 @@
    ========================================================================== */
 
 /* ---------- Liste: the card grid (FR-002/004) ---------- */
-.news-grid {
+/* Shared verbatim with /prosjekter (016) — one grid/empty-state look for every editorial card
+   list, under each surface's own class names so a future divergence stays deliberate. */
+.news-grid,
+.prosjekter-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--kihub-space-10) var(--kihub-space-6);
@@ -627,16 +630,21 @@
    horizontal scrollbar instead of wrapping inside its card (SC-004). */
 .news-grid h2,
 .news-grid h3,
-.news-grid p {
+.news-grid p,
+.prosjekter-grid h2,
+.prosjekter-grid h3,
+.prosjekter-grid p {
   overflow-wrap: anywhere;
 }
 @media (max-width: 719px) {
-  .news-grid {
+  .news-grid,
+  .prosjekter-grid {
     grid-template-columns: 1fr;
   }
 }
 
-.news-empty {
+.news-empty,
+.prosjekter-empty {
   display: grid;
   gap: var(--kihub-space-3);
   margin-top: var(--kihub-space-10);
@@ -676,14 +684,18 @@ a.news-pagination__btn:hover {
 }
 
 /* ---------- Article page (FR-014) ---------- */
-.news-detail {
+/* `.prosjekter-detail__back`/`__title` share these rules with `.news-detail` (016) — see below. */
+.news-detail,
+.prosjekter-detail {
   max-width: var(--kihub-prose-width);
 }
-.news-detail__back {
+.news-detail__back,
+.prosjekter-detail__back {
   margin: 0 0 var(--kihub-space-8);
   font: 400 var(--kihub-font-size-ui) var(--kihub-font-ui);
 }
-.news-detail__title {
+.news-detail__title,
+.prosjekter-detail__title {
   font-size: var(--kihub-font-size-h2);
   margin: 0 0 var(--kihub-space-4);
 }
@@ -710,54 +722,16 @@ a.news-pagination__btn:hover {
 .news-detail__hero {
   margin-top: var(--kihub-space-8);
 }
-.news-detail__body {
+.news-detail__body,
+.prosjekter-detail__body {
   margin-top: var(--kihub-space-8);
 }
 
 /* ==========================================================================
-   016 — /prosjekter ("KI Prosjekter i BOD"): card grid + detail page.
-   Deliberately reuses the /news layout rules (no date/tags/hero on Project),
-   under its own class names so the two surfaces can diverge independently.
+   016 — /prosjekter ("KI Prosjekter i BOD"): card grid + detail page. No date/tags/hero on
+   Project, so it reuses the .news-* rules above directly (merged selectors) rather than a
+   parallel set of `.prosjekter-*` declarations — see each rule's comment above.
    ========================================================================== */
-
-.prosjekter-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--kihub-space-10) var(--kihub-space-6);
-  margin-top: var(--kihub-space-10);
-}
-.prosjekter-grid h2,
-.prosjekter-grid h3,
-.prosjekter-grid p {
-  overflow-wrap: anywhere;
-}
-@media (max-width: 719px) {
-  .prosjekter-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.prosjekter-empty {
-  display: grid;
-  gap: var(--kihub-space-3);
-  margin-top: var(--kihub-space-10);
-  max-width: var(--kihub-prose-width);
-}
-
-.prosjekter-detail {
-  max-width: var(--kihub-prose-width);
-}
-.prosjekter-detail__back {
-  margin: 0 0 var(--kihub-space-8);
-  font: 400 var(--kihub-font-size-ui) var(--kihub-font-ui);
-}
-.prosjekter-detail__title {
-  font-size: var(--kihub-font-size-h2);
-  margin: 0 0 var(--kihub-space-4);
-}
-.prosjekter-detail__body {
-  margin-top: var(--kihub-space-8);
-}
 
 /* ==================== 014 /laering — KI Læring ====================
  *

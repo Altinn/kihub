@@ -1,5 +1,5 @@
-import type { Role } from '@kihub/governance-core';
 import type { CollectionConfig } from 'payload';
+import { isEditor } from '../lib/access';
 import { slugify } from '../lib/slug';
 
 /**
@@ -7,15 +7,11 @@ import { slugify } from '../lib/slug';
  * `/prosjekter`: a flat, editor-authored list of AI projects underway in BOD (Altinn/kihub#135).
  * No Git source, no relationship to `Artifact` — a project is not an AI asset (Principle III).
  *
- * Access and the auto-slug hook are copied from `News.ts`/`LearningPage.ts` rather than
- * reinvented: Contributor+ read everything (drafts + published); everyone else is constrained to
- * `published` — the second line of defence alongside `lib/projects.ts`'s own status filter, so a
- * draft cannot leak through the employee pages or the REST/GraphQL path.
+ * Access and the auto-slug hook follow `News.ts`/`LearningPage.ts` rather than reinventing them:
+ * Contributor+ read everything (drafts + published); everyone else is constrained to `published`
+ * — the second line of defence alongside `lib/projects.ts`'s own status filter, so a draft cannot
+ * leak through the employee pages or the REST/GraphQL path.
  */
-function isEditor(user: { role?: unknown } | null | undefined): boolean {
-  return Boolean(user) && (user?.role as Role) !== 'reader';
-}
-
 export const Project: CollectionConfig = {
   slug: 'projects',
   labels: { singular: 'Prosjekt', plural: 'Prosjekter' },
@@ -42,12 +38,24 @@ export const Project: CollectionConfig = {
     ],
   },
   fields: [
-    { name: 'title', type: 'text', required: true, label: 'Tittel' },
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+      label: 'Tittel',
+      // A whitespace-only title passes Payload's own `required` check (it's a non-empty string)
+      // but the beforeValidate hook below only derives a slug from a non-blank title — reject it
+      // here so a published project can never end up without one (a card with no slug would link
+      // to `/prosjekter/`, not a real page).
+      validate: (value: string | null | undefined) =>
+        typeof value === 'string' && value.trim().length > 0
+          ? true
+          : 'Tittel kan ikke være tom eller bare mellomrom.',
+    },
     {
       name: 'slug',
       type: 'text',
       unique: true,
-      index: true,
       label: 'Adresse',
       admin: {
         description: 'URL-håndtak (/prosjekter/<adresse>); utledes fra tittelen når feltet står tomt.',
@@ -78,7 +86,7 @@ export const Project: CollectionConfig = {
       label: 'Rekkefølge',
       admin: {
         position: 'sidebar',
-        description: 'Lav verdi vises først; like verdier alfabetisk.',
+        description: 'Lav verdi vises først; like verdier sorteres etter opprettelsesdato.',
       },
     },
   ],

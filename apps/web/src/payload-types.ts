@@ -411,7 +411,7 @@ export interface Project {
   };
   status: 'draft' | 'published';
   /**
-   * Lav verdi vises først; like verdier alfabetisk.
+   * Lav verdi vises først; like verdier sorteres etter opprettelsesdato.
    */
   order?: number | null;
   updatedAt: string;
