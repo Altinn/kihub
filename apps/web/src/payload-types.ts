@@ -75,6 +75,7 @@ export interface Config {
     'discovery-sources': DiscoverySource;
     'discovery-runs': DiscoveryRun;
     news: News;
+    projects: Project;
     events: Event;
     'learning-categories': LearningCategory;
     'learning-subcategories': LearningSubcategory;
@@ -95,6 +96,7 @@ export interface Config {
     'discovery-sources': DiscoverySourcesSelect<false> | DiscoverySourcesSelect<true>;
     'discovery-runs': DiscoveryRunsSelect<false> | DiscoveryRunsSelect<true>;
     news: NewsSelect<false> | NewsSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'learning-categories': LearningCategoriesSelect<false> | LearningCategoriesSelect<true>;
     'learning-subcategories': LearningSubcategoriesSelect<false> | LearningSubcategoriesSelect<true>;
@@ -379,6 +381,44 @@ export interface News {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  title: string;
+  /**
+   * URL-håndtak (/prosjekter/<adresse>); utledes fra tittelen når feltet står tomt.
+   */
+  slug?: string | null;
+  /**
+   * Kort ingress vist i prosjektlisten.
+   */
+  summary?: string | null;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  status: 'draft' | 'published';
+  /**
+   * Lav verdi vises først; like verdier sorteres etter opprettelsesdato.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "events".
  */
 export interface Event {
@@ -621,6 +661,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'news';
         value: number | News;
+      } | null)
+    | ({
+        relationTo: 'projects';
+        value: number | Project;
       } | null)
     | ({
         relationTo: 'events';
@@ -869,6 +913,20 @@ export interface NewsSelect<T extends boolean = true> {
   tags?: T;
   heroImageUrl?: T;
   featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  body?: T;
+  status?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -4,7 +4,7 @@
  * `defaultValue`s (so the admin form starts pre-filled) and the per-section fallback merge in
  * `lib/site-content.ts` (so a fresh environment renders a complete frontpage before editors touch
  * anything). Norwegian content mirrors the old KI HUB site, retargeted at routes that exist in
- * this portal (e.g. no `/om` or `/prosjekter` yet — editors add such links when the pages exist).
+ * this portal (e.g. no `/om` yet — editors add such links when the pages exist).
  */
 
 export interface NavItem {
@@ -64,13 +64,14 @@ export interface FrontpageContent {
 
 export const DEFAULT_SITE_CHROME: SiteChrome = {
   // 014: "KI Læring" is part of the seeded defaults, so a FRESH environment links to the module out
-  // of the box. NOTE: `mergeSiteChrome` treats a SAVED nav section as authoritative wholesale, so an
-  // environment where an editor has already customised the navigation will NOT gain this entry
-  // automatically — an editor adds it in /cms (research §11, quickstart.md §6.1). Nothing here
-  // writes to editor-owned content.
+  // of the box. 016 adds "Prosjekter" the same way. NOTE: `mergeSiteChrome` treats a SAVED nav
+  // section as authoritative wholesale, so an environment where an editor has already customised
+  // the navigation will NOT gain either entry automatically — an editor adds it in /cms (research
+  // §11, quickstart.md §6.1). Nothing here writes to editor-owned content.
   nav: [
     { label: 'Hjem', href: '/' },
     { label: 'Verktøy', href: '/registry' },
+    { label: 'Prosjekter', href: '/prosjekter' },
     { label: 'KI Læring', href: '/laering' },
     { label: 'Nyheter', href: '/news' },
     { label: 'Arrangementer', href: '/events' },
@@ -80,6 +81,7 @@ export const DEFAULT_SITE_CHROME: SiteChrome = {
     contactEmail: 'kitt@digdir.no',
     links: [
       { label: 'Verktøy', href: '/registry' },
+      { label: 'Prosjekter', href: '/prosjekter' },
       { label: 'KI Læring', href: '/laering' },
       { label: 'Nyheter', href: '/news' },
       { label: 'Arrangementer', href: '/events' },
@@ -98,7 +100,7 @@ export const DEFAULT_FRONTPAGE: FrontpageContent = {
   },
   tiles: [
     { tag: 'Katalog', title: 'Verktøy', href: '/registry', variant: 'tinted' },
-    { tag: 'Oversikt', title: 'KI Prosjekter i BOD', href: '/registry', variant: 'accent' },
+    { tag: 'Oversikt', title: 'KI Prosjekter i BOD', href: '/prosjekter', variant: 'accent' },
   ],
   subscriptions: {
     eyebrow: 'Tilgjengelige abonnementer',

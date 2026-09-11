@@ -1,14 +1,24 @@
 # KI Hub
 
-Internal employee portal for Digdir. It brings together, in one place for all employees, four
+Internal employee portal for Digdir. It brings together, in one place for all employees, five
 modules: an **AI-tool Registry** (a catalog and governance layer over Git-based AI artifacts),
-**News**, a **Calendar** of events, and **KI Læring** — a curated learning library that teaches
-employees how to work with AI tooling. The Registry indexes, enriches, reviews, and exposes
-artifacts; it never stores their content (that lives in the sibling
-[`ai-artifacts`](../ai-artifacts) repository). News, Calendar and Learning are native platform
-content, authored directly in KI Hub with no Git source.
+**News**, a **Calendar** of events, **KI Læring** — a curated learning library that teaches
+employees how to work with AI tooling — and **KI Prosjekter i BOD**, an editorial list of AI
+projects underway in BOD. The Registry indexes, enriches, reviews, and exposes artifacts; it never
+stores their content (that lives in the sibling [`ai-artifacts`](../ai-artifacts) repository).
+News, Calendar, Learning and Projects are native platform content, authored directly in KI Hub
+with no Git source.
 
-> **Status**: KI Læring (learning pages). KI Hub gained a **fourth** native-content module
+> **Status**: KI Prosjekter i BOD (016). Fixed [Altinn/kihub#135](https://github.com/Altinn/kihub/issues/135):
+> the frontpage's "Verktøy" and "KI Prosjekter i BOD" tiles both linked to `/registry`. KI Hub
+> gained a **fifth** native-content module (Constitution v3.2.0, Principle II): a flat,
+> Contributor+-authored list of AI projects in BOD (title, summary, rich-text description,
+> draft/published status, editor-controlled order) — no Git source, not an artifact. Employees
+> read it at **`/prosjekter`** (list) and **`/prosjekter/<slug>`** (detail); the frontpage's "KI
+> Prosjekter i BOD" tile now links there instead of the tool registry, while "Verktøy" is
+> unchanged. One additive schema migration; no existing Registry/News/Events/Learning data touched.
+>
+> Previously — KI Læring (learning pages, 014). KI Hub gained a **fourth** native-content module
 > (Constitution v3.1.0, Principle II) alongside Registry, News and Calendar/Events: an
 > editor-curated library of **categories → subcategories → learning pages**, authored in `/cms` by
 > **Contributor+** editors and read by all employees at **`/laering`** behind a persistent
@@ -318,6 +328,27 @@ digdir IT (a sign-in app registration and a deploy-service-principal role grant)
 currently runs a pre-014 image that ignores the new env vars. In any environment whose site
 navigation was already customised by an editor, the "KI Læring" entry does not appear
 automatically — an editor adds it once in `/cms` → Site Chrome.
+
+### KI Prosjekter i BOD (Projects)
+
+Projects is KI Hub's **fifth** native-content module (Constitution v3.2.0, Principle II),
+fixing [Altinn/kihub#135](https://github.com/Altinn/kihub/issues/135): a flat, Contributor+-authored
+list of AI projects underway in BOD — no Git source, not an artifact, no relationship to the
+Registry's `Artifact` model. Modeled on News rather than Learning: no category hierarchy, no
+pagination, no author byline — just title, summary, rich-text description, draft/published status,
+and an editor-controlled `order`.
+
+- **Read** (employees): open http://localhost:3000/prosjekter for a card grid of published
+  projects (title + summary), ordered by `order`. Selecting a card opens its full description at
+  **`/prosjekter/<slug>`**. An empty archive shows a clear "Ingen prosjekter ennå" message rather
+  than an error or a blank page. Unpublished drafts are never visible — not in the list, not by
+  direct address (a draft or unknown slug 404s).
+- **Author** (`/cms`, Contributor+): create a project, write its title/summary/description, and
+  publish it when ready. The slug is derived from the title (stable across later title edits).
+- The frontpage's "KI Prosjekter i BOD" tile links to `/prosjekter`; the "Verktøy" tile is
+  unaffected and still links to `/registry`.
+
+One additive schema migration; no existing Registry, News, Events or Learning data is touched.
 
 ## Scripts
 

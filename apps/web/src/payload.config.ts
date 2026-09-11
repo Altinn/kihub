@@ -15,6 +15,7 @@ import { LearningPage } from './collections/LearningPage';
 import { LearningSubcategory } from './collections/LearningSubcategory';
 import { Media } from './collections/Media';
 import { News } from './collections/News';
+import { Project } from './collections/Project';
 import { Review } from './collections/Review';
 import { Users } from './collections/Users';
 import { buildPoolConfig } from './lib/db-auth';
@@ -53,6 +54,7 @@ export default buildConfig({
     DiscoverySource,
     DiscoveryRun,
     News,
+    Project,
     Event,
     LearningCategory,
     LearningSubcategory,

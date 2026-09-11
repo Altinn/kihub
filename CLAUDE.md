@@ -1,5 +1,25 @@
 <!-- SPECKIT START -->
-Active feature: **015-multi-source-agents** (DONE — specify + plan + tasks + analyze + implement
+Active feature: **016-fix-frontpage-banner-links** (DONE — specify + plan + tasks + implement
+complete 2026-09-11; tasks 19/19; suite **356/356 across 45 files**, lint clean; prod build
+TypeScript-compiles clean, blocked only on the pre-existing `AUTH_MODE=mock` production gate,
+unrelated to this feature). Fixes Altinn/kihub#135 — frontpage tiles "Verktøy" and "KI Prosjekter
+i BOD" both linked to `/registry`. Adds a fifth native-content module, **Projects**: a flat,
+News-shaped collection (`title`/`slug`/`summary`/richText `body`/draft-published `status`/`order`
+— no category hierarchy like Learning, no author/tags/hero-image/pagination like News, per Start
+Simple/YAGNI), collection `projects` (`apps/web/src/collections/Project.ts`), read layer
+`lib/projects.ts`, routes `/prosjekter` (list) + `/prosjekter/[slug]` (detail), one additive
+migration (`20260911_101007_projects`, hand-patched `down` with `IF EXISTS` — same generator bug
+as `20260810_090312_learning_pages`, verified up+down clean on scratch DB `kihub_migtest_016`).
+Frontpage tile default href changed to `/prosjekter` ONLY for "KI Prosjekter i BOD"; "Verktøy"
+stays `/registry` unchanged (regression-pinned by `tests/unit/frontpage-defaults.test.ts`). For
+technologies, structure, and context read the plan:
+`specs/016-fix-frontpage-banner-links/plan.md` (with `research.md`, `data-model.md`, `contracts/`
+×2, `quickstart.md`; `spec.md` for requirements; `tasks.md` for what shipped). Constitution Check:
+PASS, no violations — constitution bumped to v3.2.0, adding Projects as a fifth Product Module,
+the same precedent as Learning's v3.1.0 addition. Verified live via browser: created + published
+a project in `/cms`, saw it on `/prosjekter` + its detail page, confirmed a deleted/unknown slug
+404s, then deleted the test doc.
+Prior: **015-multi-source-agents** (DONE — specify + plan + tasks + analyze + implement
 complete 2026-08-12; tasks 38/38 — T038's real-repo pass done against Altinn/team-kitt: PAT
 must be ≤366d (Altinn org policy), scan succeeded with a live ownership takeover ('1 overtatt
 fra annen kilde') because the repo's agent shares its id with the local demo seed. Suites:
