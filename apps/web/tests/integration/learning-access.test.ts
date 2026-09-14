@@ -225,7 +225,7 @@ describe('FR-031 — only Contributor+ may write', () => {
       limit: 1,
       overrideAccess: true,
     });
-    const id = page.docs[0].id;
+    const id = page.docs[0]!.id;
 
     await expect(
       payload.update({
