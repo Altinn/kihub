@@ -73,7 +73,7 @@ describe('buildLearningTree — ordering (B1, FR-015)', () => {
         ],
       }),
     );
-    expect(tree[0].pages.map((p) => p.title)).toEqual(['Zebra', 'Alpha', 'Beta']);
+    expect(tree[0]!.pages.map((p) => p.title)).toEqual(['Zebra', 'Alpha', 'Beta']);
   });
 
   it('is stable for items an editor never ordered — alphabetical, not input order', () => {
@@ -89,8 +89,8 @@ describe('buildLearningTree — ordering (B1, FR-015)', () => {
         pages: [page(12, 'Beta', 1), page(11, 'Alfa', 1), page(10, 'Ceta', 1)],
       }),
     );
-    expect(first[0].pages.map((p) => p.title)).toEqual(['Alfa', 'Beta', 'Ceta']);
-    expect(reversed[0].pages.map((p) => p.title)).toEqual(first[0].pages.map((p) => p.title));
+    expect(first[0]!.pages.map((p) => p.title)).toEqual(['Alfa', 'Beta', 'Ceta']);
+    expect(reversed[0]!.pages.map((p) => p.title)).toEqual(first[0]!.pages.map((p) => p.title));
   });
 
   it('sorts Norwegian letters with nb collation', () => {
@@ -101,7 +101,7 @@ describe('buildLearningTree — ordering (B1, FR-015)', () => {
       }),
     );
     // æ, ø, å sort AFTER z in Norwegian.
-    expect(tree[0].pages.map((p) => p.title)).toEqual(['Alfa', 'Ære', 'Øving']);
+    expect(tree[0]!.pages.map((p) => p.title)).toEqual(['Alfa', 'Ære', 'Øving']);
   });
 });
 
@@ -114,10 +114,10 @@ describe('buildLearningTree — grouping (B2, B3)', () => {
         pages: [page(10, 'Direkte', 1), page(11, 'Gruppert', 1, { subcategory: 5 })],
       }),
     );
-    expect(tree[0].pages.map((p) => p.title)).toEqual(['Direkte']);
-    expect(tree[0].groups).toHaveLength(1);
-    expect(tree[0].groups[0]).toMatchObject({ title: 'Tips & triks' });
-    expect(tree[0].groups[0].pages.map((p) => p.title)).toEqual(['Gruppert']);
+    expect(tree[0]!.pages.map((p) => p.title)).toEqual(['Direkte']);
+    expect(tree[0]!.groups).toHaveLength(1);
+    expect(tree[0]!.groups[0]).toMatchObject({ title: 'Tips & triks' });
+    expect(tree[0]!.groups[0]!.pages.map((p) => p.title)).toEqual(['Gruppert']);
   });
 
   it('emits ungrouped pages before subcategory groups (B3)', () => {
@@ -129,8 +129,8 @@ describe('buildLearningTree — grouping (B2, B3)', () => {
       }),
     );
     // The contract is positional: `pages` renders first, then `groups`.
-    expect(tree[0].pages).toHaveLength(1);
-    expect(tree[0].groups).toHaveLength(1);
+    expect(tree[0]!.pages).toHaveLength(1);
+    expect(tree[0]!.groups).toHaveLength(1);
   });
 
   it('treats a subcategory belonging to a DIFFERENT category as ungrouped, never reparenting', () => {
@@ -143,9 +143,9 @@ describe('buildLearningTree — grouping (B2, B3)', () => {
       }),
     );
     expect(tree).toHaveLength(1);
-    expect(tree[0].title).toBe('Eier');
-    expect(tree[0].pages.map((p) => p.title)).toEqual(['Side']);
-    expect(tree[0].groups).toEqual([]);
+    expect(tree[0]!.title).toBe('Eier');
+    expect(tree[0]!.pages.map((p) => p.title)).toEqual(['Side']);
+    expect(tree[0]!.groups).toEqual([]);
   });
 });
 
@@ -168,8 +168,8 @@ describe('buildLearningTree — pruning (B4, FR-008)', () => {
         pages: [page(10, 'Direkte', 1), page(11, 'Gruppert', 1, { subcategory: 6 })],
       }),
     );
-    expect(tree[0].groups.map((g) => g.title)).toEqual(['Full gruppe']);
-    expect(tree[0].pages.map((p) => p.title)).toEqual(['Direkte']);
+    expect(tree[0]!.groups.map((g) => g.title)).toEqual(['Full gruppe']);
+    expect(tree[0]!.pages.map((p) => p.title)).toEqual(['Direkte']);
   });
 
   it('returns an empty tree for an empty library', () => {
@@ -183,7 +183,7 @@ describe('buildLearningTree — pruning (B4, FR-008)', () => {
         pages: [page(10, 'Gyldig', 1), page(11, 'Foreldreløs', 999)],
       }),
     );
-    expect(tree[0].pages.map((p) => p.title)).toEqual(['Gyldig']);
+    expect(tree[0]!.pages.map((p) => p.title)).toEqual(['Gyldig']);
   });
 
   it('drops a page with no usable handle rather than rendering a broken link', () => {
@@ -193,7 +193,7 @@ describe('buildLearningTree — pruning (B4, FR-008)', () => {
         pages: [page(10, 'Med handle', 1), page(11, 'Uten handle', 1, { slug: null })],
       }),
     );
-    expect(tree[0].pages.map((p) => p.title)).toEqual(['Med handle']);
+    expect(tree[0]!.pages.map((p) => p.title)).toEqual(['Med handle']);
   });
 });
 
@@ -212,7 +212,7 @@ describe('buildLearningTree — current page (B5, B6, FR-003/FR-004)', () => {
     expect(tree.find((c) => c.title === 'Første')?.containsCurrent).toBe(false);
     const second = tree.find((c) => c.title === 'Andre');
     expect(second?.containsCurrent).toBe(true);
-    expect(second?.groups[0].pages[0].isCurrent).toBe(true);
+    expect(second?.groups[0]!.pages[0]!.isCurrent).toBe(true);
   });
 
   it('marks nothing current when no slug is given (the overview route)', () => {
@@ -235,15 +235,15 @@ describe('buildLearningTree — overview data (B8)', () => {
         pages: [page(10, 'Andre', 1, { order: 20 }), page(11, 'Første', 1, { order: 10 })],
       }),
     );
-    expect(tree[0].description).toBe('En beskrivelse');
-    expect(tree[0].href).toBe(learningPageHref('første'));
+    expect(tree[0]!.description).toBe('En beskrivelse');
+    expect(tree[0]!.href).toBe(learningPageHref('første'));
   });
 
   it('falls back to an empty description rather than null', () => {
     const tree = buildLearningTree(
       library({ categories: [cat(1, 'K')], pages: [page(10, 'S', 1)] }),
     );
-    expect(tree[0].description).toBe('');
+    expect(tree[0]!.description).toBe('');
   });
 
   it('uses the first page of a subcategory group when the category has no ungrouped pages', () => {
@@ -254,7 +254,7 @@ describe('buildLearningTree — overview data (B8)', () => {
         pages: [page(10, 'Bare i gruppe', 1, { subcategory: 5 })],
       }),
     );
-    expect(tree[0].href).toBe(learningPageHref('bare-i-gruppe'));
+    expect(tree[0]!.href).toBe(learningPageHref('bare-i-gruppe'));
   });
 });
 
@@ -268,7 +268,7 @@ describe('buildLearningTree — status is not its concern (B9, FR-032)', () => {
         pages: [{ ...page(10, 'Gitt av leselaget', 1) }],
       }),
     );
-    expect(tree[0].pages).toHaveLength(1);
+    expect(tree[0]!.pages).toHaveLength(1);
   });
 });
 

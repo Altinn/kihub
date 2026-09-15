@@ -75,7 +75,7 @@ describe('groupEventsByDay', () => {
     ];
     const groups = groupEventsByDay(events);
     expect(groups.map(([key]) => key)).toEqual(['2026-07-03', '2026-07-08']);
-    expect(groups[0][1].map((e) => e.title)).toEqual(['a', 'b']);
+    expect(groups[0]![1].map((e) => e.title)).toEqual(['a', 'b']);
   });
 
   it('splits UTC-same-day events that fall on different Oslo days', () => {
@@ -93,11 +93,11 @@ describe('buildMonthGrid', () => {
     expect(grid).toHaveLength(6);
     expect(grid.every((week) => week.length === 7)).toBe(true);
     // The screenshot month: leading 27–31 July, trailing 1–6 September.
-    expect(grid[0].map((c) => c.dayNumber)).toEqual([27, 28, 29, 30, 31, 1, 2]);
-    expect(grid[0][0].inMonth).toBe(false);
-    expect(grid[0][5]).toMatchObject({ dayKey: '2026-08-01', inMonth: true });
-    expect(grid[5].map((c) => c.dayNumber)).toEqual([31, 1, 2, 3, 4, 5, 6]);
-    expect(grid[5][1].inMonth).toBe(false);
+    expect(grid[0]!.map((c) => c.dayNumber)).toEqual([27, 28, 29, 30, 31, 1, 2]);
+    expect(grid[0]![0]!.inMonth).toBe(false);
+    expect(grid[0]![5]).toMatchObject({ dayKey: '2026-08-01', inMonth: true });
+    expect(grid[5]!.map((c) => c.dayNumber)).toEqual([31, 1, 2, 3, 4, 5, 6]);
+    expect(grid[5]![1]!.inMonth).toBe(false);
     const today = grid.flat().find((c) => c.isToday);
     expect(today).toMatchObject({ dayKey: '2026-08-05', dayNumber: 5, inMonth: true });
   });
@@ -105,14 +105,14 @@ describe('buildMonthGrid', () => {
   it('starts on the 1st when the month begins on a Monday', () => {
     // June 2026 starts on a Monday.
     const grid = buildMonthGrid(2026, 6, '');
-    expect(grid[0][0]).toMatchObject({ dayKey: '2026-06-01', inMonth: true });
+    expect(grid[0]![0]).toMatchObject({ dayKey: '2026-06-01', inMonth: true });
   });
 
   it('handles February in a non-leap year', () => {
     const grid = buildMonthGrid(2026, 2, '');
     const inMonth = grid.flat().filter((c) => c.inMonth);
     expect(inMonth).toHaveLength(28);
-    expect(inMonth[0].dayKey).toBe('2026-02-01');
+    expect(inMonth[0]!.dayKey).toBe('2026-02-01');
     expect(inMonth.at(-1)?.dayKey).toBe('2026-02-28');
   });
 

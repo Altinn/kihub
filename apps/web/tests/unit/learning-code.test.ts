@@ -38,7 +38,7 @@ describe('highlightCode — highlighting works synchronously (§B3.1/B3.2)', () 
   it('tokenises shell and returns lines of tokens', () => {
     const lines = highlightCode('npm install --save-dev shiki', 'shell');
     expect(lines).toHaveLength(1);
-    expect(lines[0].length).toBeGreaterThan(1);
+    expect(lines[0]!.length).toBeGreaterThan(1);
     expect(text(lines)).toBe('npm install --save-dev shiki');
   });
 
