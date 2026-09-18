@@ -11,6 +11,13 @@
 }
 .portal-shell > main {
   flex: 1;
+  /* `<main>` carries `.kihub-container`'s `margin-inline: auto` to center its max-width box, but
+   * as a direct child of this column flex container, those auto margins override the default
+   * stretch alignment: the browser shrinks main to its content's natural width instead of
+   * stretching it first. An explicit width restores normal centering, matching the header/footer
+   * (whose `.kihub-container` sits one level deeper, inside a plain block `<header>`/`<footer>`,
+   * so it never hits this flex quirk). */
+  width: 100%;
 }
 
 /* ---------- Site header ---------- */
@@ -26,10 +33,30 @@
 }
 .site-header__brand {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--kihub-space-2);
   text-decoration: none;
   color: var(--kihub-text);
+}
+.site-header__brand img {
+  height: 28px;
+  width: auto;
+}
+.site-header__brand-label {
+  font: 400 17px var(--kihub-font-ui);
+  letter-spacing: 0.05em;
+}
+.site-header__divider {
+  width: 1px;
+  height: 24px;
+  background: var(--kihub-accent-border);
+}
+@media (max-width: 899px) {
+  /* `.site-nav` reflows onto its own line below (order: 3, further down); a divider stranded
+     next to the brand on the first line alone reads as a stray mark, not a separator. */
+  .site-header__divider {
+    display: none;
+  }
 }
 .site-header__user {
   margin-left: auto;
@@ -59,6 +86,12 @@
 }
 .site-nav__link:hover {
   color: var(--kihub-accent);
+}
+.site-nav__link[aria-current='page'] {
+  color: var(--kihub-accent);
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
 }
 .site-nav__toggle {
   display: none;
@@ -123,6 +156,9 @@
   background: var(--kihub-surface-inverted);
   border-color: transparent;
   color: var(--kihub-text-inverted);
+  /* Square corners to match the tiles/other frontpage blocks (unlike the base `.kihub-card`,
+     which is rounded) — this modifier is only used by the subscriptions banner. */
+  border-radius: 0;
 }
 .kihub-card--inverted .kihub-eyebrow {
   color: rgba(255, 255, 255, 0.64);
@@ -201,6 +237,13 @@
   }
 }
 
+/* ---------- Empty state (events/news, frontpage only) ---------- */
+/* `.kihub-card` gives the fallback message the same width and visual weight as the tiles and
+   subscriptions banner above it, instead of a stray sentence stranded next to a full-width grid. */
+.fp-empty {
+  color: var(--kihub-text-subtle);
+}
+
 /* ---------- Section header (eyebrow + heading + action link) ---------- */
 .fp-section-head {
   display: flex;
@@ -227,6 +270,22 @@
   color: var(--kihub-text-inverted);
   font-family: var(--kihub-font-display);
   text-underline-offset: 3px;
+}
+.site-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--kihub-space-2);
+}
+.site-footer__logo {
+  height: 32px;
+  width: auto;
+  /* The logo's wordmark is a near-black navy (#1E2B3C), effectively invisible on this dark
+     surface (--kihub-surface-inverted: #1E2124) — flatten it to a plain white mark instead. */
+  filter: brightness(0) invert(1);
+}
+.site-footer__brand-label {
+  font: 400 17px var(--kihub-font-ui);
+  letter-spacing: 0.05em;
 }
 .site-footer__links {
   list-style: none;
@@ -978,9 +1037,8 @@ a.news-pagination__btn:hover {
 }
 
 /* ---------- Page (contract §D) ---------- */
-.lp-page {
-  max-width: var(--kihub-prose-width);
-}
+/* No prose-width cap on `.lp-page` (unlike news/events body text): the article fills the whole
+ * content column, flush with the sidebar on the left and the container edge on the right. */
 .lp-page__back {
   margin: 0 0 var(--kihub-space-6);
 }
@@ -1006,6 +1064,9 @@ a.news-pagination__btn:hover {
 }
 .lp-page__body {
   margin-top: var(--kihub-space-8);
+  /* Overrides the `.kihub-prose` max-width also on this element (LearningBody.tsx): body content
+   * (paragraphs, code blocks, images) must reach the same right edge as the title/meta above it. */
+  max-width: none;
 }
 
 /* ---------- Code blocks (contract §B2/§C) ---------- */

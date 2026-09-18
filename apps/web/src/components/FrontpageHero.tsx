@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import type { HeroContent } from '@/lib/site-content-defaults';
 
@@ -18,59 +19,6 @@ function headingWithAccent(heading: string, accentWord?: string) {
       <span className="kihub-accent-word">{accentWord}</span>
       {heading.slice(index + accentWord.length)}
     </>
-  );
-}
-
-/** Decorative placeholder artwork until final artwork is provided (research §10). */
-function HeroIllustration() {
-  return (
-    <svg
-      viewBox="0 0 320 260"
-      role="presentation"
-      aria-hidden="true"
-      style={{ width: '100%', maxWidth: '360px', height: 'auto', display: 'block' }}
-    >
-      <circle
-        cx="228"
-        cy="72"
-        r="44"
-        fill="var(--kihub-bg)"
-        stroke="var(--kihub-accent-border)"
-        strokeWidth="1.5"
-      />
-      <text
-        x="228"
-        y="80"
-        textAnchor="middle"
-        fill="var(--kihub-text)"
-        style={{ font: '400 26px var(--kihub-font-display)' }}
-      >
-        KI
-      </text>
-      {[0, 1, 2, 3, 4].map((i) => (
-        <line
-          key={i}
-          x1={196 + i * 16}
-          y1={16 - (i % 2) * 6}
-          x2={202 + i * 16}
-          y2={30 - (i % 2) * 6}
-          stroke="var(--kihub-accent)"
-          strokeWidth="1.5"
-        />
-      ))}
-      <path
-        d="M40 250c-6-60 8-108 44-128 24-13 52-10 70 6M84 250c-2-36 6-64 24-82"
-        fill="none"
-        stroke="var(--kihub-accent-border)"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M118 168c14-10 34-12 50-4l14 8"
-        fill="none"
-        stroke="var(--kihub-accent-border)"
-        strokeWidth="1.5"
-      />
-    </svg>
   );
 }
 
@@ -103,7 +51,15 @@ export function FrontpageHero({ hero }: { hero: HeroContent }) {
         ) : null}
       </div>
       <div className="fp-hero__art">
-        <HeroIllustration />
+        <Image
+          src="/brand/hero-illustration.jpg"
+          alt=""
+          role="presentation"
+          width={2000}
+          height={1660}
+          priority
+          style={{ width: '100%', maxWidth: '420px', height: 'auto', display: 'block' }}
+        />
       </div>
     </section>
   );

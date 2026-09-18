@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { getSiteChrome } from '@/lib/site-content';
 
 /**
@@ -12,19 +13,16 @@ export async function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="kihub-container site-footer__inner">
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--kihub-space-2)' }}>
-          <span
-            style={{
-              font: '600 22px var(--kihub-font-ui)',
-              letterSpacing: '-.02em',
-              color: 'var(--kihub-accent-border)',
-            }}
-          >
-            kitt
-          </span>
-          <span style={{ font: '400 17px var(--kihub-font-ui)', letterSpacing: '.05em' }}>
-            KI HUB
-          </span>
+        <div className="site-footer__brand">
+          <Image
+            src="/brand/kitt-logo.svg"
+            alt="Kitt"
+            width={100}
+            height={39}
+            className="site-footer__logo"
+            unoptimized
+          />
+          <span className="site-footer__brand-label">KI HUB</span>
         </div>
 
         <div>
