@@ -4,6 +4,7 @@ import * as migration_20260810_090312_learning_pages from './20260810_090312_lea
 import * as migration_20260810_093128_media_uploads from './20260810_093128_media_uploads';
 import * as migration_20260812_131624_agents_multisource from './20260812_131624_agents_multisource';
 import * as migration_20260911_101007_projects from './20260911_101007_projects';
+import * as migration_20260915_101941_subscriptions_request_access from './20260915_101941_subscriptions_request_access';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20260911_101007_projects.up,
     down: migration_20260911_101007_projects.down,
-    name: '20260911_101007_projects'
+    name: '20260911_101007_projects',
+  },
+  {
+    up: migration_20260915_101941_subscriptions_request_access.up,
+    down: migration_20260915_101941_subscriptions_request_access.down,
+    name: '20260915_101941_subscriptions_request_access'
   },
 ];

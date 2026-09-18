@@ -46,7 +46,12 @@ export interface Tile {
 
 export interface Chip {
   name: string;
-  href?: string;
+  description?: string;
+}
+
+export interface RequestAccess {
+  label: string;
+  body: string;
 }
 
 export interface SubscriptionsContent {
@@ -54,6 +59,7 @@ export interface SubscriptionsContent {
   heading: string;
   description: string;
   chips: Chip[];
+  requestAccess: RequestAccess;
 }
 
 export interface FrontpageContent {
@@ -107,6 +113,21 @@ export const DEFAULT_FRONTPAGE: FrontpageContent = {
     heading: 'Støttede KI-abonnementer i Digdir',
     description:
       'Disse abonnementene er godkjent og tilgjengelig for BOD-ansatte. Ta kontakt med KITT for tilgang.',
-    chips: [{ name: 'GitHub Copilot' }, { name: 'Claude Teams' }],
+    chips: [
+      {
+        name: 'GitHub Copilot',
+        description:
+          'KI-basert kodeassistent som gir forslag til kode, forklaringer og dokumentasjon direkte i utviklerverktøyet ditt.',
+      },
+      {
+        name: 'Claude Teams',
+        description:
+          'Claude er en KI-assistent for tekst, analyse og produktivitet, tilgjengelig som abonnement for team i Digdir.',
+      },
+    ],
+    requestAccess: {
+      label: 'Hvordan bestille tilgang?',
+      body: 'Ta kontakt med KITT-teamet på kitt@digdir.no for å be om tilgang. Oppgi hvilket abonnement du ønsker og hvilken avdeling du tilhører, så hjelper vi deg videre.',
+    },
   },
 };

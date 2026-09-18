@@ -163,6 +163,13 @@ describe('seeded-defaults merge (FR-012)', () => {
     expect(one.tiles).toEqual(DEFAULT_FRONTPAGE.tiles);
   });
 
+  it('falls back to the default requestAccess per-field when a stored subscriptions doc omits it (017)', () => {
+    const merged = mergeFrontpage({ subscriptions: { heading: 'Egen overskrift' } });
+    expect(merged.subscriptions.heading).toBe('Egen overskrift');
+    expect(merged.subscriptions.chips).toEqual([]);
+    expect(merged.subscriptions.requestAccess).toEqual(DEFAULT_FRONTPAGE.subscriptions.requestAccess);
+  });
+
   it('every section is non-empty through the real read path (fresh env or stored)', async () => {
     const chrome = await getSiteChrome();
     const content = await getFrontpageContent();

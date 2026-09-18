@@ -1,5 +1,69 @@
 <!-- SPECKIT START -->
-Active feature: **016-fix-frontpage-banner-links** (DONE — specify + plan + tasks + implement
+Active feature: **017-fix-subscriptions-banner** (DONE — specify + plan + tasks + implement
+complete 2026-09-15, PLUS a post-implementation revision the same day after direct user review;
+tasks 19/19 + 4 revision tasks T020–T023; suite **360/360 across 46 files**, lint clean,
+`tsc --noEmit` clean; prod build TypeScript-compiles clean, blocked only on the pre-existing
+`AUTH_MODE=mock` production gate, unrelated to this feature). Fixes Altinn/kihub#144 — the
+frontpage "Støttede KI-abonnementer i Digdir" banner rendered "GitHub Copilot"/"Claude Teams" as
+bordered `<span>`s styled like buttons that did nothing on click (false affordance), with no path
+to request-access instructions. **Shipped design** (after the revision — see research.md R5 for
+the superseded first pass): a dark **`.kihub-card--inverted`** card (new card variant, reusing the
+pre-existing `--kihub-surface-inverted`/`--kihub-text-inverted` tokens) with two fully pill-shaped
+chip buttons ("GitHub Copilot"/"Claude Teams") and a rectangular icon-led CTA
+("ⓘ Hvordan bestille tilgang?") below them, matching the issue's own attached inspiration image.
+Clicking any of the three opens a real **Designsystemet `Dialog`** (`@digdir/designsystemet-react`)
+with the explanation/instructions — chosen because the constitution names Designsystemet as the
+default for "dialogs," and because the user explicitly asked for a modal instead of a
+layout-shifting dropdown. Trigger buttons are plain kihub-styled `<button>`s, NOT Designsystemet's
+`Button` — the dark/pill look can't be expressed without restyling that primitive, which the
+constitution prohibits — opened via the native declarative `command="show-modal"`/`commandfor`
+HTML Invoker Commands attributes (typed via a new `apps/web/src/types/dom-invoker-commands.d.ts`
+declaration-merge, since `@types/react` 19.2 doesn't type them yet on plain elements). This keeps
+the site's client-component count at the three it had before (`SearchBar`/`CopyButton`/`SiteNav`)
+for OUR OWN code — Designsystemet's `Dialog`/`Button` are themselves `'use client'`, but a Server
+Component can render them as leaves without becoming one itself. Two RSC-specific bugs hit and
+fixed along the way, both worth remembering for any future Designsystemet-`Dialog` usage: (1)
+`<Dialog.Block>` (property access on the imported `Dialog`) renders as `undefined` at server-render
+time because `Dialog` is a Client Component and its server-side "client reference" placeholder
+doesn't support static sub-property access the way the callable itself works — fix: import
+`DialogBlock` as its own named export instead; (2) a `<Dialog>` nested INSIDE
+`.kihub-card--inverted` renders fully invisible (white-on-white) text, because a native `<dialog>`
+stays in its original DOM position for CSS inheritance purposes even though it *paints* in the
+browser's top layer — fix: render all `<Dialog>`s as siblings of the card, not children.
+`Chip.href` (dead — never set by defaults, unused once chips stopped navigating) was REMOVED from
+the schema, not just left inert; `Chip.description` and a new
+`subscriptions.requestAccess: {label, body}` group were added to the `frontpage` global
+(`apps/web/src/globals/Frontpage.ts`, `lib/site-content-defaults.ts`, `lib/site-content.ts`'s
+`mergeFrontpage`) — this content-model part was untouched by the revision. One additive migration
+(`20260915_101941_subscriptions_request_access` — two `ADD COLUMN` + one `DROP COLUMN`, no table
+drop involved so, unlike 014/015/016, it did NOT hit the CASCADE/named-drop generator bug; still
+verified up+down clean on scratch DB `kihub_migtest_017`). Gotcha worth keeping: after editing
+`Frontpage.ts`/`site-content-defaults.ts` and regenerating types, the LOCAL push-mode dev DB still
+has the OLD schema until something calls `getPayload()` against it — and because this change
+included a column DROP (not just additive columns like every prior feature), Payload's push-mode
+schema reconciliation blocked on an interactive "data loss" confirmation that a non-interactive
+`vitest` run can't answer, hanging every integration test's `beforeAll` for a full 120s timeout
+each (a 47-minute red suite). Fix: apply the migration's `up()` SQL directly to the local `kihub`
+DB via `psql` before rerunning tests — after that, push-mode sees the schema already matches and
+stops prompting. For technologies, structure, and context read the plan:
+`specs/017-fix-subscriptions-banner/plan.md` (with `research.md` — R5 is the revision record,
+`data-model.md`, `contracts/` ×2, `quickstart.md`; `spec.md` for requirements, updated post-revision
+for FR-003/FR-009; `tasks.md` for what shipped, including the T020–T023 revision). Constitution
+Check: PASS, no violations, no amendment needed — this extends the existing `subscriptions` group
+on the `frontpage` global, not a new Product Module. Trade-off knowingly accepted (updates spec.md
+FR-009): unlike this codebase's other disclosures (native `<details>`, JS-independent everywhere),
+the HTML Invoker Commands API is zero-JS only in browsers that implement it natively (verified:
+Chrome/Chromium 152) — older browsers depend on `@digdir/designsystemet-web`'s polyfill JS. This
+was an explicit, informed request (real modal + Designsystemet), not an oversight. Verified live
+via browser (mock sign-in, `Ada Employee`, on a FRESH tab to rule out stale console history from
+earlier iterations): both chip dialogs and the CTA dialog open with correct heading/body content,
+close via the × button, zero console errors/hydration warnings. NOTE: this browser-automation
+harness's synthetic Escape-key events did not reliably close the dialog (mouse-driven open/close
+via the × button worked every time) — same class of limitation already seen with the first
+`<details>` pass's Enter/Space, left unresolved as a suspected tooling/CDP limitation rather than
+an app defect, since Escape-closes-`<dialog>` is native, spec-mandated HTML behavior with no JS
+involved — a real keyboard press was not independently verified in this session.
+Prior: **016-fix-frontpage-banner-links** (DONE — specify + plan + tasks + implement
 complete 2026-09-11; tasks 19/19; suite **356/356 across 45 files**, lint clean; prod build
 TypeScript-compiles clean, blocked only on the pre-existing `AUTH_MODE=mock` production gate,
 unrelated to this feature). Fixes Altinn/kihub#135 — frontpage tiles "Verktøy" and "KI Prosjekter

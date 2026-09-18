@@ -1147,10 +1147,20 @@ export interface Frontpage {
     chips?:
       | {
           name: string;
-          href?: string | null;
+          /**
+           * Short explanation shown when this tool is clicked.
+           */
+          description?: string | null;
           id?: string | null;
         }[]
       | null;
+    /**
+     * The heavier "how do I get access" call-to-action.
+     */
+    requestAccess?: {
+      label?: string | null;
+      body?: string | null;
+    };
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1228,8 +1238,14 @@ export interface FrontpageSelect<T extends boolean = true> {
           | T
           | {
               name?: T;
-              href?: T;
+              description?: T;
               id?: T;
+            };
+        requestAccess?:
+          | T
+          | {
+              label?: T;
+              body?: T;
             };
       };
   updatedAt?: T;

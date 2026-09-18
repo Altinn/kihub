@@ -108,7 +108,28 @@ export const Frontpage: GlobalConfig = {
           defaultValue: DEFAULT_FRONTPAGE.subscriptions.chips,
           fields: [
             { name: 'name', type: 'text', required: true },
-            { name: 'href', type: 'text' },
+            {
+              name: 'description',
+              type: 'textarea',
+              admin: { description: 'Short explanation shown when this tool is clicked.' },
+            },
+          ],
+        },
+        {
+          name: 'requestAccess',
+          type: 'group',
+          admin: { description: 'The heavier "how do I get access" call-to-action.' },
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+              defaultValue: DEFAULT_FRONTPAGE.subscriptions.requestAccess.label,
+            },
+            {
+              name: 'body',
+              type: 'textarea',
+              defaultValue: DEFAULT_FRONTPAGE.subscriptions.requestAccess.body,
+            },
           ],
         },
       ],
