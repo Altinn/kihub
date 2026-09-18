@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { auth, signOut } from '@/auth';
 import { SiteNav } from '@/components/SiteNav';
@@ -18,18 +19,14 @@ export async function SiteHeader() {
     <header className="site-header">
       <div className="kihub-container site-header__inner">
         <Link href="/" className="site-header__brand kihub-focusable">
-          <span
-            style={{
-              font: '600 22px var(--kihub-font-ui)',
-              letterSpacing: '-.02em',
-              color: 'var(--kihub-accent)',
-            }}
-          >
-            kitt
-          </span>
-          <span style={{ font: '400 17px var(--kihub-font-ui)', letterSpacing: '.05em' }}>
-            KI HUB
-          </span>
+          <Image
+            src="/brand/kitt-logo.svg"
+            alt="Kitt KI Hub"
+            width={100}
+            height={39}
+            priority
+            unoptimized
+          />
         </Link>
 
         <SiteNav nav={chrome.nav} />

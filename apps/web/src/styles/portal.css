@@ -33,10 +33,14 @@
 }
 .site-header__brand {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--kihub-space-2);
   text-decoration: none;
   color: var(--kihub-text);
+}
+.site-header__brand img {
+  height: 28px;
+  width: auto;
 }
 .site-header__user {
   margin-left: auto;
@@ -241,6 +245,13 @@
   color: var(--kihub-text-inverted);
   font-family: var(--kihub-font-display);
   text-underline-offset: 3px;
+}
+.site-footer__logo {
+  height: 32px;
+  width: auto;
+  /* The logo's wordmark is a near-black navy (#1E2B3C), effectively invisible on this dark
+     surface (--kihub-surface-inverted: #1E2124) — flatten it to a plain white mark instead. */
+  filter: brightness(0) invert(1);
 }
 .site-footer__links {
   list-style: none;
