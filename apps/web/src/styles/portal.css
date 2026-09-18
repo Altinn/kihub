@@ -118,6 +118,64 @@
   }
 }
 
+/* ---------- Subscriptions banner: dark card + pill chips + CTA (017, Altinn/kihub#144) ---------- */
+.kihub-card--inverted {
+  background: var(--kihub-surface-inverted);
+  border-color: transparent;
+  color: var(--kihub-text-inverted);
+}
+.kihub-card--inverted .kihub-eyebrow {
+  color: rgba(255, 255, 255, 0.64);
+}
+.kihub-card--inverted .kihub-h3 {
+  color: var(--kihub-text-inverted);
+}
+.kihub-card--inverted .kihub-prose {
+  color: rgba(255, 255, 255, 0.8);
+}
+.fp-subscriptions__list {
+  display: flex;
+  gap: var(--kihub-space-3);
+  flex-wrap: wrap;
+  list-style: none;
+  margin: var(--kihub-space-5) 0 0;
+  padding: 0;
+}
+.fp-subscriptions__chip,
+.fp-subscriptions__cta {
+  /* The default focus ring is dark-on-light; on this dark card it must invert to stay visible. */
+  --kihub-focus-outer: var(--kihub-text-inverted);
+  --kihub-focus-inner: var(--kihub-surface-inverted);
+  font: 400 14px var(--kihub-font-ui);
+  padding: 9px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: transparent;
+  color: var(--kihub-text-inverted);
+  cursor: pointer;
+}
+.fp-subscriptions__chip {
+  border-radius: var(--kihub-radius-full);
+}
+.fp-subscriptions__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kihub-space-2);
+  margin-top: var(--kihub-space-4);
+  border-radius: var(--kihub-radius);
+}
+@media (hover: hover) and (pointer: fine) {
+  .fp-subscriptions__chip:hover,
+  .fp-subscriptions__cta:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+.fp-subscriptions__icon {
+  flex: none;
+}
+.fp-subscriptions__dialog.ds-dialog {
+  max-width: 420px;
+}
+
 /* ---------- Events section ---------- */
 .fp-events {
   display: grid;

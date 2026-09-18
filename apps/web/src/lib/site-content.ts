@@ -86,8 +86,16 @@ export function mergeFrontpage(doc: StoredFrontpage): FrontpageContent {
           heading: doc.subscriptions.heading ?? '',
           description: doc.subscriptions.description ?? '',
           chips: (doc.subscriptions.chips ?? []).map(
-            (c): Chip => ({ name: c.name, href: c.href ?? undefined }),
+            (c): Chip => ({ name: c.name, description: c.description ?? undefined }),
           ),
+          requestAccess: {
+            label:
+              doc.subscriptions.requestAccess?.label ??
+              DEFAULT_FRONTPAGE.subscriptions.requestAccess.label,
+            body:
+              doc.subscriptions.requestAccess?.body ??
+              DEFAULT_FRONTPAGE.subscriptions.requestAccess.body,
+          },
         }
       : DEFAULT_FRONTPAGE.subscriptions;
 
