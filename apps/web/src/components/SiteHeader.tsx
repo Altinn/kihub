@@ -23,6 +23,8 @@ export async function SiteHeader() {
           <span className="site-header__brand-label">KI HUB</span>
         </Link>
 
+        <span className="site-header__divider" aria-hidden="true" />
+
         <SiteNav nav={chrome.nav} />
 
         <div className="site-header__user">

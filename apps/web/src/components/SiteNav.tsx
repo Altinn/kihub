@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import type { NavItem } from '@/lib/site-content-defaults';
 
@@ -10,8 +11,17 @@ import type { NavItem } from '@/lib/site-content-defaults';
  * Nav data arrives as props from the server `SiteHeader`; breakpoint behavior lives in
  * `styles/portal.css`.
  */
+
+/** Exact match, or a path segment boundary below `href` — never a bare string-prefix match
+ * (so `/prosjekter` doesn't also light up for a hypothetical `/prosjekter-2026` route). */
+function isActivePath(pathname: string, href: string) {
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function SiteNav({ nav }: { nav: NavItem[] }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <nav className="site-nav" aria-label="Hovedmeny">
@@ -27,7 +37,11 @@ export function SiteNav({ nav }: { nav: NavItem[] }) {
       <ul id="site-nav-list" className="site-nav__list" data-open={open || undefined}>
         {nav.map((item) => (
           <li key={`${item.label}-${item.href}`}>
-            <Link href={item.href} className="site-nav__link kihub-focusable">
+            <Link
+              href={item.href}
+              className="site-nav__link kihub-focusable"
+              aria-current={isActivePath(pathname, item.href) ? 'page' : undefined}
+            >
               {item.label}
             </Link>
           </li>
