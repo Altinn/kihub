@@ -11,6 +11,13 @@
 }
 .portal-shell > main {
   flex: 1;
+  /* `<main>` carries `.kihub-container`'s `margin-inline: auto` to center its max-width box, but
+   * as a direct child of this column flex container, those auto margins override the default
+   * stretch alignment: the browser shrinks main to its content's natural width instead of
+   * stretching it first. An explicit width restores normal centering, matching the header/footer
+   * (whose `.kihub-container` sits one level deeper, inside a plain block `<header>`/`<footer>`,
+   * so it never hits this flex quirk). */
+  width: 100%;
 }
 
 /* ---------- Site header ---------- */
@@ -199,6 +206,13 @@
   .fp-news {
     grid-template-columns: 1fr;
   }
+}
+
+/* ---------- Empty state (events/news, frontpage only) ---------- */
+/* `.kihub-card` gives the fallback message the same width and visual weight as the tiles and
+   subscriptions banner above it, instead of a stray sentence stranded next to a full-width grid. */
+.fp-empty {
+  color: var(--kihub-text-subtle);
 }
 
 /* ---------- Section header (eyebrow + heading + action link) ---------- */
@@ -978,9 +992,8 @@ a.news-pagination__btn:hover {
 }
 
 /* ---------- Page (contract §D) ---------- */
-.lp-page {
-  max-width: var(--kihub-prose-width);
-}
+/* No prose-width cap on `.lp-page` (unlike news/events body text): the article fills the whole
+ * content column, flush with the sidebar on the left and the container edge on the right. */
 .lp-page__back {
   margin: 0 0 var(--kihub-space-6);
 }
@@ -1006,6 +1019,9 @@ a.news-pagination__btn:hover {
 }
 .lp-page__body {
   margin-top: var(--kihub-space-8);
+  /* Overrides the `.kihub-prose` max-width also on this element (LearningBody.tsx): body content
+   * (paragraphs, code blocks, images) must reach the same right edge as the title/meta above it. */
+  max-width: none;
 }
 
 /* ---------- Code blocks (contract §B2/§C) ---------- */

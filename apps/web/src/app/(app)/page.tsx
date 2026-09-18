@@ -61,15 +61,17 @@ export default async function FrontPage() {
             {timeline.length ? (
               <EventsTimeline events={timeline} />
             ) : (
-              <p className="kihub-prose" style={{ color: 'var(--kihub-text-subtle)' }}>
-                Ingen flere planlagte arrangementer akkurat nå.
-              </p>
+              <div className="kihub-card fp-empty">
+                <p className="kihub-prose">Ingen flere planlagte arrangementer akkurat nå.</p>
+              </div>
             )}
           </div>
         ) : (
-          <p className="kihub-prose" style={{ color: 'var(--kihub-text-subtle)' }}>
-            Ingen kommende arrangementer akkurat nå. Ta en titt i kalenderen senere.
-          </p>
+          <div className="kihub-card fp-empty">
+            <p className="kihub-prose">
+              Ingen kommende arrangementer akkurat nå. Ta en titt i kalenderen senere.
+            </p>
+          </div>
         )}
       </section>
 
@@ -94,9 +96,9 @@ export default async function FrontPage() {
             ))}
           </div>
         ) : (
-          <p className="kihub-prose" style={{ color: 'var(--kihub-text-subtle)' }}>
-            Ingen publiserte nyheter ennå. Kom tilbake snart.
-          </p>
+          <div className="kihub-card fp-empty">
+            <p className="kihub-prose">Ingen publiserte nyheter ennå. Kom tilbake snart.</p>
+          </div>
         )}
       </section>
     </main>
