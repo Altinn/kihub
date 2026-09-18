@@ -19,14 +19,8 @@ export async function SiteHeader() {
     <header className="site-header">
       <div className="kihub-container site-header__inner">
         <Link href="/" className="site-header__brand kihub-focusable">
-          <Image
-            src="/brand/kitt-logo.svg"
-            alt="Kitt KI Hub"
-            width={100}
-            height={39}
-            priority
-            unoptimized
-          />
+          <Image src="/brand/kitt-logo.svg" alt="Kitt" width={100} height={39} priority unoptimized />
+          <span className="site-header__brand-label">KI HUB</span>
         </Link>
 
         <SiteNav nav={chrome.nav} />

@@ -13,15 +13,16 @@ export async function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="kihub-container site-footer__inner">
-        <div>
+        <div className="site-footer__brand">
           <Image
             src="/brand/kitt-logo.svg"
-            alt="Kitt KI Hub"
+            alt="Kitt"
             width={100}
             height={39}
             className="site-footer__logo"
             unoptimized
           />
+          <span className="site-footer__brand-label">KI HUB</span>
         </div>
 
         <div>

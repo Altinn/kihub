@@ -42,6 +42,10 @@
   height: 28px;
   width: auto;
 }
+.site-header__brand-label {
+  font: 400 17px var(--kihub-font-ui);
+  letter-spacing: 0.05em;
+}
 .site-header__user {
   margin-left: auto;
   display: flex;
@@ -246,12 +250,21 @@
   font-family: var(--kihub-font-display);
   text-underline-offset: 3px;
 }
+.site-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--kihub-space-2);
+}
 .site-footer__logo {
   height: 32px;
   width: auto;
   /* The logo's wordmark is a near-black navy (#1E2B3C), effectively invisible on this dark
      surface (--kihub-surface-inverted: #1E2124) — flatten it to a plain white mark instead. */
   filter: brightness(0) invert(1);
+}
+.site-footer__brand-label {
+  font: 400 17px var(--kihub-font-ui);
+  letter-spacing: 0.05em;
 }
 .site-footer__links {
   list-style: none;
