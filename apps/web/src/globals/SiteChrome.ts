@@ -44,9 +44,18 @@ export const SiteChrome: GlobalConfig = {
           defaultValue: DEFAULT_SITE_CHROME.footer.contactLabel,
         },
         {
-          name: 'contactEmail',
-          type: 'email',
-          defaultValue: DEFAULT_SITE_CHROME.footer.contactEmail,
+          // Altinn/kihub#149 — a list of named contacts, replacing the old single `contactEmail`
+          // field, which could hold only one address and no names.
+          name: 'contacts',
+          type: 'array',
+          labels: { singular: 'Contact', plural: 'Contacts' },
+          admin: { description: 'People to contact, shown under the contact label in order.' },
+          maxRows: 10,
+          defaultValue: DEFAULT_SITE_CHROME.footer.contacts,
+          fields: [
+            { name: 'name', type: 'text', required: true },
+            { name: 'email', type: 'email', required: true },
+          ],
         },
         {
           name: 'links',

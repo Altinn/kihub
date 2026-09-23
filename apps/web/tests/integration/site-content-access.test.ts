@@ -142,11 +142,15 @@ describe('seeded-defaults merge (FR-012)', () => {
 
   it('merges per-section: a stored footer leaves the nav defaults intact', () => {
     const merged = mergeSiteChrome({
-      footer: { contactLabel: 'Skriv til oss:', contactEmail: 'x@digdir.no', links: [] },
+      footer: {
+        contactLabel: 'Skriv til oss:',
+        contacts: [{ name: 'Kari Nordmann', email: 'x@digdir.no' }],
+        links: [],
+      },
     });
     expect(merged.nav).toEqual(DEFAULT_SITE_CHROME.nav);
     expect(merged.footer.contactLabel).toBe('Skriv til oss:');
-    expect(merged.footer.contactEmail).toBe('x@digdir.no');
+    expect(merged.footer.contacts).toEqual([{ name: 'Kari Nordmann', email: 'x@digdir.no' }]);
   });
 
   it('merges per-section on the frontpage: stored hero, default tiles + subscriptions', () => {
@@ -174,7 +178,7 @@ describe('seeded-defaults merge (FR-012)', () => {
     const chrome = await getSiteChrome();
     const content = await getFrontpageContent();
     expect(chrome.nav.length).toBeGreaterThan(0);
-    expect(chrome.footer.contactEmail).toBeTruthy();
+    expect(chrome.footer.contactLabel).toBeTruthy();
     expect(content.hero.heading).toBeTruthy();
     expect(content.tiles).toHaveLength(2);
     expect(content.subscriptions.chips.length).toBeGreaterThan(0);

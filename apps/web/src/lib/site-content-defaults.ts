@@ -12,9 +12,14 @@ export interface NavItem {
   href: string;
 }
 
+export interface FooterContact {
+  name: string;
+  email: string;
+}
+
 export interface FooterContent {
   contactLabel: string;
-  contactEmail: string;
+  contacts: FooterContact[];
   links: NavItem[];
 }
 
@@ -127,8 +132,10 @@ export const DEFAULT_SITE_CHROME: SiteChrome = {
     { label: 'Arrangementer', href: '/events' },
   ],
   footer: {
-    contactLabel: 'Kontakt oss:',
-    contactEmail: 'kitt@digdir.no',
+    // Altinn/kihub#149 — no seeded contacts: the old default address (kitt@digdir.no) doesn't
+    // exist, and the team's names/addresses are editor-owned content entered in /cms.
+    contactLabel: 'Kontakt Team KITT:',
+    contacts: [],
     links: [
       { label: 'Verktøy', href: '/registry' },
       { label: 'Prosjekter', href: '/prosjekter' },
