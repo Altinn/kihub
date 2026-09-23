@@ -3,6 +3,13 @@
  * (src/styles/kihub/ is synced from the design project and never edited). Only layout that needs
  * real media queries lives here; simple grids use auto-fit inline. */
 
+/* The browser's default 8px `body` margin isn't reset anywhere in the synced kihub layer, so every
+ * full-bleed surface (most visibly the dark `.site-footer`) sat inset from the viewport edge by
+ * that margin. */
+body {
+  margin: 0;
+}
+
 /* Footer sits at the bottom even on short pages. */
 .portal-shell {
   min-height: 100dvh;
@@ -262,6 +269,11 @@
 }
 .site-footer__inner {
   display: grid;
+  /* Without this, the grid stretches each column to the tallest one (the links list), and the
+   * brand block's own `align-items: center` then centers the logo within that stretched height —
+   * dropping it below the top line that "Kontakt oss:" and "Verktøy" start on. `start` keeps every
+   * column at its natural height so all three begin on the same line. */
+  align-items: start;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--kihub-space-8);
   padding-block: var(--kihub-space-14);
@@ -801,10 +813,14 @@ a.news-pagination__btn:hover {
 }
 
 /* ---------- Article page (FR-014) ---------- */
-/* `.prosjekter-detail__back`/`__title` share these rules with `.news-detail` (016) — see below. */
-.news-detail,
-.prosjekter-detail {
-  max-width: var(--kihub-prose-width);
+/* `.prosjekter-detail__back`/`__title` share these rules with `.news-detail` (016) — see below.
+ * No prose-width cap here (matches `.lp-page` below): the article fills the whole content column
+ * instead of stopping mid-page, so the hero image and body text reach the same right edge as the
+ * title/meta above them. */
+/* Wider than the prose cap above: this page mixes metadata (tags, install command) with prose,
+ * so it keeps its pre-existing 860px width instead of the 640px article cap. */
+.artifact-detail {
+  max-width: 860px;
 }
 .news-detail__back,
 .prosjekter-detail__back {
@@ -842,6 +858,9 @@ a.news-pagination__btn:hover {
 .news-detail__body,
 .prosjekter-detail__body {
   margin-top: var(--kihub-space-8);
+  /* Overrides `.kihub-prose`'s max-width for the same reason `.news-detail`/`.prosjekter-detail`
+   * above have none: body copy must reach the same right edge as the title/hero above it. */
+  max-width: none;
 }
 
 /* ==========================================================================
@@ -1061,6 +1080,10 @@ a.news-pagination__btn:hover {
 }
 .lp-page__summary {
   margin: var(--kihub-space-6) 0 0;
+  /* Overrides `.kihub-lead`'s 38ch cap (kihub/components.css) for the same reason `.lp-page__body`
+   * overrides `.kihub-prose` below: the article fills the whole content column, so the summary
+   * must reach the same right edge as the title/meta and body instead of wrapping early. */
+  max-width: none;
 }
 .lp-page__body {
   margin-top: var(--kihub-space-8);
