@@ -25,18 +25,27 @@ export async function SiteFooter() {
           <span className="site-footer__brand-label">KI HUB</span>
         </div>
 
+        {/* The label introduces the contact list, so it is hidden with it when no contacts are
+            set; the empty column still holds its grid slot so the links stay right-aligned. */}
         <div>
-          {footer.contactLabel ? (
-            <p style={{ margin: 0, font: '400 18px/1.7 var(--kihub-font-display)' }}>
-              {footer.contactLabel}
-            </p>
-          ) : null}
-          {footer.contactEmail ? (
-            <p style={{ margin: 0, font: '400 18px/1.7 var(--kihub-font-display)' }}>
-              <a href={`mailto:${footer.contactEmail}`} className="kihub-focusable">
-                {footer.contactEmail}
-              </a>
-            </p>
+          {footer.contacts.length ? (
+            <>
+              {footer.contactLabel ? (
+                <p style={{ margin: 0, font: '400 18px/1.7 var(--kihub-font-display)' }}>
+                  {footer.contactLabel}
+                </p>
+              ) : null}
+              <ul className="site-footer__contacts">
+                {footer.contacts.map((contact) => (
+                  <li key={`${contact.name}-${contact.email}`}>
+                    <span className="site-footer__contact-name">{contact.name}</span>
+                    <a href={`mailto:${contact.email}`} className="kihub-focusable">
+                      {contact.email}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
           ) : null}
         </div>
 

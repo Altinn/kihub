@@ -40,10 +40,10 @@ export function mergeSiteChrome(doc: StoredChrome): SiteChrome {
     ? doc.nav.map((item) => ({ label: item.label, href: item.href }))
     : DEFAULT_SITE_CHROME.nav;
   const footer =
-    doc?.footer && (doc.footer.contactEmail || doc.footer.links?.length)
+    doc?.footer && (doc.footer.contacts?.length || doc.footer.links?.length)
       ? {
           contactLabel: doc.footer.contactLabel ?? '',
-          contactEmail: doc.footer.contactEmail ?? '',
+          contacts: (doc.footer.contacts ?? []).map((c) => ({ name: c.name, email: c.email })),
           links: (doc.footer.links ?? []).map((l) => ({ label: l.label, href: l.href })),
         }
       : DEFAULT_SITE_CHROME.footer;

@@ -299,6 +299,19 @@ body {
   font: 400 17px var(--kihub-font-ui);
   letter-spacing: 0.05em;
 }
+.site-footer__contacts {
+  list-style: none;
+  margin: var(--kihub-space-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kihub-space-3);
+}
+.site-footer__contacts li {
+  display: flex;
+  flex-direction: column;
+  font: 400 16px/1.5 var(--kihub-font-display);
+}
 .site-footer__links {
   list-style: none;
   margin: 0;

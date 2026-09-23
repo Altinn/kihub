@@ -1093,7 +1093,16 @@ export interface SiteChrome {
     | null;
   footer?: {
     contactLabel?: string | null;
-    contactEmail?: string | null;
+    /**
+     * People to contact, shown under the contact label in order.
+     */
+    contacts?:
+      | {
+          name: string;
+          email: string;
+          id?: string | null;
+        }[]
+      | null;
     links?:
       | {
           label: string;
@@ -1209,7 +1218,13 @@ export interface SiteChromeSelect<T extends boolean = true> {
     | T
     | {
         contactLabel?: T;
-        contactEmail?: T;
+        contacts?:
+          | T
+          | {
+              name?: T;
+              email?: T;
+              id?: T;
+            };
         links?:
           | T
           | {

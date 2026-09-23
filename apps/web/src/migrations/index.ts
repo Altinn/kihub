@@ -6,6 +6,7 @@ import * as migration_20260812_131624_agents_multisource from './20260812_131624
 import * as migration_20260911_101007_projects from './20260911_101007_projects';
 import * as migration_20260915_101941_subscriptions_request_access from './20260915_101941_subscriptions_request_access';
 import * as migration_20260923_072922_subscriptions_richtext from './20260923_072922_subscriptions_richtext';
+import * as migration_20260923_081558_footer_contacts from './20260923_081558_footer_contacts';
 
 export const migrations = [
   {
@@ -46,6 +47,11 @@ export const migrations = [
   {
     up: migration_20260923_072922_subscriptions_richtext.up,
     down: migration_20260923_072922_subscriptions_richtext.down,
-    name: '20260923_072922_subscriptions_richtext'
+    name: '20260923_072922_subscriptions_richtext',
+  },
+  {
+    up: migration_20260923_081558_footer_contacts.up,
+    down: migration_20260923_081558_footer_contacts.down,
+    name: '20260923_081558_footer_contacts'
   },
 ];
