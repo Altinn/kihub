@@ -48,8 +48,8 @@ export default async function RegistryPage({
   const hasFilters = Boolean(activeType) || activeTags.length > 0;
 
   return (
-    <main style={{ maxWidth: '1040px', margin: '0 auto', padding: '2rem 1rem' }}>
-
+    <main className="kihub-container">
+      <div className="kihub-section">
       <Heading level={2} data-size="md">
         Registry
       </Heading>
@@ -124,6 +124,7 @@ export default async function RegistryPage({
             </div>
           </div>
         )}
+      </div>
       </div>
     </main>
   );

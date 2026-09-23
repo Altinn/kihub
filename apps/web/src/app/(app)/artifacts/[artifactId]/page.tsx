@@ -31,8 +31,8 @@ export default async function ArtifactDetailPage({
   const readme = (a.readme as string | undefined) ?? '';
 
   return (
-    <main style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1rem' }}>
-
+    <main className="kihub-container">
+      <div className="kihub-section artifact-detail">
       <Paragraph data-size="sm" style={{ marginBottom: '1rem' }}>
         <Link href="/registry">← Back to catalog</Link>
       </Paragraph>
@@ -101,6 +101,7 @@ export default async function ArtifactDetailPage({
       )}
 
       {governance ? <GovernancePanel artifactId={artifactId} governance={governance} /> : null}
+      </div>
     </main>
   );
 }
