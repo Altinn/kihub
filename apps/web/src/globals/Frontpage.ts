@@ -110,7 +110,7 @@ export const Frontpage: GlobalConfig = {
             { name: 'name', type: 'text', required: true },
             {
               name: 'description',
-              type: 'textarea',
+              type: 'richText',
               admin: { description: 'Short explanation shown when this tool is clicked.' },
             },
           ],
@@ -127,7 +127,7 @@ export const Frontpage: GlobalConfig = {
             },
             {
               name: 'body',
-              type: 'textarea',
+              type: 'richText',
               defaultValue: DEFAULT_FRONTPAGE.subscriptions.requestAccess.body,
             },
           ],

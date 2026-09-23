@@ -44,14 +44,58 @@ export interface Tile {
   variant: 'tinted' | 'accent';
 }
 
+/**
+ * Minimal lexical rich-text document shape — matches what `@payloadcms/richtext-lexical` generates
+ * for every `richText` field (e.g. `Project['body']` in payload-types.ts). Declared by hand rather
+ * than imported from the generated types so this file keeps its zero-framework-dependency contract
+ * (see file header): the shape is dictated by lexical's data model, not by Payload's codegen.
+ */
+export interface RichTextValue {
+  root: {
+    type: string;
+    children: { type: string; version: number; [k: string]: unknown }[];
+    direction: 'ltr' | 'rtl' | null;
+    format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+    indent: number;
+    version: number;
+  };
+  [k: string]: unknown;
+}
+
+/** Wraps plain text in a single-paragraph lexical document, for seed/fallback content — editors
+ * can add bold, links, and extra paragraphs on top of this once they open the CMS (Altinn/kihub#148). */
+function richText(text: string): RichTextValue {
+  return {
+    root: {
+      type: 'root',
+      format: '',
+      indent: 0,
+      version: 1,
+      direction: 'ltr',
+      children: [
+        {
+          type: 'paragraph',
+          format: '',
+          indent: 0,
+          version: 1,
+          direction: 'ltr',
+          children: [
+            { type: 'text', version: 1, detail: 0, format: 0, mode: 'normal', style: '', text },
+          ],
+        },
+      ],
+    },
+  };
+}
+
 export interface Chip {
   name: string;
-  description?: string;
+  description?: RichTextValue;
 }
 
 export interface RequestAccess {
   label: string;
-  body: string;
+  body: RichTextValue;
 }
 
 export interface SubscriptionsContent {
@@ -116,18 +160,22 @@ export const DEFAULT_FRONTPAGE: FrontpageContent = {
     chips: [
       {
         name: 'GitHub Copilot',
-        description:
+        description: richText(
           'KI-basert kodeassistent som gir forslag til kode, forklaringer og dokumentasjon direkte i utviklerverktøyet ditt.',
+        ),
       },
       {
         name: 'Claude Teams',
-        description:
+        description: richText(
           'Claude er en KI-assistent for tekst, analyse og produktivitet, tilgjengelig som abonnement for team i Digdir.',
+        ),
       },
     ],
     requestAccess: {
       label: 'Hvordan bestille tilgang?',
-      body: 'Ta kontakt med KITT-teamet på kitt@digdir.no for å be om tilgang. Oppgi hvilket abonnement du ønsker og hvilken avdeling du tilhører, så hjelper vi deg videre.',
+      body: richText(
+        'Ta kontakt med KITT-teamet på kitt@digdir.no for å be om tilgang. Oppgi hvilket abonnement du ønsker og hvilken avdeling du tilhører, så hjelper vi deg videre.',
+      ),
     },
   },
 };
