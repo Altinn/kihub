@@ -25,6 +25,13 @@ body {
    * (whose `.kihub-container` sits one level deeper, inside a plain block `<header>`/`<footer>`,
    * so it never hits this flex quirk). */
   width: 100%;
+  /* `.kihub-container` also adds `padding-inline`; with the default content-box sizing,
+   * `width: 100%` + that padding overflowed the viewport by 2× the gutter below the 1200px cap.
+   * There is no global box-sizing reset, so scope it here — and widen the cap by the same two
+   * gutters, because border-box makes `max-width` include the padding: without it, main's content
+   * would stop 1 gutter short of the (content-box) header/footer edges on wide screens. */
+  box-sizing: border-box;
+  max-width: calc(var(--kihub-content-width) + 2 * var(--kihub-space-6));
 }
 
 /* ---------- Site header ---------- */
