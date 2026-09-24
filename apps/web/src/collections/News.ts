@@ -5,7 +5,8 @@ import { slugify } from '../lib/slug';
 /**
  * Phase 7 — News. A native platform-content collection (Constitution Principle II): articles are
  * authored and published in the `/cms` back-office and read by all employees in the app. News has
- * no Git source and is NOT an artifact; its only relationship is `author → users`.
+ * no Git source and is NOT an artifact; its relationships are `author → users` and (020)
+ * `heroImage → media`.
  *
  * Authoring is gated to Contributor+ (the same posture as the Phase 6 admin gate); News is
  * intentionally NOT wired into `@kihub/governance-core`'s Registry permission matrix (research §3).
@@ -82,7 +83,30 @@ export const News: CollectionConfig = {
     },
     { name: 'publishDate', type: 'date' },
     { name: 'tags', type: 'text', hasMany: true },
-    { name: 'heroImageUrl', type: 'text', label: 'Hero image URL' },
+    {
+      // 020 — the managed hero image. Takes precedence over `heroImageUrl` wherever news is rendered
+      // (`resolveHeroSource`, lib/news-view.ts). Upload FK is ON DELETE SET NULL, so deleting the
+      // media item falls back cleanly (FR-010).
+      name: 'heroImage',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Toppbilde',
+      admin: {
+        description:
+          'Last opp eller velg et bilde fra Mediefiler. Velg fokuspunkt (og eventuelt beskjæring), slik at det viktigste alltid synes på forsiden og i nyhetsoversikten. Endringer på bildet gjelder overalt der det brukes.',
+      },
+    },
+    {
+      // Legacy (pre-020): a pasted URL Payload never sees, so it cannot be framed. Kept as a fallback
+      // so existing articles keep their image; values are never migrated or rewritten (FR-008/009).
+      name: 'heroImageUrl',
+      type: 'text',
+      label: 'Bilde-URL (eldre)',
+      admin: {
+        description:
+          'Brukes bare når det ikke er lastet opp et toppbilde. Last opp et toppbilde for å kunne styre utsnittet.',
+      },
+    },
     { name: 'featured', type: 'checkbox', defaultValue: false },
   ],
 };

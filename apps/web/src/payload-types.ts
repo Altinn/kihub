@@ -374,10 +374,75 @@ export interface News {
   status: 'draft' | 'published';
   publishDate?: string | null;
   tags?: string[] | null;
+  /**
+   * Last opp eller velg et bilde fra Mediefiler. Velg fokuspunkt (og eventuelt beskjæring), slik at det viktigste alltid synes på forsiden og i nyhetsoversikten. Endringer på bildet gjelder overalt der det brukes.
+   */
+  heroImage?: (number | null) | Media;
+  /**
+   * Brukes bare når det ikke er lastet opp et toppbilde. Last opp et toppbilde for å kunne styre utsnittet.
+   */
   heroImageUrl?: string | null;
   featured?: boolean | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Bilder brukt i nyheter og KI Læring. Fokuspunkt og beskjæring gjelder overalt der bildet brukes.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  /**
+   * Beskriv bildet for dem som ikke ser det. Er bildet rent dekorativt, kryss av «Dekorativt bilde» der du setter det inn i teksten. Fokuspunkt og beskjæring du setter på bildet, gjelder overalt der bildet brukes.
+   */
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    content?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    content2x?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card2x?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -565,46 +630,6 @@ export interface LearningPage {
   author?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  /**
-   * Beskriv bildet for dem som ikke ser det. Er bildet rent dekorativt, kryss av «Dekorativt bilde» der du setter det inn i teksten.
-   */
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    content?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    content2x?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -911,6 +936,7 @@ export interface NewsSelect<T extends boolean = true> {
   status?: T;
   publishDate?: T;
   tags?: T;
+  heroImage?: T;
   heroImageUrl?: T;
   featured?: T;
   updatedAt?: T;
@@ -1024,6 +1050,26 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
         content2x?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card2x?:
           | T
           | {
               url?: T;

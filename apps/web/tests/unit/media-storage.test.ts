@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildMediaStoragePlugins,
   resolveAzureMediaConfig,
+  resolveMediaSelfFetchAllowList,
   resolveMediaStorageMode,
 } from '@/lib/media-storage';
 
@@ -113,5 +114,34 @@ describe('buildMediaStoragePlugins', () => {
     expect(() => buildMediaStoragePlugins({ MEDIA_STORAGE_MODE: 'azure' })).toThrow(
       /MEDIA_STORAGE_MODE=azure requires/,
     );
+  });
+});
+
+/**
+ * 020 T010 — the re-fetch allow-list for re-framing a saved image in azure mode (research R6). It
+ * must be scoped to our own host AND file route, and absent everywhere it is not needed.
+ */
+describe('resolveMediaSelfFetchAllowList', () => {
+  it('is undefined in disk mode, even with a hostname set (the re-fetch reads from disk)', () => {
+    expect(resolveMediaSelfFetchAllowList({})).toBeUndefined();
+    expect(
+      resolveMediaSelfFetchAllowList({ MEDIA_STORAGE_MODE: 'disk', MEDIA_PUBLIC_HOSTNAME: 'kihub.example' }),
+    ).toBeUndefined();
+  });
+
+  it('is undefined in azure mode without a hostname — Payload keeps its default SSRF guard', () => {
+    expect(resolveMediaSelfFetchAllowList({ MEDIA_STORAGE_MODE: 'azure' })).toBeUndefined();
+    expect(
+      resolveMediaSelfFetchAllowList({ MEDIA_STORAGE_MODE: 'azure', MEDIA_PUBLIC_HOSTNAME: '   ' }),
+    ).toBeUndefined();
+  });
+
+  it('allow-lists exactly our host + file route over https in azure mode', () => {
+    expect(
+      resolveMediaSelfFetchAllowList({
+        MEDIA_STORAGE_MODE: 'azure',
+        MEDIA_PUBLIC_HOSTNAME: ' kihub.example ',
+      }),
+    ).toEqual([{ protocol: 'https', hostname: 'kihub.example', pathname: '/payload-api/media/file/*' }]);
   });
 });

@@ -1,5 +1,5 @@
 import { azureStorage } from '@payloadcms/storage-azure';
-import type { Plugin } from 'payload';
+import type { AllowList, Plugin } from 'payload';
 
 /**
  * Media storage seam (014, contracts/media-storage.md §B).
@@ -94,4 +94,23 @@ export function buildMediaStoragePlugins(env: MediaEnv = process.env): Plugin[] 
       allowContainerCreate: false,
     }),
   ];
+}
+
+/**
+ * 020 research R6 — the `skipSafeFetch` allow-list for `Media.upload`.
+ *
+ * When an editor re-frames (focal point / crop) an ALREADY-SAVED image, Payload re-fetches the
+ * original. In azure mode that is an HTTP GET of `${Origin}/payload-api/media/file/<name>` through Payload's
+ * `safeFetch` SSRF guard. The entry is scoped to our own public hostname AND our own file route, so
+ * the guard stays in force for every other URL — an entry matching on path alone would let a forged
+ * `Origin` header aim the server-side fetch anywhere.
+ *
+ * Returns `undefined` (Payload's default guard) in disk mode, where the re-fetch reads from disk, and
+ * whenever `MEDIA_PUBLIC_HOSTNAME` is not set.
+ */
+export function resolveMediaSelfFetchAllowList(env: MediaEnv = process.env): AllowList | undefined {
+  if (resolveMediaStorageMode(env) !== 'azure') return undefined;
+  const hostname = env.MEDIA_PUBLIC_HOSTNAME?.trim();
+  if (!hostname) return undefined;
+  return [{ protocol: 'https', hostname, pathname: '/payload-api/media/file/*' }];
 }

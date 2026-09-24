@@ -129,6 +129,45 @@ describe('accepted uploads (FR-022, FR-023)', () => {
   });
 });
 
+describe('020 — focal point + card sizes (contracts/cms-news-hero.md A3.1, A3.3, A3.4)', () => {
+  it('defaults the focal point to the centre and generates the 16:10 card sizes (A3.1)', async () => {
+    const data = await png(2000, 1250);
+    const doc = await upload(
+      { alt: `Nyhetsbilde ${testId}` },
+      { name: 'card.png', data, mimetype: 'image/png', size: data.byteLength },
+    );
+    expect(doc.focalX).toBe(50);
+    expect(doc.focalY).toBe(50);
+    expect(doc.sizes?.card).toMatchObject({ width: 800, height: 500 });
+    expect(doc.sizes?.card2x).toMatchObject({ width: 1600, height: 1000 });
+    expect(doc.sizes?.card?.url).toBeTruthy();
+    expect(doc.sizes?.card2x?.url).toBeTruthy();
+  });
+
+  it('never enlarges a small original into a card size (A3.3, FR-004)', async () => {
+    const data = await png(600, 300);
+    const doc = await upload(
+      { alt: `Lite nyhetsbilde ${testId}` },
+      { name: 'small-card.png', data, mimetype: 'image/png', size: data.byteLength },
+    );
+    for (const size of [doc.sizes?.card, doc.sizes?.card2x]) {
+      if (!size?.url) continue;
+      expect(size.width ?? 0).toBeLessThanOrEqual(600);
+      expect(size.height ?? 0).toBeLessThanOrEqual(300);
+    }
+  });
+
+  it('keeps the reading-width size at the original aspect ratio — learning pages unchanged (A3.4, FR-011)', async () => {
+    const data = await png(2000, 500);
+    const doc = await upload(
+      { alt: `Bredt banner ${testId}` },
+      { name: 'banner.png', data, mimetype: 'image/png', size: data.byteLength },
+    );
+    expect(doc.sizes?.content?.width).toBe(760);
+    expect(Math.abs((doc.sizes?.content?.height ?? 0) - 190)).toBeLessThanOrEqual(1);
+  });
+});
+
 describe('refused uploads (FR-022)', () => {
   it('REFUSES an SVG — script-capable and served from our own origin', async () => {
     const svg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');

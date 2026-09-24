@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { formatNewsDate } from '@/lib/news-view';
+import { formatNewsDate, pickCardImage, resolveHeroSource } from '@/lib/news-view';
 import type { News } from '@/payload-types';
 
 /**
@@ -11,6 +11,11 @@ import type { News } from '@/payload-types';
  * under its "Siste nytt" `<h2>`) and the /news grid (013 US1, `headingLevel={2}` under the page
  * `<h1>`). 013 consolidated the frontpage-only `FrontpageNewsCard` into this file so the two
  * surfaces cannot drift apart.
+ *
+ * 020 — the image is resolved by `resolveHeroSource`: an uploaded hero renders the focal-framed
+ * 16:10 card sizes (`pickCardImage`, with `object-position` on the focal point so a fallback source
+ * frames identically); a legacy `heroImageUrl` renders exactly as before; neither → placeholder.
+ * The card image is always `alt=""` — the card is one link named by its title (contract B2).
  */
 export function NewsCard({
   article,
@@ -21,6 +26,8 @@ export function NewsCard({
 }) {
   const date = formatNewsDate(article.publishDate);
   const Heading = headingLevel === 3 ? 'h3' : 'h2';
+  const hero = resolveHeroSource(article);
+  const card = hero.kind === 'upload' ? pickCardImage(hero.media) : null;
 
   return (
     <Link
@@ -30,15 +37,34 @@ export function NewsCard({
     >
       <article className="kihub-stack" style={{ gap: 'var(--kihub-space-3)' }}>
         <div
-          className={`kihub-media${article.heroImageUrl ? '' : ' kihub-media--placeholder'}`}
+          className={`kihub-media${hero.kind === 'none' ? ' kihub-media--placeholder' : ''}`}
           style={{ aspectRatio: '16 / 10' }}
         >
-          {article.heroImageUrl ? (
-            // Image URLs are editor-provided strings (no Media collection); a broken URL leaves
-            // the tinted well visible behind it, matching the placeholder look.
+          {card ? (
+            // Payload already generated the sizes with sharp; next/image would add a second
+            // optimisation layer over them (the 014 LearningImage precedent).
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={article.heroImageUrl}
+              src={card.src}
+              srcSet={card.srcSet}
+              sizes="(max-width: 719px) 100vw, 50vw"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: card.objectPosition,
+                display: 'block',
+              }}
+            />
+          ) : hero.kind === 'legacy' ? (
+            // Legacy (pre-020) editor-provided URL; a broken URL leaves the tinted well visible
+            // behind it, matching the placeholder look.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={hero.url}
               alt=""
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
