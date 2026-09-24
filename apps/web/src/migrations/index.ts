@@ -7,6 +7,7 @@ import * as migration_20260911_101007_projects from './20260911_101007_projects'
 import * as migration_20260915_101941_subscriptions_request_access from './20260915_101941_subscriptions_request_access';
 import * as migration_20260923_072922_subscriptions_richtext from './20260923_072922_subscriptions_richtext';
 import * as migration_20260923_081558_footer_contacts from './20260923_081558_footer_contacts';
+import * as migration_20260924_080748_news_hero_media from './20260924_080748_news_hero_media';
 
 export const migrations = [
   {
@@ -52,6 +53,11 @@ export const migrations = [
   {
     up: migration_20260923_081558_footer_contacts.up,
     down: migration_20260923_081558_footer_contacts.down,
-    name: '20260923_081558_footer_contacts'
+    name: '20260923_081558_footer_contacts',
+  },
+  {
+    up: migration_20260924_080748_news_hero_media.up,
+    down: migration_20260924_080748_news_hero_media.down,
+    name: '20260924_080748_news_hero_media'
   },
 ];

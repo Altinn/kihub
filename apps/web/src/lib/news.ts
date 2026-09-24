@@ -30,6 +30,8 @@ export async function listPublishedNews(): Promise<News[]> {
     where: PUBLISHED,
     sort: '-publishDate',
     limit: 200,
+    // 020 R8 — `heroImage` must come back as a populated Media document, not a bare id.
+    depth: 1,
     overrideAccess: true,
   });
   return result.docs as News[];
@@ -59,7 +61,8 @@ export interface NewsPage {
  */
 export async function listPublishedNewsPage(page: number): Promise<NewsPage> {
   const payload = await payloadClient();
-  const query = { collection: 'news', where: PUBLISHED, sort: '-publishDate', limit: NEWS_PAGE_SIZE, overrideAccess: true } as const;
+  // 020 R8 — `depth: 1` so `heroImage` comes back as a populated Media document, not a bare id.
+  const query = { collection: 'news', where: PUBLISHED, sort: '-publishDate', limit: NEWS_PAGE_SIZE, depth: 1, overrideAccess: true } as const;
 
   const result = await payload.find({ ...query, page });
   if (result.docs.length === 0 && result.totalPages > 0 && page > result.totalPages) {
@@ -88,6 +91,7 @@ export async function getPublishedNewsBySlug(slug: string): Promise<News | null>
     collection: 'news',
     where: { and: [{ slug: { equals: slug } }, PUBLISHED] },
     limit: 1,
+    depth: 1, // 020 R8 — populate `heroImage`
     overrideAccess: true,
   });
   return (result.docs[0] as News) ?? null;

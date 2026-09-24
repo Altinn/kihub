@@ -1,12 +1,15 @@
 import type { Role } from '@kihub/governance-core';
 import type { CollectionConfig } from 'payload';
+import { resolveMediaSelfFetchAllowList } from '../lib/media-storage';
 
 /**
  * 014 — Media: KI Hub's FIRST managed upload collection (contracts/media-storage.md §A).
  *
- * A general platform capability, but learning pages are its only consumer today. Migrating News's
- * `heroImageUrl` text field to managed uploads is explicitly out of scope — the two mechanisms
- * coexist (spec Assumption 5).
+ * A shared library: learning pages embed it in rich text (014) and news articles use it as their
+ * hero image (020, `News.heroImage`). 020 turned on Payload's built-in focal point + crop so editors
+ * control how an image is framed on news cards; both apply to every place the image is used
+ * (specs/020-news-hero-media/research.md R2). News's legacy `heroImageUrl` text field still coexists
+ * as a fallback.
  *
  * Constitution v3.1.0 makes media uploaded for native content Payload-owned data (Principle II).
  *
@@ -26,7 +29,9 @@ export const Media: CollectionConfig = {
   admin: {
     useAsTitle: 'alt',
     defaultColumns: ['filename', 'alt', 'updatedAt'],
-    group: 'KI Læring',
+    // 020 R9 — no group: the library is shared by news and KI Læring, not owned by either.
+    description:
+      'Bilder brukt i nyheter og KI Læring. Fokuspunkt og beskjæring gjelder overalt der bildet brukes.',
   },
   access: {
     // An image referenced by a published learning page must be fetchable by every employee.
@@ -39,16 +44,32 @@ export const Media: CollectionConfig = {
     // Raster only. SVG is deliberately absent: it is a script-capable document that would be served
     // from the portal's own origin (FR-022, spec Assumption 6).
     mimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif'],
-    // Two sizes, both at the reading column's width (FR-023). `sharp` is already a dependency.
+    // Reading-column sizes (014 FR-023) plus 16:10 news-card sizes framed on the focal point (020).
+    // `sharp` is already a dependency.
+    //
+    // `withoutEnlargement: true` MUST stay explicit on the card sizes. Left undefined, Payload only
+    // skips a size when the original is smaller on BOTH axes; an original short on ONE axis (a
+    // 3000x900 banner vs 1600x1000) goes through `resizeWithFocalPoint`, which scales it UP. With it
+    // set, such originals take a plain non-enlarging resize instead, which may not come out exactly
+    // 16:10 — `pickCardImage` detects that and falls back (020 research R3/R4).
     imageSizes: [
       { name: 'content', width: 760, withoutEnlargement: true },
       { name: 'content2x', width: 1520, withoutEnlargement: true },
+      { name: 'card', width: 800, height: 500, withoutEnlargement: true },
+      { name: 'card2x', width: 1600, height: 1000, withoutEnlargement: true },
     ],
     // The admin list reuses the `content` size rather than generating a third derivative of every
     // upload (data-model.md).
     adminThumbnail: 'content',
-    focalPoint: false,
-    crop: false,
+    // 020 — the built-in image editor. Focal point only reframes the derived sizes; crop replaces the
+    // stored file itself (research R2).
+    focalPoint: true,
+    crop: true,
+    // 020 R6 — re-framing an already-saved image makes Payload re-fetch the original. In azure mode
+    // that is an HTTP fetch of our own public `/payload-api/media/file/*` route, which the default SSRF guard
+    // may refuse; this allow-lists exactly that host + route and nothing else. `undefined` (disk
+    // mode, or no MEDIA_PUBLIC_HOSTNAME) keeps Payload's default.
+    skipSafeFetch: resolveMediaSelfFetchAllowList(),
   },
   fields: [
     {
@@ -58,7 +79,7 @@ export const Media: CollectionConfig = {
       label: 'Alternativ tekst',
       admin: {
         description:
-          'Beskriv bildet for dem som ikke ser det. Er bildet rent dekorativt, kryss av «Dekorativt bilde» der du setter det inn i teksten.',
+          'Beskriv bildet for dem som ikke ser det. Er bildet rent dekorativt, kryss av «Dekorativt bilde» der du setter det inn i teksten. Fokuspunkt og beskjæring du setter på bildet, gjelder overalt der bildet brukes.',
       },
     },
   ],

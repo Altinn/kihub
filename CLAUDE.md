@@ -1,5 +1,44 @@
 <!-- SPECKIT START -->
-Active feature: **017-fix-subscriptions-banner** (DONE — specify + plan + tasks + implement
+Active feature: **020-news-hero-media** (DONE — specify + plan + tasks + analyze + implement
+complete 2026-09-23; tasks 31/31; suite **382/382 across 47 files**, lint clean, `tsc --noEmit`
+clean, `next build` green against the migrated scratch DB with `AUTH_MODE=entra`). Fixes awkward
+cropping of news hero images on the frontpage «Siste nytt» and `/news` cards. News gets a managed
+hero image: a new optional `heroImage` upload field (relationTo `media`, FK ON DELETE SET NULL),
+with the old `heroImageUrl` text field KEPT as a legacy fallback. Precedence is upload > legacy >
+placeholder, and URLs are not migrated. Payload's built-in `focalPoint` + `crop` are turned on for
+`media`, and two sizes are added: `card` 800x500 and `card2x` 1600x1000, both
+`withoutEnlargement: true`. That setting MUST be explicit: left undefined, an original short on ONE
+axis is UPSCALED by Payload's `resizeWithFocalPoint`. `Media` is now ungrouped (shared by news +
+KI Læring). Pure helpers `resolveHeroSource` / `pickCardImage` / `pickArticleImage` live in
+`lib/news-view.ts`:
+- cards use a card srcset only when that size is exactly 16:10, otherwise a reading-width
+  fallback, and ALWAYS set `object-position: focalX% focalY%` (`??` so 0 is honoured);
+- srcset candidates are deduped by width, because a small original is stored as the SAME file
+  for several sizes;
+- the article page uses `content`/`content2x` with `sizes="(max-width: 1200px) 100vw, 1200px"`
+  (the article column is full content width since #148) and is never cropped;
+- media URLs get `?v=updatedAt`, because re-framing overwrites same-named files.
+One additive migration, `20260924_080748_news_hero_media`. `focal_x`/`focal_y` ALREADY existed
+from 014's media migration, because Payload creates them even while disabled. New optional env
+**`MEDIA_PUBLIC_HOSTNAME`** (azure mode only) feeds `resolveMediaSelfFetchAllowList` →
+`Media.upload.skipSafeFetch`, scoped to that host + `/payload-api/media/file/*`. Payload's API route
+is `/payload-api`, NOT `/api`. The allow-list is needed because re-framing an ALREADY-SAVED image
+makes Payload re-fetch the original over our public origin. It is SET on `kihub-web` (2026-09-24, revision `--0000020`) to
+`kihub-web.happypond-fe66d7a5.norwayeast.azurecontainerapps.io`. After 020 deploys, run quickstart §6. Gotchas:
+- a partial API update that only sets `focalX`/`focalY` stores the numbers but does NOT regenerate
+  files. Payload needs `uploadEdits` + the full doc (`filename`, `url`) in the body, which is what
+  the admin sends;
+- `sharp().extract().stats()` measures the whole INPUT image, so use `.toBuffer()` first in tests;
+- push-mode hangs every integration test when the local DB holds schema another branch lacks. While
+  019 was unmerged, the shared `kihub` DB had its footer table, so 020 work ran on per-branch
+  clones (`kihub_020`, then `kihub_020b` after the rebase) instead of touching the shared DB.
+Rebased onto #151 (019) on 2026-09-24 and the migration REGENERATED, because a migration's `.json`
+snapshot must include every earlier migration's schema, or the next `migrate:create` re-creates
+that schema. The 48px portal overflow found while verifying this is fixed separately in #153. For
+details read `specs/020-news-hero-media/plan.md` (with `research.md` R1–R11, `data-model.md`,
+`contracts/` x2, `quickstart.md`, and `tasks.md` Notes for the implementation record).
+Constitution Check: PASS, no violations, no amendment.
+Prior: **017-fix-subscriptions-banner** (DONE — specify + plan + tasks + implement
 complete 2026-09-15, PLUS a post-implementation revision the same day after direct user review;
 tasks 19/19 + 4 revision tasks T020–T023; suite **360/360 across 46 files**, lint clean,
 `tsc --noEmit` clean; prod build TypeScript-compiles clean, blocked only on the pre-existing
