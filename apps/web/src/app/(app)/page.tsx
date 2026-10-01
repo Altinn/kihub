@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ContributeBanner } from '@/components/ContributeBanner';
 import { EventsTimeline } from '@/components/EventsTimeline';
 import { FrontpageHero } from '@/components/FrontpageHero';
 import { FrontpageTile } from '@/components/FrontpageTile';
@@ -39,6 +40,10 @@ export default async function FrontPage() {
 
       <div style={{ marginTop: 'var(--kihub-space-8)' }}>
         <SubscriptionsBanner subscriptions={content.subscriptions} />
+      </div>
+
+      <div style={{ marginTop: 'var(--kihub-space-6)' }}>
+        <ContributeBanner />
       </div>
 
       <section className="kihub-section" aria-labelledby="fp-events-heading">
