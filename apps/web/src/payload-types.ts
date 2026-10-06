@@ -1353,6 +1353,24 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LearningYouTubeBlock".
+ */
+export interface LearningYouTubeBlock {
+  /**
+   * Lim inn lenken fra «Del» på YouTube, f.eks. https://youtu.be/… Undertekster slås på automatisk, med norsk som foretrukket språk dersom videoen har et norsk undertekstspor.
+   */
+  url: string;
+  /**
+   * Leses opp av skjermlesere og vises ikke på siden. Beskriv hva videoen handler om.
+   */
+  title: string;
+  caption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'youtube';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {

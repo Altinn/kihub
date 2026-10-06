@@ -18,6 +18,7 @@ import {
 import { APIError, type CollectionConfig } from 'payload';
 import { LEARNING_CODE_LANGUAGES } from '../lib/learning-view';
 import { slugify } from '../lib/slug';
+import { parseYouTubeId } from '../lib/youtube';
 
 /**
  * 014 — Læringsside, the unit employees read at `/laering/<slug>`.
@@ -210,6 +211,43 @@ export const LearningPage: CollectionConfig = {
                 languages: LEARNING_CODE_LANGUAGES,
                 defaultLanguage: 'shell',
               }),
+              // 022 — an embedded YouTube video. Stored inside the lexical JSON, so it needs no
+              // migration. The URL is validated with the SAME parser the renderer uses, so
+              // whatever the editor accepts is exactly what plays.
+              {
+                slug: 'youtube',
+                interfaceName: 'LearningYouTubeBlock',
+                labels: { singular: 'YouTube-video', plural: 'YouTube-videoer' },
+                fields: [
+                  {
+                    name: 'url',
+                    type: 'text',
+                    required: true,
+                    label: 'YouTube-lenke',
+                    admin: {
+                      description:
+                        'Lim inn lenken fra «Del» på YouTube, f.eks. https://youtu.be/… Undertekster slås på automatisk, med norsk som foretrukket språk dersom videoen har et norsk undertekstspor.',
+                    },
+                    validate: (value: string | null | undefined) =>
+                      parseYouTubeId(value) ? true : 'Ikke en gyldig YouTube-videolenke.',
+                  },
+                  {
+                    name: 'title',
+                    type: 'text',
+                    required: true,
+                    label: 'Tittel på videoen',
+                    admin: {
+                      description:
+                        'Leses opp av skjermlesere og vises ikke på siden. Beskriv hva videoen handler om.',
+                    },
+                  },
+                  {
+                    name: 'caption',
+                    type: 'text',
+                    label: 'Bildetekst (valgfri)',
+                  },
+                ],
+              },
             ],
           }),
         ],
