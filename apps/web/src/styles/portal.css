@@ -1208,6 +1208,29 @@ a.news-pagination__btn:hover {
   border-radius: var(--kihub-radius-lg);
 }
 
+/* ---------- 022 — embedded YouTube video ---------- */
+.lp-video {
+  margin: var(--kihub-space-8) 0;
+}
+.lp-video__frame {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--kihub-radius-lg);
+  background: var(--kihub-surface-inverted);
+}
+.lp-video__frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.lp-video__caption {
+  margin-top: var(--kihub-space-3);
+  color: var(--kihub-text-subtle);
+  font-size: var(--kihub-font-size-body-sm);
+}
+
 /* =====================================================================================
  * 021 — frontpage "Del KI-verktøyene dere lager" banner + the /bidra guide page.
  * All motion is decorative and disabled under prefers-reduced-motion (bottom of section).

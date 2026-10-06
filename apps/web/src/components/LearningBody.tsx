@@ -2,13 +2,15 @@ import { RichText } from '@payloadcms/richtext-lexical/react';
 import type { JSXConvertersFunction } from '@payloadcms/richtext-lexical/react';
 import { LearningCodeBlock, type LearningCodeBlockNode } from '@/components/LearningCodeBlock';
 import { LearningImage, type LearningImageNode } from '@/components/LearningImage';
+import { LearningVideo, type LearningVideoNode } from '@/components/LearningVideo';
 import type { LearningPage } from '@/payload-types';
 
 /**
  * 014 US3 — the learning page body (contracts/learning-editor.md §B).
  *
- * Two custom converters on top of the defaults: inline uploads become a `<figure>` with correct alt
- * handling, and the `Code` block becomes a highlighted, display-only `<pre>`.
+ * Custom converters on top of the defaults: inline uploads become a `<figure>` with correct alt
+ * handling, the `Code` block becomes a highlighted, display-only `<pre>`, and the `youtube` block
+ * (022) becomes a responsive embedded player.
  *
  * Note these converters are SYNCHRONOUS — the converter type returns `React.ReactNode`, not a promise
  * (research §3). That is precisely why the highlighter is shiki's synchronous core: no async component
@@ -24,6 +26,7 @@ const converters: JSXConvertersFunction = ({ defaultConverters }) => ({
     Code: ({ node }: { node: unknown }) => (
       <LearningCodeBlock node={node as LearningCodeBlockNode} />
     ),
+    youtube: ({ node }: { node: unknown }) => <LearningVideo node={node as LearningVideoNode} />,
   },
 });
 
