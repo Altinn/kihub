@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 /**
  * 021 — the blue "Del verktøyene deres" banner below the subscriptions banner. It uses the same
- * accent fill as the "KI Prosjekter i BOD" tile. The WHOLE banner is one link to `/bidra`, so it
+ * accent fill as the "KI Prosjekter i Digdir" tile. The WHOLE banner is one link to `/bidra`, so it
  * is one tab stop with no nested interactive elements, like `FrontpageTile`. The light sweep is
  * decorative and stops under prefers-reduced-motion.
  */

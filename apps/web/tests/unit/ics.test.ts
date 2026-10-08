@@ -9,7 +9,7 @@ import { buildEventIcs } from '@/lib/ics';
 const BASE_URL = 'https://kihub.example.com';
 
 const baseEvent = {
-  title: 'Kom i gang med Claude Teams i BOD',
+  title: 'Kom i gang med Claude Teams i Digdir',
   slug: 'kom-i-gang-med-claude-teams',
   startDateTime: '2026-07-03T08:00:00.000Z',
 };

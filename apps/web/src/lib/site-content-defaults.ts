@@ -148,22 +148,22 @@ export const DEFAULT_SITE_CHROME: SiteChrome = {
 
 export const DEFAULT_FRONTPAGE: FrontpageContent = {
   hero: {
-    eyebrow: 'Digdir / BOD / KITT-teamet',
-    heading: 'Kunstig intelligens i BOD',
-    accentWord: 'BOD',
+    eyebrow: 'Digdir / KITT-teamet',
+    heading: 'Kunstig intelligens i Digdir',
+    accentWord: 'Digdir',
     lead: 'Vi hjelper deg og ditt team i gang med verktøy og veiledning for en trygg og innovativ bruk av KI i offentlig sektor.',
     primaryCta: { label: 'Se verktøy', href: '/registry' },
-    secondaryCta: { label: 'Hva skjer i BOD', href: '/events' },
+    secondaryCta: { label: 'Hva skjer i Digdir', href: '/events' },
   },
   tiles: [
     { tag: 'Katalog', title: 'Verktøy', href: '/registry', variant: 'tinted' },
-    { tag: 'Oversikt', title: 'KI Prosjekter i BOD', href: '/prosjekter', variant: 'accent' },
+    { tag: 'Oversikt', title: 'KI Prosjekter i Digdir', href: '/prosjekter', variant: 'accent' },
   ],
   subscriptions: {
     eyebrow: 'Tilgjengelige abonnementer',
     heading: 'Støttede KI-abonnementer i Digdir',
     description:
-      'Disse abonnementene er godkjent og tilgjengelig for BOD-ansatte. Ta kontakt med KITT for tilgang.',
+      'Disse abonnementene er godkjent og tilgjengelig for Digdir-ansatte. Ta kontakt med KITT for tilgang.',
     chips: [
       {
         name: 'GitHub Copilot',

@@ -44,7 +44,7 @@ Follow-up TODOs: none
 KI Hub is an internal employee portal for Digdir. It brings together, in one place for all
 employees, an **AI-tool Registry** (a catalog and governance layer over Git-based AI artifacts),
 **News**, a **Calendar** of events, **Learning** content that teaches employees how to work with
-AI tooling, and **Projects** — an editorial list of AI projects underway in BOD. Its
+AI tooling, and **Projects** — an editorial list of AI projects underway in Digdir. Its
 differentiating value in the AI space is structured governance of AI tools; its everyday value is
 being the internal home employees actually visit.
 
@@ -64,8 +64,8 @@ admin back-office for a small set of editors and admins (see Principle VIII).
   of categories, subcategories and learning pages that teach employees how to use AI tooling.
   First-class native platform content (Principle II); not an "artifact", and the Registry principles
   (I, III, IV, V, VI) do not apply to it.
-- **Projects** — a flat, editor-authored list of AI projects underway in BOD ("KI Prosjekter i
-  BOD"), each with a title, summary, and rich-text description. First-class native platform
+- **Projects** — a flat, editor-authored list of AI projects underway in Digdir ("KI Prosjekter i
+  Digdir"), each with a title, summary, and rich-text description. First-class native platform
   content (Principle II); not an "artifact" and unrelated to the Registry's `Artifact` model, and
   the Registry principles (I, III, IV, V, VI) do not apply to it.
 

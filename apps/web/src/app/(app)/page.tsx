@@ -14,7 +14,7 @@ import { getFrontpageContent } from '@/lib/site-content';
 /**
  * 011 — the portal frontpage (replaces the 010 widgets dashboard, FR-001). Composes the
  * CMS-driven hero, the two navigation tiles, the subscriptions banner (US1), the "Hva skjer i
- * BOD" events section (US2) and the "Siste nytt" news section (US3). Both sections re-select
+ * Digdir" events section (US2) and the "Siste nytt" news section (US3). Both sections re-select
  * strictly chronologically via `frontpage-select` — unlike the featured-first /events and /news
  * pages. Gated by `(app)/layout.tsx` `requireSession()`; content is read-only via
  * `lib/site-content.ts` (seeded defaults guarantee a complete first render).
@@ -53,7 +53,7 @@ export default async function FrontPage() {
               Arrangementer
             </p>
             <h2 id="fp-events-heading" className="kihub-h2">
-              Hva skjer i BOD
+              Hva skjer i Digdir
             </h2>
           </div>
           <Link href="/events" className="kihub-btn kihub-btn--tertiary">

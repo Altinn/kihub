@@ -1,5 +1,5 @@
 /**
- * 011 frontpage — pure selection helpers for the "Hva skjer i BOD" and "Siste nytt" sections
+ * 011 frontpage — pure selection helpers for the "Hva skjer i Digdir" and "Siste nytt" sections
  * (FR-006/008, contracts/frontpage-read.md). `lib/events.ts` returns featured-first ordering for the
  * /events page; the frontpage is strictly chronological, so these helpers re-sort WITHOUT touching
  * the shared libs. (`lib/news.ts` is itself strictly newest-first since 013, so `selectLatestNews`

@@ -2,7 +2,7 @@ import { ProjectCard } from '@/components/ProjectCard';
 import { listPublishedProjects } from '@/lib/projects';
 
 /**
- * 016 — "KI Prosjekter i BOD" (Altinn/kihub#135). One server component: the card grid of
+ * 016 — "KI Prosjekter i Digdir" (Altinn/kihub#135). One server component: the card grid of
  * published projects, ordered by the editor-controlled `order` field. No pagination — the
  * expected scale (a handful to a few dozen projects) doesn't need it (unlike /news's archive).
  * Access is gated by `(app)/layout.tsx` `requireSession()` — employees only; drafts can never
@@ -14,7 +14,7 @@ export default async function ProjectsListPage() {
   return (
     <main className="kihub-container">
       <div className="kihub-section">
-        <h1 className="kihub-h1">KI Prosjekter i BOD</h1>
+        <h1 className="kihub-h1">KI Prosjekter i Digdir</h1>
 
         {projects.length === 0 ? (
           <div className="prosjekter-empty">

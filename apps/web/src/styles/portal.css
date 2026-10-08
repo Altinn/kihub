@@ -884,7 +884,7 @@ a.news-pagination__btn:hover {
 }
 
 /* ==========================================================================
-   016 — /prosjekter ("KI Prosjekter i BOD"): card grid + detail page. No date/tags/hero on
+   016 — /prosjekter ("KI Prosjekter i Digdir"): card grid + detail page. No date/tags/hero on
    Project, so it reuses the .news-* rules above directly (merged selectors) rather than a
    parallel set of `.prosjekter-*` declarations — see each rule's comment above.
    ========================================================================== */
@@ -1236,7 +1236,7 @@ a.news-pagination__btn:hover {
  * All motion is decorative and disabled under prefers-reduced-motion (bottom of section).
  * ===================================================================================== */
 
-/* ---------- Frontpage banner (accent fill, same as the "KI Prosjekter i BOD" tile) ---------- */
+/* ---------- Frontpage banner (accent fill, same as the "KI Prosjekter i Digdir" tile) ---------- */
 .fp-contribute {
   position: relative;
   display: grid;
