@@ -3,7 +3,7 @@ import { DEFAULT_FRONTPAGE } from '@/lib/site-content-defaults';
 
 /**
  * 016 (US1/US2, FR-001/002) — pins both halves of the Altinn/kihub#135 fix in one place: the
- * "KI Prosjekter i BOD" tile must lead somewhere OTHER than the tool registry, and "Verktøy" must
+ * "KI Prosjekter i Digdir" tile must lead somewhere OTHER than the tool registry, and "Verktøy" must
  * keep leading to the tool registry, unchanged. A future edit that reunifies them breaks this test.
  */
 describe('DEFAULT_FRONTPAGE tiles (Altinn/kihub#135)', () => {
@@ -12,8 +12,8 @@ describe('DEFAULT_FRONTPAGE tiles (Altinn/kihub#135)', () => {
     expect(tool?.href).toBe('/registry');
   });
 
-  it('sends "KI Prosjekter i BOD" to its own dedicated destination, distinct from the registry', () => {
-    const projects = DEFAULT_FRONTPAGE.tiles.find((t) => t.title === 'KI Prosjekter i BOD');
+  it('sends "KI Prosjekter i Digdir" to its own dedicated destination, distinct from the registry', () => {
+    const projects = DEFAULT_FRONTPAGE.tiles.find((t) => t.title === 'KI Prosjekter i Digdir');
     expect(projects?.href).toBe('/prosjekter');
     expect(projects?.href).not.toBe('/registry');
   });

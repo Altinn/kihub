@@ -4,7 +4,7 @@ import { slugify } from '../lib/slug';
 
 /**
  * 016 — Prosjekt. Native platform content (Constitution Principle II) shown to employees at
- * `/prosjekter`: a flat, editor-authored list of AI projects underway in BOD (Altinn/kihub#135).
+ * `/prosjekter`: a flat, editor-authored list of AI projects underway in Digdir (Altinn/kihub#135).
  * No Git source, no relationship to `Artifact` — a project is not an AI asset (Principle III).
  *
  * Access and the auto-slug hook follow `News.ts`/`LearningPage.ts` rather than reinventing them:

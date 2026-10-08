@@ -47,10 +47,10 @@ per the constitution's Designsystemet exemption.
 export function Hero() {
   return (
     <section className="kihub-container kihub-section">
-      <p className="kihub-eyebrow kihub-eyebrow--accent">Digdir / BOD / KITT-teamet</p>
+      <p className="kihub-eyebrow kihub-eyebrow--accent">Digdir / KITT-teamet</p>
       <h1 className="kihub-h1">
         Kunstig intelligens<br />
-        <span className="kihub-accent-word">i BOD</span>
+        <span className="kihub-accent-word">i Digdir</span>
       </h1>
       <p className="kihub-lead">
         Vi hjelper deg og ditt team i gang med verktøy og veiledning for en trygg
