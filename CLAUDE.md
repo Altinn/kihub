@@ -24,7 +24,8 @@ from 014's media migration, because Payload creates them even while disabled. Ne
 `Media.upload.skipSafeFetch`, scoped to that host + `/payload-api/media/file/*`. Payload's API route
 is `/payload-api`, NOT `/api`. The allow-list is needed because re-framing an ALREADY-SAVED image
 makes Payload re-fetch the original over our public origin. It is SET on `kihub-web` (2026-09-24, revision `--0000020`) to
-`kihub-web.happypond-fe66d7a5.norwayeast.azurecontainerapps.io`. After 020 deploys, run quickstart §6. Gotchas:
+`kihub-web.happypond-fe66d7a5.norwayeast.azurecontainerapps.io`, and since 2026-10-08 (revision `--0000025`, custom
+domain cutover) to `kihub.digdir.no`. After 020 deploys, run quickstart §6. Gotchas:
 - a partial API update that only sets `focalX`/`focalY` stores the numbers but does NOT regenerate
   files. Payload needs `uploadEdits` + the full doc (`filename`, `url`) in the body, which is what
   the admin sends;
