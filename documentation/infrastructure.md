@@ -8,10 +8,34 @@ subscription, shaped for a later port to the dis-core golden path (see deploymen
 
 | What | URL |
 |---|---|
-| Production portal | https://kihub-web.happypond-fe66d7a5.norwayeast.azurecontainerapps.io |
+| Production portal | https://kihub.digdir.no (custom domain, see below) |
+| Default Container Apps address | https://kihub-web.happypond-fe66d7a5.norwayeast.azurecontainerapps.io (still resolves; sign-in redirects to the custom domain because `AUTH_URL` is fixed) |
 | CMS (Contributor+) | same origin, `/cms` |
 | CI pipeline | `.github/workflows/deploy-production.yml` (push to `main`) |
 | Container image | `ghcr.io/altinn/kihub-web` (public; tags: `latest` + every commit sha) |
+
+## Custom domain (2026-10-08)
+
+`kihub.digdir.no` is a subdomain of a zone Digdir Drift (drift@digdir.no) controls; no external order
+process. Drift created two records:
+
+| Type | Name | Value |
+|---|---|---|
+| CNAME | `kihub.digdir.no` | `kihub-web.happypond-fe66d7a5.norwayeast.azurecontainerapps.io` |
+| TXT | `asuid.kihub.digdir.no` | environment `customDomainVerificationId` (`az containerapp env show -n kihub-env -g rg-kihub-app --query properties.customDomainConfiguration.customDomainVerificationId`) |
+
+**Both must stay in place**: the TXT proves ownership, the CNAME is what the free managed certificate
+renews against. `digdir.no` has CAA records (digicert.com is allowed, which Azure's managed certs need).
+Environment static IP is `131.163.17.109`, but use the CNAME, not an A record: the IP can change if the
+environment is recreated.
+
+Azure side (done via CLI): `az containerapp hostname add` then `hostname bind --validation-method CNAME`,
+creating managed cert `mc-kihub-env-kihub-digdir-no-7327`. App settings changed to match:
+`AUTH_URL=https://kihub.digdir.no`, `MEDIA_PUBLIC_HOSTNAME=kihub.digdir.no`. Entra app registration
+(`b4fce259-…`, digdir tenant, portal only) has redirect URI
+`https://kihub.digdir.no/api/auth/callback/microsoft-entra-id`. Order matters when changing a domain:
+bind first, add the Entra redirect URI second, change `AUTH_URL` last, or sign-in breaks. CI only swaps
+`--image`, so none of this is overwritten by a deploy.
 
 ## Azure resources
 
