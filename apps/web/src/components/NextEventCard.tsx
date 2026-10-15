@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { Event } from '@/payload-types';
+import type { EventItem } from '@/lib/content/types';
 import {
   formatDayNumeral,
   formatMonthYear,
@@ -15,13 +15,13 @@ import { EVENT_TYPE_LABELS, type EventTypeValue } from '@/lib/events-view';
  */
 
 /** Compose the meta line from the parts that exist — never a dangling separator. */
-function metaLine(event: Event): string {
+function metaLine(event: EventItem): string {
   return [event.location, event.onlineUrl ? 'Digitalt' : null, event.organizer]
     .filter(Boolean)
     .join(' · ');
 }
 
-export function NextEventCard({ event }: { event: Event }) {
+export function NextEventCard({ event }: { event: EventItem }) {
   const slug = event.slug ?? '';
   // 012 FR-015: the badge shows the event TYPE (closed category) instead of the first free tag.
   const tag = EVENT_TYPE_LABELS[event.eventType as EventTypeValue];

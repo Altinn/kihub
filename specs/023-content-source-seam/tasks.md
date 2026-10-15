@@ -257,18 +257,18 @@ single rich-text entry point, and the parity goldens still match byte-for-byte.
 
 ### Events
 
-- [ ] T016 [P] [US1] Add `apps/web/tests/unit/content-mapping.events.test.ts` for `toEventItem`:
+- [X] T016 [P] [US1] Add `apps/web/tests/unit/content-mapping.events.test.ts` for `toEventItem`:
   - every nullable field → `null`;
   - `description` wrapped;
   - `eventType`/`format` passed through;
   - `status`/`featured`/`tags` absent from the result.
-- [ ] T017 [US1] Create `apps/web/src/lib/content/payload/events.ts`:
+- [X] T017 [US1] Create `apps/web/src/lib/content/payload/events.ts`:
   - `toEventItem`;
   - `payloadEventsSource: EventsSource`, with `listUpcoming` (query plus the featured-first
     stable sort, applied to the Payload docs BEFORE mapping), `listInRange` and
     `getPublishedBySlug` moved verbatim from `apps/web/src/lib/events.ts`.
   Rewrite `lib/events.ts` as a facade with the same exported names.
-- [ ] T018 [US1] Retype the event consumers to `EventItem` and remove their `@/payload-types`
+- [X] T018 [US1] Retype the event consumers to `EventItem` and remove their `@/payload-types`
   imports:
   - `apps/web/src/components/EventsDayList.tsx`, `EventsMonthCalendar.tsx`, `EventsTimeline.tsx`,
     `NextEventCard.tsx`;
@@ -633,5 +633,10 @@ Task: "T026 content-mapping.site-content.test.ts"
   consecutive runs (one with `CI=1`) were green with 0 written.
 - **T011**: `/bidra` (the contribute guide) also renders `LearningCodeBlock` directly, so a
   `bidra` golden was captured on unchanged component code (own commit) before its props changed.
+- **T018**: `events-access.test.ts` asserted `d.status === 'published'` on `listEventsInRange`
+  results, and view models carry no `status`. Rather than drop a published-only guarantee, the
+  test now loads each returned id with `payload.findByID` and asserts the stored status. That is
+  the same guarantee, checked against the source. `ics/route.ts` needed no change: `EventItem`
+  satisfies `IcsEvent` structurally.
 - **Goldens**: 31 surfaces = 62 files (`.html` + `.queries.json`) plus `event-ics.ics` and its
   queries file. With the parity suite added, the full suite is **457/457 across 50 files**.

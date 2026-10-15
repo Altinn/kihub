@@ -1,7 +1,7 @@
-import { RichText } from '@payloadcms/richtext-lexical/react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { EventTypeBadge } from '@/components/EventTypeBadge';
+import { RichTextBody } from '@/components/RichTextBody';
 import { formatEventWhen } from '@/lib/event-dates';
 import { getPublishedEventBySlug } from '@/lib/events';
 import {
@@ -79,7 +79,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         </p>
 
         <div className="kihub-prose ev-detail__body">
-          <RichText data={event.description} />
+          <RichTextBody value={event.description} />
         </div>
       </article>
     </main>

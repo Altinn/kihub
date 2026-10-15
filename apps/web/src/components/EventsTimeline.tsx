@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { Event } from '@/payload-types';
+import type { EventItem } from '@/lib/content/types';
 import { formatTimeHM, formatTimelineDate } from '@/lib/event-dates';
 import { EVENT_TYPE_LABELS, type EventTypeValue } from '@/lib/events-view';
 
@@ -18,7 +18,7 @@ const DOT_COLORS = [
 ];
 
 /** "type · location" from the parts that exist — never a dangling separator. */
-function typeLine(event: Event): string {
+function typeLine(event: EventItem): string {
   // 012 FR-015: the type is the closed eventType category, no longer the first free tag.
   return [
     EVENT_TYPE_LABELS[event.eventType as EventTypeValue],
@@ -28,7 +28,7 @@ function typeLine(event: Event): string {
     .join(' · ');
 }
 
-export function EventsTimeline({ events }: { events: Event[] }) {
+export function EventsTimeline({ events }: { events: EventItem[] }) {
   return (
     <div>
       <p className="kihub-eyebrow" style={{ margin: 0 }}>

@@ -8,7 +8,7 @@ import {
   seatsText,
   type EventTypeValue,
 } from '@/lib/events-view';
-import type { Event } from '@/payload-types';
+import type { EventItem } from '@/lib/content/types';
 
 /**
  * 012 US1 — the grouped list view (FR-002/003): one tinted date chip per Oslo day
@@ -17,7 +17,7 @@ import type { Event } from '@/payload-types';
  * distinguish "nothing upcoming" from "no filter matches" (FR-005, spec edge cases).
  */
 
-function metaLine(event: Event): string {
+function metaLine(event: EventItem): string {
   return [placeText(event), event.channel, seatsText(event.capacity, event.seatsTaken)]
     .filter(Boolean)
     .join(' · ');
@@ -27,7 +27,7 @@ export function EventsDayList({
   events,
   hasActiveFilters,
 }: {
-  events: Event[];
+  events: EventItem[];
   hasActiveFilters: boolean;
 }) {
   if (events.length === 0) {
