@@ -1,0 +1,17 @@
+200
+Content-Type: text/calendar; charset=utf-8
+Content-Disposition: attachment; filename="webinar-ki-offentlig.ics"
+
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//KI Hub//Events//NB
+BEGIN:VEVENT
+UID:webinar-ki-offentlig@kihub
+DTSTAMP:20261015T080000Z
+DTSTART:20261020T080000Z
+DTEND:20261020T093000Z
+SUMMARY:Webinar: KI i offentlig sektor
+URL:http://kihub.test/events/webinar-ki-offentlig
+DESCRIPTION:KI-teamet · https://teams.example/webinar
+END:VEVENT
+END:VCALENDAR

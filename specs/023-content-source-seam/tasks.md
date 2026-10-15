@@ -43,7 +43,7 @@ All paths are relative to the repo root. The web app is `apps/web/`.
 **Purpose**: Capture the byte-level "before" picture of every editorial surface (research R8), so
 every later phase is checked against it.
 
-- [ ] T001 Spike the render path in `apps/web/tests/unit/content-parity.test.ts`. Prove that one page
+- [X] T001 Spike the render path in `apps/web/tests/unit/content-parity.test.ts`. Prove that one page
   renders to HTML without Next and without a DB:
   - **Mocks**: `vi.mock('payload', …)` with `getPayload` returning a stub whose `find` returns one
     project; `vi.mock('@payload-config', () => ({ default: {} }))`;
@@ -57,7 +57,7 @@ every later phase is checked against it.
     - the frontpage renders with `SubscriptionsBanner`'s Designsystemet `Dialog`.
   - **Record** what worked, and any surface needing the component-level fallback, under
     "Notes" at the bottom of this file.
-- [ ] T002 Create the in-memory Payload fake in `apps/web/tests/helpers/fake-payload.ts`:
+- [X] T002 Create the in-memory Payload fake in `apps/web/tests/helpers/fake-payload.ts`:
   - `createFakePayload({ collections, globals })`.
   - **`find({ collection, where, sort, limit = 10, page = 1 })`**:
     - honours `slug: { equals }` and `status: { equals: 'published' }`, wherever they appear in a
@@ -76,7 +76,7 @@ every later phase is checked against it.
     render the same surfaces against the empty set (C2).
   - Export a `mockPayloadModule(fake)` helper returning `{ getPayload: async () => fake }` for use in
     `vi.mock` factories.
-- [ ] T003 [P] Create deterministic fixtures in `apps/web/tests/helpers/content-fixtures.ts`. Use
+- [X] T003 [P] Create deterministic fixtures in `apps/web/tests/helpers/content-fixtures.ts`. Use
   fixed numeric ids, fixed ISO timestamps, fixed filenames (`/payload-api/media/file/<name>`) and a
   `lexical(...)` builder for bodies. Include:
   - **media**:
@@ -113,7 +113,7 @@ every later phase is checked against it.
       frontpage case, and a `site-chrome: null` variant (defaults path).
   - **an `EMPTY` fixture set**: every collection empty (no news, events, projects or learning
     content) and both globals `null`.
-- [ ] T004 Write the full parity suite in `apps/web/tests/unit/content-parity.test.ts`, replacing the
+- [X] T004 Write the full parity suite in `apps/web/tests/unit/content-parity.test.ts`, replacing the
   spike body:
   - Wire `vi.mock('payload')` to `createFakePayload(fixtures)`, and keep the T001 mocks.
   - Pin the clock with `vi.useFakeTimers({ toFake: ['Date'] })` and
@@ -139,7 +139,7 @@ every later phase is checked against it.
     `await expect(JSON.stringify(fake.calls, null, 2)).toMatchFileSnapshot('./__parity__/<surface>.queries.json')`.
   - Draft and unknown slugs: assert the page calls `notFound()`. Expect the thrown
     `NEXT_HTTP_ERROR_FALLBACK;404` / `NEXT_NOT_FOUND` digest.
-- [ ] T005 Capture the goldens on unchanged code. This is the ONLY permitted `-u` run:
+- [X] T005 Capture the goldens on unchanged code. This is the ONLY permitted `-u` run:
   1. `pnpm --filter web exec vitest run tests/unit/content-parity.test.ts -u`.
   2. Open every file in `apps/web/tests/unit/__parity__/` and confirm it contains the real fixture
      content: each `*.html` shows the expected titles (the `*-empty` ones show the module's empty
@@ -607,3 +607,29 @@ Task: "T026 content-mapping.site-content.test.ts"
   - F2 (plan names per-module mapping files);
   - U1 (fixed ICS request URL).
 - Record the T001 spike results, the T036 exit observation, and the T039 gate counts here.
+- **Baseline before 023 code** (main @ 673fefa + spec docs): suite **419/419 across 49 files**.
+- **T001 spike results**:
+  - (a) Importing `.tsx` from tests needs `oxc: { jsx: { runtime: 'automatic' } }` in
+    `apps/web/vitest.config.ts`. tsconfig's `jsx: "preserve"` is for Next's compiler, and Vite
+    refuses to parse the JSX otherwise. This is test tooling only.
+  - (b) `renderToStaticMarkup` cannot await the nested async server components in
+    `events/page.tsx` (`ListView`/`CalendarView`). React 19's `renderToReadableStream` + `allReady`
+    renders them inline with no Suspense markers, so the harness uses the stream renderer for every
+    surface.
+  - (c) `SiteNav`'s `usePathname()` is `null` outside the app router and crashes `isActivePath`.
+    The harness mocks `next/navigation` with `usePathname: () => '/'` and keeps the real
+    `notFound`.
+  - (d) `next/link`, `next/image` (frontpage hero art; it emits a deterministic
+    `<link rel="preload">`) and Designsystemet's `Dialog` render fine. No surface needed the
+    component-level fallback.
+  - (e) Payload's default upload converter reads `mimeType` and per-size
+    `filename`/`filesize`/`mimeType`, so fixtures carry the full Media shape.
+  - (f) An unregistered block renders Payload's `<span>unknown node</span>` and
+    `console.error`s. This is pinned in `laering-page.html`.
+- **T005 capture gotcha**: the first capture run timed out on the cold first surface (5 s
+  default). The timed-out render kept going after the next test had swapped fixtures, so it wrote
+  a CONTAMINATED `frontpage-defaults`/`frontpage-stored` pair. Fix: `{ timeout: 60_000 }` on both
+  describes; the two pairs were deleted and recaptured, still on unchanged code. After that, three
+  consecutive runs (one with `CI=1`) were green with 0 written.
+- **Goldens**: 31 surfaces = 62 files (`.html` + `.queries.json`) plus `event-ics.ics` and its
+  queries file. With the parity suite added, the full suite is **457/457 across 50 files**.

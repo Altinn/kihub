@@ -1,0 +1,23 @@
+[
+  {
+    "op": "find",
+    "collection": "projects",
+    "where": {
+      "and": [
+        {
+          "slug": {
+            "equals": "ki-assistent"
+          }
+        },
+        {
+          "status": {
+            "equals": "published"
+          }
+        }
+      ]
+    },
+    "limit": 1,
+    "page": 1,
+    "overrideAccess": true
+  }
+]

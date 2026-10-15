@@ -2,6 +2,9 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  // 023: the parity harness imports pages/components (.tsx). tsconfig's `jsx: "preserve"` is for
+  // Next's compiler; tests need the JSX transformed, with React 19's automatic runtime.
+  oxc: { jsx: { runtime: 'automatic' } },
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],

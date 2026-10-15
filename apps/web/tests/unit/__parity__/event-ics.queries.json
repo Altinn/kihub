@@ -1,0 +1,23 @@
+[
+  {
+    "op": "find",
+    "collection": "events",
+    "where": {
+      "and": [
+        {
+          "slug": {
+            "equals": "webinar-ki-offentlig"
+          }
+        },
+        {
+          "status": {
+            "equals": "published"
+          }
+        }
+      ]
+    },
+    "limit": 1,
+    "page": 1,
+    "overrideAccess": true
+  }
+]

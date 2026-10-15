@@ -1,0 +1,23 @@
+[
+  {
+    "op": "find",
+    "collection": "events",
+    "where": {
+      "and": [
+        {
+          "slug": {
+            "equals": "avholdt-webinar"
+          }
+        },
+        {
+          "status": {
+            "equals": "published"
+          }
+        }
+      ]
+    },
+    "limit": 1,
+    "page": 1,
+    "overrideAccess": true
+  }
+]

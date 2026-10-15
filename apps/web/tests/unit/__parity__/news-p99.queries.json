@@ -1,0 +1,30 @@
+[
+  {
+    "op": "find",
+    "collection": "news",
+    "where": {
+      "status": {
+        "equals": "published"
+      }
+    },
+    "sort": "-publishDate",
+    "limit": 12,
+    "page": 99,
+    "depth": 1,
+    "overrideAccess": true
+  },
+  {
+    "op": "find",
+    "collection": "news",
+    "where": {
+      "status": {
+        "equals": "published"
+      }
+    },
+    "sort": "-publishDate",
+    "limit": 12,
+    "page": 2,
+    "depth": 1,
+    "overrideAccess": true
+  }
+]
