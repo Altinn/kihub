@@ -1,8 +1,8 @@
-import { RichText } from '@payloadcms/richtext-lexical/react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { RichTextBody } from '@/components/RichTextBody';
 import { getPublishedNewsBySlug } from '@/lib/news';
-import { formatNewsDate, pickArticleImage, resolveHeroSource } from '@/lib/news-view';
+import { formatNewsDate, pickArticleImage } from '@/lib/news-view';
 
 /**
  * 013 US3 (FR-014) — the article page on the kihub token layer, Norwegian copy: title, byline +
@@ -17,12 +17,11 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
   const article = await getPublishedNewsBySlug(decodeURIComponent(slug));
   if (!article) notFound();
 
-  const author = typeof article.author === 'object' && article.author ? article.author : null;
-  const byline = author?.name || author?.email || 'KI Hub';
-  const tags = (article.tags ?? []).filter((t): t is string => Boolean(t));
+  const byline = article.author?.name || article.author?.email || 'KI Hub';
+  const tags = article.tags;
   const publishedOn = formatNewsDate(article.publishDate);
-  const hero = resolveHeroSource(article);
-  const heroImage = hero.kind === 'upload' ? pickArticleImage(hero.media) : null;
+  const hero = article.hero;
+  const heroImage = hero.kind === 'image' ? pickArticleImage(hero.image) : null;
 
   return (
     <main className="kihub-container">
@@ -70,7 +69,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
         ) : null}
 
         <div className="news-detail__body kihub-prose">
-          <RichText data={article.body} />
+          <RichTextBody value={article.body} />
         </div>
       </article>
     </main>

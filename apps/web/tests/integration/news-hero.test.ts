@@ -2,7 +2,7 @@ import path from 'node:path';
 import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { resolveHeroSource } from '@/lib/news-view';
+import { resolveHeroSource } from '@/lib/content/payload/news';
 import type { Media, News } from '@/payload-types';
 
 /**
@@ -132,7 +132,7 @@ describe('news → media relationship (A3.5, FR-008, FR-010)', () => {
 
     const populated = (await payload.findByID({ collection: 'news', id: article.id, depth: 1 })) as News;
     expect(typeof populated.heroImage).toBe('object');
-    expect(resolveHeroSource(populated).kind).toBe('upload');
+    expect(resolveHeroSource(populated).kind).toBe('image');
 
     await payload.delete({ collection: 'media', id: hero.id, overrideAccess: true });
 

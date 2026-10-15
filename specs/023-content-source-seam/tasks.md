@@ -281,7 +281,7 @@ single rich-text entry point, and the parity goldens still match byte-for-byte.
 
 ### News (+ images)
 
-- [ ] T019 [P] [US1] Add `apps/web/tests/unit/content-mapping.news.test.ts` for `toNewsArticle`:
+- [X] T019 [P] [US1] Add `apps/web/tests/unit/content-mapping.news.test.ts` for `toNewsArticle`:
   - `tags` filtered of empties;
   - `author` resolved;
   - `hero` precedence: populated media with url → `image`; populated media without url → legacy;
@@ -289,14 +289,14 @@ single rich-text entry point, and the parity goldens still match byte-for-byte.
   MOVE the existing `resolveHeroSource` cases out of `apps/web/tests/unit/news-view.test.ts` into
   this file, adapted to the new return shape. Keep the same inputs and the same precedence
   expectations.
-- [ ] T020 [US1] Create `apps/web/src/lib/content/payload/news.ts`:
+- [X] T020 [US1] Create `apps/web/src/lib/content/payload/news.ts`:
   - `resolveHeroSource`, moved from `apps/web/src/lib/news-view.ts` and returning `NewsHero` with
     `image: toContentImage(media)`;
   - `toNewsArticle`;
   - `payloadNewsSource: NewsSource`, with the three queries moved verbatim, including the clamp.
   Rewrite `apps/web/src/lib/news.ts` as a facade. `NewsPage` is now imported from
   `@/lib/content/types` and re-exported.
-- [ ] T021 [US1] Retype the pure helpers in `apps/web/src/lib/news-view.ts`:
+- [X] T021 [US1] Retype the pure helpers in `apps/web/src/lib/news-view.ts`:
   - `pickCardImage(image: ContentImage)` and `pickArticleImage(image: ContentImage)`.
   - Property paths only: `media.sizes?.X` → `image.renditions.X`, `media.focalX` →
     `image.focalX`, `media.url`/`width`/`height`/`alt`/`updatedAt` keep their names.
@@ -304,7 +304,7 @@ single rich-text entry point, and the parity goldens still match byte-for-byte.
     import.
   Convert the fixtures in `apps/web/tests/unit/news-view.test.ts` to `ContentImage`, with
   identical expected values.
-- [ ] T022 [US1] Retype the news consumers:
+- [X] T022 [US1] Retype the news consumers:
   - `apps/web/src/components/NewsCard.tsx` → `article: NewsArticle`, with
     `article.hero.kind === 'image' ? pickCardImage(article.hero.image) : null` and the legacy branch
     on `kind === 'legacy'`;
@@ -638,5 +638,9 @@ Task: "T026 content-mapping.site-content.test.ts"
   test now loads each returned id with `payload.findByID` and asserts the stored status. That is
   the same guarantee, checked against the source. `ics/route.ts` needed no change: `EventItem`
   satisfies `IcsEvent` structurally.
+- **T022**: `news-access.test.ts` "never returns a draft" asserted `a.status` on page results. It
+  now loads every returned id in one `payload.find({ id: { in } })` and asserts that count and
+  stored status match (the same guarantee). `news-hero.test.ts` imports `resolveHeroSource` from
+  the Payload source and expects `kind: 'image'` (was `'upload'`).
 - **Goldens**: 31 surfaces = 62 files (`.html` + `.queries.json`) plus `event-ics.ics` and its
   queries file. With the parity suite added, the full suite is **457/457 across 50 files**.

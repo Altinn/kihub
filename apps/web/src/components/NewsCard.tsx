@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { formatNewsDate, pickCardImage, resolveHeroSource } from '@/lib/news-view';
-import type { News } from '@/payload-types';
+import { formatNewsDate, pickCardImage } from '@/lib/news-view';
+import type { NewsArticle } from '@/lib/content/types';
 
 /**
  * One news card (013 FR-002/003, contracts/news-page-ui.md §B.1): 16:10 media well (image or
@@ -21,13 +21,13 @@ export function NewsCard({
   article,
   headingLevel = 2,
 }: {
-  article: News;
+  article: NewsArticle;
   headingLevel?: 2 | 3;
 }) {
   const date = formatNewsDate(article.publishDate);
   const Heading = headingLevel === 3 ? 'h3' : 'h2';
-  const hero = resolveHeroSource(article);
-  const card = hero.kind === 'upload' ? pickCardImage(hero.media) : null;
+  const hero = article.hero;
+  const card = hero.kind === 'image' ? pickCardImage(hero.image) : null;
 
   return (
     <Link

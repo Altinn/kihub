@@ -3,6 +3,7 @@ import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { listPublishedNewsPage } from '@/lib/news';
+import type { NewsArticle } from '@/lib/content/types';
 import { NEWS_PAGE_SIZE } from '@/lib/news-view';
 import type { News } from '@/payload-types';
 
@@ -249,7 +250,7 @@ describe('Paginated news reads (013 T010/T014)', () => {
   /** Walk every page once and return the flattened result plus the totals reported on page 1. */
   async function walkAllPages() {
     const first = await listPublishedNewsPage(1);
-    const all: News[] = [...first.articles];
+    const all: NewsArticle[] = [...first.articles];
     for (let p = 2; p <= first.totalPages; p++) {
       const next = await listPublishedNewsPage(p);
       all.push(...next.articles);
@@ -274,7 +275,7 @@ describe('Paginated news reads (013 T010/T014)', () => {
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids.length).toBe(totalDocs);
     // Every seeded article is reachable by paging.
-    for (const id of seeded) expect(ids).toContain(id);
+    for (const id of seeded) expect(ids).toContain(String(id));
   });
 
   it('orders strictly newest-first across page boundaries (FR-005)', async () => {
@@ -287,8 +288,18 @@ describe('Paginated news reads (013 T010/T014)', () => {
 
   it('never returns a draft on any page (FR-012)', async () => {
     const { all } = await walkAllPages();
-    expect(all.every((a) => a.status === 'published')).toBe(true);
-    expect(all.some((a) => a.id === draftId)).toBe(false);
+    // 023: read-layer results are view models without `status`, so check the stored status of
+    // every returned article directly — the same published-only guarantee, asserted at the source.
+    const stored = await payload.find({
+      collection: 'news',
+      where: { id: { in: all.map((a) => Number(a.id)) } },
+      limit: all.length,
+      depth: 0,
+      overrideAccess: true,
+    });
+    expect(stored.totalDocs).toBe(all.length);
+    expect(stored.docs.every((d) => d.status === 'published')).toBe(true);
+    expect(all.some((a) => a.id === String(draftId))).toBe(false);
   });
 
   it('clamps an out-of-range page to the last page instead of erroring or emptying (FR-010)', async () => {
