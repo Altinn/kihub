@@ -318,19 +318,19 @@ single rich-text entry point, and the parity goldens still match byte-for-byte.
 
 ### KI Læring
 
-- [ ] T023 [P] [US1] Add `apps/web/tests/unit/content-mapping.learning.test.ts` for
+- [X] T023 [P] [US1] Add `apps/web/tests/unit/content-mapping.learning.test.ts` for
   `toLearningArticle`:
   - populated `category`/`subcategory` → titles;
   - ids or null → `''`;
   - `author` resolved or null;
   - `body` wrapped;
   - `updatedAt` passed through.
-- [ ] T024 [US1] Create `apps/web/src/lib/content/payload/learning.ts`:
+- [X] T024 [US1] Create `apps/web/src/lib/content/payload/learning.ts`:
   - `payloadLearningSource: LearningSource`, with `readLibrary` moved verbatim from
     `apps/web/src/lib/learning.ts` (three queries, `depth: 0`, same mapping into `LearningLibrary`),
     and `getPublishedPageBySlug` (same query, default depth) plus `toLearningArticle`.
   Rewrite `apps/web/src/lib/learning.ts` as a facade.
-- [ ] T025 [US1] Update the learning consumers:
+- [X] T025 [US1] Update the learning consumers:
   - `apps/web/src/components/LearningBody.tsx`: `body: RichTextContent`, keep the
     `lp-page__body kihub-prose` wrapper, render `<RichTextBody value={body} profile="learning" />`,
     and remove the converters and Payload imports, which now live in `LexicalRichText`;

@@ -1,16 +1,16 @@
 import { RichTextBody } from '@/components/RichTextBody';
-import { lexicalContent } from '@/lib/content/rich-text';
-import type { LearningPage } from '@/payload-types';
+import type { RichTextContent } from '@/lib/content/rich-text';
 
 /**
- * 014 US3 — the learning page body (contracts/learning-editor.md §B). 023: the converters moved to
- * `components/rich-text/LexicalRichText.tsx` (profile `learning`); this component keeps the page's
- * body wrapper. (Interim: still takes the Payload body until T025 retypes it.)
+ * 014 US3 — the learning page body (contracts/learning-editor.md §B). Since 023 the converters
+ * (inline images, highlighted `Code` blocks, `youtube` embeds) live in the lexical renderer's
+ * `learning` profile (`components/rich-text/LexicalRichText.tsx`); this component keeps the page's
+ * body wrapper.
  */
-export function LearningBody({ body }: { body: LearningPage['body'] }) {
+export function LearningBody({ body }: { body: RichTextContent }) {
   return (
     <div className="lp-page__body kihub-prose">
-      <RichTextBody value={lexicalContent(body)} profile="learning" />
+      <RichTextBody value={body} profile="learning" />
     </div>
   );
 }
