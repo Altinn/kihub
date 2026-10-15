@@ -453,7 +453,7 @@ serve silently.
 
 **Independent Test**: `apps/web/tests/unit/content-stand-in.test.ts` is green.
 
-- [ ] T037 [US3] Write `apps/web/tests/unit/content-stand-in.test.ts`:
+- [X] T037 [US3] Write `apps/web/tests/unit/content-stand-in.test.ts`:
   - Reuse the T002 fake for `payload` and the T001 mocks.
   - `vi.mock('@/lib/content/registry', async (importOriginal) => ({ ...(await importOriginal()), projectsSource: () => standIn }))`,
     where `standIn: ProjectsSource` returns hand-built `ProjectItem`s with ids like `'umb-…'`
@@ -670,5 +670,11 @@ Task: "T026 content-mapping.site-content.test.ts"
     the logs; that's the intended outcome.
 - **Scratch DB**: `kihub_023` was created in `kihub-postgres` and fully migrated (`pnpm run migrate`
   with `DATABASE_URI` → `/kihub_023`). `next build` with `AUTH_MODE=entra` is green against it.
+- **T037**: the stand-in Projects source (GUID-style `umb-…` ids) renders `/prosjekter` and a
+  project page through `<RichTextBody>`. An unknown slug is still a 404, and `/news` keeps reading
+  Payload in the same file. `git status src/app src/components` was empty (SC-004: 0 page or
+  component edits).
+- `next dev` (T036) writes `apps/web/AGENTS.md` + `apps/web/CLAUDE.md` (Next 16's agent hint
+  files). They are not part of this feature and were deleted, not committed.
 - **Goldens**: 31 surfaces = 62 files (`.html` + `.queries.json`) plus `event-ics.ics` and its
   queries file. With the parity suite added, the full suite is **457/457 across 50 files**.
