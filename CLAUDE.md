@@ -241,10 +241,28 @@ home-page widgets `specs/010-home-widgets/`; frontpage redesign `specs/011-front
 (DONE, suite 134/134 → now 141/141 with deploy-phase tests); events page redesign
 `specs/012-events-page-redesign/` (DONE, suite 187/187 across 27 files, lint + prod build green).
 Governance rules:
-`.specify/memory/constitution.md` (v3.1.0 — KI Hub is an employee portal: Registry + News +
-Calendar + Learning, two surfaces; Learning is native Payload content, NOT an artifact, and the
-Registry principles I/III/IV/V/VI do not apply to it; Design System constraint = Designsystemet as
-FOUNDATION with the generated
-KI Hub theme (`designsystemet.config.json` + `pnpm --filter web theme:build`) + kihub token layer;
-custom presentational components sanctioned on the tokens).
+`.specify/memory/constitution.md` (**v4.0.0, 2026-10-15**). KI Hub is an employee portal with
+five modules (Registry, News, Calendar, Learning, Projects) and two surfaces.
+
+What the v4.0.0 amendment decided:
+- **Target CMS**: ALL of KI Hub (native content AND the Registry's enterprise context) moves from
+  Payload + PostgreSQL to a **separate, headless Umbraco** instance.
+- **Hosting**: our own ACA, Azure SQL, private Azure Blob, Entra backoffice login. uSync owns the
+  schema; no content is written from startup code.
+- **Access**: the Delivery API needs an API key and is called server-side only; media is never
+  public.
+- **Principle II** is CMS-neutral: one source of truth per module at any time.
+- **New TRANSITIONAL Principle IX**: modules move one at a time behind `CONTENT_SOURCE_<MODULE>`
+  (023), only when they match the parity goldens. Each move stays reversible by configuration
+  until Payload is retired. Order: Projects pilot, then News+media, Events, Frontpage/chrome,
+  Learning, and the Registry LAST.
+- **New modules**: built on Umbraco once its foundation is live.
+- **Reference implementation**: digdir/ki.norge.no (MIT).
+
+Unchanged:
+- Learning/Projects/News/Events are native content, NOT artifacts; Registry principles
+  I/III/IV/V/VI do not apply to them.
+- Design System constraint: Designsystemet as FOUNDATION with the generated KI Hub theme
+  (`designsystemet.config.json` + `pnpm --filter web theme:build`) + kihub token layer, custom
+  presentational components sanctioned on the tokens. Both back-offices are exempt.
 <!-- SPECKIT END -->
