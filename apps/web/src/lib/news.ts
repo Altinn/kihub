@@ -1,4 +1,4 @@
-import { payloadNewsSource } from '@/lib/content/payload/news';
+import { newsSource } from '@/lib/content/registry';
 import type { NewsArticle, NewsPage } from '@/lib/content/types';
 
 export type { NewsPage } from '@/lib/content/types';
@@ -12,15 +12,15 @@ export type { NewsPage } from '@/lib/content/types';
 
 /** Published articles, strictly newest-first (013 FR-005); ≤ 200. */
 export function listPublishedNews(): Promise<NewsArticle[]> {
-  return payloadNewsSource.listPublished();
+  return newsSource().listPublished();
 }
 
 /** One page of published articles, newest-first, clamped to the last page (013 FR-006/010). */
 export function listPublishedNewsPage(page: number): Promise<NewsPage> {
-  return payloadNewsSource.listPublishedPage(page);
+  return newsSource().listPublishedPage(page);
 }
 
 /** A single published article by slug, or `null` (draft/unknown → the page returns 404). */
 export function getPublishedNewsBySlug(slug: string): Promise<NewsArticle | null> {
-  return payloadNewsSource.getPublishedBySlug(slug);
+  return newsSource().getPublishedBySlug(slug);
 }

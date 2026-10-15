@@ -1,4 +1,4 @@
-import { payloadEventsSource } from '@/lib/content/payload/events';
+import { eventsSource } from '@/lib/content/registry';
 import type { EventItem } from '@/lib/content/types';
 import type { EventFormatValue, EventTypeValue } from '@/lib/events-view';
 
@@ -13,15 +13,15 @@ export function listUpcomingEvents(filters?: {
   types?: EventTypeValue[];
   form?: EventFormatValue;
 }): Promise<EventItem[]> {
-  return payloadEventsSource.listUpcoming(filters);
+  return eventsSource().listUpcoming(filters);
 }
 
 /** 012 FR-007 — published events overlapping [from, to], past included, soonest-first. */
 export function listEventsInRange(fromIso: string, toIso: string): Promise<EventItem[]> {
-  return payloadEventsSource.listInRange(fromIso, toIso);
+  return eventsSource().listInRange(fromIso, toIso);
 }
 
 /** A single published event by slug, past included, or `null` (draft/unknown → 404). */
 export function getPublishedEventBySlug(slug: string): Promise<EventItem | null> {
-  return payloadEventsSource.getPublishedBySlug(slug);
+  return eventsSource().getPublishedBySlug(slug);
 }

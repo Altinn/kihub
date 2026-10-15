@@ -1,4 +1,4 @@
-import { payloadProjectsSource } from '@/lib/content/payload/projects';
+import { projectsSource } from '@/lib/content/registry';
 import type { ProjectItem } from '@/lib/content/types';
 
 /**
@@ -9,10 +9,10 @@ import type { ProjectItem } from '@/lib/content/types';
 
 /** Published projects, ordered by the editor-controlled `order` field, then creation order. */
 export function listPublishedProjects(): Promise<ProjectItem[]> {
-  return payloadProjectsSource.listPublished();
+  return projectsSource().listPublished();
 }
 
 /** A single published project by slug, or `null` (draft/unknown → the page returns 404). */
 export function getPublishedProjectBySlug(slug: string): Promise<ProjectItem | null> {
-  return payloadProjectsSource.getPublishedBySlug(slug);
+  return projectsSource().getPublishedBySlug(slug);
 }

@@ -1,4 +1,4 @@
-import { payloadFrontpageSource, payloadSiteChromeSource } from '@/lib/content/payload/site-content';
+import { frontpageSource, siteChromeSource } from '@/lib/content/registry';
 import type { FrontpageContent, SiteChrome } from './site-content-defaults';
 
 export type { Cta, FrontpageContent, NavItem, SiteChrome, Tile } from './site-content-defaults';
@@ -12,10 +12,10 @@ export type { Cta, FrontpageContent, NavItem, SiteChrome, Tile } from './site-co
 
 /** Header nav + footer content for the shared chrome (SiteHeader/SiteFooter). */
 export function getSiteChrome(): Promise<SiteChrome> {
-  return payloadSiteChromeSource.getSiteChrome();
+  return siteChromeSource().getSiteChrome();
 }
 
 /** Hero, tiles and subscriptions banner content for the frontpage. */
 export function getFrontpageContent(): Promise<FrontpageContent> {
-  return payloadFrontpageSource.getFrontpage();
+  return frontpageSource().getFrontpage();
 }

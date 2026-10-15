@@ -1,4 +1,4 @@
-import { payloadLearningSource } from '@/lib/content/payload/learning';
+import { learningSource } from '@/lib/content/registry';
 import type { LearningArticle } from '@/lib/content/types';
 import type { LearningLibrary } from '@/lib/learning-view';
 
@@ -10,10 +10,10 @@ import type { LearningLibrary } from '@/lib/learning-view';
 
 /** The whole published library (categories, subcategories, published pages) for the tree. */
 export function readLearningLibrary(): Promise<LearningLibrary> {
-  return payloadLearningSource.readLibrary();
+  return learningSource().readLibrary();
 }
 
 /** One published page by handle, or `null` (draft/unknown → the route calls `notFound()`). */
 export function getPublishedLearningPageBySlug(slug: string): Promise<LearningArticle | null> {
-  return payloadLearningSource.getPublishedPageBySlug(slug);
+  return learningSource().getPublishedPageBySlug(slug);
 }

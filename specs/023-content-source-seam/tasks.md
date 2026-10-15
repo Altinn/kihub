@@ -387,7 +387,7 @@ with one clear message.
 **Independent Test**: `apps/web/tests/unit/content-source-config.test.ts` is green, and quickstart §4
 (bad values refuse to serve; `Payload`, blank and unknown names start normally).
 
-- [ ] T030 [P] [US2] Write `apps/web/tests/unit/content-source-config.test.ts` BEFORE the
+- [X] T030 [P] [US2] Write `apps/web/tests/unit/content-source-config.test.ts` BEFORE the
   implementation (contracts/content-source.md §2 and §5). Cover:
   - an empty env → all `payload`;
   - an explicit `payload`;
@@ -399,7 +399,7 @@ with one clear message.
   - `resolveModuleSources(config, { payload: A, fixture: B })` with only `projects: 'fixture'` →
     projects from B and everything else from A, which proves per-module independence.
   Confirm the tests fail.
-- [ ] T031 [US2] Create `apps/web/src/lib/content/config.ts`:
+- [X] T031 [US2] Create `apps/web/src/lib/content/config.ts`:
   - `CONTENT_MODULES`, an ordered list;
   - `SETTING_FOR_MODULE`, mapping each module to its env name (`siteChrome` →
     `CONTENT_SOURCE_SITE_CHROME`);
@@ -407,7 +407,7 @@ with one clear message.
   - `ContentSourceConfigError`;
   - a pure `readContentSourceConfig(env: Record<string, string | undefined>)`.
   T030 must now be green.
-- [ ] T032 [US2] Create `apps/web/src/lib/content/payload/index.ts` exporting `payloadSources:
+- [X] T032 [US2] Create `apps/web/src/lib/content/payload/index.ts` exporting `payloadSources:
   ModuleSources`. Create `apps/web/src/lib/content/registry.ts` with:
   - `SOURCES: Record<SourceId, ModuleSources> = { payload: payloadSources }`;
   - a pure `resolveModuleSources(config, table)`;
@@ -415,25 +415,25 @@ with one clear message.
     `frontpageSource()` and `siteChromeSource()`. These read
     `readContentSourceConfig(process.env)` once; a failure is cached and rethrown on every call,
     never defaulted.
-- [ ] T033 [US2] Switch the facades from direct adapter imports to the registry getters:
+- [X] T033 [US2] Switch the facades from direct adapter imports to the registry getters:
   - `apps/web/src/lib/news.ts`, `events.ts`, `projects.ts`, `learning.ts`, `site-content.ts`;
   - each exported function becomes `return xSource().method(...)`.
   Run the full suite. Parity must be green.
-- [ ] T034 [US2] In `apps/web/src/instrumentation.ts`, call `readContentSourceConfig(process.env)`
+- [X] T034 [US2] In `apps/web/src/instrumentation.ts`, call `readContentSourceConfig(process.env)`
   when `NEXT_RUNTIME === 'nodejs'`, for EVERY `NODE_ENV`, BEFORE the existing production-only
   early return. Use a dynamic import, matching the file's style.
   - On `ContentSourceConfigError`: `console.error(err.message)`, then `process.exit(1)`. This is
     deterministic fail-fast and doesn't depend on how Next.js treats a thrown `register()` error
     (research R6). Rethrow any other error.
   - Extend the doc comment to explain why it exits explicitly.
-- [ ] T035 [P] [US2] Add the six `CONTENT_SOURCE_*` rows to `documentation/runtime-config.md`:
+- [X] T035 [P] [US2] Add the six `CONTENT_SOURCE_*` rows to `documentation/runtime-config.md`:
   - not required; default `payload`; accepted `payload`;
   - trimmed and case-insensitive;
   - an invalid value aborts startup (the process exits non-zero) with one message listing every
     bad setting;
   - the module→setting mapping;
   - a pointer to `specs/023-content-source-seam/contracts/content-source.md`.
-- [ ] T036 [US2] Run quickstart §4 manually:
+- [X] T036 [US2] Run quickstart §4 manually:
   1. `next dev` with `CONTENT_SOURCE_NEWS=paylod CONTENT_SOURCE_EVENTS=umbraco`. The process must
      exit non-zero with the single message, before serving any request.
   2. Then a production build plus `next start` with the same values, with the same expectation.
@@ -652,5 +652,23 @@ Task: "T026 content-mapping.site-content.test.ts"
   `src/components` are `components/cms/DiscoveryScanPanel.tsx` (the `/cms` admin panel) and
   `components/rich-text/LexicalRichText.tsx` (SC-003: 13 → 0 editorial files). The suite is
   **485/485 across 56 files**, and lint and `tsc --noEmit` are clean.
+- **T034**: `process.exit` lives in `lib/content/boot-check.ts`, a Node-only module that
+  `register()` imports dynamically after the `NEXT_RUNTIME === 'nodejs'` guard, so it stays out
+  of the Edge bundle of `instrumentation.ts`.
+- **T036 fail-fast, observed 2026-10-15**, with `CONTENT_SOURCE_NEWS=paylod
+  CONTENT_SOURCE_EVENTS=umbraco` (and `CONTENT_SOURCE_PROJECTS=umbraco` for the standalone run):
+  - `next dev`, `next start` and the real production entry point
+    `node .next/standalone/apps/web/server.js` all print the ONE message, e.g.
+    `Invalid content source configuration: CONTENT_SOURCE_NEWS="paylod" (accepted: payload);
+    CONTENT_SOURCE_EVENTS="umbraco" (accepted: payload)`, and exit with **code 1**.
+  - A curl loop polling `/signin` during startup got no response before the exit.
+  - Next prints `✓ Ready` just before `register()` runs; Next awaits instrumentation before
+    handling a request.
+  - `CONTENT_SOURCE_NEWS=Payload`, `CONTENT_SOURCE_EVENTS=" "` and `CONTENT_SOURCE_SOMETHING=x`
+    start normally (`/signin` 200, `/` 307).
+  - Not verified here: on ACA a bad value makes the new revision crash-loop with that message in
+    the logs; that's the intended outcome.
+- **Scratch DB**: `kihub_023` was created in `kihub-postgres` and fully migrated (`pnpm run migrate`
+  with `DATABASE_URI` → `/kihub_023`). `next build` with `AUTH_MODE=entra` is green against it.
 - **Goldens**: 31 surfaces = 62 files (`.html` + `.queries.json`) plus `event-ics.ics` and its
   queries file. With the parity suite added, the full suite is **457/457 across 50 files**.
