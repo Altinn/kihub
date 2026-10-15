@@ -208,6 +208,14 @@ const surfaces: Surface[] = [
     },
   },
   {
+    // Not editorial content, but it renders `LearningCodeBlock`, whose props 023 changes (T011).
+    name: 'bidra',
+    render: async () => {
+      const { default: Page } = await import('@/app/(app)/bidra/page');
+      return toHtml(await Page());
+    },
+  },
+  {
     name: 'site-header',
     render: async () => {
       const { SiteHeader } = await import('@/components/SiteHeader');

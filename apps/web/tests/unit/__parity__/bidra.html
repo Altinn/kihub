@@ -1,0 +1,1435 @@
+<main class="bidra">
+<section class="bidra-hero" aria-labelledby="bidra-title">
+<div class="kihub-container bidra-hero__inner">
+<div class="bidra-hero__text">
+<span class="kihub-tag kihub-tag--on-accent">Veiledning for team</span>
+<h1 id="bidra-title" class="kihub-h1 bidra-hero__title">Del KI-verktøyene dere lager</h1>
+<p class="bidra-hero__lede">Har teamet ditt laget en skill, en agent, en prompt eller en MCP-server som andre kan ha nytte av? Med én liten fil i deres eget repo dukker den opp i KI Hub, slik at hele Digdir kan finne den, forstå den og ta den i bruk.</p>
+<div class="bidra-hero__actions">
+<a href="#steg" class="bidra-btn bidra-btn--light">Kom i gang</a>
+<a href="#eksempler" class="bidra-btn bidra-btn--ghost">Se eksempler</a>
+</div>
+</div>
+<div class="bidra-hero__art" aria-hidden="true">
+<div class="bidra-window">
+<div class="bidra-window__bar">
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<em>skills/klarsprak-sjekk/artifact.yaml</em>
+</div>
+<pre class="bidra-window__code">
+<span class="bidra-type bidra-type--1">
+<b>id:</b> digdir.klarsprak-sjekk</span>
+<span class="bidra-type bidra-type--2">
+<b>type:</b> skill</span>
+<span class="bidra-type bidra-type--3">
+<b>name:</b> Klarspråk-sjekk</span>
+<span class="bidra-type bidra-type--4">
+<b>version:</b> 1.0.0</span>
+<span class="bidra-type bidra-type--5">
+<b>owner:</b>
+</span>
+<span class="bidra-type bidra-type--6">  <b>team:</b> Team Tekst</span>
+</pre>
+</div>
+<div class="bidra-hero__beam">
+</div>
+<div class="bidra-hero__card">
+<span class="bidra-hero__badge">Ferdighet</span>
+<strong>Klarspråk-sjekk</strong>
+<span>Team Tekst · Eksperimentell</span>
+<span class="bidra-hero__check">✓ Registrert i KI Hub</span>
+</div>
+</div>
+</div>
+</section>
+<div class="kihub-container bidra-layout">
+<nav class="bidra-toc" aria-label="Innhold på siden">
+<p class="bidra-toc__title">På denne siden</p>
+<ol>
+<li>
+<a href="#hvorfor">Hvorfor</a>
+</li>
+<li>
+<a href="#slik-fungerer-det">Slik fungerer det</a>
+</li>
+<li>
+<a href="#typer">Typer artefakter</a>
+</li>
+<li>
+<a href="#steg">Steg for steg</a>
+</li>
+<li>
+<a href="#felt">Alle felt i manifestet</a>
+</li>
+<li>
+<a href="#livslop">Livsløp og godkjenning</a>
+</li>
+<li>
+<a href="#feil">Vanlige feil</a>
+</li>
+<li>
+<a href="#sporsmal">Spørsmål og svar</a>
+</li>
+<li>
+<a href="#sjekkliste">Sjekkliste</a>
+</li>
+</ol>
+</nav>
+<div class="bidra-content">
+<section id="hvorfor" class="bidra-section" aria-labelledby="hvorfor-heading">
+<header class="bidra-section__head">
+<p class="kihub-eyebrow kihub-eyebrow--accent" style="margin:0">Hvorfor</p>
+<h2 id="hvorfor-heading" class="kihub-h2">Hvorfor skal vi gjøre dette?</h2>
+<p class="bidra-lede">Det beste KI-verktøyet er det kollegaene dine faktisk finner. I dag ligger mye godt arbeid gjemt i enkeltrepoer som bare ett team kjenner til. KI Hub gjør det synlig, uten at dere må gi fra dere eierskapet.</p>
+</header>
+<div class="bidra-benefits">
+<article class="bidra-benefit bidra-reveal">
+<span class="bidra-benefit__icon" aria-hidden="true">◎</span>
+<h3 class="kihub-h4">Blir funnet</h3>
+<p>Kollegaer søker i KI Hub før de bygger noe selv. Ligger verktøyet deres der, blir det brukt i stedet for å bli laget på nytt.</p>
+</article>
+<article class="bidra-benefit bidra-reveal">
+<span class="bidra-benefit__icon" aria-hidden="true">⟲</span>
+<h3 class="kihub-h4">Ingen dobbeltarbeid</h3>
+<p>Mange team løser de samme problemene med KI. En felles katalog betyr at én god løsning kan hjelpe hele Digdir.</p>
+</article>
+<article class="bidra-benefit bidra-reveal">
+<span class="bidra-benefit__icon" aria-hidden="true">✓</span>
+<h3 class="kihub-h4">Trygg bruk</h3>
+<p>Status, eier og godkjenning vises tydelig, så kollegaer vet hva som er utprøvd, godkjent eller anbefalt.</p>
+</article>
+<article class="bidra-benefit bidra-reveal">
+<span class="bidra-benefit__icon" aria-hidden="true">↻</span>
+<h3 class="kihub-h4">Alltid oppdatert</h3>
+<p>Dere jobber i eget repo som før. KI Hub henter endringene selv, så katalogen aldri blir utdatert.</p>
+</article>
+</div>
+<div class="bidra-compare bidra-reveal">
+<div>
+<p class="bidra-compare__label">Uten KI Hub</p>
+<ul>
+<li>«Har noen laget noe for dette før?» i Slack</li>
+<li>Tre team bygger nesten samme prompt</li>
+<li>Ingen vet hvem som eier hva, eller om det er trygt</li>
+</ul>
+</div>
+<div class="bidra-compare__good">
+<p class="bidra-compare__label">Med KI Hub</p>
+<ul>
+<li>Ett søk viser hva som finnes</li>
+<li>Én god løsning gjenbrukes av mange</li>
+<li>Eier, kontakt og status står på hver side</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="slik-fungerer-det" class="bidra-section" aria-labelledby="slik-fungerer-det-heading">
+<header class="bidra-section__head">
+<p class="kihub-eyebrow kihub-eyebrow--accent" style="margin:0">Oversikt</p>
+<h2 id="slik-fungerer-det-heading" class="kihub-h2">Slik fungerer det</h2>
+<p class="bidra-lede">Dere beholder alt i deres eget repo. KI Hub leser bare en liten beskrivelsesfil, artifact.yaml, og README-en ved siden av den. Resten skjer automatisk.</p>
+</header>
+<ol class="bidra-flow">
+<li class="bidra-flow__step" style="--i:0">
+<span class="bidra-flow__num">1</span>
+<strong>Dere pusher</strong>
+<span>artifact.yaml i eget repo</span>
+</li>
+<li class="bidra-flow__step" style="--i:1">
+<span class="bidra-flow__num">2</span>
+<strong>KI Hub skanner</strong>
+<span>Via webhook eller daglig</span>
+</li>
+<li class="bidra-flow__step" style="--i:2">
+<span class="bidra-flow__num">3</span>
+<strong>Validering</strong>
+<span>Manifest og agentkort sjekkes</span>
+</li>
+<li class="bidra-flow__step" style="--i:3">
+<span class="bidra-flow__num">4</span>
+<strong>Katalogen</strong>
+<span>Artefakten får sin egen side</span>
+</li>
+<li class="bidra-flow__step" style="--i:4">
+<span class="bidra-flow__num">5</span>
+<strong>Kollegaer bruker</strong>
+<span>Søker, leser og installerer</span>
+</li>
+</ol>
+<div class="bidra-note">
+<strong>Hva leser KI Hub?</strong> Bare <code>artifact.yaml</code>,<!-- --> <code>README.md</code> og, for agenter, <code>agent-card.json</code>. Selve innholdet, som koden, SKILL.md eller promptene, blir liggende hos dere. KI Hub lenker til kilden.</div>
+</section>
+<section id="typer" class="bidra-section" aria-labelledby="typer-heading">
+<header class="bidra-section__head">
+<p class="kihub-eyebrow kihub-eyebrow--accent" style="margin:0">Typer</p>
+<h2 id="typer-heading" class="kihub-h2">Hva kan dere dele?</h2>
+<p class="bidra-lede">Hver artefakt har én type. Typen bestemmer hvilken mappe den skal ligge i. Det er den vanligste feilen, så sjekk tabellen.</p>
+</header>
+<div class="bidra-types">
+<article class="bidra-type-card bidra-reveal">
+<div class="bidra-type-card__head">
+<h3 class="bidra-type-card__label">Ferdighet</h3>
+<code>type: <!-- -->skill</code>
+</div>
+<p>En gjenbrukbar evne for en KI-assistent, for eksempel en SKILL.md for Claude eller Copilot.</p>
+<code class="bidra-type-card__dir">skills<!-- -->/&lt;navn&gt;/artifact.yaml</code>
+</article>
+<article class="bidra-type-card bidra-reveal">
+<div class="bidra-type-card__head">
+<h3 class="bidra-type-card__label">Prompt</h3>
+<code>type: <!-- -->prompt</code>
+</div>
+<p>En ferdig formulert prompt som løser én bestemt oppgave godt.</p>
+<code class="bidra-type-card__dir">prompts<!-- -->/&lt;navn&gt;/artifact.yaml</code>
+</article>
+<article class="bidra-type-card bidra-reveal">
+<div class="bidra-type-card__head">
+<h3 class="bidra-type-card__label">Arbeidsflyt</h3>
+<code>type: <!-- -->workflow</code>
+</div>
+<p>En flyt i flere steg, for eksempel en GitHub Actions-jobb som bruker KI.</p>
+<code class="bidra-type-card__dir">workflows<!-- -->/&lt;navn&gt;/artifact.yaml</code>
+</article>
+<article class="bidra-type-card bidra-reveal">
+<div class="bidra-type-card__head">
+<h3 class="bidra-type-card__label">MCP-server</h3>
+<code>type: <!-- -->mcp</code>
+</div>
+<p>En MCP-server som gir KI-assistenter tilgang til et verktøy eller en datakilde.</p>
+<code class="bidra-type-card__dir">mcp<!-- -->/&lt;navn&gt;/artifact.yaml</code>
+</article>
+<article class="bidra-type-card bidra-reveal">
+<div class="bidra-type-card__head">
+<h3 class="bidra-type-card__label">Mal</h3>
+<code>type: <!-- -->template</code>
+</div>
+<p>Et utgangspunkt å kopiere, for eksempel en mal for et nytt KI-prosjekt.</p>
+<code class="bidra-type-card__dir">templates<!-- -->/&lt;navn&gt;/artifact.yaml</code>
+</article>
+<article class="bidra-type-card bidra-reveal">
+<div class="bidra-type-card__head">
+<h3 class="bidra-type-card__label">Retningslinje</h3>
+<code>type: <!-- -->policy</code>
+</div>
+<p>En retningslinje for hvordan KI skal eller ikke skal brukes.</p>
+<code class="bidra-type-card__dir">policies<!-- -->/&lt;navn&gt;/artifact.yaml</code>
+</article>
+<article class="bidra-type-card bidra-reveal">
+<div class="bidra-type-card__head">
+<h3 class="bidra-type-card__label">Dreiebok</h3>
+<code>type: <!-- -->playbook</code>
+</div>
+<p>En steg-for-steg-oppskrift for en hel arbeidsprosess med KI.</p>
+<code class="bidra-type-card__dir">playbooks<!-- -->/&lt;navn&gt;/artifact.yaml</code>
+</article>
+<article class="bidra-type-card bidra-reveal">
+<div class="bidra-type-card__head">
+<h3 class="bidra-type-card__label">Agent</h3>
+<code>type: <!-- -->agent</code>
+</div>
+<p>En selvstendig KI-agent. Kan ha et eget agentkort (agent-card.json).</p>
+<code class="bidra-type-card__dir">agents<!-- -->/&lt;navn&gt;/artifact.yaml</code>
+</article>
+</div>
+</section>
+<section id="steg" class="bidra-section" aria-labelledby="steg-heading">
+<header class="bidra-section__head">
+<p class="kihub-eyebrow kihub-eyebrow--accent" style="margin:0">Steg for steg</p>
+<h2 id="steg-heading" class="kihub-h2">Fra repo til KI Hub på seks steg</h2>
+<p class="bidra-lede">Følg stegene i rekkefølge. Eksemplene kan kopieres rett inn. De testes automatisk mot det samme skjemaet som KI Hub bruker, så de er alltid gyldige.</p>
+</header>
+<ol class="bidra-steps" id="eksempler">
+<li class="bidra-step">
+<div class="bidra-step__marker" aria-hidden="true">1</div>
+<div class="bidra-step__body">
+<h3 class="kihub-h3">Lag mappestrukturen</h3>
+<p>Lag en mappe for hver artefakt under riktig typemappe i roten av repoet. Mappenavnet er fritt, men bruk små bokstaver og bindestrek. Strukturen må være nøyaktig<!-- --> <code>&lt;typemappe&gt;/&lt;navn&gt;/artifact.yaml</code>: to nivåer, verken mer eller mindre.</p>
+<figure class="lp-code">
+<div class="lp-code__head">
+<span class="lp-code__lang">Ren tekst</span>
+<button class="ds-button" data-variant="secondary" type="button" data-size="sm">Kopier</button>
+</div>
+<pre class="lp-code__pre" tabindex="0">
+<code>
+<span class="lp-code__line">
+<span>team-repo/</span>
+</span>
+<span class="lp-code__line">
+<span>├── skills/</span>
+</span>
+<span class="lp-code__line">
+<span>│   └── klarsprak-sjekk/</span>
+</span>
+<span class="lp-code__line">
+<span>│       ├── artifact.yaml      ← påkrevd: beskriver artefakten</span>
+</span>
+<span class="lp-code__line">
+<span>│       ├── README.md          ← anbefalt: vises på detaljsiden</span>
+</span>
+<span class="lp-code__line">
+<span>│       └── SKILL.md           ← selve innholdet deres</span>
+</span>
+<span class="lp-code__line">
+<span>└── agents/</span>
+</span>
+<span class="lp-code__line">
+<span>    └── tilgangsveileder/</span>
+</span>
+<span class="lp-code__line">
+<span>        ├── artifact.yaml      ← påkrevd</span>
+</span>
+<span class="lp-code__line">
+<span>        ├── agent-card.json    ← valgfritt, kun for agenter</span>
+</span>
+<span class="lp-code__line">
+<span>        └── README.md</span>
+</span>
+</code>
+</pre>
+</figure>
+</div>
+</li>
+<li class="bidra-step">
+<div class="bidra-step__marker" aria-hidden="true">2</div>
+<div class="bidra-step__body">
+<h3 class="kihub-h3">Skriv artifact.yaml</h3>
+<p>Manifestet beskriver artefakten: hva den heter, hva den gjør, hvem som eier den og hvor den ligger. Dette er det eneste påkrevde. Den første linjen er valgfri, men gir autofullføring og feilmarkering i VS Code (med YAML-utvidelsen fra Red Hat).</p>
+<figure class="lp-code">
+<div class="lp-code__head">
+<span class="lp-code__lang">YAML</span>
+<button class="ds-button" data-variant="secondary" type="button" data-size="sm">Kopier</button>
+</div>
+<pre class="lp-code__pre" tabindex="0">
+<code>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-comment)"># yaml-language-server: $schema=https://raw.githubusercontent.com/Altinn/kihub/main/packages/artifact-schema/schema/artifact.schema.json</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">id</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">digdir.klarsprak-sjekk</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">type</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">skill</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">name</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">Klarspråk-sjekk</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">version</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-constant)">1.0.0</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">description</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">Går gjennom en tekst og foreslår klarere formuleringer etter Digdirs klarspråkråd.</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">owner</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">team</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">Team Tekst</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">contact</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">team-tekst@digdir.no</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">source</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">provider</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">github</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">repository</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">Altinn/team-tekst</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">path</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">skills/klarsprak-sjekk</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">install</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">apm</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">    </span>
+<span style="color:var(--shiki-token-keyword)">package</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">altinn/klarsprak-sjekk</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">tags</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  - </span>
+<span style="color:var(--shiki-token-string-expression)">klarsprak</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  - </span>
+<span style="color:var(--shiki-token-string-expression)">tekst</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">visibility</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">internal</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">lifecycle</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">status</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">experimental</span>
+</span>
+<span class="lp-code__line">
+</span>
+</code>
+</pre>
+</figure>
+<details class="bidra-details">
+<summary>Vis et minimalt eksempel med bare de påkrevde feltene</summary>
+<figure class="lp-code">
+<div class="lp-code__head">
+<span class="lp-code__lang">YAML</span>
+<button class="ds-button" data-variant="secondary" type="button" data-size="sm">Kopier</button>
+</div>
+<pre class="lp-code__pre" tabindex="0">
+<code>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">id</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">digdir.mote-referat</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">type</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">prompt</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">name</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">Møtereferat fra notater</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">version</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-constant)">0.1.0</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">description</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">Gjør stikkordsnotater om til et ryddig møtereferat med beslutninger og oppgaver.</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">owner</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">team</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">Team Møte</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">contact</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">team-mote@digdir.no</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">source</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">provider</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">github</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">repository</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">Altinn/team-mote</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">path</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">prompts/mote-referat</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">visibility</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">internal</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">lifecycle</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">status</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">draft</span>
+</span>
+<span class="lp-code__line">
+</span>
+</code>
+</pre>
+</figure>
+</details>
+<div class="bidra-tip">
+<strong>Tips om id:</strong> Velg den med omhu, for den skal aldri endres. Bruk<!-- --> <code>digdir.</code> pluss et kort, beskrivende navn. Den er artefaktens faste identitet, også om dere flytter repoet.</div>
+</div>
+</li>
+<li class="bidra-step">
+<div class="bidra-step__marker" aria-hidden="true">3</div>
+<div class="bidra-step__body">
+<h3 class="kihub-h3">Skriv en README.md som selger</h3>
+<p>README-en vises i sin helhet på artefaktens side i KI Hub, og den er det kollegaer leser før de bestemmer seg. Svar på fire spørsmål: <em>hva</em> den gjør,<!-- --> <em>når</em> den passer, <em>hvordan</em> man bruker den og hvilke<!-- --> <em>begrensninger</em> den har.</p>
+<figure class="lp-code">
+<div class="lp-code__head">
+<span class="lp-code__lang">Markdown</span>
+<button class="ds-button" data-variant="secondary" type="button" data-size="sm">Kopier</button>
+</div>
+<pre class="lp-code__pre" tabindex="0">
+<code>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)"># Klarspråk-sjekk</span>
+</span>
+<span class="lp-code__line">
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">Går gjennom en tekst og foreslår klarere formuleringer etter Digdirs klarspråkråd.</span>
+</span>
+<span class="lp-code__line">
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">## Når bør du bruke den?</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">- Før du publiserer tekst til innbyggere eller virksomheter</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">- Når et utkast føles tungt eller byråkratisk</span>
+</span>
+<span class="lp-code__line">
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">## Slik bruker du den</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">1. Installer: </span>
+<span style="color:var(--shiki-token-string)">`apm install altinn/klarsprak-sjekk`</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">2. Be assistenten: «Sjekk denne teksten for klarspråk»</span>
+</span>
+<span class="lp-code__line">
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">## Begrensninger</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">Erstatter ikke en språkvask. Ikke lim inn taushetsbelagt informasjon.</span>
+</span>
+<span class="lp-code__line">
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">## Kontakt</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">Team Tekst – team-tekst@digdir.no</span>
+</span>
+<span class="lp-code__line">
+</span>
+</code>
+</pre>
+</figure>
+</div>
+</li>
+<li class="bidra-step">
+<div class="bidra-step__marker" aria-hidden="true">4</div>
+<div class="bidra-step__body">
+<h3 class="kihub-h3">Agenter: legg til et agentkort</h3>
+<p>Er artefakten en agent (<code>type: agent</code> under <code>agents/</code>), kan dere legge en <code>agent-card.json</code> ved siden av manifestet. Den følger den åpne<!-- --> <a href="https://a2a-protocol.org/" class="bidra-link">A2A-standarden (Agent2Agent) v1.0</a>. KI Hub viser kortet på agentens side, med evner, eksempler og grensesnitt.</p>
+<p>Kortet er <strong>valgfritt og tilgivende</strong>. Bare <code>name</code> er påkrevd, og ukjente felt er tillatt. Er kortet ugyldig, blir agenten likevel registrert, men uten kort.</p>
+<div class="bidra-split">
+<div>
+<p class="bidra-split__label">agents/tilgangsveileder/artifact.yaml</p>
+<figure class="lp-code">
+<div class="lp-code__head">
+<span class="lp-code__lang">YAML</span>
+<button class="ds-button" data-variant="secondary" type="button" data-size="sm">Kopier</button>
+</div>
+<pre class="lp-code__pre" tabindex="0">
+<code>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">id</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">digdir.tilgangsveileder</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">type</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">agent</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">name</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">Tilgangsveileder</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">version</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-constant)">1.2.0</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">description</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">Svarer på spørsmål om roller og tilganger i Altinn, med lenker til riktig dokumentasjon.</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">owner</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">team</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">Team Tilgang</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">contact</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">team-tilgang@digdir.no</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">source</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">provider</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">github</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">repository</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">Altinn/team-tilgang</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">path</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">agents/tilgangsveileder</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">tags</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  - </span>
+<span style="color:var(--shiki-token-string-expression)">altinn</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  - </span>
+<span style="color:var(--shiki-token-string-expression)">tilgang</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  - </span>
+<span style="color:var(--shiki-token-string-expression)">support</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">visibility</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">internal</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-keyword)">lifecycle</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">status</span>
+<span style="color:var(--shiki-token-keyword)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">experimental</span>
+</span>
+<span class="lp-code__line">
+</span>
+</code>
+</pre>
+</figure>
+</div>
+<div>
+<p class="bidra-split__label">agents/tilgangsveileder/agent-card.json</p>
+<figure class="lp-code">
+<div class="lp-code__head">
+<span class="lp-code__lang">JSON</span>
+<button class="ds-button" data-variant="secondary" type="button" data-size="sm">Kopier</button>
+</div>
+<pre class="lp-code__pre" tabindex="0">
+<code>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">{</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">&quot;name&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;Tilgangsveileder&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">&quot;description&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;Hjelper saksbehandlere og utviklere å forstå roller og tilganger i Altinn.&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">&quot;version&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;1.2.0&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">&quot;provider&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> {</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">    </span>
+<span style="color:var(--shiki-token-keyword)">&quot;organization&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;Digdir – Team Tilgang&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">    </span>
+<span style="color:var(--shiki-token-keyword)">&quot;url&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;https://github.com/Altinn/team-tilgang&quot;</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  }</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">&quot;supportedInterfaces&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> [</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">    {</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">      </span>
+<span style="color:var(--shiki-token-keyword)">&quot;url&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;https://tilgangsveileder.example.digdir.no/a2a&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">      </span>
+<span style="color:var(--shiki-token-keyword)">&quot;protocol&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;JSONRPC&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">      </span>
+<span style="color:var(--shiki-token-keyword)">&quot;version&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;1.0&quot;</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">    }</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  ]</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">&quot;capabilities&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> {</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">    </span>
+<span style="color:var(--shiki-token-keyword)">&quot;streaming&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-constant)">true</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">    </span>
+<span style="color:var(--shiki-token-keyword)">&quot;pushNotifications&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-constant)">false</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  }</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">&quot;defaultInputModes&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> [</span>
+<span style="color:var(--shiki-token-string-expression)">&quot;text/plain&quot;</span>
+<span style="color:var(--shiki-foreground)">]</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">&quot;defaultOutputModes&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> [</span>
+<span style="color:var(--shiki-token-string-expression)">&quot;text/plain&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;text/markdown&quot;</span>
+<span style="color:var(--shiki-foreground)">]</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  </span>
+<span style="color:var(--shiki-token-keyword)">&quot;skills&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> [</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">    {</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">      </span>
+<span style="color:var(--shiki-token-keyword)">&quot;id&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;forklar-rolle&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">      </span>
+<span style="color:var(--shiki-token-keyword)">&quot;name&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;Forklar en rolle&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">      </span>
+<span style="color:var(--shiki-token-keyword)">&quot;description&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;Forklarer hva en Altinn-rolle gir tilgang til.&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">      </span>
+<span style="color:var(--shiki-token-keyword)">&quot;tags&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> [</span>
+<span style="color:var(--shiki-token-string-expression)">&quot;roller&quot;</span>
+<span style="color:var(--shiki-foreground)">]</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">      </span>
+<span style="color:var(--shiki-token-keyword)">&quot;examples&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> [</span>
+<span style="color:var(--shiki-token-string-expression)">&quot;Hva kan en med rollen «Utfyller/innsender» gjøre?&quot;</span>
+<span style="color:var(--shiki-foreground)">]</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">    }</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">    {</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">      </span>
+<span style="color:var(--shiki-token-keyword)">&quot;id&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;finn-tilgang&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">      </span>
+<span style="color:var(--shiki-token-keyword)">&quot;name&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;Finn riktig tilgang&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">      </span>
+<span style="color:var(--shiki-token-keyword)">&quot;description&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string-expression)">&quot;Foreslår hvilken rolle eller tilgangspakke en bruker trenger.&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">,</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">      </span>
+<span style="color:var(--shiki-token-keyword)">&quot;examples&quot;</span>
+<span style="color:var(--shiki-token-punctuation)">:</span>
+<span style="color:var(--shiki-foreground)"> [</span>
+<span style="color:var(--shiki-token-string-expression)">&quot;Hvilken tilgang trenger jeg for å sende inn MVA-melding?&quot;</span>
+<span style="color:var(--shiki-foreground)">]</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">    }</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">  ]</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-foreground)">}</span>
+</span>
+<span class="lp-code__line">
+</span>
+</code>
+</pre>
+</figure>
+</div>
+</div>
+<figure class="bidra-preview">
+<figcaption>
+<span class="bidra-preview__pulse" aria-hidden="true">
+</span>Slik vises agentkortet over på agentens side i KI Hub</figcaption>
+<div class="bidra-preview__frame">
+<div class="ds-card" style="margin-top:1.5rem">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:0.75rem;flex-wrap:wrap">
+<h2 class="ds-heading" data-size="xs">Agentkort</h2>
+<span style="font-size:0.85rem;color:var(--ds-color-neutral-text-subtle)">Tilgangsveileder · v1.2.0 · Digdir – Team Tilgang<!-- --> · <a href="https://github.com/Altinn/team-tilgang">github.com</a>
+</span>
+</div>
+<p class="ds-paragraph" data-size="sm" style="margin-top:0.5rem">Hjelper saksbehandlere og utviklere å forstå roller og tilganger i Altinn.</p>
+<h3 class="ds-heading" data-size="2xs" style="margin-top:1rem;margin-bottom:0.35rem">Egenskaper</h3>
+<div style="display:flex;flex-wrap:wrap;gap:0.35rem">
+<span class="ds-tag" data-color="info" data-size="sm">Strømming</span>
+</div>
+<h3 class="ds-heading" data-size="2xs" style="margin-top:1rem;margin-bottom:0.35rem">Ferdigheter</h3>
+<dl style="margin:0;display:grid;gap:0.6rem">
+<div>
+<dt style="font-weight:600">Forklar en rolle</dt>
+<dd style="margin:0">
+<p class="ds-paragraph" data-size="sm" style="margin:0.15rem 0">Forklarer hva en Altinn-rolle gir tilgang til.</p>
+<span style="display:inline-flex;flex-wrap:wrap;gap:0.25rem;margin-top:0.2rem">
+<span class="ds-tag" data-color="neutral" data-size="sm">roller</span>
+</span>
+<ul style="margin:0.3rem 0 0;padding-left:1.25rem;font-size:0.85rem">
+<li>Hva kan en med rollen «Utfyller/innsender» gjøre?</li>
+</ul>
+</dd>
+</div>
+<div>
+<dt style="font-weight:600">Finn riktig tilgang</dt>
+<dd style="margin:0">
+<p class="ds-paragraph" data-size="sm" style="margin:0.15rem 0">Foreslår hvilken rolle eller tilgangspakke en bruker trenger.</p>
+<ul style="margin:0.3rem 0 0;padding-left:1.25rem;font-size:0.85rem">
+<li>Hvilken tilgang trenger jeg for å sende inn MVA-melding?</li>
+</ul>
+</dd>
+</div>
+</dl>
+<h3 class="ds-heading" data-size="2xs" style="margin-top:1rem;margin-bottom:0.35rem">Grensesnitt</h3>
+<ul style="margin:0;padding-left:1.25rem">
+<li style="font-size:0.9rem">
+<span class="ds-tag" data-color="neutral" data-size="sm" style="margin-right:0.4rem">JSONRPC</span>
+<code>https://tilgangsveileder.example.digdir.no/a2a</code> (v1.0)</li>
+</ul>
+<h3 class="ds-heading" data-size="2xs" style="margin-top:1rem;margin-bottom:0.35rem">Inn-/utdataformater</h3>
+<p class="ds-paragraph" data-size="sm" style="margin:0">Inn: text/plain · Ut: text/plain, text/markdown</p>
+</div>
+</div>
+</figure>
+</div>
+</li>
+<li class="bidra-step">
+<div class="bidra-step__marker" aria-hidden="true">5</div>
+<div class="bidra-step__body">
+<h3 class="kihub-h3">Valider før dere pusher</h3>
+<p>Manifestet er strengt med vilje: ukjente felt og skrivefeil blir avvist, slik at feil oppdages tidlig. Det finnes to måter å sjekke det på:</p>
+<div class="bidra-options">
+<div class="bidra-option">
+<p class="bidra-option__title">A · I editoren (anbefalt)</p>
+<p>Ha med <code># yaml-language-server</code>-linjen fra eksempelet øverst i filen. VS Code markerer da feil mens dere skriver. Skjemaet ligger åpent på<!-- --> <a href="https://raw.githubusercontent.com/Altinn/kihub/main/packages/artifact-schema/schema/artifact.schema.json" class="bidra-link">GitHub</a>.</p>
+</div>
+<div class="bidra-option">
+<p class="bidra-option__title">B · Med KI Hubs validator</p>
+<p>Den samme koden som KI Hub selv bruker. Svarer med ✓ eller en liste med feil per felt.</p>
+</div>
+</div>
+<figure class="lp-code">
+<div class="lp-code__head">
+<span class="lp-code__lang">Shell</span>
+<button class="ds-button" data-variant="secondary" type="button" data-size="sm">Kopier</button>
+</div>
+<pre class="lp-code__pre" tabindex="0">
+<code>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-function)">git</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string)">clone</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string)">https://github.com/Altinn/kihub.git</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-function)">cd</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string)">kihub</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-punctuation)">&amp;&amp;</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-function)">pnpm</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string)">install</span>
+</span>
+<span class="lp-code__line">
+<span style="color:var(--shiki-token-function)">pnpm</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string)">--filter</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string)">@kihub/artifact-schema</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string)">validate</span>
+<span style="color:var(--shiki-foreground)"> </span>
+<span style="color:var(--shiki-token-string)">../team-repo/skills/klarsprak-sjekk/artifact.yaml</span>
+</span>
+</code>
+</pre>
+</figure>
+</div>
+</li>
+<li class="bidra-step">
+<div class="bidra-step__marker" aria-hidden="true">6</div>
+<div class="bidra-step__body">
+<h3 class="kihub-h3">Koble repoet til KI Hub (én gang)</h3>
+<p>KI Hub må vite at repoet finnes. Det gjøres <strong>én gang per repo</strong>, ikke per artefakt. Etter det dukker nye artefakter opp av seg selv.</p>
+<ol class="bidra-sublist">
+<li>
+<strong>Send Team KITT</strong> (se kontaktene nederst på siden) navnet på repoet (<code>eier/repo</code>), hvilken gren som skal leses (vanligvis<!-- --> <code>main</code>) og hvilket team som eier det.</li>
+<li>
+<strong>KITT legger inn repoet som kilde</strong> med et token som bare kan lese, og kjører en første skanning. Dere får beskjed om hva som ble funnet, og eventuelle feil.</li>
+<li>
+<strong>Legg inn webhooken</strong> dere får fra KITT, så vises endringer med en gang i stedet for innen et døgn. I GitHub: <em>Settings → Webhooks → Add webhook</em>. Lim inn adressen og hemmeligheten, velg <code>application/json</code> og<!-- --> <em>Just the push event</em>.</li>
+</ol>
+<div class="bidra-tip">
+<strong>Er repoet allerede koblet til?</strong> Da trenger dere ikke gjøre noe. Push den nye mappen, så er den i katalogen etter neste skanning.</div>
+</div>
+</li>
+</ol>
+</section>
+<section id="felt" class="bidra-section" aria-labelledby="felt-heading">
+<header class="bidra-section__head">
+<p class="kihub-eyebrow kihub-eyebrow--accent" style="margin:0">Oppslag</p>
+<h2 id="felt-heading" class="kihub-h2">Alle felt i artifact.yaml</h2>
+<p class="bidra-lede">Dette er hele skjemaet. Felt som ikke står her, blir avvist.</p>
+</header>
+<div class="bidra-table-wrap" tabindex="0" role="region" aria-label="Felt i manifestet">
+<table class="bidra-table">
+<thead>
+<tr>
+<th scope="col">Felt</th>
+<th scope="col">Påkrevd</th>
+<th scope="col">Format</th>
+<th scope="col">Forklaring</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">
+<code>id</code>
+</th>
+<td>
+<span class="bidra-pill bidra-pill--req">Ja</span>
+</td>
+<td class="bidra-table__format">organisasjon.navn, med små bokstaver</td>
+<td>Artefaktens faste identitet, for eksempel digdir.klarsprak-sjekk. Endre den aldri, heller ikke hvis dere flytter repo. Historikk og godkjenninger henger på den.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>type</code>
+</th>
+<td>
+<span class="bidra-pill bidra-pill--req">Ja</span>
+</td>
+<td class="bidra-table__format">skill | prompt | workflow | mcp | template | policy | playbook | agent</td>
+<td>Hva slags artefakt det er. Må stemme med mappen filen ligger i.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>name</code>
+</th>
+<td>
+<span class="bidra-pill bidra-pill--req">Ja</span>
+</td>
+<td class="bidra-table__format">tekst</td>
+<td>Navnet kollegaer ser i katalogen.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>version</code>
+</th>
+<td>
+<span class="bidra-pill bidra-pill--req">Ja</span>
+</td>
+<td class="bidra-table__format">MAJOR.MINOR.PATCH</td>
+<td>For eksempel 1.0.0. Øk versjonen når dere endrer noe som brukerne merker.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>description</code>
+</th>
+<td>
+<span class="bidra-pill bidra-pill--req">Ja</span>
+</td>
+<td class="bidra-table__format">én setning</td>
+<td>Vises på kortet i katalogen og søkes i. Skriv hva den gjør, ikke hvordan.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>owner.team</code>
+</th>
+<td>
+<span class="bidra-pill bidra-pill--req">Ja</span>
+</td>
+<td class="bidra-table__format">tekst</td>
+<td>Teamet som eier og vedlikeholder artefakten.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>owner.contact</code>
+</th>
+<td>
+<span class="bidra-pill bidra-pill--req">Ja</span>
+</td>
+<td class="bidra-table__format">e-postadresse</td>
+<td>Hvor kollegaer sender spørsmål. Bruk gjerne en teamadresse, ikke en person.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>source.provider</code>
+</th>
+<td>
+<span class="bidra-pill bidra-pill--req">Ja</span>
+</td>
+<td class="bidra-table__format">github</td>
+<td>Foreløpig støttes bare GitHub.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>source.repository</code>
+</th>
+<td>
+<span class="bidra-pill bidra-pill--req">Ja</span>
+</td>
+<td class="bidra-table__format">eier/repo</td>
+<td>Repoet artefakten bor i, for eksempel Altinn/team-tekst.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>source.path</code>
+</th>
+<td>
+<span class="bidra-pill bidra-pill--req">Ja</span>
+</td>
+<td class="bidra-table__format">sti i repoet</td>
+<td>Mappen artefakten ligger i, for eksempel skills/klarsprak-sjekk.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>install.apm.package</code>
+</th>
+<td>
+<span class="bidra-pill">Valgfritt</span>
+</td>
+<td class="bidra-table__format">pakke-id</td>
+<td>Har dere en APM-pakke, viser KI Hub en ferdig «apm install»-kommando som kan kopieres.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>tags</code>
+</th>
+<td>
+<span class="bidra-pill">Valgfritt</span>
+</td>
+<td class="bidra-table__format">liste, små bokstaver med bindestrek</td>
+<td>Stikkord som gjør artefakten lettere å finne, for eksempel klarsprak eller tilgang.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>visibility</code>
+</th>
+<td>
+<span class="bidra-pill bidra-pill--req">Ja</span>
+</td>
+<td class="bidra-table__format">internal</td>
+<td>Bruk internal. Verdiene public og restricted er reservert til senere.</td>
+</tr>
+<tr>
+<th scope="row">
+<code>lifecycle.status</code>
+</th>
+<td>
+<span class="bidra-pill bidra-pill--req">Ja</span>
+</td>
+<td class="bidra-table__format">draft | experimental | …</td>
+<td>Startstatusen dere foreslår. Etter første registrering er det godkjennerne i KI Hub som flytter statusen videre.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="bidra-small">Den fullstendige tekniske referansen finnes i<!-- --> <a href="https://github.com/Altinn/kihub/blob/main/packages/artifact-schema/docs/artifact-manifest.md" class="bidra-link">artifact-manifest.md på GitHub</a>.</p>
+</section>
+<section id="livslop" class="bidra-section" aria-labelledby="livslop-heading">
+<header class="bidra-section__head">
+<p class="kihub-eyebrow kihub-eyebrow--accent" style="margin:0">Kvalitet</p>
+<h2 id="livslop-heading" class="kihub-h2">Livsløp og godkjenning</h2>
+<p class="bidra-lede">Alle artefakter har en status som forteller kollegaer hvor moden den er. Dere velger startstatusen i manifestet. Etter det flyttes den ett steg om gangen i KI Hub, og godkjenning gjøres av en godkjenner.</p>
+</header>
+<ol class="bidra-lifecycle">
+<li style="--i:0">
+<span class="bidra-lifecycle__dot" aria-hidden="true">
+</span>
+<strong>Utkast</strong>
+<code>draft</code>
+<span>Dere jobber fortsatt med den</span>
+</li>
+<li style="--i:1">
+<span class="bidra-lifecycle__dot" aria-hidden="true">
+</span>
+<strong>Eksperimentell</strong>
+<code>experimental</code>
+<span>Klar til å prøves av andre</span>
+</li>
+<li style="--i:2">
+<span class="bidra-lifecycle__dot" aria-hidden="true">
+</span>
+<strong>Til vurdering</strong>
+<code>in-review</code>
+<span>Dere ber om gjennomgang</span>
+</li>
+<li style="--i:3">
+<span class="bidra-lifecycle__dot" aria-hidden="true">
+</span>
+<strong>Godkjent</strong>
+<code>approved</code>
+<span>En godkjenner har sagt ja</span>
+</li>
+<li style="--i:4">
+<span class="bidra-lifecycle__dot" aria-hidden="true">
+</span>
+<strong>Anbefalt</strong>
+<code>recommended</code>
+<span>Standardvalget i Digdir</span>
+</li>
+</ol>
+<div class="bidra-note">
+<strong>Hvilken startstatus skal vi velge?</strong> Velg <code>experimental</code> når andre kan prøve artefakten, og <code>draft</code> hvis den ikke er klar ennå. Fra<!-- --> <em>Til vurdering</em> til <em>Godkjent</em> og <em>Anbefalt</em> er det en godkjenner som bestemmer. En artefakt kan også bli <code>deprecated</code> (utfaset) eller<!-- --> <code>archived</code> (arkivert).</div>
+</section>
+<section id="feil" class="bidra-section" aria-labelledby="feil-heading">
+<header class="bidra-section__head">
+<p class="kihub-eyebrow kihub-eyebrow--accent" style="margin:0">Feilsøking</p>
+<h2 id="feil-heading" class="kihub-h2">Vanlige feil, og hvordan dere unngår dem</h2>
+<p class="bidra-lede">De to første har skjedd i praksis, og de er lumske: de gir ingen feilmelding i det hele tatt, fordi KI Hub rett og slett ikke ser filen.</p>
+</header>
+<div class="bidra-mistakes">
+<article class="bidra-mistake bidra-reveal">
+<h3 class="kihub-h4">Feil mappedybde</h3>
+<p class="bidra-mistake__symptom">
+<span aria-hidden="true">⚠</span> <!-- -->Artefakten dukker aldri opp, og ingen feilmelding vises.</p>
+<p class="bidra-mistake__fix">
+<span aria-hidden="true">→</span> <!-- -->Filen må ligge nøyaktig to nivåer ned: agents/tilgangsveileder/artifact.yaml. agents/artifact.yaml blir ikke funnet.</p>
+</article>
+<article class="bidra-mistake bidra-reveal">
+<h3 class="kihub-h4">Mellomrom eller feil filnavn</h3>
+<p class="bidra-mistake__symptom">
+<span aria-hidden="true">⚠</span> <!-- -->Artefakten dukker aldri opp.</p>
+<p class="bidra-mistake__fix">
+<span aria-hidden="true">→</span> <!-- -->Filen må hete nøyaktig artifact.yaml. Ikke artifact.yml, ikke Artifact.yaml, og ingen mellomrom på slutten.</p>
+</article>
+<article class="bidra-mistake bidra-reveal">
+<h3 class="kihub-h4">type passer ikke med mappen</h3>
+<p class="bidra-mistake__symptom">
+<span aria-hidden="true">⚠</span> <!-- -->Manifestet blir avvist som ugyldig.</p>
+<p class="bidra-mistake__fix">
+<span aria-hidden="true">→</span> <!-- -->type: agent må ligge under agents/, type: skill under skills/ og så videre. Se tabellen over typer.</p>
+</article>
+<article class="bidra-mistake bidra-reveal">
+<h3 class="kihub-h4">Ukjente eller feilstavede felt</h3>
+<p class="bidra-mistake__symptom">
+<span aria-hidden="true">⚠</span> <!-- -->Manifestet blir avvist med en feil som (root): Unrecognized key: &quot;descripton&quot;.</p>
+<p class="bidra-mistake__fix">
+<span aria-hidden="true">→</span> <!-- -->Skjemaet er strengt med vilje, slik at skrivefeil oppdages. Bruk bare feltene i tabellen.</p>
+</article>
+<article class="bidra-mistake bidra-reveal">
+<h3 class="kihub-h4">id er endret</h3>
+<p class="bidra-mistake__symptom">
+<span aria-hidden="true">⚠</span> <!-- -->KI Hub tror det er en helt ny artefakt, og godkjenningen forsvinner fra den gamle.</p>
+<p class="bidra-mistake__fix">
+<span aria-hidden="true">→</span> <!-- -->Behold id-en for alltid. Endre heller name, version og description.</p>
+</article>
+<article class="bidra-mistake bidra-reveal">
+<h3 class="kihub-h4">Ugyldig agentkort</h3>
+<p class="bidra-mistake__symptom">
+<span aria-hidden="true">⚠</span> <!-- -->Agenten er registrert, men agentkortet vises ikke på detaljsiden.</p>
+<p class="bidra-mistake__fix">
+<span aria-hidden="true">→</span> <!-- -->Kortet må være gyldig JSON med minst et «name»-felt. Største tillatte størrelse er 256 KB.</p>
+</article>
+</div>
+</section>
+<section id="sporsmal" class="bidra-section" aria-labelledby="sporsmal-heading">
+<header class="bidra-section__head">
+<p class="kihub-eyebrow kihub-eyebrow--accent" style="margin:0">Spørsmål og svar</p>
+<h2 id="sporsmal-heading" class="kihub-h2">Det dere lurer på</h2>
+</header>
+<div class="bidra-faq">
+<details class="bidra-faq__item">
+<summary>Må koden eller innholdet vårt flyttes til KI Hub?</summary>
+<p>Nei. Alt blir liggende i deres eget repo, og dere eier det fortsatt. KI Hub leser bare metadata (artifact.yaml), README og eventuelt agentkortet, og lenker til kilden.</p>
+</details>
+<details class="bidra-faq__item">
+<summary>Hvor lang tid tar det før endringer vises?</summary>
+<p>Med webhook skjer det i løpet av sekunder etter at dere har pushet. Uten webhook plukker den daglige skanningen opp endringene innen et døgn.</p>
+</details>
+<details class="bidra-faq__item">
+<summary>Kan vi ha flere artefakter i samme repo?</summary>
+<p>Ja. Hver mappe med en artifact.yaml blir én artefakt. Dere kan blande typer, for eksempel både skills/ og agents/.</p>
+</details>
+<details class="bidra-faq__item">
+<summary>Hva skjer hvis vi sletter en artefakt fra repoet?</summary>
+<p>Ved neste skanning merkes den som inaktiv og forsvinner fra katalogen. Historikken beholdes, så den kommer tilbake med samme status hvis dere legger den inn igjen med samme id.</p>
+</details>
+<details class="bidra-faq__item">
+<summary>Kan repoet vårt være privat?</summary>
+<p>Ja. KI Hub leser repoet med et eget token som bare har lesetilgang. Innholdet vises bare for innloggede ansatte i Digdir.</p>
+</details>
+<details class="bidra-faq__item">
+<summary>Må vi ha et agentkort?</summary>
+<p>Nei, det er valgfritt. En agent registreres helt fint uten. Kortet gir kollegaer en mye rikere detaljside, med evner, eksempler og grensesnitt, så vi anbefaler det.</p>
+</details>
+<details class="bidra-faq__item">
+<summary>Hva bør IKKE ligge i en artefakt?</summary>
+<p>Hemmeligheter, API-nøkler, personopplysninger eller taushetsbelagt informasjon. README og agentkort vises for alle ansatte.</p>
+</details>
+</div>
+</section>
+<section id="sjekkliste" class="bidra-section" aria-labelledby="sjekkliste-heading">
+<div class="bidra-final">
+<p class="kihub-eyebrow" style="margin:0">Før dere pusher</p>
+<h2 id="sjekkliste-heading" class="kihub-h2">Sjekkliste</h2>
+<ul class="bidra-checklist">
+<li>Mappen ligger under riktig typemappe, for eksempel skills/mitt-verktoy/</li>
+<li>Filen heter nøyaktig artifact.yaml</li>
+<li>id er unik, med små bokstaver, på formen organisasjon.navn</li>
+<li>type stemmer med mappen</li>
+<li>Alle påkrevde felt er fylt ut, og ingen ukjente felt er med</li>
+<li>README.md forklarer hva, når, hvordan og begrensninger</li>
+<li>Agenter: eventuelt agent-card.json ved siden av artifact.yaml</li>
+<li>Manifestet er validert lokalt eller i editoren</li>
+<li>Repoet er koblet til KI Hub (gjøres én gang per repo)</li>
+</ul>
+<div class="bidra-hero__actions">
+<a class="bidra-btn bidra-btn--light" href="/registry">Se hva som allerede finnes</a>
+<a href="#bidra-title" class="bidra-btn bidra-btn--ghost">Til toppen ↑</a>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
