@@ -471,7 +471,7 @@ serve silently.
 
 ## Phase 6: Polish & cross-cutting
 
-- [ ] T038 Add the guardrail (research R9) in `apps/web/eslint.config.mjs`.
+- [X] T038 Add the guardrail (research R9) in `apps/web/eslint.config.mjs`.
   - Add a config object with `files`:
     - `src/app/(app)/**`
     - `src/components/**`
@@ -494,7 +494,7 @@ serve silently.
     - quickstart §2: add `@/payload-types` to `NewsCard.tsx` and see the error;
     - add `import { payloadNewsSource } from '@/lib/content/payload/news'` to
       `src/lib/news.ts` and see the error.
-- [ ] T039 Run all the gates and record the counts in Notes:
+- [X] T039 Run all the gates and record the counts in Notes:
   - `pnpm --filter web test` (suite count, files);
   - `pnpm --filter web lint`;
   - `pnpm --filter web exec tsc --noEmit`;
@@ -676,5 +676,14 @@ Task: "T026 content-mapping.site-content.test.ts"
   component edits).
 - `next dev` (T036) writes `apps/web/AGENTS.md` + `apps/web/CLAUDE.md` (Next 16's agent hint
   files). They are not part of this feature and were deleted, not committed.
+- **T038**: all three negative checks fail lint with the 023 message: `@/payload-types` in
+  `NewsCard.tsx`, `@/lib/content/payload/news` in `lib/news.ts` (adapter bypass), and `payload` in
+  `(app)/prosjekter/page.tsx`. The `src/app/(app)/**` glob matches literally. Enabling the full
+  lint also caught a loop variable named `module` (introduced in T031, Next's
+  `no-assign-module-variable`), renamed to `contentModule`.
+- **T039 gates (final code)**: suite **497/497 across 58 files**, lint clean, `tsc --noEmit` clean,
+  `CI=1` parity run 39/39 with 0 snapshots written, and `next build` (`AUTH_MODE=entra`, scratch
+  `kihub_023`) green. The goldens were touched only by the two capture commits (`b1a441b`,
+  `b1aaaa3`).
 - **Goldens**: 31 surfaces = 62 files (`.html` + `.queries.json`) plus `event-ics.ics` and its
   queries file. With the parity suite added, the full suite is **457/457 across 50 files**.

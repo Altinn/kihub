@@ -101,8 +101,8 @@ describe('resolveModuleSources (per-module independence)', () => {
       table as never,
     );
     expect(resolved.projects).toBe(table.fixture.projects);
-    for (const module of ['news', 'events', 'learning', 'frontpage', 'siteChrome'] as const) {
-      expect(resolved[module]).toBe(table.payload[module]);
+    for (const contentModule of ['news', 'events', 'learning', 'frontpage', 'siteChrome'] as const) {
+      expect(resolved[contentModule]).toBe(table.payload[contentModule]);
     }
   });
 });

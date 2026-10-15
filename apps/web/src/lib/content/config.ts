@@ -51,14 +51,14 @@ export function readContentSourceConfig(env: Record<string, string | undefined>)
   const config = {} as Record<ContentModule, SourceId>;
   const problems: string[] = [];
 
-  for (const module of CONTENT_MODULES) {
-    const setting = SETTING_FOR_MODULE[module];
+  for (const contentModule of CONTENT_MODULES) {
+    const setting = SETTING_FOR_MODULE[contentModule];
     const raw = env[setting];
     const value = (raw ?? '').trim().toLowerCase();
     if (value === '') {
-      config[module] = DEFAULT_SOURCE;
+      config[contentModule] = DEFAULT_SOURCE;
     } else if (isSourceId(value)) {
-      config[module] = value;
+      config[contentModule] = value;
     } else {
       problems.push(`${setting}="${raw}" (accepted: ${SOURCE_IDS.join(', ')})`);
     }
