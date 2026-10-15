@@ -1,5 +1,28 @@
 <!-- SPECKIT START -->
-Active feature: **020-news-hero-media** (DONE — specify + plan + tasks + analyze + implement
+Active feature: **023-content-source-seam** (IN PROGRESS: specify + plan done 2026-10-15; next
+`/speckit-tasks`). This is step 1 of the management-decided move of editorial content to **Umbraco**
+(.NET), "option 2": headless Umbraco for editorial content, while the registry (artifacts, catalog,
+reviews, audit, discovery, users/roles, search) stays on Payload/Postgres. It is a zero-visible-change
+refactor:
+- KI Hub-owned view models in `lib/content/types.ts` replace `@/payload-types` in employee
+  pages/components.
+- Per-module sources are chosen by `CONTENT_SOURCE_{NEWS,EVENTS,PROJECTS,LEARNING,FRONTPAGE,SITE_CHROME}`:
+  `payload` only, the default; values are trimmed and lower-cased; a bad value fails fast in
+  `instrumentation.ts` and on first use.
+- The `lib/<module>.ts` read functions keep their names as facades. The Payload queries move
+  verbatim into `lib/content/payload/*`, alongside their mappers.
+- `<RichTextBody value profile>` (`standard` | `learning`) is the only rich-text entry point. Its
+  lexical branch is the only employee-app importer of `@payloadcms/richtext-lexical/react`.
+- Proof is a DB-free golden-HTML parity harness (`tests/unit/content-parity.test.ts`, fake
+  `getPayload`, fixed fixtures and clock). Its goldens are captured BEFORE the refactor, and nothing
+  may update them with `-u`. They are also the acceptance target for the future Umbraco adapters.
+- An ESLint `no-restricted-imports` guard keeps Payload out of the employee surface.
+- No schema change, migration, dependency, URL, `/cms` or infra change.
+- Constitution: PASS. Principle II is amended only when a module is first served from Umbraco
+  (Projects pilot).
+Read `specs/023-content-source-seam/plan.md` (with `research.md` R1–R12, `data-model.md`,
+`contracts/` x2, `quickstart.md`).
+Prior: **020-news-hero-media** (DONE — specify + plan + tasks + analyze + implement
 complete 2026-09-23; tasks 31/31; suite **382/382 across 47 files**, lint clean, `tsc --noEmit`
 clean, `next build` green against the migrated scratch DB with `AUTH_MODE=entra`). Fixes awkward
 cropping of news hero images on the frontpage «Siste nytt» and `/news` cards. News gets a managed
