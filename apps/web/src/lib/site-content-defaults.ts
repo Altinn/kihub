@@ -7,6 +7,8 @@
  * this portal (e.g. no `/om` yet — editors add such links when the pages exist).
  */
 
+import type { LexicalDocument } from './content/rich-text';
+
 export interface NavItem {
   label: string;
   href: string;
@@ -49,27 +51,9 @@ export interface Tile {
   variant: 'tinted' | 'accent';
 }
 
-/**
- * Minimal lexical rich-text document shape — matches what `@payloadcms/richtext-lexical` generates
- * for every `richText` field (e.g. `Project['body']` in payload-types.ts). Declared by hand rather
- * than imported from the generated types so this file keeps its zero-framework-dependency contract
- * (see file header): the shape is dictated by lexical's data model, not by Payload's codegen.
- */
-export interface RichTextValue {
-  root: {
-    type: string;
-    children: { type: string; version: number; [k: string]: unknown }[];
-    direction: 'ltr' | 'rtl' | null;
-    format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-    indent: number;
-    version: number;
-  };
-  [k: string]: unknown;
-}
-
 /** Wraps plain text in a single-paragraph lexical document, for seed/fallback content — editors
  * can add bold, links, and extra paragraphs on top of this once they open the CMS (Altinn/kihub#148). */
-function richText(text: string): RichTextValue {
+function richText(text: string): LexicalDocument {
   return {
     root: {
       type: 'root',
@@ -95,12 +79,12 @@ function richText(text: string): RichTextValue {
 
 export interface Chip {
   name: string;
-  description?: RichTextValue;
+  description?: LexicalDocument;
 }
 
 export interface RequestAccess {
   label: string;
-  body: RichTextValue;
+  body: LexicalDocument;
 }
 
 export interface SubscriptionsContent {

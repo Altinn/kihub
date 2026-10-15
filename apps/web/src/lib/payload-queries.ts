@@ -1,7 +1,2 @@
-/**
- * Shared `status: published` filter for native-content read layers (News, Learning, Projects,
- * ...). Every read-layer function that lists or resolves employee-facing content ANDs this in,
- * so a draft can never leak through — the collection's own `access.read` rule is the second line
- * of defense.
- */
-export const PUBLISHED = { status: { equals: 'published' } } as const;
+/** 023 — temporary re-export; removed in T029 once every importer uses `lib/content/payload/client`. */
+export { PUBLISHED } from './content/payload/client';

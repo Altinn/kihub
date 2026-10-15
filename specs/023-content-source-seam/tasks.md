@@ -158,7 +158,7 @@ every later phase is checked against it.
 
 **Purpose**: The neutral types and the shared Payload helpers that every module task builds on.
 
-- [ ] T006 [P] Create `apps/web/src/lib/content/rich-text.ts` (contracts/rich-text.md §1):
+- [X] T006 [P] Create `apps/web/src/lib/content/rich-text.ts` (contracts/rich-text.md §1):
   - Move the hand-declared lexical root interface from `apps/web/src/lib/site-content-defaults.ts`
     here as `LexicalDocument`.
   - Add `RichTextContent = { format: 'lexical'; document: LexicalDocument }` and a
@@ -167,22 +167,22 @@ every later phase is checked against it.
     (types unchanged otherwise for now).
   - Update the type import in `apps/web/tests/unit/subscriptions-banner-view.test.ts` to
     `LexicalDocument`.
-- [ ] T007 [P] Create `apps/web/src/lib/content/types.ts` with `ImageRendition`, `RenditionName`,
+- [X] T007 [P] Create `apps/web/src/lib/content/types.ts` with `ImageRendition`, `RenditionName`,
   `ContentImage`, `Author`, `NewsHero`, `NewsArticle`, `NewsPage`, `EventItem`, `ProjectItem` and
   `LearningArticle`, exactly as in `specs/023-content-source-seam/data-model.md`.
   - Import `EventTypeValue`/`EventFormatValue` from `@/lib/events-view` and `RichTextContent` from
     `./rich-text`.
   - No Payload imports.
-- [ ] T008 [P] Create `apps/web/src/lib/content/ports.ts` with:
+- [X] T008 [P] Create `apps/web/src/lib/content/ports.ts` with:
   - `ContentModule = 'news' | 'events' | 'projects' | 'learning' | 'frontpage' | 'siteChrome'`;
   - the six port interfaces from contracts/content-source.md §3;
   - `ModuleSources = { news: NewsSource; events: EventsSource; … }`.
   `LearningLibrary` comes from `@/lib/learning-view`; `FrontpageContent`/`SiteChrome` from
   `@/lib/site-content-defaults`.
-- [ ] T009 Create `apps/web/src/lib/content/payload/client.ts` exporting `payloadClient()`
+- [X] T009 Create `apps/web/src/lib/content/payload/client.ts` exporting `payloadClient()`
   (`getPayload({ config })`) and `PUBLISHED`, both moved from `apps/web/src/lib/payload-queries.ts`.
   Temporarily make `payload-queries.ts` re-export `PUBLISHED` from here; T029 removes it.
-- [ ] T010 [P] Create `apps/web/src/lib/content/payload/media.ts` with:
+- [X] T010 [P] Create `apps/web/src/lib/content/payload/media.ts` with:
   - `toContentImage(value: number | Media | null | undefined): ContentImage | null`. This returns
     `null` for a nullish value or a bare id. Every rendition present in `sizes` is mapped to
     `{ url ?? null, width ?? null, height ?? null }`, and absent size keys stay absent. Focal `null`

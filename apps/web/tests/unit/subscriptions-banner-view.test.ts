@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_FRONTPAGE, type RichTextValue } from '@/lib/site-content-defaults';
+import type { LexicalDocument } from '@/lib/content/rich-text';
+import { DEFAULT_FRONTPAGE } from '@/lib/site-content-defaults';
 
 /** Recursively joins every lexical text node's `text`, for asserting a rich-text field isn't empty
  * without depending on its exact node structure (Altinn/kihub#148 made these fields richText). */
-function plainTextOf(value: RichTextValue | undefined): string {
+function plainTextOf(value: LexicalDocument | undefined): string {
   function walk(node: unknown): string {
     if (!node || typeof node !== 'object') return '';
     const n = node as { text?: unknown; children?: unknown };
