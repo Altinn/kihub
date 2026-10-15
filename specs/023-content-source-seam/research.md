@@ -130,20 +130,20 @@ would change the markup of any inline image in a news body.
   accepted values. Other `CONTENT_SOURCE_*` names are not read, so they're ignored (US2 scenario 4).
 - Validation runs in two places:
   1. **At boot**, in `src/instrumentation.ts`, for the Node.js runtime in every `NODE_ENV`, placed
-     before the existing production-only Payload init.
-  2. **Lazily**, memoised, the first time any facade resolves a source. This covers scripts,
-     tests, and any runtime where the boot hook's error is only logged rather than fatal.
+     before the existing production-only Payload init. On a `ContentSourceConfigError` it logs the
+     message and calls `process.exit(1)`. The process is terminated explicitly, rather than relying
+     on Next.js treating a thrown `register()` error as fatal, so FR-012 ("stops the application at
+     startup") holds deterministically under both `next dev` and `next start`.
+  2. **Lazily**, memoised, the first time any facade resolves a source. This is defence-in-depth
+     for scripts and tests, which never run `register()`.
 
 **Rationale**: FR-010–FR-013. This uses the same env-selected, throw-on-misconfig pattern as
 `MEDIA_STORAGE_MODE` (`lib/media-storage.ts`). Lower-casing tolerates `Payload` but still rejects
 typos like `paylod`. No setting is needed in any environment today, so there is **no infra
 change**.
 
-**Implementation check (T-task)**: confirm under `next start` that an error thrown in
-`register()` aborts startup. The existing comment there assumes it does ("crashes the boot
-loudly"). If Next only logs it, the lazy check still guarantees no editorial page is served from a
-misconfigured module (it returns a 500 with the message), and quickstart §4 records which behaviour
-was observed.
+**Implementation check (T036)**: confirm that under both `next dev` and `next start` the process
+exits non-zero with the single message, before serving any request.
 
 **Alternatives considered**:
 - *One `CONTENT_SOURCE` JSON map.* Harder to set in Azure Container Apps and harder to read in a
@@ -171,11 +171,17 @@ plus its adapter, and one config value per module (SC-004).
 - Mocks `payload` (`getPayload` → an in-memory fake `find`/`findGlobal` over fixed fixture
   documents, honouring only `slug` equality, `status: published` and paging), `@payload-config`
   and `@/auth`.
+- **Records every `find`/`findGlobal` call** (collection/slug, `where`, `sort`, `limit`, `page`,
+  `depth`, `overrideAccess`) and snapshots them per surface to `__parity__/<surface>.queries.json`
+  next to the HTML. Because the fake ignores date and type predicates, the HTML alone can't catch a
+  changed query. The query snapshot proves the "verbatim move" (R10) and "no extra round-trips"
+  (SC-006). `where` values derived from `now` are stable because the clock is pinned.
 - Pins the clock with `vi.setSystemTime`.
 - Renders every editorial surface to static HTML with `react-dom/server`, and compares each one
   with `toMatchFileSnapshot('__parity__/<surface>.html')`.
 
 The surfaces covered:
+- an **empty** fixture set for every module (empty states, spec Edge Cases)
 - the frontpage
 - `/news` p1 and p2
 - the news article with upload hero, legacy hero and no hero
@@ -183,7 +189,7 @@ The surfaces covered:
 - the event page and its ICS body
 - `/prosjekter` and a project page
 - `/laering` and a learning page with code, video, image and a decorative image
-- the site header and footer
+- the site header and footer, both stored and never-saved (defaults)
 
 The goldens are **captured on unchanged `main` code first** and committed in their own commit.
 Every later task must pass against them **without `-u`**.
@@ -219,10 +225,16 @@ feature renders the same surfaces from equivalent Umbraco fixtures and must matc
 `src/lib/content/*.ts` forbids imports of `@/payload-types`, `payload`, `@payload-config` and
 `@payloadcms/*`. The error message points to `lib/content/types.ts`.
 
-Exempt (they are Payload-specific by definition):
+The same override also forbids `@/lib/content/payload/*`, so a page, component or facade can't
+bypass the per-module switch (FR-010) by importing a Payload adapter directly. The five facade
+files (`lib/news.ts`, `lib/events.ts`, `lib/projects.ts`, `lib/learning.ts`, `lib/site-content.ts`)
+are part of the guarded set.
+
+Exempt (they are Payload-specific by definition, or they are the switch itself):
 - `src/components/cms/**` (Payload admin custom components)
 - `src/components/rich-text/LexicalRichText.tsx` (the lexical renderer)
-- `src/lib/content/payload/**`
+- `src/lib/content/payload/**` (the adapters)
+- `src/lib/content/registry.ts` (the only legitimate importer of `payload/index.ts`)
 
 Registry libs (`lib/catalog.ts`, `governance.ts`, `discovery.ts`, `search.ts`) are not in the
 restricted set, so FR-015 holds.
@@ -239,7 +251,8 @@ keeps its default depth, so `category`, `subcategory`, `author` and inline uploa
 for the mapper.
 
 **Rationale**: SC-006. The one check that matters is that no adapter adds a query to resolve a
-relation the old code got from `depth`.
+relation the old code got from `depth`. This is enforced by the per-surface
+`__parity__/<surface>.queries.json` snapshots (R8), captured before the refactor.
 
 ## R11 — Constitution: no amendment in this feature
 

@@ -36,7 +36,8 @@ The function is pure (`env` is passed in) and is unit-tested exhaustively.
 
 **Where it runs**:
 - (a) `src/instrumentation.ts` `register()`, for `NEXT_RUNTIME === 'nodejs'` in **every**
-  `NODE_ENV`, before the production-only Payload init.
+  `NODE_ENV`, before the production-only Payload init. On `ContentSourceConfigError` it writes the
+  message to stderr and calls `process.exit(1)`, so the application never starts serving.
 - (b) Lazily and memoised, on the first facade call (`lib/content/registry.ts`). After a failure,
   every facade call rethrows the same error. It never falls back to a default.
 
@@ -86,6 +87,10 @@ Facades contain no logic beyond delegation. Their return types are the view mode
   `siteChromeSource()`: these use the memoised config from §2.
 
 Adding a source = one `SOURCES` entry plus its adapters. Switching a module = one setting.
+
+`registry.ts` is the only module allowed to import `lib/content/payload/index.ts` (or any future
+source's adapters). Pages, components and facades import neither, and ESLint enforces this
+(research R9).
 
 ## §6 Out of scope (FR-015)
 

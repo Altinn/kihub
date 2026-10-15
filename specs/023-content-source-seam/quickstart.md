@@ -23,11 +23,12 @@ pnpm --filter web exec tsc --noEmit
 Expected:
 - The full suite is green. Its new members are:
   - `content-source-config` (selection/validation)
-  - `content-mapping` (Payload → view model, per module, incl. image + rich-text edge cases)
+  - `content-mapping.<module>` (Payload → view model, one file per module, incl. image + rich-text
+  edge cases)
   - `content-parity` (golden HTML, research R8)
   - `content-stand-in` (US3)
-- `content-parity` must pass **without** `-u`. The `__parity__/*.html` goldens are the ones
-  committed before the refactor; `git log -- apps/web/tests/unit/__parity__` shows a single
+- `content-parity` must pass **without** `-u`. The `__parity__/*.html` and `*.queries.json`
+  goldens are the ones committed before the refactor; `git log -- apps/web/tests/unit/__parity__` shows a single
   capture commit.
 - Lint is clean, including the new `no-restricted-imports` guard (research R9).
 
@@ -65,12 +66,10 @@ CONTENT_SOURCE_NEWS=paylod CONTENT_SOURCE_EVENTS=umbraco pnpm --filter web dev
 ```
 
 Expected:
-- The server refuses to start, or (see research R6) every editorial page answers 500.
-- In both cases the log carries **one** message naming `CONTENT_SOURCE_NEWS="paylod"` and
+- The process exits with a non-zero code before serving any request.
+- The log carries **one** message naming `CONTENT_SOURCE_NEWS="paylod"` and
   `CONTENT_SOURCE_EVENTS="umbraco"` with `accepted: payload`.
-- `/registry` is unaffected in the 500 case.
-
-Record which of the two behaviours `next start` shows in `tasks.md` Notes.
+- The same holds for `next start` on a production build (research R6).
 
 Then confirm the tolerant cases start normally:
 - `CONTENT_SOURCE_NEWS=Payload` and `CONTENT_SOURCE_NEWS=" "` both mean `payload`.
@@ -82,6 +81,7 @@ Then confirm the tolerant cases start normally:
   save as before.
 - `git diff main -- apps/web/src/collections apps/web/src/globals apps/web/src/migrations apps/web/src/payload.config.ts`
   is empty, except the `site-content-defaults` type rename if it surfaces in `Frontpage.ts` imports.
+- `git diff main -- apps/web/package.json pnpm-lock.yaml` is empty (FR-004: no new dependency).
 - `/registry`, an artifact page and registry search behave as before.
 
 ## §6 Release notes

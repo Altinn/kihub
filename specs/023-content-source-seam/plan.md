@@ -45,8 +45,8 @@ token layer, shiki 4.4.3 (unchanged). **No new dependency.**
 touched.
 
 **Testing**: vitest 4.1 (`tests/**/*.test.ts`, node env, files run sequentially). New unit suites:
-`content-source-config`, `content-mapping`, `content-parity` (goldens in `tests/unit/__parity__/`),
-`content-stand-in`. Existing integration suites (`news-access`, `news-hero`, `events-access`,
+`content-source-config`, `content-mapping.<module>` (one file per module), `content-parity`
+(HTML + query goldens in `tests/unit/__parity__/`), `content-stand-in`. Existing integration suites (`news-access`, `news-hero`, `events-access`,
 `projects-access`, `learning-*`, `site-content-access`) are updated only where they assert on the
 read-layer return shape.
 
@@ -111,7 +111,7 @@ specs/023-content-source-seam/
 apps/web/
 ├── eslint.config.mjs                     # + no-restricted-imports override (R9)
 ├── src/
-│   ├── instrumentation.ts                # + readContentSourceConfig at boot, all NODE_ENVs (R6)
+│   ├── instrumentation.ts                # + readContentSourceConfig at boot, all NODE_ENVs, exit(1) on error (R6)
 │   ├── lib/
 │   │   ├── content/                      # NEW — the seam
 │   │   │   ├── types.ts                  # view models (data-model.md)
@@ -146,10 +146,10 @@ apps/web/
 └── tests/
     └── unit/
         ├── content-source-config.test.ts # NEW
-        ├── content-mapping.test.ts       # NEW
+        ├── content-mapping.<module>.test.ts  # NEW — media, projects, events, news, learning, site-content
         ├── content-parity.test.ts        # NEW — golden HTML harness
         ├── content-stand-in.test.ts      # NEW — US3
-        └── __parity__/*.html             # NEW — goldens, captured BEFORE the refactor
+        └── __parity__/*.html, *.queries.json  # NEW — goldens, captured BEFORE the refactor
 documentation/runtime-config.md           # + CONTENT_SOURCE_* rows
 ```
 

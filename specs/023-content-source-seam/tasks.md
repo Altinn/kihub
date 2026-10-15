@@ -68,6 +68,12 @@ every later phase is checked against it.
     - returns `{ docs, totalDocs, totalPages, page }`, with Payload's semantics: an empty
       collection gives `totalPages: 0`, and a page past the end gives `docs: []`.
   - **`findGlobal({ slug })`** returns the fixture global or `null`.
+  - **Call log**: every `find`/`findGlobal` call appends
+    `{ op, collection | slug, where, sort, limit, page, depth, overrideAccess }`, with argument
+    values copied verbatim and `undefined` keys omitted, to `fake.calls`. `fake.resetCalls()`
+    clears it (research R8, R10).
+  - Support swapping the fixture set at runtime (`fake.useFixtures(set)`), so the parity suite can
+    render the same surfaces against the empty set (C2).
   - Export a `mockPayloadModule(fake)` helper returning `{ getPayload: async () => fake }` for use in
     `vi.mock` factories.
 - [ ] T003 [P] Create deterministic fixtures in `apps/web/tests/helpers/content-fixtures.ts`. Use
@@ -96,13 +102,17 @@ every later phase is checked against it.
     - a `Code` block (`typescript`) and an empty `Code` block;
     - a `youtube` block with a `?t=` start, and one with an invalid URL;
     - an upload node and a `decorative` upload node;
-    - an upload node whose media is `null`.
+    - an upload node whose media is `null`;
+    - a block node of an unregistered type (e.g. `blockType: 'unknownWidget'`), which pins today's
+      handling of unrecognised blocks.
     The page has populated `category`/`subcategory`/`author`.
   - **globals**:
     - `frontpage` is `null` (defaults path);
     - `site-chrome` is stored with nav and footer;
     - also export a stored `frontpage` variant with rich-text chip descriptions for a second
-      frontpage case.
+      frontpage case, and a `site-chrome: null` variant (defaults path).
+  - **an `EMPTY` fixture set**: every collection empty (no news, events, projects or learning
+    content) and both globals `null`.
 - [ ] T004 Write the full parity suite in `apps/web/tests/unit/content-parity.test.ts`, replacing the
   spike body:
   - Wire `vi.mock('payload')` to `createFakePayload(fixtures)`, and keep the T001 mocks.
@@ -119,13 +129,22 @@ every later phase is checked against it.
       snapshot `await res.text()` to `.ics`)
     - `projects-list`, `project-detail`
     - `laering-index`, `laering-page`
-    - `site-header`, `site-footer`
+    - `site-header`, `site-footer` (stored chrome), `site-header-defaults`, `site-footer-defaults`
+      (`site-chrome: null`)
+    - against the `EMPTY` set: `news-empty`, `events-empty`, `projects-empty`, `laering-empty`,
+      `frontpage-empty`
+  - For the ICS case, build the request as `new Request('http://kihub.test/events/<slug>/ics')`, so
+    the origin in the file doesn't depend on the environment.
+  - **Query goldens**: call `fake.resetCalls()` before each surface, and after rendering assert
+    `await expect(JSON.stringify(fake.calls, null, 2)).toMatchFileSnapshot('./__parity__/<surface>.queries.json')`.
   - Draft and unknown slugs: assert the page calls `notFound()`. Expect the thrown
     `NEXT_HTTP_ERROR_FALLBACK;404` / `NEXT_NOT_FOUND` digest.
 - [ ] T005 Capture the goldens on unchanged code. This is the ONLY permitted `-u` run:
   1. `pnpm --filter web exec vitest run tests/unit/content-parity.test.ts -u`.
   2. Open every file in `apps/web/tests/unit/__parity__/` and confirm it contains the real fixture
-     content. A golden of an error page or an empty `<main>` is a harness bug: fix it and recapture.
+     content: each `*.html` shows the expected titles (the `*-empty` ones show the module's empty
+     state), and each `*.queries.json` lists the expected collections. A golden of an error page, an
+     unexpectedly empty `<main>` or an empty call log is a harness bug: fix it and recapture.
   3. Rerun without `-u` and confirm it is green.
   4. Run the full `pnpm --filter web test` and confirm it is green.
   5. Commit the harness and goldens ALONE: `test(parity): golden HTML of editorial surfaces before 023 refactor`.
@@ -402,19 +421,25 @@ with one clear message.
   Run the full suite. Parity must be green.
 - [ ] T034 [US2] In `apps/web/src/instrumentation.ts`, call `readContentSourceConfig(process.env)`
   when `NEXT_RUNTIME === 'nodejs'`, for EVERY `NODE_ENV`, BEFORE the existing production-only
-  early return. Use a dynamic import, matching the file's style. Extend the doc comment.
+  early return. Use a dynamic import, matching the file's style.
+  - On `ContentSourceConfigError`: `console.error(err.message)`, then `process.exit(1)`. This is
+    deterministic fail-fast and doesn't depend on how Next.js treats a thrown `register()` error
+    (research R6). Rethrow any other error.
+  - Extend the doc comment to explain why it exits explicitly.
 - [ ] T035 [P] [US2] Add the six `CONTENT_SOURCE_*` rows to `documentation/runtime-config.md`:
   - not required; default `payload`; accepted `payload`;
   - trimmed and case-insensitive;
-  - an invalid value aborts startup, or makes editorial pages 500, with one message;
+  - an invalid value aborts startup (the process exits non-zero) with one message listing every
+    bad setting;
   - the module→setting mapping;
   - a pointer to `specs/023-content-source-seam/contracts/content-source.md`.
 - [ ] T036 [US2] Run quickstart §4 manually:
-  1. `next dev` with `CONTENT_SOURCE_NEWS=paylod CONTENT_SOURCE_EVENTS=umbraco`.
-  2. Then a production build plus `next start` with the same values. Use a scratch DB and
-     `AUTH_MODE=entra`, as in T040.
-  3. Record under Notes whether `register()` throwing aborts startup or only logs (research R6),
-     and confirm that `/registry` keeps working in the log-only case.
+  1. `next dev` with `CONTENT_SOURCE_NEWS=paylod CONTENT_SOURCE_EVENTS=umbraco`. The process must
+     exit non-zero with the single message, before serving any request.
+  2. Then a production build plus `next start` with the same values, with the same expectation.
+     Build against the migrated scratch DB `kihub_023` with `AUTH_MODE=entra`, using the procedure
+     written in T039. Create the DB now if it doesn't exist yet; T039 reuses it.
+  3. Record the observed exit code and message under Notes.
   4. Confirm that `Payload`, blank and `CONTENT_SOURCE_SOMETHING=x` start normally.
 
 **Checkpoint**: US2 is complete. Switching a module is one setting, and misconfiguration can't
@@ -451,17 +476,24 @@ serve silently.
     - `src/app/(app)/**`
     - `src/components/**`
     - `src/lib/*-view.ts`, `src/lib/frontpage-select.ts`, `src/lib/site-content-defaults.ts`
+    - the facades `src/lib/news.ts`, `src/lib/events.ts`, `src/lib/projects.ts`,
+      `src/lib/learning.ts`, `src/lib/site-content.ts`
     - `src/lib/content/*.ts`
   - Set `ignores`:
     - `src/components/cms/**`
     - `src/components/rich-text/LexicalRichText.tsx`
+    - `src/lib/content/registry.ts` (the switch itself)
   - The rule is `no-restricted-imports` with `paths` `@/payload-types`, `payload` and
-    `@payload-config`, and `patterns` `@payloadcms/*`. Its message is: "Editorial pages/components
+    `@payload-config`, and `patterns` `@payloadcms/*` and `@/lib/content/payload/*` (so nothing can
+    bypass the per-module switch, FR-010). Its message is: "Editorial pages/components
     use KI Hub view models from @/lib/content/types and <RichTextBody> — Payload access lives in
     src/lib/content/payload/ (023)".
   - Note `src/lib/content/payload/**` is NOT matched by `src/lib/content/*.ts`.
-  - Run `pnpm --filter web lint` and confirm it is clean. Then do the quickstart §2 negative check:
-    add the import, see the error, revert.
+  - Run `pnpm --filter web lint` and confirm it is clean. Then do the negative checks, reverting
+    each one:
+    - quickstart §2: add `@/payload-types` to `NewsCard.tsx` and see the error;
+    - add `import { payloadNewsSource } from '@/lib/content/payload/news'` to
+      `src/lib/news.ts` and see the error.
 - [ ] T039 Run all the gates and record the counts in Notes:
   - `pnpm --filter web test` (suite count, files);
   - `pnpm --filter web lint`;
@@ -478,6 +510,7 @@ serve silently.
   - Check `/registry`, an artifact page and search: unchanged.
   - Confirm `git diff main -- apps/web/src/collections apps/web/src/globals apps/web/src/migrations apps/web/src/payload.config.ts`
     is empty, or only a type-import line in `Frontpage.ts`.
+  - Confirm `git diff main -- apps/web/package.json pnpm-lock.yaml` is empty (FR-004).
 - [ ] T041 Update the agent context in `CLAUDE.md` (the 023 entry inside `<!-- SPECKIT START -->`):
   - set the status to DONE with the date, task count, suite count, and the lint/tsc/build results;
   - add the R6 `next start` observation and any harness gotchas found in T001;
@@ -562,4 +595,15 @@ Task: "T026 content-mapping.site-content.test.ts"
 
 - `content-mapping` is split into per-module files (`content-mapping.<module>.test.ts`) so they can
   be written in parallel. plan.md names one file; this is the only deviation.
-- Record the T001 spike results, the T036 `next start` observation, and the T039 gate counts here.
+- 2026-10-15 `/speckit-analyze` remediation:
+  - I1 (fail-fast is now an explicit `process.exit(1)`);
+  - C1 (query-call goldens);
+  - C2 (empty-state surfaces);
+  - C3 (adapter-bypass lint);
+  - C4 (unknown block);
+  - C5 (default chrome);
+  - C6 (dependency diff);
+  - F1 (T036 → T039 scratch DB);
+  - F2 (plan names per-module mapping files);
+  - U1 (fixed ICS request URL).
+- Record the T001 spike results, the T036 exit observation, and the T039 gate counts here.
