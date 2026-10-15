@@ -2,13 +2,30 @@ import type { Role } from '@kihub/governance-core';
 import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  getFrontpageContent,
-  getSiteChrome,
-  mergeFrontpage,
-  mergeSiteChrome,
-} from '@/lib/site-content';
+import { mergeFrontpage, mergeSiteChrome } from '@/lib/content/payload/site-content';
+import { lexicalContent } from '@/lib/content/rich-text';
+import { getFrontpageContent, getSiteChrome } from '@/lib/site-content';
 import { DEFAULT_FRONTPAGE, DEFAULT_SITE_CHROME } from '@/lib/site-content-defaults';
+
+/**
+ * 023: the merge returns rich text format-tagged (`RichTextContent`), while the seeded defaults keep
+ * the stored lexical shape (they are also the global's `defaultValue`s). This is the defaults as the
+ * merge must return them — same content, wrapped.
+ */
+const MERGED_DEFAULT_FRONTPAGE = {
+  ...DEFAULT_FRONTPAGE,
+  subscriptions: {
+    ...DEFAULT_FRONTPAGE.subscriptions,
+    chips: DEFAULT_FRONTPAGE.subscriptions.chips.map((c) => ({
+      name: c.name,
+      description: c.description ? lexicalContent(c.description) : undefined,
+    })),
+    requestAccess: {
+      label: DEFAULT_FRONTPAGE.subscriptions.requestAccess.label,
+      body: lexicalContent(DEFAULT_FRONTPAGE.subscriptions.requestAccess.body),
+    },
+  },
+};
 
 /**
  * T011 (011 foundational, FR-011/012, contracts/site-content-globals.md) — the access matrix and
@@ -131,7 +148,7 @@ describe('globals access matrix (FR-011, Principle VIII)', () => {
 describe('seeded-defaults merge (FR-012)', () => {
   it('returns the complete defaults when nothing is stored', () => {
     expect(mergeSiteChrome(null)).toEqual(DEFAULT_SITE_CHROME);
-    expect(mergeFrontpage(null)).toEqual(DEFAULT_FRONTPAGE);
+    expect(mergeFrontpage(null)).toEqual(MERGED_DEFAULT_FRONTPAGE);
   });
 
   it('merges per-section: a stored nav leaves the footer defaults intact', () => {
@@ -157,7 +174,7 @@ describe('seeded-defaults merge (FR-012)', () => {
     const merged = mergeFrontpage({ hero: { heading: 'Egen tittel' } });
     expect(merged.hero.heading).toBe('Egen tittel');
     expect(merged.tiles).toEqual(DEFAULT_FRONTPAGE.tiles);
-    expect(merged.subscriptions).toEqual(DEFAULT_FRONTPAGE.subscriptions);
+    expect(merged.subscriptions).toEqual(MERGED_DEFAULT_FRONTPAGE.subscriptions);
   });
 
   it('falls back to default tiles unless exactly two stored tiles exist', () => {
@@ -171,7 +188,7 @@ describe('seeded-defaults merge (FR-012)', () => {
     const merged = mergeFrontpage({ subscriptions: { heading: 'Egen overskrift' } });
     expect(merged.subscriptions.heading).toBe('Egen overskrift');
     expect(merged.subscriptions.chips).toEqual([]);
-    expect(merged.subscriptions.requestAccess).toEqual(DEFAULT_FRONTPAGE.subscriptions.requestAccess);
+    expect(merged.subscriptions.requestAccess).toEqual(MERGED_DEFAULT_FRONTPAGE.subscriptions.requestAccess);
   });
 
   it('every section is non-empty through the real read path (fresh env or stored)', async () => {

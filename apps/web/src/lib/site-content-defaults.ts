@@ -7,7 +7,7 @@
  * this portal (e.g. no `/om` yet — editors add such links when the pages exist).
  */
 
-import type { LexicalDocument } from './content/rich-text';
+import type { LexicalDocument, RichTextContent } from './content/rich-text';
 
 export interface NavItem {
   label: string;
@@ -79,12 +79,12 @@ function richText(text: string): LexicalDocument {
 
 export interface Chip {
   name: string;
-  description?: LexicalDocument;
+  description?: RichTextContent;
 }
 
 export interface RequestAccess {
   label: string;
-  body: LexicalDocument;
+  body: RichTextContent;
 }
 
 export interface SubscriptionsContent {
@@ -99,6 +99,28 @@ export interface FrontpageContent {
   hero: HeroContent;
   tiles: Tile[];
   subscriptions: SubscriptionsContent;
+}
+
+/*
+ * 023 — the seeded defaults keep the STORED (lexical) shape, because they are also the Payload
+ * `frontpage` global's `defaultValue`s. The content source wraps their rich text into
+ * `RichTextContent` when it falls back to them (research R12), so pages only ever see
+ * `FrontpageContent`.
+ */
+export interface ChipDefaults {
+  name: string;
+  description?: LexicalDocument;
+}
+
+export interface SubscriptionsDefaults extends Omit<SubscriptionsContent, 'chips' | 'requestAccess'> {
+  chips: ChipDefaults[];
+  requestAccess: { label: string; body: LexicalDocument };
+}
+
+export interface FrontpageDefaults {
+  hero: HeroContent;
+  tiles: Tile[];
+  subscriptions: SubscriptionsDefaults;
 }
 
 export const DEFAULT_SITE_CHROME: SiteChrome = {
@@ -130,7 +152,7 @@ export const DEFAULT_SITE_CHROME: SiteChrome = {
   },
 };
 
-export const DEFAULT_FRONTPAGE: FrontpageContent = {
+export const DEFAULT_FRONTPAGE: FrontpageDefaults = {
   hero: {
     eyebrow: 'Digdir / KITT-teamet',
     heading: 'Kunstig intelligens i Digdir',

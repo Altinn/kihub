@@ -343,14 +343,14 @@ single rich-text entry point, and the parity goldens still match byte-for-byte.
 
 ### Frontpage + site chrome
 
-- [ ] T026 [P] [US1] Add `apps/web/tests/unit/content-mapping.site-content.test.ts`:
+- [X] T026 [P] [US1] Add `apps/web/tests/unit/content-mapping.site-content.test.ts`:
   - `mergeFrontpage(null)` equals the defaults, with chip descriptions and `requestAccess.body`
     wrapped as `RichTextContent`;
   - a stored subscriptions section is wrapped the same way;
   - a stored `requestAccess` missing label/body falls back per field;
   - tiles ≠ 2 → default tiles;
   - `mergeSiteChrome` per-section fallback is unchanged.
-- [ ] T027 [US1] Create `apps/web/src/lib/content/payload/site-content.ts`:
+- [X] T027 [US1] Create `apps/web/src/lib/content/payload/site-content.ts`:
   - `mergeSiteChrome` and `mergeFrontpage`, moved from `apps/web/src/lib/site-content.ts`.
     `mergeFrontpage` wraps rich text into `RichTextContent` for both stored and defaulted chips and
     request-access (research R12).
@@ -363,11 +363,11 @@ single rich-text entry point, and the parity goldens still match byte-for-byte.
   Check that `apps/web/src/globals/Frontpage.ts` `defaultValue`s still compile. Rewrite
   `apps/web/src/lib/site-content.ts` as a facade that keeps the type re-exports. Point the merge
   imports in `apps/web/tests/integration/site-content-access.test.ts` at the new module.
-- [ ] T028 [US1] In `apps/web/src/components/SubscriptionsBanner.tsx`, replace both `RichText` calls
+- [X] T028 [US1] In `apps/web/src/components/SubscriptionsBanner.tsx`, replace both `RichText` calls
   with `<RichTextBody value=… />` (standard profile) and remove the
   `@payloadcms/richtext-lexical/react` import. Parity must be green: `frontpage-defaults`,
   `frontpage-stored`, `site-header`, `site-footer`.
-- [ ] T029 [US1] Delete `apps/web/src/lib/payload-queries.ts` and repoint any remaining importers
+- [X] T029 [US1] Delete `apps/web/src/lib/payload-queries.ts` and repoint any remaining importers
   (`grep -rn "payload-queries" apps/web/src apps/web/tests`) to `@/lib/content/payload/client`.
   Then confirm that
   `grep -rln "@/payload-types\|@payloadcms/richtext-lexical/react\|from 'payload'" "apps/web/src/app/(app)" apps/web/src/components`
@@ -642,5 +642,15 @@ Task: "T026 content-mapping.site-content.test.ts"
   now loads every returned id in one `payload.find({ id: { in } })` and asserts that count and
   stored status match (the same guarantee). `news-hero.test.ts` imports `resolveHeroSource` from
   the Payload source and expects `kind: 'image'` (was `'upload'`).
+- **T027**: `site-content-access.test.ts` compared `mergeFrontpage(null)` with the stored-shape
+  `DEFAULT_FRONTPAGE`. It now compares with `MERGED_DEFAULT_FRONTPAGE`, which holds the same
+  defaults with chip descriptions and the request-access body wrapped as `RichTextContent`. The
+  merge functions are imported from `@/lib/content/payload/site-content`. `Frontpage.ts` compiles
+  unchanged: `DEFAULT_FRONTPAGE` is now typed `FrontpageDefaults` (stored shape) with the same
+  values.
+- **US1 checkpoint (T029)**: the only Payload importers left under `src/app/(app)` and
+  `src/components` are `components/cms/DiscoveryScanPanel.tsx` (the `/cms` admin panel) and
+  `components/rich-text/LexicalRichText.tsx` (SC-003: 13 → 0 editorial files). The suite is
+  **485/485 across 56 files**, and lint and `tsc --noEmit` are clean.
 - **Goldens**: 31 surfaces = 62 files (`.html` + `.queries.json`) plus `event-ics.ics` and its
   queries file. With the parity suite added, the full suite is **457/457 across 50 files**.
