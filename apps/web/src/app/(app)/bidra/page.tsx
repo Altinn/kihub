@@ -75,7 +75,7 @@ const FLOW = [
 ];
 
 function Code({ code, language }: { code: string; language: string }) {
-  return <LearningCodeBlock node={{ fields: { code, language } }} />;
+  return <LearningCodeBlock code={code} language={language} />;
 }
 
 function SectionHead({ id, eyebrow, title, lede }: { id: string; eyebrow: string; title: string; lede?: string }) {

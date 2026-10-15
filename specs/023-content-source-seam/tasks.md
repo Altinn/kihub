@@ -212,7 +212,7 @@ single rich-text entry point, and the parity goldens still match byte-for-byte.
 
 ### Rich-text entry point (contracts/rich-text.md)
 
-- [ ] T011 [US1] Create `apps/web/src/components/rich-text/LexicalRichText.tsx`, which renders
+- [X] T011 [US1] Create `apps/web/src/components/rich-text/LexicalRichText.tsx`, which renders
   `<RichText data={document} converters=…>` from `@payloadcms/richtext-lexical/react`:
   - profile `standard` passes NO `converters` prop, identical to today's bare calls;
   - profile `learning` uses the converters moved verbatim from
@@ -225,7 +225,7 @@ single rich-text entry point, and the parity goldens still match byte-for-byte.
   `LearningCodeBlock.tsx` and `LearningVideo.tsx` to the neutral shapes in contracts/rich-text.md
   §4, keeping their bodies' logic identical: `image.renditions.content?.url ?? image.url`, the
   width/height fallbacks, the empty-code and invalid-URL early returns, and the title fallback.
-- [ ] T012 [US1] Create `apps/web/src/components/RichTextBody.tsx`:
+- [X] T012 [US1] Create `apps/web/src/components/RichTextBody.tsx`:
   - signature `RichTextBody({ value, profile = 'standard' }: { value: RichTextContent; profile?: 'standard' | 'learning' })`;
   - an exhaustive `switch (value.format)`, with a `never` check in the default branch, delegating
     `'lexical'` to `LexicalRichText`;
@@ -631,5 +631,7 @@ Task: "T026 content-mapping.site-content.test.ts"
   a CONTAMINATED `frontpage-defaults`/`frontpage-stored` pair. Fix: `{ timeout: 60_000 }` on both
   describes; the two pairs were deleted and recaptured, still on unchanged code. After that, three
   consecutive runs (one with `CI=1`) were green with 0 written.
+- **T011**: `/bidra` (the contribute guide) also renders `LearningCodeBlock` directly, so a
+  `bidra` golden was captured on unchanged component code (own commit) before its props changed.
 - **Goldens**: 31 surfaces = 62 files (`.html` + `.queries.json`) plus `event-ics.ics` and its
   queries file. With the parity suite added, the full suite is **457/457 across 50 files**.

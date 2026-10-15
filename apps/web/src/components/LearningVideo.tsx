@@ -7,22 +7,20 @@ import { parseYouTubeId, parseYouTubeStart, youtubeEmbedUrl } from '@/lib/youtub
  * loading, and subtitles forced on with Norwegian preferred (`lib/youtube.ts`). The `referrerPolicy`
  * must NOT be `no-referrer`: YouTube refuses to play embeds that send no referrer.
  */
-export interface LearningVideoNode {
-  fields: {
-    url?: string | null;
-    title?: string | null;
-    caption?: string | null;
-    blockType?: string;
-  };
-}
-
-export function LearningVideo({ node }: { node: LearningVideoNode }) {
-  const url = node.fields?.url;
+export function LearningVideo({
+  url,
+  title: rawTitle,
+  caption: rawCaption,
+}: {
+  url: string | null;
+  title: string | null;
+  caption: string | null;
+}) {
   const id = parseYouTubeId(url);
   if (!id) return null;
 
-  const title = node.fields?.title?.trim() || 'YouTube-video';
-  const caption = node.fields?.caption?.trim();
+  const title = rawTitle?.trim() || 'YouTube-video';
+  const caption = rawCaption?.trim();
   const src = youtubeEmbedUrl(id, { start: parseYouTubeStart(url) });
 
   return (

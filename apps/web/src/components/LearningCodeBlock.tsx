@@ -12,19 +12,9 @@ import { codeLanguageLabel, highlightCode } from '@/lib/learning-code';
  * Token colours are `var(--shiki-…)` references supplied by the CSS-variables theme and resolved by
  * the alias block in `portal.css`, so no colour value is hardcoded here (FR-034).
  */
-export interface LearningCodeBlockNode {
-  fields: {
-    code?: string | null;
-    language?: string | null;
-    blockType?: string;
-  };
-}
-
-export function LearningCodeBlock({ node }: { node: LearningCodeBlockNode }) {
-  const code = node.fields?.code ?? '';
+export function LearningCodeBlock({ code, language }: { code: string; language: string | null }) {
   if (!code.trim()) return null;
 
-  const language = node.fields?.language ?? null;
   const label = codeLanguageLabel(language);
   const lines = highlightCode(code, language);
 
