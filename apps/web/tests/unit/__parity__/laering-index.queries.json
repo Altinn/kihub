@@ -1,0 +1,43 @@
+[
+  {
+    "op": "find",
+    "collection": "learning-categories",
+    "sort": [
+      "order",
+      "title"
+    ],
+    "limit": 200,
+    "page": 1,
+    "depth": 0,
+    "overrideAccess": true
+  },
+  {
+    "op": "find",
+    "collection": "learning-subcategories",
+    "sort": [
+      "order",
+      "title"
+    ],
+    "limit": 200,
+    "page": 1,
+    "depth": 0,
+    "overrideAccess": true
+  },
+  {
+    "op": "find",
+    "collection": "learning-pages",
+    "where": {
+      "status": {
+        "equals": "published"
+      }
+    },
+    "sort": [
+      "order",
+      "title"
+    ],
+    "limit": 200,
+    "page": 1,
+    "depth": 0,
+    "overrideAccess": true
+  }
+]

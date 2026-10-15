@@ -189,14 +189,14 @@ describe('Projects authoring access + visibility (T006/T012)', () => {
 
   it('the read layer never returns a draft, in the list or by slug (FR-007/009)', async () => {
     const list = await listPublishedProjects();
-    expect(list.some((p) => p.id === draftId)).toBe(false);
-    expect(list.some((p) => p.id === publishedId)).toBe(true);
+    expect(list.some((p) => p.id === String(draftId))).toBe(false);
+    expect(list.some((p) => p.id === String(publishedId))).toBe(true);
 
     const byDraftSlug = await getPublishedProjectBySlug(draftSlug);
     expect(byDraftSlug).toBeNull();
 
     const published = await payload.findByID({ collection: 'projects', id: publishedId, overrideAccess: true });
     const byPublishedSlug = await getPublishedProjectBySlug(published.slug ?? '');
-    expect(byPublishedSlug?.id).toBe(publishedId);
+    expect(byPublishedSlug?.id).toBe(String(publishedId));
   });
 });

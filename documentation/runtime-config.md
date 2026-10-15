@@ -40,6 +40,28 @@ is configured with — Azure Container Apps sets these; local dev uses `apps/web
 
 Webhook HMAC secrets are per-source database fields (hidden, Admin-only), not env vars.
 
+## Content sources (023 — Payload → Umbraco migration seam)
+
+Each editorial module reads its content from the source its setting names. Today the only source is
+`payload`, so **none of these needs to be set anywhere**. They exist so a module can later be moved
+to another source (and rolled back) with one setting, without a code change. Contract:
+`specs/023-content-source-seam/contracts/content-source.md`.
+
+| Variable | Required | Values | Module |
+|---|---|---|---|
+| `CONTENT_SOURCE_NEWS` | no (default `payload`) | `payload` | News (`/news`, frontpage «Siste nytt», news hero images) |
+| `CONTENT_SOURCE_EVENTS` | no (default `payload`) | `payload` | Events (`/events`, event pages + `.ics`, frontpage events) |
+| `CONTENT_SOURCE_PROJECTS` | no (default `payload`) | `payload` | Projects (`/prosjekter`) |
+| `CONTENT_SOURCE_LEARNING` | no (default `payload`) | `payload` | KI Læring (`/laering`, incl. inline images) |
+| `CONTENT_SOURCE_FRONTPAGE` | no (default `payload`) | `payload` | Frontpage hero, tiles, subscriptions banner |
+| `CONTENT_SOURCE_SITE_CHROME` | no (default `payload`) | `payload` | Header navigation + footer |
+
+Values are trimmed and case-insensitive; empty means the default. **Any other value stops the
+application at startup**: the process exits non-zero after logging ONE message that lists every bad
+setting, e.g. `Invalid content source configuration: CONTENT_SOURCE_NEWS="paylod" (accepted: payload)`.
+It never falls back silently. Other `CONTENT_SOURCE_*` names are ignored. The registry, discovery and
+the `/cms` back-office do not read these settings.
+
 ## Dev/tooling only (not set in the container)
 
 | Variable | Used by |

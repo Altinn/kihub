@@ -1,0 +1,47 @@
+[
+  {
+    "op": "find",
+    "collection": "events",
+    "where": {
+      "and": [
+        {
+          "status": {
+            "equals": "published"
+          }
+        },
+        {
+          "startDateTime": {
+            "less_than_equal": "2026-11-08T22:59:59.999Z"
+          }
+        },
+        {
+          "or": [
+            {
+              "endDateTime": {
+                "greater_than_equal": "2026-09-27T22:00:00.000Z"
+              }
+            },
+            {
+              "and": [
+                {
+                  "endDateTime": {
+                    "exists": false
+                  }
+                },
+                {
+                  "startDateTime": {
+                    "greater_than_equal": "2026-09-27T22:00:00.000Z"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "sort": "startDateTime",
+    "limit": 200,
+    "page": 1,
+    "overrideAccess": true
+  }
+]

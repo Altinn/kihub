@@ -6,9 +6,8 @@ import {
   parseNewsPageParam,
   pickArticleImage,
   pickCardImage,
-  resolveHeroSource,
 } from '../../src/lib/news-view';
-import type { Media } from '../../src/payload-types';
+import type { ContentImage } from '../../src/lib/content/types';
 
 /**
  * T003 (013 US2/FR-007/008/009/010/013) — the pure /news view module. The page-boundary arithmetic
@@ -140,13 +139,13 @@ describe('formatNewsDate', () => {
 const UPDATED = '2026-09-23T10:00:00.000Z';
 const V = `v=${Date.parse(UPDATED)}`;
 
-type Sizes = NonNullable<Media['sizes']>;
 function size(name: string, width: number, height: number) {
   return { url: `/payload-api/media/file/${name}-${width}x${height}.png`, width, height };
 }
-function media(overrides: Partial<Omit<Media, 'sizes'>> & { sizes?: Partial<Sizes> } = {}): Media {
+// 023: the helpers take KI Hub's ContentImage (renditions) instead of Payload's Media (sizes); the
+// inputs and expectations below are otherwise unchanged from 020.
+function media(overrides: Partial<ContentImage> = {}): ContentImage {
   return {
-    id: 1,
     alt: 'Et bilde med tekst i høyre kant',
     url: '/payload-api/media/file/bilde.png',
     width: 3000,
@@ -154,46 +153,17 @@ function media(overrides: Partial<Omit<Media, 'sizes'>> & { sizes?: Partial<Size
     focalX: 90,
     focalY: 20,
     updatedAt: UPDATED,
-    createdAt: UPDATED,
-    sizes: {},
+    renditions: {},
     ...overrides,
-  } as Media;
+  };
 }
 
-describe('resolveHeroSource (B4.1, FR-008/FR-010)', () => {
-  it('prefers a populated upload even when a legacy URL is also set', () => {
-    const m = media();
-    expect(resolveHeroSource({ heroImage: m, heroImageUrl: 'https://legacy.example/a.jpg' })).toEqual({
-      kind: 'upload',
-      media: m,
-    });
-  });
-
-  it('does not treat a media document without a file URL as an upload', () => {
-    expect(resolveHeroSource({ heroImage: media({ url: null }), heroImageUrl: null })).toEqual({ kind: 'none' });
-  });
-
-  it('falls back to the legacy URL when the media was deleted (null) or is unpopulated (an id)', () => {
-    expect(resolveHeroSource({ heroImage: null, heroImageUrl: 'https://legacy.example/a.jpg' })).toEqual({
-      kind: 'legacy',
-      url: 'https://legacy.example/a.jpg',
-    });
-    expect(resolveHeroSource({ heroImage: 42, heroImageUrl: 'https://legacy.example/a.jpg' })).toEqual({
-      kind: 'legacy',
-      url: 'https://legacy.example/a.jpg',
-    });
-  });
-
-  it('is none when neither is usable, including a whitespace-only legacy URL', () => {
-    expect(resolveHeroSource({ heroImage: undefined, heroImageUrl: '   ' })).toEqual({ kind: 'none' });
-    expect(resolveHeroSource({ heroImage: null, heroImageUrl: null })).toEqual({ kind: 'none' });
-  });
-});
+// 023: the `resolveHeroSource` cases moved to content-mapping.news.test.ts (the source resolves the hero).
 
 describe('pickCardImage (B4.2–B4.4, B4.6)', () => {
   it('uses the exact 16:10 card sizes as a srcset, with the focal point as object-position', () => {
     const img = pickCardImage(
-      media({ sizes: { card: size('bilde', 800, 500), card2x: size('bilde', 1600, 1000) } }),
+      media({ renditions: { card: size('bilde', 800, 500), card2x: size('bilde', 1600, 1000) } }),
     );
     expect(img.src).toBe(`/payload-api/media/file/bilde-800x500.png?${V}`);
     expect(img.srcSet).toBe(
@@ -203,14 +173,14 @@ describe('pickCardImage (B4.2–B4.4, B4.6)', () => {
   });
 
   it('uses only the card size that exists', () => {
-    const img = pickCardImage(media({ sizes: { card: size('bilde', 800, 500) } }));
+    const img = pickCardImage(media({ renditions: { card: size('bilde', 800, 500) } }));
     expect(img.srcSet).toBe(`/payload-api/media/file/bilde-800x500.png?${V} 800w`);
   });
 
   it('skips a card size that is not 16:10 and falls back to the reading-width sizes', () => {
     const img = pickCardImage(
       media({
-        sizes: {
+        renditions: {
           card: size('lite', 600, 300),
           card2x: size('lite', 600, 300),
           content: size('lite', 600, 300),
@@ -224,7 +194,7 @@ describe('pickCardImage (B4.2–B4.4, B4.6)', () => {
 
   it('keeps one srcset candidate per width when a small original is stored for several sizes', () => {
     const same = size('lite', 600, 300);
-    const img = pickCardImage(media({ sizes: { card: same, card2x: same, content: same, content2x: same } }));
+    const img = pickCardImage(media({ renditions: { card: same, card2x: same, content: same, content2x: same } }));
     expect(img.srcSet).toBe(`/payload-api/media/file/lite-600x300.png?${V} 600w`);
   });
 
@@ -247,7 +217,7 @@ describe('pickCardImage (B4.2–B4.4, B4.6)', () => {
 describe('pickArticleImage (B4.5, FR-006/007)', () => {
   it('uses the reading-width sizes with their actual widths and dimensions', () => {
     const img = pickArticleImage(
-      media({ sizes: { content: size('bilde', 760, 253), content2x: size('bilde', 1520, 507) } }),
+      media({ renditions: { content: size('bilde', 760, 253), content2x: size('bilde', 1520, 507) } }),
     );
     expect(img.src).toBe(`/payload-api/media/file/bilde-760x253.png?${V}`);
     expect(img.srcSet).toBe(
@@ -258,7 +228,7 @@ describe('pickArticleImage (B4.5, FR-006/007)', () => {
 
   it('never uses a card crop — falls back to the whole original instead', () => {
     const img = pickArticleImage(
-      media({ sizes: { card: size('bilde', 800, 500), card2x: size('bilde', 1600, 1000) } }),
+      media({ renditions: { card: size('bilde', 800, 500), card2x: size('bilde', 1600, 1000) } }),
     );
     expect(img.src).toBe(`/payload-api/media/file/bilde.png?${V}`);
     expect(img.srcSet).toBeUndefined();

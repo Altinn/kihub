@@ -1,5 +1,5 @@
 import { Dialog, DialogBlock } from '@digdir/designsystemet-react';
-import { RichText } from '@payloadcms/richtext-lexical/react';
+import { RichTextBody } from '@/components/RichTextBody';
 import type { SubscriptionsContent } from '@/lib/site-content-defaults';
 
 /**
@@ -120,7 +120,7 @@ export function SubscriptionsBanner({
             </h3>
             {chip.description ? (
               <div className="kihub-prose" style={{ marginTop: 'var(--kihub-space-2)' }}>
-                <RichText data={chip.description} />
+                <RichTextBody value={chip.description} />
               </div>
             ) : null}
           </DialogBlock>
@@ -133,7 +133,7 @@ export function SubscriptionsBanner({
           </h3>
           {subscriptions.requestAccess.body ? (
             <div className="kihub-prose" style={{ marginTop: 'var(--kihub-space-2)' }}>
-              <RichText data={subscriptions.requestAccess.body} />
+              <RichTextBody value={subscriptions.requestAccess.body} />
             </div>
           ) : null}
         </DialogBlock>

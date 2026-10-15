@@ -1,0 +1,61 @@
+[
+  {
+    "op": "findGlobal",
+    "slug": "frontpage",
+    "overrideAccess": true
+  },
+  {
+    "op": "find",
+    "collection": "events",
+    "where": {
+      "and": [
+        {
+          "status": {
+            "equals": "published"
+          }
+        },
+        {
+          "or": [
+            {
+              "endDateTime": {
+                "greater_than_equal": "2026-10-15T08:00:00.000Z"
+              }
+            },
+            {
+              "and": [
+                {
+                  "endDateTime": {
+                    "exists": false
+                  }
+                },
+                {
+                  "startDateTime": {
+                    "greater_than_equal": "2026-10-15T08:00:00.000Z"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "sort": "startDateTime",
+    "limit": 200,
+    "page": 1,
+    "overrideAccess": true
+  },
+  {
+    "op": "find",
+    "collection": "news",
+    "where": {
+      "status": {
+        "equals": "published"
+      }
+    },
+    "sort": "-publishDate",
+    "limit": 200,
+    "page": 1,
+    "depth": 1,
+    "overrideAccess": true
+  }
+]

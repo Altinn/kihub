@@ -1,0 +1,24 @@
+[
+  {
+    "op": "find",
+    "collection": "news",
+    "where": {
+      "and": [
+        {
+          "slug": {
+            "equals": "ugenererte-storrelser"
+          }
+        },
+        {
+          "status": {
+            "equals": "published"
+          }
+        }
+      ]
+    },
+    "limit": 1,
+    "page": 1,
+    "depth": 1,
+    "overrideAccess": true
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "op": "find",
+    "collection": "projects",
+    "where": {
+      "status": {
+        "equals": "published"
+      }
+    },
+    "sort": [
+      "order",
+      "createdAt"
+    ],
+    "limit": 200,
+    "page": 1,
+    "overrideAccess": true
+  }
+]

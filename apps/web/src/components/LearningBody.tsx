@@ -1,39 +1,16 @@
-import { RichText } from '@payloadcms/richtext-lexical/react';
-import type { JSXConvertersFunction } from '@payloadcms/richtext-lexical/react';
-import { LearningCodeBlock, type LearningCodeBlockNode } from '@/components/LearningCodeBlock';
-import { LearningImage, type LearningImageNode } from '@/components/LearningImage';
-import { LearningVideo, type LearningVideoNode } from '@/components/LearningVideo';
-import type { LearningPage } from '@/payload-types';
+import { RichTextBody } from '@/components/RichTextBody';
+import type { RichTextContent } from '@/lib/content/rich-text';
 
 /**
- * 014 US3 — the learning page body (contracts/learning-editor.md §B).
- *
- * Custom converters on top of the defaults: inline uploads become a `<figure>` with correct alt
- * handling, the `Code` block becomes a highlighted, display-only `<pre>`, and the `youtube` block
- * (022) becomes a responsive embedded player.
- *
- * Note these converters are SYNCHRONOUS — the converter type returns `React.ReactNode`, not a promise
- * (research §3). That is precisely why the highlighter is shiki's synchronous core: no async component
- * and no Suspense boundary is introduced per code block.
+ * 014 US3 — the learning page body (contracts/learning-editor.md §B). Since 023 the converters
+ * (inline images, highlighted `Code` blocks, `youtube` embeds) live in the lexical renderer's
+ * `learning` profile (`components/rich-text/LexicalRichText.tsx`); this component keeps the page's
+ * body wrapper.
  */
-const converters: JSXConvertersFunction = ({ defaultConverters }) => ({
-  ...defaultConverters,
-  upload: ({ node }) => <LearningImage node={node as unknown as LearningImageNode} />,
-  blocks: {
-    // The `blocks` map is indexed by block slug and typed loosely, so `node` needs an explicit
-    // annotation — without it TypeScript infers `any` here, which only `next build`'s type check
-    // catches (vitest and eslint both pass).
-    Code: ({ node }: { node: unknown }) => (
-      <LearningCodeBlock node={node as LearningCodeBlockNode} />
-    ),
-    youtube: ({ node }: { node: unknown }) => <LearningVideo node={node as LearningVideoNode} />,
-  },
-});
-
-export function LearningBody({ body }: { body: LearningPage['body'] }) {
+export function LearningBody({ body }: { body: RichTextContent }) {
   return (
     <div className="lp-page__body kihub-prose">
-      <RichText data={body} converters={converters} />
+      <RichTextBody value={body} profile="learning" />
     </div>
   );
 }

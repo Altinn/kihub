@@ -4,7 +4,6 @@ import { LearningBody } from '@/components/LearningBody';
 import { LearningShell } from '@/components/LearningShell';
 import { getPublishedLearningPageBySlug, readLearningLibrary } from '@/lib/learning';
 import { buildLearningTree, formatLearningUpdated } from '@/lib/learning-view';
-import type { LearningCategory, LearningSubcategory, User } from '@/payload-types';
 
 /**
  * 014 US1 — a single learning page (contracts/learning-page-ui.md §D).
@@ -17,12 +16,6 @@ import type { LearningCategory, LearningSubcategory, User } from '@/payload-type
  * The byline (#140) mirrors the News detail page: name if set, else email, else omitted — so a
  * colleague reading a page can tell who to contact about it.
  */
-function relationTitle(
-  value: number | LearningCategory | LearningSubcategory | null | undefined,
-): string {
-  return value && typeof value === 'object' ? value.title : '';
-}
-
 export default async function LearningPageRoute({
   params,
 }: {
@@ -39,10 +32,8 @@ export default async function LearningPageRoute({
 
   const tree = buildLearningTree(library, decoded);
   const updated = formatLearningUpdated(page.updatedAt);
-  const categoryTitle = relationTitle(page.category);
-  const subcategoryTitle = relationTitle(page.subcategory);
-  const author = typeof page.author === 'object' ? (page.author as User | null) : null;
-  const byline = author?.name || author?.email || null;
+  const { categoryTitle, subcategoryTitle } = page;
+  const byline = page.author?.name || page.author?.email || null;
 
   return (
     <LearningShell tree={tree}>

@@ -1,0 +1,34 @@
+<link rel="preload" as="image" href="/brand/kitt-logo.svg"/>
+<header class="site-header">
+<div class="kihub-container site-header__inner">
+<a class="site-header__brand kihub-focusable" href="/">
+<img alt="Kitt" width="100" height="39" decoding="async" data-nimg="1" style="color:transparent" src="/brand/kitt-logo.svg"/>
+<span class="site-header__brand-label">KI HUB</span>
+</a>
+<span class="site-header__divider" aria-hidden="true">
+</span>
+<nav class="site-nav" aria-label="Hovedmeny">
+<button type="button" class="site-nav__toggle kihub-focusable" aria-expanded="false" aria-controls="site-nav-list">Meny</button>
+<ul id="site-nav-list" class="site-nav__list">
+<li>
+<a class="site-nav__link kihub-focusable" aria-current="page" href="/">Hjem</a>
+</li>
+<li>
+<a class="site-nav__link kihub-focusable" href="/news">Nyheter</a>
+</li>
+<li>
+<a class="site-nav__link kihub-focusable" href="/laering">KI Læring</a>
+</li>
+</ul>
+</nav>
+<div class="site-header__user">
+<a class="site-nav__link kihub-focusable" href="/registry">Søk</a>
+<span style="font:400 13px var(--kihub-font-ui);color:var(--kihub-text-subtle);text-align:right"> · <a class="kihub-link" href="/cms">Admin</a>
+</span>
+<form action="javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)">
+<button type="submit" class="kihub-btn kihub-btn--secondary" style="padding:7px 12px;font-size:14px">Logg ut</button>
+</form>
+</div>
+</div>
+</header>
+<script>addEventListener("submit",function(a){if(!a.defaultPrevented){var c=a.target,d=a.submitter,e=c.action,b=d;if(d){var f=d.getAttribute("formAction");null!=f&&(e=f,b=null)}"javascript:throw new Error('React form unexpectedly submitted.')"===e&&(a.preventDefault(),b?(a=document.createElement("input"),a.name=b.name,a.value=b.value,b.parentNode.insertBefore(a,b),b=new FormData(c),a.parentNode.removeChild(a)):b=new FormData(c),a=c.ownerDocument||c,(a.$$reactFormReplay=a.$$reactFormReplay||[]).push(c,d,b))}});</script>

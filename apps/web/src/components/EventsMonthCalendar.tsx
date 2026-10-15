@@ -9,7 +9,7 @@ import {
   weekdayHeaders,
   type EventTypeValue,
 } from '@/lib/events-view';
-import type { Event } from '@/payload-types';
+import type { EventItem } from '@/lib/content/types';
 
 /**
  * 012 US2 — the month grid (FR-006/007/008): legend mapping the five event types to their
@@ -37,12 +37,12 @@ export function EventsMonthCalendar({
   year: number;
   month: number;
   todayKey: string;
-  events: Event[];
+  events: EventItem[];
 }) {
   const grid = buildMonthGrid(year, month, todayKey);
 
   // dayKey → events shown in that cell, insertion-ordered by start (events arrive sorted).
-  const byDay = new Map<string, Event[]>();
+  const byDay = new Map<string, EventItem[]>();
   for (const event of events) {
     for (const key of eventDayKeys(event)) {
       const cell = byDay.get(key);
@@ -147,7 +147,7 @@ export function EventsMonthCalendar({
  * events — including any spanning into it from an adjacent month — as the same grouped rows the
  * list view uses, so every event stays readable and tappable without a scrolling grid.
  */
-function MonthAgenda({ year, month, events }: { year: number; month: number; events: Event[] }) {
+function MonthAgenda({ year, month, events }: { year: number; month: number; events: EventItem[] }) {
   const monthPrefix = `${year}-${String(month).padStart(2, '0')}`;
   const monthEvents = events.filter((event) =>
     eventDayKeys(event).some((key) => key.startsWith(monthPrefix)),

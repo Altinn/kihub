@@ -316,7 +316,7 @@ describe('012 event fields: defaults + seat validation (FR-009/012, US3)', () =>
 
 describe('012 read layer: filters + range query (FR-005/007/016, US1/US2)', () => {
   /** Only this suite's events — the shared dev DB may hold unrelated rows. */
-  const mine = (docs: Event[]) => docs.filter((d) => d.title.includes(testId));
+  const mine = <T extends { title: string }>(docs: T[]) => docs.filter((d) => d.title.includes(testId));
 
   beforeAll(async () => {
     const make = (
@@ -404,6 +404,11 @@ describe('012 read layer: filters + range query (FR-005/007/016, US1/US2)', () =
     );
     expect(docs.some((d) => d.title === `Range outside ${testId}`)).toBe(false);
     expect(docs.some((d) => d.title === `Range draft ${testId}`)).toBe(false);
-    expect(docs.every((d) => d.status === 'published')).toBe(true);
+    // 023: read-layer results are view models without `status`, so check each returned event's
+    // stored status directly — the same published-only guarantee, asserted against the source.
+    for (const d of docs) {
+      const stored = await payload.findByID({ collection: 'events', id: Number(d.id), overrideAccess: true });
+      expect(stored.status).toBe('published');
+    }
   });
 });
