@@ -502,7 +502,7 @@ serve silently.
     `kihub-postgres`, then `pnpm --filter web migrate` with `DATABASE_URI` pointed at it; this is
     the 020 pattern.
   `next build` is the gate that catches implicit `any` (014 lesson).
-- [ ] T040 Run quickstart §3 and §5 in the browser:
+- [X] T040 Run quickstart §3 and §5 in the browser:
   - Use the `kihub-web-main` launch config (port 3021, `main` worktree) against the same DB as
     this branch's `kihub-web` (port 3000).
   - Compare the `<main>` HTML of each listed page; expect no diff.
@@ -511,7 +511,7 @@ serve silently.
   - Confirm `git diff main -- apps/web/src/collections apps/web/src/globals apps/web/src/migrations apps/web/src/payload.config.ts`
     is empty, or only a type-import line in `Frontpage.ts`.
   - Confirm `git diff main -- apps/web/package.json pnpm-lock.yaml` is empty (FR-004).
-- [ ] T041 Update the agent context in `CLAUDE.md` (the 023 entry inside `<!-- SPECKIT START -->`):
+- [X] T041 Update the agent context in `CLAUDE.md` (the 023 entry inside `<!-- SPECKIT START -->`):
   - set the status to DONE with the date, task count, suite count, and the lint/tsc/build results;
   - add the R6 `next start` observation and any harness gotchas found in T001;
   - add a pointer to this file's Notes.
@@ -685,5 +685,21 @@ Task: "T026 content-mapping.site-content.test.ts"
   `CI=1` parity run 39/39 with 0 snapshots written, and `next build` (`AUTH_MODE=entra`, scratch
   `kihub_023`) green. The goldens were touched only by the two capture commits (`b1a441b`,
   `b1aaaa3`).
+- **T040 live parity (2026-10-15)**:
+  - Method: the same dev server config (`kihub-web`, port 3001) against the same shared dev DB
+    `kihub`, run once on this branch and once with the checkout switched to `main` @ 673fefa.
+  - Result: SHA-256 of the `<main>` HTML (`.ics` bodies with `DTSTAMP` normalised) for **29 real
+    pages** is **29/29 identical**.
+  - Pages covered: `/`, `/news` (+`?page=2`, `?page=99`), `/events` list + calendar for
+    2026-06…12, `/prosjekter`, `/laering`, `/bidra`, 3 news articles, 3 events and their `.ics`,
+    1 project, 3 learning pages.
+  - Stability check: on the branch, each page was fetched twice, and both fetches were identical.
+  - `/cms` as the Aria Admin persona: the collections list, the News list (drafts visible) and the
+    Frontpage global edit form all load.
+  - `/registry` returns 200 ("Catalog is empty" for the reader persona: local data/governance,
+    and the registry code diff vs `main` is empty).
+  - Empty `git diff main`: collections, globals, migrations, `payload.config.ts`,
+    `components/cms`, `app/(payload)`, `package.json`/`pnpm-lock.yaml`, registry libs/pages, the
+    API routes and `packages/`. `Frontpage.ts` did not even need an import change.
 - **Goldens**: 31 surfaces = 62 files (`.html` + `.queries.json`) plus `event-ics.ics` and its
   queries file. With the parity suite added, the full suite is **457/457 across 50 files**.

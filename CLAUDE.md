@@ -1,27 +1,55 @@
 <!-- SPECKIT START -->
-Active feature: **023-content-source-seam** (IN PROGRESS: specify + plan done 2026-10-15; next
-`/speckit-tasks`). This is step 1 of the management-decided move of editorial content to **Umbraco**
-(.NET), "option 2": headless Umbraco for editorial content, while the registry (artifacts, catalog,
-reviews, audit, discovery, users/roles, search) stays on Payload/Postgres. It is a zero-visible-change
-refactor:
-- KI Hub-owned view models in `lib/content/types.ts` replace `@/payload-types` in employee
+Active feature: **023-content-source-seam** (DONE: specify + plan + tasks + analyze (10 findings
+fixed) + implement complete 2026-10-15; tasks 41/41; suite **497/497 across 58 files** (baseline
+419/49); lint, `tsc --noEmit` and `next build` clean, the build run against migrated scratch DB
+`kihub_023` with `AUTH_MODE=entra`).
+
+This is step 1 of the management-decided move of editorial content to **Umbraco** (.NET), "option 2":
+headless Umbraco for editorial content, while the registry (artifacts, catalog, reviews, audit,
+discovery, users/roles, search) stays on Payload/Postgres. It is a zero-visible-change refactor:
+- KI Hub-owned view models in `lib/content/types.ts`: `NewsArticle`, `EventItem`, `ProjectItem`,
+  `LearningArticle`, `ContentImage` (renditions `card`/`card2x`/`content`/`content2x`), `NewsHero`
+  (resolved by the source) and `Author`. These replace `@/payload-types` in employee
   pages/components.
-- Per-module sources are chosen by `CONTENT_SOURCE_{NEWS,EVENTS,PROJECTS,LEARNING,FRONTPAGE,SITE_CHROME}`:
-  `payload` only, the default; values are trimmed and lower-cased; a bad value fails fast in
-  `instrumentation.ts` and on first use.
-- The `lib/<module>.ts` read functions keep their names as facades. The Payload queries move
-  verbatim into `lib/content/payload/*`, alongside their mappers.
+- `lib/content/ports.ts` defines one source interface per module.
+- `lib/content/payload/*` holds the Payload queries, moved VERBATIM, plus the mappers.
+- `lib/content/registry.ts` holds the `SOURCES` table and picks a source per module from
+  `CONTENT_SOURCE_{NEWS,EVENTS,PROJECTS,LEARNING,FRONTPAGE,SITE_CHROME}` (only `payload` exists, and
+  it is the default; values are trimmed and case-insensitive). It is the ONLY importer of the
+  adapters.
+- The `lib/<module>.ts` functions keep their names as one-line facades.
+- A bad value: `instrumentation.ts` → `lib/content/boot-check.ts` logs ONE message and calls
+  `process.exit(1)`. Verified under `next dev`, `next start` and
+  `node .next/standalone/apps/web/server.js`.
 - `<RichTextBody value profile>` (`standard` | `learning`) is the only rich-text entry point. Its
-  lexical branch is the only employee-app importer of `@payloadcms/richtext-lexical/react`.
-- Proof is a DB-free golden-HTML parity harness (`tests/unit/content-parity.test.ts`, fake
-  `getPayload`, fixed fixtures and clock). Its goldens are captured BEFORE the refactor, and nothing
-  may update them with `-u`. They are also the acceptance target for the future Umbraco adapters.
-- An ESLint `no-restricted-imports` guard keeps Payload out of the employee surface.
+  lexical branch `components/rich-text/LexicalRichText.tsx` is the only employee-app importer of
+  Payload's renderer. `LearningImage`/`CodeBlock`/`Video` take neutral props.
+- `DEFAULT_FRONTPAGE` keeps its stored lexical shape (`FrontpageDefaults`), because it is the
+  global's `defaultValue`; the merge wraps its rich text.
+- An ESLint `no-restricted-imports` guard (in `eslint.config.mjs`) keeps Payload AND
+  `lib/content/payload/*` out of pages, components, view helpers and facades.
+- **Parity harness** (`tests/unit/content-parity.test.ts` plus `tests/helpers/{fake-payload,
+  content-fixtures,parity-fake}.ts`): it renders 32 surfaces with a fake `getPayload`, fixed
+  fixtures and a pinned clock, and snapshots the HTML AND each surface's Payload queries
+  (`__parity__/*.html`, `*.queries.json`). The goldens were captured on UNCHANGED code; never run
+  it with `-u`. They are the acceptance target for the future Umbraco adapters.
+- Live check: 29 real dev-DB pages are byte-identical vs `main`.
 - No schema change, migration, dependency, URL, `/cms` or infra change.
 - Constitution: PASS. Principle II is amended only when a module is first served from Umbraco
-  (Projects pilot).
+  (next feature: the Projects pilot).
+
+Gotchas:
+- Tests importing `.tsx` need `oxc: { jsx: { runtime: 'automatic' } }` in `vitest.config.ts`
+  (tsconfig is `jsx: preserve`).
+- `renderToStaticMarkup` cannot await nested async server components (`events/page.tsx`); use
+  `renderToReadableStream` + `allReady`.
+- Mock `next/navigation`'s `usePathname` for `SiteNav`.
+- A timed-out snapshot test keeps rendering after the next test swaps fixtures and writes a
+  CONTAMINATED golden; give the describe a long timeout.
+- `next dev` writes `apps/web/AGENTS.md` + `CLAUDE.md`; don't commit them.
+
 Read `specs/023-content-source-seam/plan.md` (with `research.md` R1–R12, `data-model.md`,
-`contracts/` x2, `quickstart.md`).
+`contracts/` x2, `quickstart.md`, and the `tasks.md` Notes for the implementation record).
 Prior: **020-news-hero-media** (DONE — specify + plan + tasks + analyze + implement
 complete 2026-09-23; tasks 31/31; suite **382/382 across 47 files**, lint clean, `tsc --noEmit`
 clean, `next build` green against the migrated scratch DB with `AUTH_MODE=entra`). Fixes awkward
