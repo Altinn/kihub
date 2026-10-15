@@ -1,15 +1,15 @@
 import Link from 'next/link';
-import type { Project } from '@/payload-types';
+import type { ProjectItem } from '@/lib/content/types';
 
 /**
  * One project card on `/prosjekter` (016), modeled on `NewsCard` but without the date line or
- * hero-image well — `Project` has no `publishDate`/`heroImageUrl` fields. The whole card is a
+ * hero-image well — a project has no `publishDate`/`heroImageUrl` fields. The whole card is a
  * single link to the project — no competing nested links.
  */
-export function ProjectCard({ project }: { project: Project }) {
+export function ProjectCard({ project }: { project: ProjectItem }) {
   return (
     <Link
-      href={`/prosjekter/${project.slug ?? ''}`}
+      href={`/prosjekter/${project.slug}`}
       className="kihub-focusable"
       style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
     >

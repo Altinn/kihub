@@ -1,6 +1,6 @@
-import { RichText } from '@payloadcms/richtext-lexical/react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { RichTextBody } from '@/components/RichTextBody';
 import { getPublishedProjectBySlug } from '@/lib/projects';
 
 /**
@@ -24,7 +24,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         <h1 className="kihub-h2 prosjekter-detail__title">{project.title}</h1>
 
         <div className="prosjekter-detail__body kihub-prose">
-          <RichText data={project.body} />
+          <RichTextBody value={project.body} />
         </div>
       </article>
     </main>

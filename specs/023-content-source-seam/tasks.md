@@ -234,19 +234,19 @@ single rich-text entry point, and the parity goldens still match byte-for-byte.
 
 ### Projects (smallest module first)
 
-- [ ] T013 [P] [US1] Add `apps/web/tests/unit/content-mapping.projects.test.ts` for `toProjectItem`:
+- [X] T013 [P] [US1] Add `apps/web/tests/unit/content-mapping.projects.test.ts` for `toProjectItem`:
   - `id` stringified;
   - `slug: null` → `''`;
   - `summary` nullish → `null`;
   - `body` wrapped as `{ format: 'lexical', document }`.
-- [ ] T014 [US1] Create `apps/web/src/lib/content/payload/projects.ts`:
+- [X] T014 [US1] Create `apps/web/src/lib/content/payload/projects.ts`:
   - `toProjectItem`;
   - `payloadProjectsSource: ProjectsSource`, with the two queries moved verbatim from
     `apps/web/src/lib/projects.ts`.
   Then rewrite `apps/web/src/lib/projects.ts` as a facade: `listPublishedProjects()` and
   `getPublishedProjectBySlug()` delegate to `payloadProjectsSource` and return `ProjectItem`
   types. The registry comes in US2.
-- [ ] T015 [US1] Retype the project consumers:
+- [X] T015 [US1] Retype the project consumers:
   - `apps/web/src/components/ProjectCard.tsx` → `ProjectItem`, and drop the `@/payload-types`
     import;
   - `apps/web/src/app/(app)/prosjekter/page.tsx`;
