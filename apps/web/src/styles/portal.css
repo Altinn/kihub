@@ -165,6 +165,27 @@ body {
   }
 }
 
+/* ---------- Frontpage navigation tiles in Digdir pink / yellow (025) ----------
+ * Graphic colors from the Digdir profile guide. White text fails contrast on both (3.2:1 / 2.1:1),
+ * so tiles carry dark ink (#1E2124: 5.1:1 on pink, 7.8:1 on yellow), the default dark tag chip and
+ * a dark arrow circle with a white glyph. */
+.fp-tile { color: var(--kihub-text); transition: background-color 0.2s ease; }
+.fp-tile--pink { background: var(--kihub-pink); }
+.fp-tile--yellow { background: var(--kihub-yellow); }
+.fp-tile .kihub-tile__arrow {
+  background: var(--kihub-surface-inverted);
+  color: var(--kihub-text-inverted);
+  transition: transform 0.2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .fp-tile--pink:hover { background: var(--kihub-pink-hover); }
+  .fp-tile--yellow:hover { background: var(--kihub-yellow-hover); }
+  .fp-tile:hover .kihub-tile__arrow { transform: translateX(4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fp-tile, .fp-tile .kihub-tile__arrow { transition: none; }
+}
+
 /* ---------- Subscriptions banner: dark card + pill chips + CTA (017, Altinn/kihub#144) ---------- */
 .kihub-card--inverted {
   background: var(--kihub-surface-inverted);

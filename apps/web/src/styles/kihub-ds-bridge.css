@@ -45,6 +45,14 @@
   --kihub-focus-outer: var(--ds-color-focus-outer);
   --kihub-focus-inner: var(--ds-color-focus-inner);
 
+  /* 025: Digdir graphic colors «Rød» and «Gul» (profilveileder.digdir.no) as named core colors
+   * next to accent/neutral. New kihub tokens with no tokens.css counterpart: they exist only here.
+   * Graphic colors — white text fails contrast on both, so put dark ink (--kihub-text) on them. */
+  --kihub-pink: var(--ds-color-pink-base-default);
+  --kihub-pink-hover: var(--ds-color-pink-base-hover);
+  --kihub-yellow: var(--ds-color-yellow-base-default);
+  --kihub-yellow-hover: var(--ds-color-yellow-base-hover);
+
   /* Designsystemet components use the same self-hosted UI font as the kihub layer. */
   --ds-font-family: var(--kihub-font-ui);
 }

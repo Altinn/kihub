@@ -14,25 +14,15 @@ import '@/styles/portal.css';
 import localFont from 'next/font/local';
 
 /**
- * Self-hosted from files committed in `src/fonts/` (see its README), not fetched from Google Fonts.
+ * Self-hosted from a file committed in `src/fonts/` (see its README), not fetched from Google Fonts.
  *
  * `next/font/google` self-hosts at runtime but downloads at BUILD time, so `next build` required
- * network access to fonts.gstatic.com and failed without it. These are the same latin variable woff2
- * files Google was serving — Google returns one variable file per family and points every requested
- * static weight at it — so this is a build-reliability change, not a visual one.
+ * network access to fonts.gstatic.com and failed without it. This is the same latin variable woff2
+ * Google was serving.
  *
- * `kihub-fonts.css` maps these two variables onto the kihub font tokens; the names are unchanged, so
- * nothing else needed touching.
+ * 025: Inter is the only typeface. `kihub-fonts.css` maps this variable onto BOTH kihub font tokens
+ * (display and UI); Source Serif 4 was removed.
  */
-const displayFont = localFont({
-  src: '../fonts/SourceSerif4-Variable.woff2',
-  // A variable font: one file covering the range, declared as a range rather than per-weight files.
-  weight: '400 600',
-  style: 'normal',
-  display: 'swap',
-  variable: '--font-kihub-display',
-  fallback: ['Georgia', 'Times New Roman', 'serif'],
-});
 const uiFont = localFont({
   src: '../fonts/Inter-Variable.woff2',
   weight: '400 600',
@@ -55,7 +45,7 @@ export function ThemedHtml({ children }: { children: React.ReactNode }) {
       data-color-scheme="light"
       data-size="md"
       data-color="accent"
-      className={`${displayFont.variable} ${uiFont.variable}`}
+      className={uiFont.variable}
     >
       <body>{children}</body>
     </html>

@@ -123,6 +123,38 @@ design-tokens: v1.18.0
   --ds-color-neutral-base-active: #414346;
   --ds-color-neutral-base-contrast-subtle: #b1b2b3;
   --ds-color-neutral-base-contrast-default: #ffffff;
+  --ds-color-pink-background-default: #ffffff;
+  --ds-color-pink-background-tinted: #fef0f1;
+  --ds-color-pink-surface-default: #ffffff;
+  --ds-color-pink-surface-tinted: #fde2e3;
+  --ds-color-pink-surface-hover: #fccfd1;
+  --ds-color-pink-surface-active: #fababc;
+  --ds-color-pink-border-subtle: #f9a5a8;
+  --ds-color-pink-border-default: #cb4f53;
+  --ds-color-pink-border-strong: #9e3d40;
+  --ds-color-pink-text-subtle: #9e3d40;
+  --ds-color-pink-text-default: #4b1d1e;
+  --ds-color-pink-base-default: #F45F63;
+  --ds-color-pink-base-hover: #f78588;
+  --ds-color-pink-base-active: #f9a6a8;
+  --ds-color-pink-base-contrast-subtle: #020101;
+  --ds-color-pink-base-contrast-default: #000000;
+  --ds-color-yellow-background-default: #ffffff;
+  --ds-color-yellow-background-tinted: #fbf3df;
+  --ds-color-yellow-surface-default: #ffffff;
+  --ds-color-yellow-surface-tinted: #f8e7c1;
+  --ds-color-yellow-surface-hover: #f3d797;
+  --ds-color-yellow-surface-active: #edc567;
+  --ds-color-yellow-border-subtle: #e8b43a;
+  --ds-color-yellow-border-default: #9a7216;
+  --ds-color-yellow-border-strong: #775811;
+  --ds-color-yellow-text-subtle: #775811;
+  --ds-color-yellow-text-default: #382908;
+  --ds-color-yellow-base-default: #E5AA20;
+  --ds-color-yellow-base-hover: #c9951c;
+  --ds-color-yellow-base-active: #af8218;
+  --ds-color-yellow-base-contrast-subtle: #2c2006;
+  --ds-color-yellow-base-contrast-default: #000000;
   --ds-color-info-background-default: #ffffff;
   --ds-color-info-background-tinted: #edf5fa;
   --ds-color-info-surface-default: #ffffff;
@@ -228,6 +260,38 @@ design-tokens: v1.18.0
   --ds-color-neutral-base-active: #414346;
   --ds-color-neutral-base-contrast-subtle: #b1b2b3;
   --ds-color-neutral-base-contrast-default: #ffffff;
+  --ds-color-pink-background-default: #ffffff;
+  --ds-color-pink-background-tinted: #fef0f1;
+  --ds-color-pink-surface-default: #ffffff;
+  --ds-color-pink-surface-tinted: #fde2e3;
+  --ds-color-pink-surface-hover: #fccfd1;
+  --ds-color-pink-surface-active: #fababc;
+  --ds-color-pink-border-subtle: #f9a5a8;
+  --ds-color-pink-border-default: #cb4f53;
+  --ds-color-pink-border-strong: #9e3d40;
+  --ds-color-pink-text-subtle: #9e3d40;
+  --ds-color-pink-text-default: #4b1d1e;
+  --ds-color-pink-base-default: #F45F63;
+  --ds-color-pink-base-hover: #f78588;
+  --ds-color-pink-base-active: #f9a6a8;
+  --ds-color-pink-base-contrast-subtle: #020101;
+  --ds-color-pink-base-contrast-default: #000000;
+  --ds-color-yellow-background-default: #ffffff;
+  --ds-color-yellow-background-tinted: #fbf3df;
+  --ds-color-yellow-surface-default: #ffffff;
+  --ds-color-yellow-surface-tinted: #f8e7c1;
+  --ds-color-yellow-surface-hover: #f3d797;
+  --ds-color-yellow-surface-active: #edc567;
+  --ds-color-yellow-border-subtle: #e8b43a;
+  --ds-color-yellow-border-default: #9a7216;
+  --ds-color-yellow-border-strong: #775811;
+  --ds-color-yellow-text-subtle: #775811;
+  --ds-color-yellow-text-default: #382908;
+  --ds-color-yellow-base-default: #E5AA20;
+  --ds-color-yellow-base-hover: #c9951c;
+  --ds-color-yellow-base-active: #af8218;
+  --ds-color-yellow-base-contrast-subtle: #2c2006;
+  --ds-color-yellow-base-contrast-default: #000000;
   --ds-color-info-background-default: #ffffff;
   --ds-color-info-background-tinted: #edf5fa;
   --ds-color-info-surface-default: #ffffff;
@@ -498,6 +562,38 @@ design-tokens: v1.18.0
   --ds-color-neutral-base-active: #808183;
   --ds-color-neutral-base-contrast-subtle: #1b1b1b;
   --ds-color-neutral-base-contrast-default: #000000;
+  --ds-color-pink-background-default: #241313;
+  --ds-color-pink-background-tinted: #301919;
+  --ds-color-pink-surface-default: #3c2020;
+  --ds-color-pink-surface-tinted: #452524;
+  --ds-color-pink-surface-hover: #502b2a;
+  --ds-color-pink-surface-active: #653635;
+  --ds-color-pink-border-subtle: #78403f;
+  --ds-color-pink-border-default: #c16766;
+  --ds-color-pink-border-strong: #e39291;
+  --ds-color-pink-text-subtle: #e39291;
+  --ds-color-pink-text-default: #f9e8e8;
+  --ds-color-pink-base-default: #9f3e41;
+  --ds-color-pink-base-hover: #7f3234;
+  --ds-color-pink-base-active: #612628;
+  --ds-color-pink-base-contrast-subtle: #ffffff;
+  --ds-color-pink-base-contrast-default: #ffffff;
+  --ds-color-yellow-background-default: #1c170d;
+  --ds-color-yellow-background-tinted: #261f11;
+  --ds-color-yellow-surface-default: #2f2716;
+  --ds-color-yellow-surface-tinted: #372c19;
+  --ds-color-yellow-surface-hover: #40341d;
+  --ds-color-yellow-surface-active: #504124;
+  --ds-color-yellow-border-subtle: #5f4e2b;
+  --ds-color-yellow-border-default: #9a7d46;
+  --ds-color-yellow-border-strong: #c8a25b;
+  --ds-color-yellow-text-subtle: #c8a25b;
+  --ds-color-yellow-text-default: #f5ebd8;
+  --ds-color-yellow-base-default: #513c0b;
+  --ds-color-yellow-base-hover: #694e0f;
+  --ds-color-yellow-base-active: #816012;
+  --ds-color-yellow-base-contrast-subtle: #ddd9cf;
+  --ds-color-yellow-base-contrast-default: #ffffff;
   --ds-color-info-background-default: #0d1925;
   --ds-color-info-background-tinted: #112130;
   --ds-color-info-surface-default: #15293d;
@@ -603,6 +699,38 @@ design-tokens: v1.18.0
   --ds-color-neutral-base-active: #808183;
   --ds-color-neutral-base-contrast-subtle: #1b1b1b;
   --ds-color-neutral-base-contrast-default: #000000;
+  --ds-color-pink-background-default: #241313;
+  --ds-color-pink-background-tinted: #301919;
+  --ds-color-pink-surface-default: #3c2020;
+  --ds-color-pink-surface-tinted: #452524;
+  --ds-color-pink-surface-hover: #502b2a;
+  --ds-color-pink-surface-active: #653635;
+  --ds-color-pink-border-subtle: #78403f;
+  --ds-color-pink-border-default: #c16766;
+  --ds-color-pink-border-strong: #e39291;
+  --ds-color-pink-text-subtle: #e39291;
+  --ds-color-pink-text-default: #f9e8e8;
+  --ds-color-pink-base-default: #9f3e41;
+  --ds-color-pink-base-hover: #7f3234;
+  --ds-color-pink-base-active: #612628;
+  --ds-color-pink-base-contrast-subtle: #ffffff;
+  --ds-color-pink-base-contrast-default: #ffffff;
+  --ds-color-yellow-background-default: #1c170d;
+  --ds-color-yellow-background-tinted: #261f11;
+  --ds-color-yellow-surface-default: #2f2716;
+  --ds-color-yellow-surface-tinted: #372c19;
+  --ds-color-yellow-surface-hover: #40341d;
+  --ds-color-yellow-surface-active: #504124;
+  --ds-color-yellow-border-subtle: #5f4e2b;
+  --ds-color-yellow-border-default: #9a7d46;
+  --ds-color-yellow-border-strong: #c8a25b;
+  --ds-color-yellow-text-subtle: #c8a25b;
+  --ds-color-yellow-text-default: #f5ebd8;
+  --ds-color-yellow-base-default: #513c0b;
+  --ds-color-yellow-base-hover: #694e0f;
+  --ds-color-yellow-base-active: #816012;
+  --ds-color-yellow-base-contrast-subtle: #ddd9cf;
+  --ds-color-yellow-base-contrast-default: #ffffff;
   --ds-color-info-background-default: #0d1925;
   --ds-color-info-background-tinted: #112130;
   --ds-color-info-surface-default: #15293d;
@@ -853,6 +981,28 @@ design-tokens: v1.18.0
 }
 
 @layer ds.theme.color {
+[data-color="pink"], [data-color-scheme][data-color="pink"] {
+  --ds-color-background-default: var(--ds-color-pink-background-default);
+  --ds-color-background-tinted: var(--ds-color-pink-background-tinted);
+  --ds-color-surface-default: var(--ds-color-pink-surface-default);
+  --ds-color-surface-tinted: var(--ds-color-pink-surface-tinted);
+  --ds-color-surface-hover: var(--ds-color-pink-surface-hover);
+  --ds-color-surface-active: var(--ds-color-pink-surface-active);
+  --ds-color-border-subtle: var(--ds-color-pink-border-subtle);
+  --ds-color-border-default: var(--ds-color-pink-border-default);
+  --ds-color-border-strong: var(--ds-color-pink-border-strong);
+  --ds-color-text-subtle: var(--ds-color-pink-text-subtle);
+  --ds-color-text-default: var(--ds-color-pink-text-default);
+  --ds-color-base-default: var(--ds-color-pink-base-default);
+  --ds-color-base-hover: var(--ds-color-pink-base-hover);
+  --ds-color-base-active: var(--ds-color-pink-base-active);
+  --ds-color-base-contrast-subtle: var(--ds-color-pink-base-contrast-subtle);
+  --ds-color-base-contrast-default: var(--ds-color-pink-base-contrast-default);
+}
+
+}
+
+@layer ds.theme.color {
 [data-color="success"], [data-color-scheme][data-color="success"] {
   --ds-color-background-default: var(--ds-color-success-background-default);
   --ds-color-background-tinted: var(--ds-color-success-background-tinted);
@@ -892,6 +1042,28 @@ design-tokens: v1.18.0
   --ds-color-base-active: var(--ds-color-warning-base-active);
   --ds-color-base-contrast-subtle: var(--ds-color-warning-base-contrast-subtle);
   --ds-color-base-contrast-default: var(--ds-color-warning-base-contrast-default);
+}
+
+}
+
+@layer ds.theme.color {
+[data-color="yellow"], [data-color-scheme][data-color="yellow"] {
+  --ds-color-background-default: var(--ds-color-yellow-background-default);
+  --ds-color-background-tinted: var(--ds-color-yellow-background-tinted);
+  --ds-color-surface-default: var(--ds-color-yellow-surface-default);
+  --ds-color-surface-tinted: var(--ds-color-yellow-surface-tinted);
+  --ds-color-surface-hover: var(--ds-color-yellow-surface-hover);
+  --ds-color-surface-active: var(--ds-color-yellow-surface-active);
+  --ds-color-border-subtle: var(--ds-color-yellow-border-subtle);
+  --ds-color-border-default: var(--ds-color-yellow-border-default);
+  --ds-color-border-strong: var(--ds-color-yellow-border-strong);
+  --ds-color-text-subtle: var(--ds-color-yellow-text-subtle);
+  --ds-color-text-default: var(--ds-color-yellow-text-default);
+  --ds-color-base-default: var(--ds-color-yellow-base-default);
+  --ds-color-base-hover: var(--ds-color-yellow-base-hover);
+  --ds-color-base-active: var(--ds-color-yellow-base-active);
+  --ds-color-base-contrast-subtle: var(--ds-color-yellow-base-contrast-subtle);
+  --ds-color-base-contrast-default: var(--ds-color-yellow-base-contrast-default);
 }
 
 }
