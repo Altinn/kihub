@@ -26,11 +26,12 @@ compatible with Digdir services. This layer sits ON TOP of `@digdir/designsystem
 >   values in `tokens.css` stay for sync fidelity but are overridden by the bridge — to change a
 >   color, change the config (and the design project), not this folder.
 > - **025 — Inter everywhere + Digdir pink/yellow** (`specs/025-inter-brand-colors/`):
->   `../kihub-fonts.css` points `--kihub-font-display` at Inter and sets display headings + tile
->   titles to semibold, so the `"Source Serif 4"` value in `tokens.css`/`tokens.ts` is inert; and
->   `pink`/`yellow` are named colors in `designsystemet.config.json`, bridged as `--kihub-pink*` /
->   `--kihub-yellow*` (no `tokens.css` counterpart). The frontpage tiles use them via
->   `portal.css` `.fp-tile--pink/--yellow`, not `.kihub-tile--accent`.
+>   `../kihub-fonts.css` points `--kihub-font-display` at Inter and sets display headings to
+>   semibold, so the `"Source Serif 4"` value in `tokens.css`/`tokens.ts` is inert. Frontpage
+>   card titles are 24px regular (`portal.css`). `pink`/`yellow` are named colors in
+>   `designsystemet.config.json`, bridged as `--kihub-pink` / `--kihub-yellow` (no `tokens.css`
+>   counterpart). The frontpage tiles use them as flat fills via `portal.css`
+>   `.fp-tile--pink/--yellow`, not `.kihub-tile--accent`.
 
 ## Files
 

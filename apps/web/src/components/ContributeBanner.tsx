@@ -3,8 +3,8 @@ import Link from 'next/link';
 /**
  * 021 — the blue "Del verktøyene deres" banner below the subscriptions banner, in the accent
  * fill. The WHOLE banner is one link to `/bidra`, so it
- * is one tab stop with no nested interactive elements, like `FrontpageTile`. The light sweep is
- * decorative and stops under prefers-reduced-motion.
+ * is one tab stop with no nested interactive elements, like `FrontpageTile`. Flat fill with no
+ * motion or hover shift (025).
  */
 export function ContributeBanner() {
   return (

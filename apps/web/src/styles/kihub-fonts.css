@@ -5,8 +5,8 @@
  *
  * 025: Inter for the whole portal. The display token (headings, lead, reading text) now
  * resolves to the same Inter as the UI token; Source Serif 4 is gone. A sans-serif at the
- * serif's regular weight reads thin, so display headings and tile titles go to semibold
- * (the top of the shipped 400–600 axis). */
+ * serif's regular weight reads thin, so display headings go to semibold (the top of the
+ * shipped 400–600 axis). Frontpage card titles are set back to regular in portal.css. */
 :root {
   --kihub-font-display: var(--font-kihub-ui), system-ui, -apple-system, sans-serif;
   --kihub-font-ui: var(--font-kihub-ui), system-ui, -apple-system, sans-serif;
@@ -15,7 +15,6 @@
 .kihub-h1,
 .kihub-h2,
 .kihub-h3,
-.kihub-h4,
-.kihub-tile__title {
+.kihub-h4 {
   font-weight: var(--kihub-weight-semibold);
 }

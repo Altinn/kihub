@@ -7,10 +7,13 @@ Active feature: **025-inter-brand-colors** (DONE — specify + plan + tasks + im
 (2) **Digdir pink «Rød» `#F45F63` and yellow «Gul» `#E5AA20`** (profilveileder.digdir.no
 /visuell-profil/farger/109) are named colors `pink`/`yellow` in `designsystemet.config.json`, with
 `base-default` pinned. `theme:build` was verified reproducible on unchanged main, so the diff only
-ADDS tokens. They are bridged as `--kihub-pink(-hover)` and `--kihub-yellow(-hover)`. These are
+ADDS tokens. They are bridged as `--kihub-pink` and `--kihub-yellow`. These are
 graphic colors: white text fails on both (3.2 and 2.1:1), so use dark ink (`#1E2124` gives 5.1 and
 7.8:1). (3) **Frontpage tiles**: `FrontpageTile` maps the UNCHANGED enum `tinted` → `.fp-tile--pink`
-and `accent` → `.fp-tile--yellow` (portal.css). Only the CMS option labels changed, so there is no
+and `accent` → `.fp-tile--yellow` (portal.css). Review revision (R5): frontpage cards are FLAT.
+The contribute banner's light sweep and all hover color shifts and arrow motion are removed.
+Card titles (tiles, subscriptions card, contribute banner) are 24px regular. Only the hero h1
+and page headings keep semibold. Only the CMS option labels changed, so there is no
 migration and saved prod content recolors with no editor action. The 024 hero SVG's coral was
 aligned to `#F45F63`. Gotcha: `theme:build --clean` briefly deletes `design-tokens-build/kihub.css`,
 so a running dev server logs a transient "Module not found" for it. Plan:

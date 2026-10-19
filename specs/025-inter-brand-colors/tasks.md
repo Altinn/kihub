@@ -50,6 +50,16 @@ dark text.
 - [x] T010 Run lint, `tsc --noEmit` and the web test suite (`set -a; source apps/web/.env; set +a`).
 - [x] T011 Walk quickstart.md in the local dev server, with screenshots of `/`.
 
+## Phase 5: Review revision (R5)
+
+- [x] T012 [US2] Set frontpage card titles (tiles, subscriptions card, contribute banner) to 24px
+  regular in `apps/web/src/styles/portal.css`, and drop `.kihub-tile__title` from the semibold
+  list in `apps/web/src/styles/kihub-fonts.css`.
+- [x] T013 [US2] Remove the contribute banner's light sweep, the hover background shifts and the
+  arrow motion on `.fp-contribute` and `.fp-tile` in `apps/web/src/styles/portal.css`. Remove the
+  unused hover tokens from `apps/web/src/styles/kihub-ds-bridge.css` and update the
+  `ContributeBanner.tsx` doc comment.
+
 ## Dependencies & Execution Order
 
 T001 → T002 → T006/T007. US1 (T003–T005) is independent of the colors. T008 and T009 are

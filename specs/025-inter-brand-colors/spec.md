@@ -70,6 +70,12 @@ readable text.
   CMS variant choices MUST be relabelled to describe the new colors.
 - **FR-006**: The other homepage blocks (hero, subscriptions card, contribute banner, news and
   events) keep their current colors.
+- **FR-007** *(review revision)*: Homepage cards are flat Digdir colors. They have no animated
+  light sweep, no hover color shift and no arrow motion. This applies to the two tiles and the
+  "Del KI-verktøyene dere lager" banner.
+- **FR-008** *(review revision)*: Titles inside homepage cards (the two tiles, the subscriptions
+  card and the contribute banner) read as plain text: 24px, regular weight. The hero heading keeps
+  the semibold display treatment.
 
 ## Success Criteria *(mandatory)*
 

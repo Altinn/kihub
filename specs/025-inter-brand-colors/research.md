@@ -23,6 +23,9 @@
   body text in the same face. 600 is the top of the file's weight axis, so no new font file is
   needed.
 
+**Revised after user review (R5)**: semibold stays on `.kihub-h1`–`h4`, but NOT on the
+frontpage card titles. See R5.
+
 ## R3 — Colors: named Designsystemet colors, bridged into kihub tokens
 
 - **Decision**: Add `"pink": "#F45F63"` and `"yellow": "#E5AA20"` to `designsystemet.config.json`
@@ -50,3 +53,19 @@
 - **Alternatives considered**: new `pink`/`yellow` enum values plus a migration plus a data
   backfill. More work and more risk, under a constitution (v4.0.0) that is moving this content to
   Umbraco anyway. Rejected.
+
+## R5 — Review revision: plain card titles, no motion on cards
+
+- **Decision**: In `portal.css`, `.fp-tile .kihub-tile__title`, `.kihub-card--inverted .kihub-h3`
+  and `.fp-contribute .fp-contribute__heading` get `--kihub-font-size-h4` (24px) at
+  `--kihub-weight-regular`. Remove `.kihub-tile__title` from the semibold list in
+  `kihub-fonts.css`. Delete the contribute banner's `::before` light sweep (`fp-contribute-sweep`
+  keyframes), its hover background shift and the arrow `translateX` on hover. Remove the same
+  hover shift and arrow motion from `.fp-tile`, and drop the now-unused `--kihub-*-hover` bridge
+  tokens.
+- **Rationale**: The user reviewed the change live. 30px semibold card titles read too big and
+  bold compared with the hero. The banner's sweep (and every hover shift) changed the rendered
+  color, but the brief is pure Digdir colors as flat fills. The banner keeps the Digdir-blue accent
+  `#0062BA` (≈ the guide's «Mørk blå» `#0062B8`).
+- **Unchanged**: focus rings (`.kihub-tile:focus-visible`, `.kihub-focusable`). The
+  subscriptions chips' hover tint is on buttons inside the card, not on the card itself.
