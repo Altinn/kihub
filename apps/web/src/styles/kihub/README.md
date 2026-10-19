@@ -1,7 +1,8 @@
 # KI HUB design system — direction 1a
 
-White ground, one blue accent (#0062BA), near-black ink. Type: **Source Serif 4** for
-display and reading text, **Inter** for navigation, labels and eyebrows. Accent and
+White ground, one blue accent (#0062BA), near-black ink, plus Digdir's graphic colors pink
+(#F45F63) and yellow (#E5AA20) since 025. Type: **Inter** throughout (025; the design project's
+Source Serif 4 display face is overridden locally, see below). Accent and
 neutral steps are taken from Designsystemet (digdir), so KI HUB stays visually
 compatible with Digdir services. This layer sits ON TOP of `@digdir/designsystemet-css`
 (the constitution's mandatory UI system) — it does not replace it.
@@ -24,6 +25,13 @@ compatible with Digdir services. This layer sits ON TOP of `@digdir/designsystem
 >   re-points the `--kihub-*` color tokens at the generated `--ds-*` variables. The literal hex
 >   values in `tokens.css` stay for sync fidelity but are overridden by the bridge — to change a
 >   color, change the config (and the design project), not this folder.
+> - **025 — Inter everywhere + Digdir pink/yellow** (`specs/025-inter-brand-colors/`):
+>   `../kihub-fonts.css` points `--kihub-font-display` at Inter and sets display headings to
+>   semibold, so the `"Source Serif 4"` value in `tokens.css`/`tokens.ts` is inert. Frontpage
+>   card titles are 24px regular (`portal.css`). `pink`/`yellow` are named colors in
+>   `designsystemet.config.json`, bridged as `--kihub-pink` / `--kihub-yellow` (no `tokens.css`
+>   counterpart). The frontpage tiles use them as flat fills via `portal.css`
+>   `.fp-tile--pink/--yellow`, not `.kihub-tile--accent`.
 
 ## Files
 
@@ -67,10 +75,10 @@ export function Hero() {
 
 ## Rules that keep it clean
 
-- **One accent.** `--kihub-accent` is the only chromatic colour in the UI. Status colours are for status only, never decoration.
+- **One accent.** `--kihub-accent` is the only chromatic colour for interactive UI. Digdir pink and yellow (025) are graphic colours for large surfaces such as the frontpage tiles, always with dark ink. Status colours are for status only, never decoration.
 - **Two surfaces.** White ground plus `--kihub-surface-accent` (#EEF4FA). A third background is a smell.
 - **Ink for weight, not colour.** Emphasis comes from size and `--kihub-text` vs `--kihub-text-subtle`, not from more hues.
-- **Serif reads, sans labels.** Display, headings, body copy and button labels are Source Serif 4; nav, eyebrows, dates and metadata are Inter.
+- **One typeface.** Everything is Inter (025): headings in semibold, body in regular.
 - **Never remove the focus ring.** 3px outer outline + 3px inner white ring, offset 3px.
 - **Radii stay small.** 4px is the default; 8–12px for cards and media only.
 - **No gradients, no glass, no coloured shadows.**

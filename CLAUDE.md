@@ -1,5 +1,24 @@
 <!-- SPECKIT START -->
-Active feature: **024-hero-design-element** (DONE — specify + plan + tasks + implement 2026-10-19;
+Active feature: **025-inter-brand-colors** (DONE — specify + plan + tasks + implement 2026-10-19).
+(1) **Inter everywhere**: the local override `styles/kihub-fonts.css` points
+`--kihub-font-display` at the Inter `next/font` variable and makes `.kihub-h1`–`h4` and
+`.kihub-tile__title` semibold (600). Source Serif 4 is DELETED (loader, woff2, OFL); the
+`"Source Serif 4"` value in the synced `kihub/tokens.css`/`tokens.ts` is now inert.
+(2) **Digdir pink «Rød» `#F45F63` and yellow «Gul» `#E5AA20`** (profilveileder.digdir.no
+/visuell-profil/farger/109) are named colors `pink`/`yellow` in `designsystemet.config.json`, with
+`base-default` pinned. `theme:build` was verified reproducible on unchanged main, so the diff only
+ADDS tokens. They are bridged as `--kihub-pink` and `--kihub-yellow`. These are
+graphic colors: white text fails on both (3.2 and 2.1:1), so use dark ink (`#1E2124` gives 5.1 and
+7.8:1). (3) **Frontpage tiles**: `FrontpageTile` maps the UNCHANGED enum `tinted` → `.fp-tile--pink`
+and `accent` → `.fp-tile--yellow` (portal.css). Review revision (R5): frontpage cards are FLAT.
+The contribute banner's light sweep and all hover color shifts and arrow motion are removed.
+Card titles (tiles, subscriptions card, contribute banner) are 24px regular. Only the hero h1
+and page headings keep semibold. Only the CMS option labels changed, so there is no
+migration and saved prod content recolors with no editor action. The 024 hero SVG's coral was
+aligned to `#F45F63`. Gotcha: `theme:build --clean` briefly deletes `design-tokens-build/kihub.css`,
+so a running dev server logs a transient "Module not found" for it. Plan:
+`specs/025-inter-brand-colors/plan.md`.
+Prior: **024-hero-design-element** (DONE — specify + plan + tasks + implement 2026-10-19;
 tasks 5/5, lint + `tsc --noEmit` clean, verified in the browser on :3024). It swaps the frontpage hero
 art from the raster three-people illustration (`public/brand/hero-illustration.jpg`, deleted) to
 element 1 of Digdir's "Designelementer (For skjerm)" sheet: a coral circle `#F05F63` overlapped by

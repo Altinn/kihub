@@ -74,8 +74,8 @@ export const Frontpage: GlobalConfig = {
           name: 'variant',
           type: 'select',
           options: [
-            { label: 'Tinted (light blue)', value: 'tinted' },
-            { label: 'Accent (blue)', value: 'accent' },
+            { label: 'Pink (Digdir rød)', value: 'tinted' },
+            { label: 'Yellow (Digdir gul)', value: 'accent' },
           ],
           defaultValue: 'tinted',
         },

@@ -5,7 +5,9 @@
     "kihub": {
       "colors": {
         "accent": "#0062BA",
-        "neutral": "#1E2124"
+        "neutral": "#1E2124",
+        "pink": "#F45F63",
+        "yellow": "#E5AA20"
       },
       "typography": {
         "fontFamily": "Inter"
@@ -32,6 +34,12 @@
             "border-strong": { "light": "#1E2124" },
             "text-subtle": { "light": "#5B6168" },
             "text-default": { "light": "#1E2124" }
+          },
+          "pink": {
+            "base-default": { "light": "#F45F63" }
+          },
+          "yellow": {
+            "base-default": { "light": "#E5AA20" }
           }
         },
         "severity": {

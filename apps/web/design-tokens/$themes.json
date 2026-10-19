@@ -116,6 +116,22 @@
     "group": "Color"
   },
   {
+    "id": "b0f7f128338b504edbff2838d59a991df26b398a",
+    "name": "pink",
+    "selectedTokenSets": {
+      "semantic/color/pink": "enabled"
+    },
+    "group": "Color"
+  },
+  {
+    "id": "96de5543d183d7de52ac5fa21c46fc811f673f89",
+    "name": "yellow",
+    "selectedTokenSets": {
+      "semantic/color/yellow": "enabled"
+    },
+    "group": "Color"
+  },
+  {
     "id": "59bd0a3ff43b32849b319e645d4798d8a5d1e889",
     "name": "info",
     "selectedTokenSets": {

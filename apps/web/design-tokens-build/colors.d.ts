@@ -7,6 +7,8 @@ declare module '@digdir/designsystemet-types' {
   export interface ColorDefinitions {
     accent: never;
     neutral: never;
+    pink: never;
+    yellow: never;
   }
   export interface SeverityColorDefinitions {
     info: never;
