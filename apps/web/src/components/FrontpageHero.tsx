@@ -52,12 +52,13 @@ export function FrontpageHero({ hero }: { hero: HeroContent }) {
       </div>
       <div className="fp-hero__art">
         <Image
-          src="/brand/hero-illustration.jpg"
+          src="/brand/hero-design-element.svg"
           alt=""
           role="presentation"
-          width={2000}
-          height={1660}
+          width={298}
+          height={180}
           priority
+          unoptimized
           style={{ width: '100%', maxWidth: '420px', height: 'auto', display: 'block' }}
         />
       </div>
