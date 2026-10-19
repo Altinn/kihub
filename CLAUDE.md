@@ -1,5 +1,13 @@
 <!-- SPECKIT START -->
-Active feature: **020-news-hero-media** (DONE — specify + plan + tasks + analyze + implement
+Active feature: **024-hero-design-element** (DONE — specify + plan + tasks + implement 2026-10-19;
+tasks 5/5, lint + `tsc --noEmit` clean, verified in the browser on :3024). It swaps the frontpage hero
+art from the raster three-people illustration (`public/brand/hero-illustration.jpg`, deleted) to
+element 1 of Digdir's "Designelementer (For skjerm)" sheet: a coral circle `#F05F63` overlapped by
+a rotated navy square `#1E2B3C`. The element is extracted from the vector PDF as
+`public/brand/hero-design-element.svg` (viewBox 298×180), shown via `next/image` `unoptimized`
+like `kitt-logo.svg`. Image swap only: no CSS, CMS or schema change. Plan:
+`specs/024-hero-design-element/plan.md`.
+Prior: **020-news-hero-media** (DONE — specify + plan + tasks + analyze + implement
 complete 2026-09-23; tasks 31/31; suite **382/382 across 47 files**, lint clean, `tsc --noEmit`
 clean, `next build` green against the migrated scratch DB with `AUTH_MODE=entra`). Fixes awkward
 cropping of news hero images on the frontpage «Siste nytt» and `/news` cards. News gets a managed
