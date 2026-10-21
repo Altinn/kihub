@@ -796,6 +796,11 @@ body {
   gap: var(--kihub-space-10) var(--kihub-space-6);
   margin-top: var(--kihub-space-10);
 }
+/* Projects are bordered link cards (#159), so the news grid's 40px row gap, sized for borderless
+   cards, would leave them floating apart. Grid stretch keeps each row's cards the same height. */
+.prosjekter-grid {
+  row-gap: var(--kihub-space-6);
+}
 /* `minmax(0, 1fr)` above plus wrapping below is what keeps a long unbroken headline from forcing a
    horizontal scrollbar instead of wrapping inside its card (SC-004). */
 .news-grid h2,

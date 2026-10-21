@@ -1,32 +1,21 @@
+import { Card, Heading, Paragraph } from '@digdir/designsystemet-react';
 import Link from 'next/link';
 import type { Project } from '@/payload-types';
 
 /**
- * One project card on `/prosjekter` (016), modeled on `NewsCard` but without the date line or
- * hero-image well — `Project` has no `publishDate`/`heroImageUrl` fields. The whole card is a
- * single link to the project — no competing nested links.
+ * One project card on `/prosjekter` (016), as a Designsystemet «lenkekort» (Altinn/kihub#159):
+ * the link sits in the heading, and `Card` delegates clicks anywhere on the card to it. The
+ * underlined title, border and hover tint make the card read as a link, which the earlier
+ * borderless title + summary did not. There is one link only, so the accessible name stays the
+ * title and not the whole summary. Without JS the title link still works on its own.
  */
 export function ProjectCard({ project }: { project: Project }) {
   return (
-    <Link
-      href={`/prosjekter/${project.slug ?? ''}`}
-      className="kihub-focusable"
-      style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
-    >
-      <article className="kihub-stack" style={{ gap: 'var(--kihub-space-3)' }}>
-        <h2 className="kihub-h4">{project.title}</h2>
-        {project.summary ? (
-          <p
-            style={{
-              margin: 0,
-              font: '400 var(--kihub-font-size-body-sm)/var(--kihub-line-height-body) var(--kihub-font-display)',
-              color: 'var(--kihub-text-subtle)',
-            }}
-          >
-            {project.summary}
-          </p>
-        ) : null}
-      </article>
-    </Link>
+    <Card>
+      <Heading level={2} data-size="xs">
+        <Link href={`/prosjekter/${project.slug ?? ''}`}>{project.title}</Link>
+      </Heading>
+      {project.summary ? <Paragraph data-size="sm">{project.summary}</Paragraph> : null}
+    </Card>
   );
 }
