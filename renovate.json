@@ -2,5 +2,13 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>Altinn/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "description": "Payload packages pin each other's exact version (e.g. @payloadcms/next peers payload@<same>); bumping one alone ships two copies of @payloadcms/ui and breaks /cms.",
+      "matchPackageNames": ["payload", "@payloadcms/**"],
+      "groupName": "payload",
+      "groupSlug": "payload"
+    }
   ]
 }
