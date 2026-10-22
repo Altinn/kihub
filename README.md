@@ -9,7 +9,20 @@ stores their content (that lives in the sibling [`ai-artifacts`](../ai-artifacts
 News, Calendar, Learning and Projects are native platform content, authored directly in KI Hub
 with no Git source.
 
-> **Status**: KI Prosjekter i Digdir (016). Fixed [Altinn/kihub#135](https://github.com/Altinn/kihub/issues/135):
+> **Status**: Designsystemet alignment (026). The employee-facing UI was rebuilt on Digdir's
+> [Designsystemet](https://designsystemet.no) and Digdir's visual profile
+> ([design.digdir.no](https://design.digdir.no/digdir/farger)), with WCAG 2.2 AA as the bar.
+> - **Theme:** Digdir's official theme, with no overrides.
+> - **Markup:** every component is plain HTML with `ds-*` classes in Server Components.
+> - **Removed:** the custom `kihub-*` layer.
+> - **Accessibility:** a skip link and a single main landmark on every page; one h1 per page and no
+>   skipped heading levels; native GET-form filters; Norwegian UI text; rem-based type that follows
+>   the user's font size.
+> - **Verification:** 0 axe violations and no 320px overflow on all 15 routes.
+> - **Constitution:** v4.0.0. No schema or content migration was needed. See
+>   [`specs/026-designsystemet-alignment/`](specs/026-designsystemet-alignment).
+>
+> Previously — KI Prosjekter i Digdir (016). Fixed [Altinn/kihub#135](https://github.com/Altinn/kihub/issues/135):
 > the frontpage's "Verktøy" and "KI Prosjekter i Digdir" tiles both linked to `/registry`. KI Hub
 > gained a **fifth** native-content module (Constitution v3.2.0, Principle II): a flat,
 > Contributor+-authored list of AI projects in Digdir (title, summary, rich-text description,
@@ -106,6 +119,37 @@ Built with Next.js + Payload CMS (PostgreSQL) and Auth.js (Azure Entra ID). The 
 UI uses Digdir's [Designsystemet](https://github.com/digdir/designsystemet); the **editor
 back-office** at `/cms` is Payload's own admin UI and is exempt from Designsystemet (Constitution
 Principle VIII — two surfaces sharing one auth, role model, and Payload data layer).
+
+### Design system and accessibility (Constitution v4.0.0)
+
+- **Theme.** The theme is Digdir's official Designsystemet theme. It is defined in
+  `apps/web/designsystemet.config.json`:
+  - accent `#0062BA`;
+  - brand1 Rød `#F45F63`, brand2 Gul `#E5AA20`, brand3 Blå `#1E98F5`;
+  - neutral Blåsvart `#1E2B3C`.
+
+  Generate it with `pnpm --filter web theme:build`; the output goes to `design-tokens/` and
+  `design-tokens-build/kihub.css`. Full-strength Rød, Gul and Blå are **graphic colours only**.
+  Their light tints are the card surfaces, as on digdir.no: Blåsvart text on
+  `brand*-surface-tinted`, via the `.app-tint` helper.
+- **Components.** Use Designsystemet components as plain HTML with its CSS classes (`ds-button`,
+  `ds-link`, `ds-card`, `ds-tag`, `ds-details`, `ds-table`, `ds-alert`, `ds-chip`, `ds-pagination`,
+  `ds-search`, `ds-dialog` …), rendered in Server Components. The React wrappers are not used:
+  in 1.18 every one is `'use client'`, even `Heading`. `@digdir/designsystemet-web`, loaded once in
+  the shell, adds progressive enhancement: the dialog Invoker-Commands polyfill and card click
+  delegation.
+- **App CSS.** `apps/web/src/styles/app.css` holds only layout and the few components
+  Designsystemet lacks (header, footer, calendar, timeline, code blocks). It uses `--ds-*` tokens
+  only: no hard-coded colours, px type or spacing, and no custom properties of its own.
+- **Accessibility gate.** Every employee-facing change must reach 0 axe violations (WCAG 2.2 AA)
+  plus a keyboard pass. The pages provide:
+  - a skip link to `#main-content`;
+  - one h1 per page;
+  - native form filters that work without JavaScript;
+  - reflow at 320px.
+
+  See [`specs/026-designsystemet-alignment/quickstart.md`](specs/026-designsystemet-alignment/quickstart.md)
+  for the checks.
 
 ## Prerequisites
 
@@ -395,5 +439,6 @@ implement). See [`specs/001-phase1-foundation/`](specs/001-phase1-foundation),
 [`specs/011-frontpage-redesign/`](specs/011-frontpage-redesign),
 [`specs/012-events-page-redesign/`](specs/012-events-page-redesign),
 [`specs/013-news-page-redesign/`](specs/013-news-page-redesign),
-[`specs/014-learning-pages/`](specs/014-learning-pages), and the
+[`specs/014-learning-pages/`](specs/014-learning-pages),
+[`specs/026-designsystemet-alignment/`](specs/026-designsystemet-alignment), and the
 [constitution](.specify/memory/constitution.md).

@@ -9,19 +9,20 @@ import type { LearningTree, LearningTreeGroup } from '@/lib/learning-view';
  * implements FR-004 for free: the group holding the current page is opened by emitting `open` on the
  * server, with no state, no effect and no hydration.
  *
- * `SiteNav.tsx` uses the client-component + `aria-expanded` pattern; it deliberately is NOT the model
- * here, because it cannot satisfy FR-005 (research §10).
+ * 026: each category is a Designsystemet `details.ds-details` (its own chevron, focus and open
+ * styling replace the custom ▾/▴ markers). A subcategory is a labelled list, not an h3 — headings
+ * here came before the page's h1 in the DOM and broke the outline. Links are `ds-link`s; the
+ * current page is `aria-current` and shown by weight + rule + tint, never colour alone.
  */
-function PageList({ pages }: { pages: LearningTreeGroup['pages'] }) {
+function PageList({ pages, labelledBy }: { pages: LearningTreeGroup['pages']; labelledBy?: string }) {
   return (
-    <ul className="lp-nav__list">
+    <ul className="app-learning-nav__list" aria-labelledby={labelledBy}>
       {pages.map((page) => (
         <li key={page.slug}>
           <Link
             href={page.href}
-            className="lp-nav__link kihub-focusable"
-            // Conveys the current page to assistive technology; the visible treatment in
-            // portal.css keys off the same attribute, so the two can never disagree (§B2).
+            className="ds-link app-learning-nav__link"
+            data-color="neutral"
             aria-current={page.isCurrent ? 'page' : undefined}
           >
             {page.title}
@@ -37,24 +38,30 @@ export function LearningNav({ tree }: { tree: LearningTree }) {
   if (!tree.length) return null;
 
   return (
-    <nav className="lp-nav" aria-label="Utforsk læringsinnhold">
-      {tree.map((category) => (
+    <nav className="app-learning-nav" aria-label="Utforsk læringsinnhold" data-color="neutral">
+      {tree.map((category, categoryIndex) => (
         <details
           key={category.title}
-          className="lp-nav__group"
+          className="ds-details"
           // FR-004: server-emitted, so the current page's group is already open on first paint.
           open={category.containsCurrent}
         >
-          <summary className="lp-nav__group-title kihub-focusable">{category.title}</summary>
+          <summary>{category.title}</summary>
+          <div>
+            {category.pages.length ? <PageList pages={category.pages} /> : null}
 
-          {category.pages.length ? <PageList pages={category.pages} /> : null}
-
-          {category.groups.map((group) => (
-            <div key={group.title} className="lp-nav__subgroup">
-              <h3 className="lp-nav__subgroup-title">{group.title}</h3>
-              <PageList pages={group.pages} />
-            </div>
-          ))}
+            {category.groups.map((group, groupIndex) => {
+              const labelId = `learning-nav-${categoryIndex}-${groupIndex}`;
+              return (
+                <div key={group.title} className="app-learning-nav__group">
+                  <p id={labelId} className="ds-paragraph app-learning-nav__group-title" data-size="sm">
+                    {group.title}
+                  </p>
+                  <PageList pages={group.pages} labelledBy={labelId} />
+                </div>
+              );
+            })}
+          </div>
         </details>
       ))}
     </nav>

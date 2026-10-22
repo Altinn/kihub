@@ -108,26 +108,34 @@
     "group": "Color"
   },
   {
+    "id": "8a351e1bb79110ad4ea1c7eaa9949439ae7f07f6",
+    "name": "brand1",
+    "selectedTokenSets": {
+      "semantic/color/brand1": "enabled"
+    },
+    "group": "Color"
+  },
+  {
+    "id": "0097f745bc0669d9eca6f59ae5dc4082f3ce0540",
+    "name": "brand2",
+    "selectedTokenSets": {
+      "semantic/color/brand2": "enabled"
+    },
+    "group": "Color"
+  },
+  {
+    "id": "ab30b4d4ac3520dec96763c7a0aa3bdcd5eb12fb",
+    "name": "brand3",
+    "selectedTokenSets": {
+      "semantic/color/brand3": "enabled"
+    },
+    "group": "Color"
+  },
+  {
     "id": "e7fb41a6a0544d8a8aa178232034311f9d725555",
     "name": "neutral",
     "selectedTokenSets": {
       "semantic/color/neutral": "enabled"
-    },
-    "group": "Color"
-  },
-  {
-    "id": "b0f7f128338b504edbff2838d59a991df26b398a",
-    "name": "pink",
-    "selectedTokenSets": {
-      "semantic/color/pink": "enabled"
-    },
-    "group": "Color"
-  },
-  {
-    "id": "96de5543d183d7de52ac5fa21c46fc811f673f89",
-    "name": "yellow",
-    "selectedTokenSets": {
-      "semantic/color/yellow": "enabled"
     },
     "group": "Color"
   },
