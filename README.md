@@ -9,6 +9,11 @@ stores their content (that lives in the sibling [`ai-artifacts`](../ai-artifacts
 News, Calendar, Learning and Projects are native platform content, authored directly in KI Hub
 with no Git source.
 
+> **Direction (Constitution v4.0.0, 2026-10-15)**: KI Hub is moving from Payload CMS to a separate, headless
+> **Umbraco** instance, one module at a time and reversibly (Principle IX). Editorial modules go first (Projects pilot),
+> and the Registry goes last. Until a module moves, the sections below describe it accurately: Payload is still the live CMS.
+> Step 1, the CMS-neutral content seam, is `specs/023-content-source-seam/`.
+
 > **Status**: KI Prosjekter i Digdir (016). Fixed [Altinn/kihub#135](https://github.com/Altinn/kihub/issues/135):
 > the frontpage's "Verktøy" and "KI Prosjekter i Digdir" tiles both linked to `/registry`. KI Hub
 > gained a **fifth** native-content module (Constitution v3.2.0, Principle II): a flat,
