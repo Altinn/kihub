@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   NEWS_PAGE_SIZE,
   buildPagination,
+  pageNumbers,
   formatNewsDate,
   parseNewsPageParam,
   pickArticleImage,
@@ -263,5 +264,33 @@ describe('pickArticleImage (B4.5, FR-006/007)', () => {
     expect(img.src).toBe(`/payload-api/media/file/bilde.png?${V}`);
     expect(img.srcSet).toBeUndefined();
     expect(img).toMatchObject({ width: 3000, height: 1000 });
+  });
+});
+
+describe('pageNumbers (026, Designsystemet pagination)', () => {
+  it('lists every page up to seven', () => {
+    expect(pageNumbers(1, 1)).toEqual([1]);
+    expect(pageNumbers(3, 7)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+  });
+
+  it('keeps first, last and the current neighbourhood, with gaps, beyond seven', () => {
+    expect(pageNumbers(1, 20)).toEqual([1, 2, 3, 4, 5, null, 20]);
+    expect(pageNumbers(10, 20)).toEqual([1, null, 9, 10, 11, null, 20]);
+    expect(pageNumbers(20, 20)).toEqual([1, null, 16, 17, 18, 19, 20]);
+  });
+
+  it('always shows the same number of slots, so the bar does not jump', () => {
+    for (let p = 1; p <= 20; p++) expect(pageNumbers(p, 20)).toHaveLength(7);
+  });
+});
+
+describe('buildPagination items (026)', () => {
+  it('marks only the rendered page as current and links page 1 to the bare /news', () => {
+    const { items } = buildPagination(2, 3, 30);
+    expect(items).toEqual([
+      { page: 1, href: '/news', current: false },
+      { page: 2, href: '/news?page=2', current: true },
+      { page: 3, href: '/news?page=3', current: false },
+    ]);
   });
 });

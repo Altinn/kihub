@@ -12,7 +12,8 @@ import type { LearningTree } from '@/lib/learning-view';
  * shell with its own `currentSlug`.
  *
  * The phone-level disclosure is a native `<details>` here too, so the whole navigation collapses
- * above the content with no JavaScript (FR-006).
+ * above the content with no JavaScript (FR-006). 026: it is a Designsystemet `ds-details`; on
+ * wide screens app.css hides its summary and forces it open, so the navigation simply stands.
  */
 export function LearningShell({
   tree,
@@ -24,23 +25,21 @@ export function LearningShell({
   const hasNav = tree.length > 0;
 
   return (
-    <main className="kihub-container">
-      <div className="lp-shell" data-nav={hasNav || undefined}>
+    <div className="app-container">
+      <div className="app-learning" data-nav={hasNav || undefined}>
         {hasNav ? (
-          <div className="lp-shell__aside">
+          <div className="app-learning__aside">
             {/* Desktop: the navigation stands open. Phone: this <details> collapses it (CSS swaps
                 which of the two is shown, so the markup is emitted once). */}
-            <details className="lp-shell__disclosure">
-              <summary className="lp-shell__disclosure-title kihub-focusable">
-                Utforsk innhold
-              </summary>
+            <details className="ds-details app-learning__disclosure" data-color="neutral">
+              <summary>Utforsk innhold</summary>
               <LearningNav tree={tree} />
             </details>
           </div>
         ) : null}
 
-        <div className="lp-shell__content">{children}</div>
+        <div className="app-learning__content">{children}</div>
       </div>
-    </main>
+    </div>
   );
 }

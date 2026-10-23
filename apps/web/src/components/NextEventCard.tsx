@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { EventTypeBadge } from '@/components/EventTypeBadge';
 import type { Event } from '@/payload-types';
 import {
   formatDayNumeral,
@@ -6,12 +7,15 @@ import {
   formatTimeHM,
   formatWeekday,
 } from '@/lib/event-dates';
-import { EVENT_TYPE_LABELS, type EventTypeValue } from '@/lib/events-view';
 
 /**
  * 011 US2 — the "Neste arrangement" card (contracts/frontpage-read.md): tinted date zone with the
- * big day numeral, then tag, title, meta line, a primary "Se arrangementet" action to the detail
- * page (no registration concept — clarification) and the "+ Legg til i kalender" ICS download.
+ * big day numeral, then type, title, meta line and the "Legg til i kalender" ICS download.
+ *
+ * 026 R5: a Designsystemet card with two `ds-card__block`s. The title is the card's ONE link
+ * (`h3 > a`), and `data-clickdelegatefor` (designsystemet-web) makes the whole card forward clicks
+ * to it, so there is no second "Se arrangementet" link to the same page. The ICS download is the
+ * card's only other action, a secondary `ds-button`.
  */
 
 /** Compose the meta line from the parts that exist — never a dangling separator. */
@@ -23,91 +27,44 @@ function metaLine(event: Event): string {
 
 export function NextEventCard({ event }: { event: Event }) {
   const slug = event.slug ?? '';
-  // 012 FR-015: the badge shows the event TYPE (closed category) instead of the first free tag.
-  const tag = EVENT_TYPE_LABELS[event.eventType as EventTypeValue];
+  const linkId = `next-event-${event.id}`;
   const meta = metaLine(event);
 
   return (
     <article
-      className="kihub-card"
-      style={{ padding: 0, overflow: 'hidden' }}
-      aria-label="Neste arrangement"
+      className="ds-card app-event-card"
+      data-color="neutral"
+      data-clickdelegatefor={linkId}
+      aria-labelledby={`${linkId}-label`}
     >
-      <div style={{ background: 'var(--kihub-surface-accent)', padding: '20px 22px' }}>
-        <p className="kihub-eyebrow" style={{ margin: 0 }}>
+      <div className="ds-card__block app-event-card__date app-tint" data-color="brand2">
+        <p id={`${linkId}-label`} className="ds-paragraph" data-size="sm">
           Neste arrangement
         </p>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'baseline',
-            gap: 'var(--kihub-space-3)',
-            marginTop: 'var(--kihub-space-2)',
-          }}
-        >
-          <span
-            style={{
-              font: '400 40px/1 var(--kihub-font-display)',
-              color: 'var(--kihub-text)',
-            }}
-          >
-            {formatDayNumeral(event.startDateTime)}
-          </span>
-          <span
-            style={{
-              font: '400 18px var(--kihub-font-display)',
-              color: 'var(--kihub-text-subtle)',
-            }}
-          >
+        <p className="ds-paragraph app-event-card__when">
+          <time dateTime={event.startDateTime}>
+            <span className="app-event-card__day">{formatDayNumeral(event.startDateTime)}</span>{' '}
             {formatMonthYear(event.startDateTime)} · {formatWeekday(event.startDateTime)} ·{' '}
             {formatTimeHM(event.startDateTime)}
-          </span>
-        </div>
+          </time>
+        </p>
       </div>
 
-      <div style={{ padding: '20px 22px' }}>
-        {tag ? (
-          <span
-            className="kihub-tag kihub-tag--tinted"
-            style={{ textTransform: 'uppercase', letterSpacing: '.1em', fontSize: '12px' }}
-          >
-            {tag}
-          </span>
-        ) : null}
-        <h3 className="kihub-h4" style={{ marginTop: tag ? 'var(--kihub-space-4)' : 0 }}>
-          <Link
-            href={`/events/${slug}`}
-            className="kihub-focusable"
-            style={{ color: 'inherit', textDecoration: 'none' }}
-          >
+      <div className="ds-card__block">
+        <EventTypeBadge type={event.eventType} />
+        <h3 className="ds-heading" data-size="xs">
+          <Link id={linkId} href={`/events/${slug}`}>
             {event.title}
           </Link>
         </h3>
         {meta ? (
-          <p
-            style={{
-              margin: 'var(--kihub-space-2) 0 0',
-              font: '400 13px var(--kihub-font-ui)',
-              color: 'var(--kihub-text-subtle)',
-            }}
-          >
+          <p className="ds-paragraph app-meta" data-size="sm">
             {meta}
           </p>
         ) : null}
-        <Link
-          href={`/events/${slug}`}
-          className="kihub-btn kihub-btn--primary"
-          style={{ width: '100%', justifyContent: 'center', marginTop: 'var(--kihub-space-5)' }}
-        >
-          Se arrangementet
-        </Link>
-        <p style={{ margin: 'var(--kihub-space-4) 0 0', textAlign: 'center' }}>
-          <a
-            href={`/events/${slug}/ics`}
-            className="kihub-link"
-            style={{ font: '400 15px var(--kihub-font-display)' }}
-          >
-            + Legg til i kalender
+        <p className="ds-paragraph">
+          <a href={`/events/${slug}/ics`} className="ds-button" data-variant="secondary" data-size="sm">
+            Legg til i kalender
           </a>
         </p>
       </div>

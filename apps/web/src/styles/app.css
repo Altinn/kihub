@@ -1,0 +1,1389 @@
+/* 026 — the app's own stylesheet on top of Designsystemet (@digdir/designsystemet-css + the
+ * generated Digdir theme). Only page layout and the few components Designsystemet does not provide
+ * (header, footer, …) live here, and every value is a --ds-* token (contracts/theme.md): no
+ * hard-coded colors, px type or spacing. Components themselves are plain HTML with ds-* classes. */
+
+:root {
+  /* Inter, self-hosted via next/font (themed-html.tsx), for Designsystemet and everything else.
+   * The app defines no custom properties of its own: everything else is a --ds-* token. */
+  --ds-font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+}
+
+/* Designsystemet sets the body colour, background, size and line height, but not its typeface. */
+body {
+  margin: 0;
+  font-family: var(--ds-font-family);
+}
+
+/* Very narrow screens (≈ 320–480px): slimmer page gutter and card padding, so text keeps room. */
+@media (width < 30rem) {
+  .app-container {
+    padding-inline: var(--ds-size-4);
+  }
+  .ds-card {
+    --dsc-card-padding: var(--ds-size-4);
+  }
+}
+
+/* Long Norwegian compounds hyphenate (lang="nb") instead of breaking mid-word on narrow screens. */
+main :is(h1, h2, h3, h4) {
+  hyphens: auto;
+}
+/* Inline code (URLs, paths) may break anywhere rather than push the page wider; code BLOCKS keep
+ * their lines and scroll inside their own box instead. */
+main :not(pre) > code {
+  overflow-wrap: anywhere;
+}
+
+/* Programmatic focus target of the skip link; it is not itself interactive. */
+#main-content:focus {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Layout primitives ---------- */
+/* Content column: 75rem of content plus the gutter on each side (border-box). */
+.app-container {
+  box-sizing: border-box;
+  max-width: calc(75rem + 2 * var(--ds-size-6));
+  margin-inline: auto;
+  padding-inline: var(--ds-size-6);
+}
+.app-section {
+  padding-block: var(--ds-size-18);
+}
+.app-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-size-4);
+}
+.app-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-size-3);
+}
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--ds-size-6);
+}
+.app-accent-word {
+  color: var(--ds-color-accent-text-subtle);
+}
+
+/* Footer sits at the bottom even on short pages. */
+.app-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.app-shell > main {
+  flex: 1;
+}
+
+/* ---------- Header (Designsystemet has no header component; built on its tokens). The
+ * responsive switch follows Designsystemet's own site header: the row never wraps, the menu list
+ * may — and SiteNav swaps to the hamburger panel as soon as it does (no fixed breakpoint). Without
+ * JavaScript the wrapped list is the fallback. ---------- */
+.app-header {
+  border-bottom: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+}
+.app-header__inner {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--ds-size-4);
+  padding-block: var(--ds-size-3);
+}
+.app-header__brand {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--ds-size-2);
+  /* Digdir: clear space around the logo ≥ the emblem's height. */
+  margin-inline-end: var(--ds-size-4);
+  color: var(--ds-color-neutral-text-default);
+  text-decoration: none;
+  border-radius: var(--ds-border-radius-md);
+}
+.app-header__brand img {
+  height: var(--ds-size-7);
+  width: auto;
+}
+/* Digdir: on a dark ground the logo is the white (negative) version, as in the footer. */
+:root[data-color-scheme='dark'] .app-header__brand img {
+  filter: brightness(0) invert(1);
+}
+.app-header__brand-label {
+  font-size: var(--ds-body-md-font-size);
+  font-weight: var(--ds-font-weight-medium);
+}
+.app-header__user {
+  flex: none;
+  margin-inline-start: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--ds-size-3);
+}
+/* User menu: a Designsystemet Dropdown opened from an Avatar + name button. */
+.app-user-menu__trigger {
+  gap: var(--ds-size-2);
+  padding-inline-start: var(--ds-size-1);
+}
+.app-user-menu__switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-size-4);
+  min-height: var(--dsc-dropdown-item-size);
+  padding: var(--dsc-dropdown-item-padding);
+}
+
+/* Full menu: a wrapping row (the wrap is what triggers the hamburger). */
+.app-nav {
+  flex: 1;
+  min-width: 0;
+}
+.app-nav__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--ds-size-5);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* Header navigation reads as a menu, so links are not underlined at rest. One cue for both
+ * states: a bar under the link — accent for the current page, neutral on hover. The text keeps
+ * its colour on hover (Designsystemet's neutral link hover is text-subtle, which reads as
+ * disabled), via the link's documented --dsc-link-color--hover variable. */
+.app-nav__link.ds-link {
+  --dsc-link-color--hover: var(--ds-color-neutral-text-default);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-size-1);
+  padding-block: var(--ds-size-2);
+  text-decoration-line: none;
+  border-bottom: var(--ds-border-width-focus) solid transparent;
+}
+@media (hover: hover) and (pointer: fine) {
+  .app-nav__link.ds-link:hover {
+    text-decoration-line: none;
+    border-bottom-color: var(--ds-color-neutral-border-default);
+  }
+  .app-header__brand:hover .app-header__brand-label {
+    text-decoration-line: underline;
+  }
+}
+.app-nav__link.ds-link[aria-current='page'],
+.app-nav__link.ds-link[aria-current='page']:hover {
+  border-bottom-color: var(--ds-color-accent-base-default);
+  font-weight: var(--ds-font-weight-medium);
+}
+
+/* Hamburger mode: the "Meny" button at the end of the row opens a Designsystemet drawer
+ * (`dialog.ds-dialog[data-placement=right]`), narrowed through its documented variable. */
+.app-nav--hamburger {
+  display: flex;
+  justify-content: flex-end;
+}
+.app-menu-dialog.ds-dialog {
+  --dsc-dialog-placement-inline-max-width: 24rem;
+}
+.app-menu-dialog > .ds-heading {
+  margin-bottom: var(--ds-size-4);
+}
+.app-menu-panel__list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0 0 var(--ds-size-6);
+  padding: 0;
+}
+.app-menu-panel__list li {
+  border-top: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+}
+.app-menu-panel__list .app-nav__link.ds-link {
+  display: flex;
+  padding: var(--ds-size-3) var(--ds-size-2);
+  border-bottom: none;
+  border-inline-start: var(--ds-border-width-focus) solid transparent;
+}
+@media (hover: hover) and (pointer: fine) {
+  .app-menu-panel__list .app-nav__link.ds-link:hover {
+    border-inline-start-color: var(--ds-color-neutral-border-default);
+  }
+}
+.app-menu-panel__list .app-nav__link.ds-link[aria-current='page'],
+.app-menu-panel__list .app-nav__link.ds-link[aria-current='page']:hover {
+  border-inline-start-color: var(--ds-color-accent-base-default);
+}
+.app-menu-dialog .app-header__user {
+  flex-wrap: wrap;
+  margin-inline-start: 0;
+}
+@media (width < 30rem) {
+  .app-header__brand {
+    margin-inline-end: 0;
+  }
+}
+
+/* ---------- Footer (digdir.no pattern): Blåsvart ground — the light-scheme neutral base,
+ * #1E2B3C — holding a dark-scheme subtree whose own background is made transparent, so text,
+ * links and the focus ring use Designsystemet's light-on-dark tokens. ---------- */
+.app-footer {
+  margin-top: var(--ds-size-18);
+}
+.app-footer__scheme {
+  background: transparent;
+}
+/* In dark mode the page is already dark, so the footer would merge into it: a tinted ground and a
+ * top border keep it a distinct band. */
+:root[data-color-scheme='dark'] .app-footer {
+  background: var(--ds-color-neutral-background-tinted);
+  border-top: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+}
+.app-footer__inner {
+  display: grid;
+  align-items: start;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--ds-size-10);
+  padding-block: var(--ds-size-14);
+}
+.app-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-size-2);
+}
+.app-footer__logo {
+  height: var(--ds-size-8);
+  width: auto;
+  /* Digdir: the negative logo is always white. */
+  filter: brightness(0) invert(1);
+}
+.app-footer__brand-label {
+  font-size: var(--ds-body-md-font-size);
+  font-weight: var(--ds-font-weight-medium);
+}
+.app-footer__heading {
+  margin: 0 0 var(--ds-size-4);
+}
+.app-footer__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--ds-size-3);
+}
+.app-footer__contact {
+  display: grid;
+  gap: var(--ds-size-1);
+}
+/* Chevron links: the leading chevron marks them as links, so no underline at rest (as on
+ * digdir.no); hover adds the underline. */
+.app-footer__link.ds-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-size-1);
+  overflow-wrap: anywhere;
+  text-decoration-line: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .app-footer__link.ds-link:hover {
+    text-decoration-line: underline;
+  }
+}
+.app-footer__chevron {
+  flex: none;
+  width: 1em;
+  height: 1em;
+}
+@media (width < 45rem) {
+  .app-footer__inner {
+    grid-template-columns: 1fr;
+    gap: var(--ds-size-8);
+    padding-block: var(--ds-size-10);
+  }
+}
+
+/* ---------- Shared text helpers ---------- */
+/* A sentence-case kicker above a heading (replaces the uppercase, letter-spaced eyebrow), in the
+ * surrounding colour context's subtle text. Meta lines are always neutral (the page's default
+ * data-color is accent, so the unprefixed role token would turn them blue). */
+.app-kicker {
+  color: var(--ds-color-text-subtle);
+}
+.app-meta {
+  color: var(--ds-color-neutral-text-subtle);
+}
+.app-section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--ds-size-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--ds-size-8);
+}
+/* Rich text from the CMS / Markdown (ds-richtext converters). Payload's <RichText> wraps its
+ * output in div.payload-richtext, so the flow rules apply one level down as well. */
+:where(.app-richtext, .app-richtext > .payload-richtext) > * + * {
+  margin-block-start: var(--ds-size-3);
+}
+:where(.app-richtext, .app-richtext > .payload-richtext) > :first-child {
+  margin-block-start: 0;
+}
+
+/* ==================== Frontpage (026 slice 1) ==================== */
+.app-frontpage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-size-6);
+}
+
+/* Hero: text left, the Digdir design element at the right edge (Digdir profile placement). */
+.app-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: var(--ds-size-10);
+  align-items: center;
+  padding-block: var(--ds-size-14) var(--ds-size-8);
+}
+.app-hero__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ds-size-5);
+}
+.app-hero__lead {
+  max-width: 38ch;
+  color: var(--ds-color-neutral-text-subtle);
+}
+.app-hero__art img {
+  display: block;
+  width: 100%;
+  max-width: 26.25rem;
+  height: auto;
+  margin-inline-start: auto;
+}
+@media (width < 56.25rem) {
+  .app-hero {
+    grid-template-columns: 1fr;
+    padding-block: var(--ds-size-10) var(--ds-size-4);
+  }
+  .app-hero__art {
+    display: none;
+  }
+}
+.app-hero__heading.ds-heading {
+  font-weight: 700;
+  line-height: 1;
+}
+@media (width < 45rem) {
+  /* The 2xl display size cannot fit "intelligens" on one line on a phone. */
+  .app-hero__heading.ds-heading {
+    font-size: var(--ds-heading-lg-font-size);
+  }
+}
+
+/* Digdir tint cards (the digdir.no "Hva skal du gjøre?" pattern): a Designsystemet tinted card
+ * whose data-color is a Digdir graphic colour, so its surface is that colour's light generated tint
+ * (e.g. brand2 surface-tinted #f8e7c1). The text stays Blåsvart — the brand's own text role would
+ * tint it brown/red — set through the card's documented --dsc-card-color variable. */
+.app-tint {
+  --dsc-card-color: var(--ds-color-neutral-text-default);
+  color: var(--ds-color-neutral-text-default);
+}
+
+/* Navigation tiles. */
+.app-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: var(--ds-size-6);
+}
+.app-tile.ds-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--ds-size-8);
+  min-height: 13.75rem;
+}
+
+/* Contribute banner: a tinted link card. */
+.app-banner.ds-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.app-banner .ds-paragraph {
+  max-width: 60ch;
+}
+
+/* Subscriptions: a dark-scheme card (data-color-scheme="dark" on the element). */
+.app-subscriptions.ds-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.app-subscriptions__description {
+  max-width: 60ch;
+}
+.app-subscriptions__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-size-3);
+  list-style: none;
+  margin-inline: 0;
+  padding: 0;
+}
+.app-subscriptions__dialog.ds-dialog {
+  max-width: 26.25rem;
+}
+
+/* Events section: next-event card + timeline. */
+.app-fp-events {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--ds-size-10);
+  align-items: start;
+}
+.app-event-card__date {
+  background: var(--ds-color-surface-tinted);
+}
+.app-event-card__day {
+  font-size: var(--ds-heading-lg-font-size);
+  line-height: 1;
+  margin-inline-end: var(--ds-size-2);
+}
+.app-timeline__list {
+  list-style: none;
+  margin: var(--ds-size-2) 0 0;
+  padding: 0;
+}
+.app-timeline__item {
+  display: grid;
+  grid-template-columns: var(--ds-size-2) minmax(5rem, auto) minmax(0, 1fr);
+  gap: var(--ds-size-4);
+  align-items: start;
+  padding-block: var(--ds-size-4);
+  border-bottom: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+}
+.app-timeline__item::before {
+  content: '';
+  width: var(--ds-size-2);
+  height: var(--ds-size-2);
+  margin-top: var(--ds-size-2);
+  border-radius: var(--ds-border-radius-full);
+  background: var(--ds-color-accent-base-default);
+}
+.app-timeline__item time {
+  white-space: nowrap;
+}
+.app-timeline__item p {
+  margin-block-start: var(--ds-size-1);
+}
+@media (width < 56.25rem) {
+  .app-fp-events {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* News section: two-up card grid. */
+.app-fp-news {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ds-size-10) var(--ds-size-6);
+}
+@media (width < 45rem) {
+  .app-fp-news {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==================== News + projects (026 slice 2) ==================== */
+/* One card grid for every editorial list (/news, /prosjekter). `minmax(0, 1fr)` plus
+ * overflow-wrap keeps a long unbroken headline from forcing horizontal scroll (013 SC-004). */
+.app-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ds-size-6);
+  margin-top: var(--ds-size-10);
+}
+.app-content-card :is(h2, h3, p) {
+  overflow-wrap: anywhere;
+}
+@media (width < 45rem) {
+  .app-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.app-empty {
+  margin-top: var(--ds-size-10);
+  max-width: 40rem; /* reading measure */
+}
+
+/* Link cards (`ds-card[data-clickdelegatefor]`): the WHOLE card is the target. Designsystemet
+ * styles the heading link (inherited colour, underlined heading) and designsystemet-web forwards
+ * clicks and drives the card's hover surface; the link itself carries no ds-link styles. Focus is
+ * shown on the card, not the small link: the card takes Designsystemet's focus ring while its own
+ * link has keyboard focus — a :focus-within scoped to that link and to keyboard focus
+ * (:focus-visible), so a mouse click or a second control (the event card's calendar button) does
+ * not ring the whole card. */
+.ds-card[data-clickdelegatefor]:has(
+    > :is(h1, h2, h3, h4, h5, h6) > a:focus-visible,
+    > .ds-card__block > :is(h1, h2, h3, h4, h5, h6) > a:focus-visible
+  ) {
+  box-shadow: var(--dsc-focus-boxShadow);
+  outline: var(--dsc-focus-outline);
+  outline-offset: var(--ds-border-width-focus);
+}
+.ds-card[data-clickdelegatefor] :is(h1, h2, h3, h4, h5, h6) > a:focus-visible {
+  box-shadow: none;
+  outline: none;
+}
+
+/* 16:10 media well; the image is the only child of its ds-card__block (full-bleed). */
+.app-card-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  margin: 0;
+  background: var(--ds-color-accent-surface-tinted);
+}
+
+.app-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--ds-size-14);
+  padding-top: var(--ds-size-6);
+  border-top: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+}
+
+/* Article pages (/news/[slug], /prosjekter/[slug]): full content width, so the hero and body
+ * reach the same right edge as the title above them (013/020). */
+.app-article {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ds-size-4);
+}
+.app-breadcrumbs {
+  margin-bottom: var(--ds-size-4);
+}
+.app-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-size-2);
+  list-style: none;
+  margin: var(--ds-size-2) 0 0;
+  padding: 0;
+}
+.app-article-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: var(--ds-size-4);
+  border-radius: var(--ds-border-radius-lg);
+  background: var(--ds-color-accent-surface-tinted);
+}
+.app-article > .app-richtext {
+  align-self: stretch;
+  margin-top: var(--ds-size-4);
+}
+
+/* Rich text rhythm: more air before a heading than after it. */
+:where(.app-richtext, .app-richtext > .payload-richtext) > .ds-heading:not(:first-child) {
+  margin-block-start: var(--ds-size-8);
+}
+:where(.app-richtext, .app-richtext > .payload-richtext) > .ds-heading + * {
+  margin-block-start: var(--ds-size-2);
+}
+.app-richtext img {
+  max-width: 100%;
+  height: auto;
+}
+/* A wide table or code block scrolls inside its own labelled, focusable region (WCAG 1.4.10). */
+.app-scroll-region {
+  /* Positioned, so absolutely positioned content inside (a visually hidden <caption>) is
+   * contained by the scroller instead of escaping it and widening the page. */
+  position: relative;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* ---------- Shared page structure ---------- */
+/* Page h1 + an action (e.g. the events view switch) on one line, wrapping on narrow screens. */
+.app-page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-size-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--ds-size-10);
+}
+/* Sidebar (filters / navigation) + content. */
+.app-sidebar-layout {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  gap: var(--ds-size-14);
+  align-items: start;
+}
+@media (width < 56.25rem) {
+  .app-sidebar-layout {
+    grid-template-columns: 1fr;
+    gap: var(--ds-size-8);
+  }
+}
+@media (width < 30rem) {
+  /* The xl page-title size cannot fit a long single word ("Arrangementer") on a phone. */
+  main h1.ds-heading[data-size='xl'] {
+    font-size: var(--ds-heading-md-font-size);
+  }
+  .app-page-head {
+    margin-bottom: var(--ds-size-6);
+  }
+}
+
+/* Filter forms: fieldsets of Designsystemet chips + a submit button. */
+.app-filters {
+  display: grid;
+  gap: var(--ds-size-6);
+}
+.app-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-size-2);
+}
+
+/* ==================== Events (026 slice 3) ==================== */
+.app-days {
+  display: grid;
+  gap: var(--ds-size-10);
+}
+.app-daychip {
+  display: inline-block;
+  padding: var(--ds-size-2) var(--ds-size-4);
+  border-radius: var(--ds-border-radius-full);
+  /* The digdir.no event list's Gul tint, with Blåsvart text. */
+  background: var(--ds-color-brand2-surface-tinted);
+  color: var(--ds-color-neutral-text-default);
+}
+.app-event-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.app-event-row {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--ds-size-5);
+  padding-block: var(--ds-size-6);
+  border-bottom: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+}
+.app-event-row p {
+  margin-block-start: var(--ds-size-1);
+}
+@media (width < 30rem) {
+  /* Phone: time | title, with the type tag under the title instead of a third squeezed column. */
+  .app-event-row {
+    grid-template-columns: 3rem minmax(0, 1fr);
+    align-items: start;
+    gap: var(--ds-size-2) var(--ds-size-4);
+  }
+  .app-event-row > .ds-tag {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+/* A type-coloured dot: `data-color` on the element picks the Designsystemet colour. */
+.app-dot {
+  display: inline-block;
+  flex: none;
+  width: var(--ds-size-2);
+  height: var(--ds-size-2);
+  border-radius: var(--ds-border-radius-full);
+  background: var(--ds-color-base-default);
+}
+
+.app-monthnav {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-size-4);
+  margin-bottom: var(--ds-size-6);
+}
+.app-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--ds-size-2) var(--ds-size-6);
+  list-style: none;
+  margin: 0 0 var(--ds-size-5);
+  padding: 0;
+  font-size: var(--ds-body-sm-font-size);
+}
+.app-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-size-2);
+}
+
+/* Month grid: a ds-table with seven equal columns. */
+.app-cal.ds-table {
+  width: 100%;
+  table-layout: fixed;
+}
+.app-cal th {
+  font-size: var(--ds-body-sm-font-size);
+  font-weight: var(--ds-font-weight-medium);
+  color: var(--ds-color-neutral-text-subtle);
+}
+.app-cal td.app-cal__cell {
+  vertical-align: top;
+  height: 6rem;
+  padding: var(--ds-size-2);
+}
+.app-cal__cell--dim {
+  background: var(--ds-color-neutral-background-tinted);
+}
+.app-cal__day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--ds-size-7);
+  height: var(--ds-size-7);
+  margin-bottom: var(--ds-size-1);
+  font-size: var(--ds-body-sm-font-size);
+  color: var(--ds-color-neutral-text-subtle);
+}
+.app-cal__cell[aria-current='date'] .app-cal__day {
+  border-radius: var(--ds-border-radius-full);
+  background: var(--ds-color-accent-base-default);
+  color: var(--ds-color-accent-base-contrast-default);
+}
+.app-cal__entry {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-size-2);
+  max-width: 100%;
+  padding: var(--ds-size-1);
+  border-radius: var(--ds-border-radius-sm);
+  color: var(--ds-color-neutral-text-default);
+  text-decoration: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .app-cal__entry:hover .app-cal__entry-text {
+    text-decoration: underline;
+  }
+}
+.app-cal__entry-text {
+  overflow: hidden;
+  font-size: var(--ds-body-xs-font-size);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.app-cal__more {
+  display: block;
+  padding-inline-start: var(--ds-size-1);
+  font-size: var(--ds-body-xs-font-size);
+  color: var(--ds-color-neutral-text-subtle);
+}
+/* Phone-only pieces (hidden on wide screens). */
+.app-cal__dots {
+  display: none;
+  flex-wrap: wrap;
+  gap: var(--ds-size-1);
+}
+.app-agenda {
+  display: none;
+  margin-top: var(--ds-size-8);
+}
+/* Narrow viewports: the full grid would only fit by scrolling sideways — show a compact dot
+ * overview plus the tappable month agenda below instead (no horizontal scrolling). */
+@media (width < 45rem) {
+  .app-cal th {
+    padding: var(--ds-size-2) 0;
+    font-size: var(--ds-body-xs-font-size);
+    text-align: center;
+  }
+  .app-cal td.app-cal__cell {
+    height: auto;
+    min-height: var(--ds-size-11);
+    padding: var(--ds-size-1);
+  }
+  .app-cal__day {
+    min-width: var(--ds-size-6);
+    height: var(--ds-size-6);
+    margin-bottom: 0;
+    font-size: var(--ds-body-xs-font-size);
+  }
+  .app-cal__entry,
+  .app-cal__more {
+    display: none;
+  }
+  .app-cal__dots {
+    display: flex;
+  }
+  .app-agenda {
+    display: block;
+  }
+  .app-legend {
+    justify-content: flex-start;
+  }
+}
+
+/* Event detail */
+.app-event-detail {
+  max-width: 40rem; /* reading measure */
+}
+.app-event-meta.ds-card {
+  align-self: stretch;
+}
+.app-event-meta dl {
+  display: grid;
+  gap: var(--ds-size-3);
+  margin: 0;
+}
+.app-event-meta dl > div {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: var(--ds-size-4);
+}
+.app-event-meta dt {
+  font-weight: var(--ds-font-weight-medium);
+}
+.app-event-meta dd {
+  margin: 0;
+}
+
+/* ==================== KI Læring (026 slice 4) ==================== */
+.app-learning {
+  padding-block: var(--ds-size-10);
+}
+.app-learning[data-nav] {
+  display: grid;
+  /* `minmax(0, 1fr)` is load-bearing: without the 0 minimum a wide <pre> or table sets the
+   * column's min-content width and widens the whole PAGE instead of scrolling in its own block. */
+  grid-template-columns: 15rem minmax(0, 1fr);
+  gap: var(--ds-size-10);
+  align-items: start;
+}
+.app-learning__aside {
+  /* Desktop: the navigation stays reachable while a long page scrolls. */
+  position: sticky;
+  top: var(--ds-size-6);
+}
+.app-learning__content {
+  min-width: 0;
+}
+.app-learning__lead {
+  max-width: 40rem; /* reading measure */
+  margin-top: var(--ds-size-4);
+  color: var(--ds-color-neutral-text-subtle);
+}
+.app-learning__overview {
+  display: grid;
+  gap: var(--ds-size-6);
+  margin-top: var(--ds-size-10);
+}
+.app-learning-page__summary {
+  color: var(--ds-color-neutral-text-subtle);
+}
+.app-learning-page__body {
+  align-self: stretch;
+}
+
+/* Wide screens: the phone disclosure is not a control — hide its summary and keep it open
+ * (two rules, because engines implement the closed state differently). */
+@media (width >= 56.25rem) {
+  .app-learning__disclosure > summary {
+    display: none;
+  }
+  .app-learning__disclosure.ds-details {
+    border: 0;
+    background: none;
+  }
+  .app-learning__disclosure > .app-learning-nav {
+    display: block;
+    margin: 0;
+  }
+  .app-learning__disclosure::details-content {
+    content-visibility: visible;
+    block-size: auto;
+  }
+}
+@media (width < 56.25rem) {
+  /* Single column — the desktop layout is replaced, not squeezed. */
+  .app-learning[data-nav] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ds-size-6);
+  }
+  .app-learning__aside {
+    position: static;
+  }
+}
+
+/* Resource navigation: one ds-details per category. */
+.app-learning-nav .ds-details > div {
+  margin-inline: 0;
+}
+.app-learning-nav__list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.app-learning-nav__link.ds-link {
+  display: block;
+  padding: var(--ds-size-2) var(--ds-size-3);
+  overflow-wrap: anywhere; /* long titles wrap instead of widening the sidebar */
+  text-decoration-line: none;
+  border-inline-start: var(--ds-border-width-focus) solid transparent;
+}
+@media (hover: hover) and (pointer: fine) {
+  .app-learning-nav__link.ds-link:hover {
+    text-decoration-line: underline;
+  }
+}
+/* The current page is keyed off aria-current, so the visible and announced states never disagree.
+ * Weight + rule + tint, never colour alone. */
+.app-learning-nav__link.ds-link[aria-current='page'] {
+  font-weight: var(--ds-font-weight-semibold);
+  border-inline-start-color: var(--ds-color-accent-base-default);
+  background: var(--ds-color-accent-surface-tinted);
+}
+.app-learning-nav__group {
+  margin-top: var(--ds-size-3);
+}
+.app-learning-nav__group-title {
+  padding-inline: var(--ds-size-3);
+  font-weight: var(--ds-font-weight-medium);
+  color: var(--ds-color-neutral-text-subtle);
+}
+.app-learning-nav__group .app-learning-nav__link.ds-link {
+  padding-inline-start: var(--ds-size-5);
+}
+
+/* Code blocks. shiki's CSS-variables theme emits `var(--shiki-…)`; these aliases resolve them to
+ * Designsystemet TEXT roles (not base fills, which are not guaranteed 4.5:1 as small text). Four
+ * roles only — keywords in the accent, literals in one second hue, comments subtle, the rest ink.
+ * Every variable the theme emits gets a value, so none falls back to the browser default. */
+:root {
+  --shiki-foreground: var(--ds-color-neutral-text-default);
+  --shiki-background: transparent;
+  --shiki-token-keyword: var(--ds-color-accent-text-default);
+  --shiki-token-string: var(--ds-color-success-text-default);
+  --shiki-token-string-expression: var(--ds-color-success-text-default);
+  --shiki-token-constant: var(--ds-color-success-text-default);
+  --shiki-token-comment: var(--ds-color-neutral-text-subtle);
+  --shiki-token-punctuation: var(--ds-color-neutral-text-default);
+  --shiki-token-function: var(--ds-color-neutral-text-default);
+  --shiki-token-parameter: var(--ds-color-neutral-text-default);
+  --shiki-token-link: var(--ds-color-neutral-text-default);
+}
+.app-code {
+  margin: var(--ds-size-6) 0;
+  overflow: hidden;
+  border: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+  border-radius: var(--ds-border-radius-md);
+  background: var(--ds-color-neutral-background-tinted);
+}
+.app-code__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-size-3);
+  padding: var(--ds-size-2) var(--ds-size-3);
+  border-bottom: var(--ds-border-width-default) solid var(--ds-color-neutral-border-subtle);
+}
+.app-code__pre {
+  /* Overflow stays INSIDE the block, so a long line never scrolls the page sideways. */
+  overflow-x: auto;
+  margin: 0;
+  padding: var(--ds-size-4);
+  white-space: pre; /* keeps the authored indentation and blank lines */
+  tab-size: 2;
+  color: var(--shiki-foreground);
+  background: var(--shiki-background);
+}
+.app-code__pre:focus-visible {
+  outline: var(--dsc-focus-outline);
+  outline-offset: calc(var(--ds-border-width-focus) * -1);
+  box-shadow: var(--dsc-focus-boxShadow-inset);
+}
+.app-code__pre code {
+  /* Designsystemet has no monospace token — a system stack, not a new design decision. */
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: var(--ds-body-sm-font-size);
+  line-height: var(--ds-line-height-md);
+}
+.app-code__line {
+  display: block;
+  min-height: 1lh;
+}
+
+/* Inline images and embedded video. */
+.app-figure {
+  margin: var(--ds-size-8) 0;
+}
+.app-figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--ds-border-radius-lg);
+}
+.app-video {
+  margin: var(--ds-size-8) 0;
+}
+.app-video__frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--ds-border-radius-lg);
+  background: var(--ds-color-neutral-base-default);
+}
+.app-video__frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.app-video figcaption {
+  margin-top: var(--ds-size-3);
+}
+
+/* ==================== Registry, artifacts, sign-in (026 slice 5) ==================== */
+.app-cluster--tight {
+  gap: var(--ds-size-2);
+}
+.app-page-intro {
+  display: grid;
+  gap: var(--ds-size-2);
+  margin-bottom: var(--ds-size-10);
+}
+.app-search {
+  display: grid;
+  gap: var(--ds-size-2);
+}
+
+/* Artifact detail: metadata + prose, wider than the prose cap. */
+.app-artifact {
+  max-width: 53.75rem;
+}
+.app-artifact > .ds-divider,
+.app-artifact > .app-panel,
+.app-artifact > .app-readme {
+  align-self: stretch;
+}
+/* A label/value description list (artifact metadata, governance). */
+.app-meta-list {
+  display: grid;
+  gap: var(--ds-size-2);
+  /* Only bottom/side margins: the top comes from Designsystemet's card child spacing. */
+  margin-inline: 0;
+  margin-block-end: 0;
+}
+.app-meta-list > div {
+  display: grid;
+  grid-template-columns: minmax(8rem, max-content) minmax(0, 1fr);
+  gap: var(--ds-size-4);
+}
+.app-meta-list dt {
+  font-weight: var(--ds-font-weight-medium);
+}
+.app-meta-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (width < 30rem) {
+  .app-meta-list > div {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+.app-readme {
+  display: grid;
+  gap: var(--ds-size-3);
+}
+
+/* Panels (install, agent card, governance): a card of headed groups. */
+.app-panel.ds-card > .ds-heading:not(:first-child) {
+  margin-top: var(--ds-size-6);
+}
+.app-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ds-size-2) var(--ds-size-4);
+}
+.app-install {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-size-3);
+}
+.app-install__command {
+  flex: 1;
+  min-width: 0;
+  padding: var(--ds-size-2) var(--ds-size-3);
+  overflow-wrap: anywhere;
+  border-radius: var(--ds-border-radius-md);
+  background: var(--ds-color-neutral-surface-tinted);
+}
+.app-skill-list {
+  display: grid;
+  gap: var(--ds-size-3);
+  margin-inline: 0;
+  margin-block-end: 0;
+}
+.app-skill-list dt {
+  font-weight: var(--ds-font-weight-semibold);
+}
+.app-skill-list dd {
+  display: grid;
+  gap: var(--ds-size-2);
+  margin: 0;
+}
+.app-review-list,
+.app-audit-list,
+.app-persona-list {
+  display: grid;
+  gap: var(--ds-size-3);
+  list-style: none;
+  margin-inline: 0;
+  margin-block-end: 0;
+  padding: 0;
+}
+.app-audit-list {
+  gap: var(--ds-size-1);
+}
+.app-review-list .ds-card {
+  --dsc-card-padding: var(--ds-size-3) var(--ds-size-4);
+}
+
+/* Sign-in: a single narrow column. */
+.app-signin {
+  display: grid;
+  gap: var(--ds-size-4);
+  max-width: 32.5rem;
+  margin: 0 auto;
+  padding: var(--ds-size-12) var(--ds-size-4);
+}
+.app-persona-list p {
+  margin-top: var(--ds-size-1);
+}
+
+/* ==================== /bidra guide (026 slice 6) ==================== */
+.app-guide__layout {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  gap: var(--ds-size-14);
+  align-items: start;
+  padding-bottom: var(--ds-size-18);
+}
+.app-guide__toc {
+  position: sticky;
+  top: var(--ds-size-6);
+}
+.app-guide__toc-title {
+  margin-bottom: var(--ds-size-2);
+  font-weight: var(--ds-font-weight-medium);
+  color: var(--ds-color-neutral-text-subtle);
+}
+.app-guide__toc ol {
+  display: grid;
+  gap: var(--ds-size-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--ds-body-sm-font-size);
+}
+.app-guide__content {
+  display: grid;
+  /* An explicit 0-minimum column: an implicit grid column sizes to its content, so the card grids
+   * inside would push past the content edge instead of wrapping. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ds-size-18);
+  min-width: 0;
+}
+.app-guide__section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ds-size-6);
+  scroll-margin-top: var(--ds-size-6);
+}
+.app-guide__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ds-size-3);
+}
+.app-guide__lede {
+  max-width: 40rem; /* reading measure */
+  color: var(--ds-color-neutral-text-subtle);
+}
+.app-guide__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--ds-size-4);
+}
+.app-guide__compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--ds-size-4);
+}
+.app-guide__icon {
+  width: var(--ds-size-8);
+  height: var(--ds-size-8);
+  color: var(--ds-color-accent-text-subtle);
+}
+.app-guide__type-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ds-size-2);
+}
+.app-guide__path,
+.app-guide__format {
+  overflow-wrap: anywhere;
+  font-size: var(--ds-body-sm-font-size);
+}
+
+/* "Slik fungerer det" flow and the lifecycle: numbered step lists. */
+.app-guide__flow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: var(--ds-size-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.app-guide__flow > li {
+  display: grid;
+  align-content: start;
+  gap: var(--ds-size-1);
+}
+.app-guide__num {
+  display: inline-grid;
+  place-items: center;
+  width: var(--ds-size-8);
+  height: var(--ds-size-8);
+  border-radius: var(--ds-border-radius-full);
+  background: var(--ds-color-accent-base-default);
+  color: var(--ds-color-accent-base-contrast-default);
+  font-weight: var(--ds-font-weight-medium);
+}
+.app-guide__lifecycle {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  gap: var(--ds-size-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.app-guide__lifecycle > li {
+  display: grid;
+  gap: var(--ds-size-1);
+  padding-top: var(--ds-size-3);
+  border-top: var(--ds-border-width-focus) solid var(--ds-color-accent-base-default);
+}
+
+/* Steps: the native ordered list, with the number drawn as a decorative circle. */
+.app-guide__steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ds-size-14);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: guide-step;
+}
+.app-guide__step {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ds-size-4);
+  padding-inline-start: var(--ds-size-14);
+  counter-increment: guide-step;
+}
+.app-guide__step::before {
+  content: counter(guide-step);
+  position: absolute;
+  inset-inline-start: 0;
+  display: grid;
+  place-items: center;
+  width: var(--ds-size-10);
+  height: var(--ds-size-10);
+  border-radius: var(--ds-border-radius-full);
+  background: var(--ds-color-accent-surface-tinted);
+  color: var(--ds-color-accent-text-default);
+  font-weight: var(--ds-font-weight-semibold);
+}
+.app-guide__step > .app-code {
+  margin: 0;
+}
+.app-guide__split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--ds-size-4);
+}
+/* Grid items default to `min-width: auto`, so a long code line would set the column's minimum
+ * and widen the page; 0 lets the code block scroll inside itself instead. */
+:is(.app-guide__split, .app-guide__grid, .app-guide__compare, .app-guide__flow) > * {
+  min-width: 0;
+}
+.app-guide__split p {
+  overflow-wrap: anywhere; /* long file paths */
+}
+.app-guide__split .app-code {
+  margin-block: var(--ds-size-2) 0;
+}
+.app-guide__preview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ds-size-2);
+  margin: 0;
+}
+.app-guide__final.ds-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ds-size-4);
+}
+.app-guide__checklist {
+  margin: 0;
+}
+
+@media (width < 56.25rem) {
+  .app-guide__layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ds-size-8);
+  }
+  .app-guide__toc {
+    position: static;
+  }
+}
+@media (width < 30rem) {
+  .app-guide__step {
+    padding-inline-start: 0;
+    padding-top: var(--ds-size-12);
+  }
+  .app-guide__step::before {
+    top: 0;
+  }
+}

@@ -10,7 +10,13 @@ import { codeLanguageLabel, highlightCode } from '@/lib/learning-code';
  * be parsed as markup (FR-030).
  *
  * Token colours are `var(--shiki-…)` references supplied by the CSS-variables theme and resolved by
- * the alias block in `portal.css`, so no colour value is hardcoded here (FR-034).
+ * the alias block in `app.css`, so no colour value is hardcoded here (FR-034). They are per-token
+ * data, so they stay inline styles (026 FR-021's documented exception).
+ *
+ * 026: the scrollable `<pre>` is a named, focusable group ("Kodeeksempel (TypeScript)"), so a
+ * keyboard user can scroll it and a screen reader announces what it is. A group, not a region: a
+ * page often holds several samples in one language, and landmarks must have unique names. The
+ * language label is sentence case.
  */
 export interface LearningCodeBlockNode {
   fields: {
@@ -29,19 +35,30 @@ export function LearningCodeBlock({ node }: { node: LearningCodeBlockNode }) {
   const lines = highlightCode(code, language);
 
   return (
-    <figure className="lp-code">
-      <div className="lp-code__head">
-        {label ? <span className="lp-code__lang">{label}</span> : <span />}
+    <figure className="app-code">
+      <div className="app-code__head">
+        {label ? (
+          <span className="ds-paragraph app-meta" data-size="sm">
+            {label}
+          </span>
+        ) : (
+          <span />
+        )}
         {/* The one client component involved: clipboard access has no server equivalent. It copies
             the RAW field text, not the highlighted markup (§B2.5), and degrades to an inert button
             without scripting — which affects neither navigation nor reading. */}
         <CopyButton text={code} label="Kopier" copiedLabel="Kopiert" />
       </div>
 
-      <pre className="lp-code__pre" tabIndex={0}>
+      <pre
+        className="app-code__pre"
+        role="group"
+        aria-label={label ? `Kodeeksempel (${label})` : 'Kodeeksempel'}
+        tabIndex={0}
+      >
         <code>
           {lines.map((tokens, lineIndex) => (
-            <span className="lp-code__line" key={lineIndex}>
+            <span className="app-code__line" key={lineIndex}>
               {tokens.map((token, tokenIndex) => (
                 <span
                   key={tokenIndex}
