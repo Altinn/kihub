@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@azure/identity": "^4.13.1",
-    "@digdir/designsystemet-css": "1.18.0",
-    "@digdir/designsystemet-react": "1.18.0",
+    "@digdir/designsystemet-css": "1.23.0",
+    "@digdir/designsystemet-react": "1.23.0",
     "@kihub/artifact-schema": "workspace:*",
     "@kihub/discovery-core": "workspace:*",
     "@kihub/github-client": "workspace:*",
@@ -30,29 +30,29 @@
     "@payloadcms/next": "3.88.0",
     "@payloadcms/richtext-lexical": "3.88.0",
     "@payloadcms/storage-azure": "3.88.0",
-    "@shikijs/langs": "4.4.3",
+    "@shikijs/langs": "4.5.0",
     "graphql": "^16.8.1",
     "next": "16.3.8",
     "next-auth": "5.0.0-beta.32",
     "payload": "3.88.0",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "react-markdown": "10.1.0",
     "remark-gfm": "4.0.1",
     "sharp": "^0.35.3",
-    "shiki": "4.4.3"
+    "shiki": "4.5.0"
   },
   "devDependencies": {
-    "@digdir/designsystemet": "1.18.0",
+    "@digdir/designsystemet": "1.23.0",
     "@eslint/eslintrc": "^3.2.0",
     "@types/node": "^22.10.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "cross-env": "^7.0.3",
     "eslint": "^9.17.0",
-    "eslint-config-next": "16.2.11",
+    "eslint-config-next": "16.4.3",
     "tsx": "^4.19.2",
     "typescript": "^5.7.0",
-    "vitest": "4.1.11"
+    "vitest": "4.1.12"
   }
 }
