@@ -32,14 +32,14 @@
     "@payloadcms/storage-azure": "3.88.0",
     "@shikijs/langs": "4.4.3",
     "graphql": "^16.8.1",
-    "next": "16.3.8",
+    "next": "16.4.1",
     "next-auth": "5.0.0-beta.32",
     "payload": "3.88.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "react-markdown": "10.1.0",
     "remark-gfm": "4.0.1",
-    "sharp": "^0.35.3",
+    "sharp": "^0.35.5",
     "shiki": "4.4.3"
   },
   "devDependencies": {
