@@ -405,6 +405,55 @@ main :not(pre) > code {
   color: var(--ds-color-neutral-text-default);
 }
 
+/* Solid brand cards (frontpage tiles, contribute banner; review revision of 026): a link card on
+ * its colour's solid `base-default` surface with the generated `base-contrast-default` text, and
+ * Designsystemet's own `base-hover`/`base-active` steps, all through the card's documented
+ * --dsc-card-* variables. The title is not underlined: as in 025 the arrow chip is the link cue.
+ * Tags and chips inside take their own colour's solid pair (tiles: data-color="neutral", Blåsvart
+ * with white), or the card colour's inverse pair with `.app-solid__inverse` (banner: white with
+ * accent). */
+.app-solid.ds-card {
+  --dsc-card-background: var(--ds-color-base-default);
+  --dsc-card-background--hover: var(--ds-color-base-hover);
+  --dsc-card-background--active: var(--ds-color-base-active);
+  --dsc-card-color: var(--ds-color-base-contrast-default);
+  --dsc-card-border-color: transparent;
+}
+.app-solid.ds-card > .app-solid__title {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-size-3);
+  font-weight: var(--ds-font-weight-regular);
+  text-decoration-line: none;
+}
+.app-solid .ds-tag {
+  --dsc-tag-background: var(--ds-color-base-default);
+  --dsc-tag-color: var(--ds-color-base-contrast-default);
+  --dsc-tag-border-color: transparent;
+}
+.app-solid .ds-tag.app-solid__inverse {
+  --dsc-tag-background: var(--ds-color-base-contrast-default);
+  --dsc-tag-color: var(--ds-color-base-default);
+}
+.app-arrow-chip {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--ds-size-9);
+  block-size: var(--ds-size-9);
+  border-radius: var(--ds-border-radius-full);
+  background: var(--ds-color-base-default);
+  color: var(--ds-color-base-contrast-default);
+}
+.app-arrow-chip.app-solid__inverse {
+  background: var(--ds-color-base-contrast-default);
+  color: var(--ds-color-base-default);
+}
+.app-arrow-chip svg {
+  inline-size: var(--ds-size-5);
+  block-size: var(--ds-size-5);
+}
+
 /* Navigation tiles. */
 .app-tiles {
   display: grid;
@@ -414,13 +463,16 @@ main :not(pre) > code {
 .app-tile.ds-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   align-items: flex-start;
   gap: var(--ds-size-8);
   min-height: 13.75rem;
 }
+/* The title sits at the tile's foot, with or without a tag above it. */
+.app-tile.ds-card > .app-solid__title {
+  margin-top: auto;
+}
 
-/* Contribute banner: a tinted link card. */
+/* Contribute banner: a solid accent link card ending in a "Les veiledningen" cue. */
 .app-banner.ds-card {
   display: flex;
   flex-direction: column;
@@ -428,6 +480,12 @@ main :not(pre) > code {
 }
 .app-banner .ds-paragraph {
   max-width: 60ch;
+}
+.app-banner__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-size-3);
+  font-weight: var(--ds-font-weight-medium);
 }
 
 /* Subscriptions: a dark-scheme card (data-color-scheme="dark" on the element). */
