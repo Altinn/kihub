@@ -21,6 +21,7 @@ export {
 } from './config';
 export {
   artifactDirectoryDigest,
+  comparePaths,
   digestKnownFiles,
   gitBlobOid,
   type ArtifactDigestEntry,

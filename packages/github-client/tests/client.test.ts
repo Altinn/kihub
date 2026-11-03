@@ -87,16 +87,57 @@ describe('createGithubRepoReader', () => {
     await expect(reader.listArtifactDirs()).rejects.toThrow('truncated');
   });
 
-  it('readFile returns blob contents, and undefined on 404', async () => {
-    const fetchImpl = vi.fn(async (url: string | URL | Request) => {
-      return String(url).includes('README.md')
-        ? new Response('# Hello', { status: 200 })
-        : new Response('not found', { status: 404 });
-    });
+  it('readFile fetches the blob sha from the tree snapshot, and is undefined for paths not in it', async () => {
+    const readmeSha = gitBlobOid('readme');
+    const fetchImpl = vi.fn(async (url: string | URL | Request) =>
+      String(url).includes(`/git/blobs/${readmeSha}`) ? new Response('# Hello', { status: 200 }) : jsonResponse(TREE),
+    );
     const reader = createGithubRepoReader({ repo: 'digdir/ai-artifacts', token: 't', fetchImpl });
 
     expect(await reader.readFile('skills/security-review/README.md')).toBe('# Hello');
     expect(await reader.readFile('skills/security-review/MISSING.md')).toBeUndefined();
+    // One tree request + one blob request; the missing file needs no network call.
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it('reads every file from the single tree snapshot even if the branch moves mid-scan', async () => {
+    let treeCalls = 0;
+    const fetchImpl = vi.fn(async (url: string | URL | Request) => {
+      const u = String(url);
+      if (u.includes('/git/trees/')) {
+        treeCalls += 1;
+        return jsonResponse(TREE);
+      }
+      if (u.includes(`/git/blobs/${gitBlobOid('manifest')}`)) return new Response('manifest');
+      return new Response('unexpected', { status: 500 });
+    });
+    const reader = createGithubRepoReader({ repo: 'digdir/ai-artifacts', token: 't', fetchImpl });
+
+    await reader.listArtifactDirs();
+    expect(await reader.readFile('skills/security-review/artifact.yaml')).toBe('manifest');
+    expect(fetchImpl.mock.calls.some(([url]) => String(url).includes('/contents/'))).toBe(false);
+    expect(treeCalls).toBe(1);
+  });
+
+  it('digests a nested artifact into its enclosing artifact too, like a prefix filter', async () => {
+    const tree = {
+      tree: [
+        { path: 'skills/outer/artifact.yaml', type: 'blob', sha: gitBlobOid('outer') },
+        { path: 'skills/outer/skills/inner/artifact.yaml', type: 'blob', sha: gitBlobOid('inner') },
+      ],
+    };
+    const reader = createGithubRepoReader({
+      repo: 'digdir/ai-artifacts',
+      token: 't',
+      fetchImpl: vi.fn(async () => jsonResponse(tree)),
+    });
+    await reader.listArtifactDirs(['.', 'skills/outer']);
+    expect(await reader.artifactDigest?.('skills/outer')).toBe(
+      artifactDirectoryDigest([
+        { path: 'artifact.yaml', blobOid: gitBlobOid('outer') },
+        { path: 'skills/inner/artifact.yaml', blobOid: gitBlobOid('inner') },
+      ]),
+    );
   });
 
   it('throws GithubClientError on a non-404 error, without leaking the token', async () => {

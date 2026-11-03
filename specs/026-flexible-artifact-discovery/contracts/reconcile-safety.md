@@ -49,6 +49,9 @@ Automated discovery persists `summary.revisionChanged` and `revisionChangedIds` 
 - Stable ID remains the upsert key.
 - Source ownership is stamped after reading the previous owner.
 - Deactivation remains source-scoped and soft.
-- Invalid artifacts are skipped/reported.
+- Invalid artifacts are skipped/reported. An owned row whose stored `source.path` matches a
+  still-present invalid directory (compared ignoring a leading `./` and trailing `/`) is not
+  deactivated.
+- The owned-row read is unpaginated (`pagination: false`), so no row escapes deactivation.
 - Duplicate IDs use deterministic first-path-wins and are reported.
 - A transport/config/tree failure never invokes reconcile.

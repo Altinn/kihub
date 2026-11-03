@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import {
   closeSync,
   constants,
@@ -21,7 +22,7 @@ import {
   resolveDiscoveryConfig,
   type ResolvedDiscoveryConfig,
 } from './config';
-import { artifactDirectoryDigest, digestKnownFiles, gitBlobOid } from './digest';
+import { artifactDirectoryDigest, comparePaths, digestKnownFiles, gitBlobOid } from './digest';
 
 /** Type directories walked below every configured artifact root. */
 export const TYPE_DIRS = [
@@ -247,25 +248,82 @@ function listLocalArtifactDirs(rootPath: string, artifactRoots: readonly string[
       }
     }
   }
-  return [...new Set(dirs)].sort((a, b) => a.localeCompare(b));
+  return [...new Set(dirs)].sort(comparePaths);
 }
 
-function localArtifactDigest(rootPath: string, artifactRelPath: string): string {
+/**
+ * Repo-relative paths Git tracks, when `rootPath` is itself the top of a Git checkout; undefined
+ * otherwise (plain directories hash every file). Submodule gitlinks are skipped, matching the
+ * GitHub tree reader, which only digests blobs.
+ */
+function gitTrackedFiles(rootPath: string): string[] | undefined {
+  let topLevel: string;
+  try {
+    topLevel = execFileSync('git', ['-C', rootPath, 'rev-parse', '--show-toplevel'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return undefined;
+  }
+  if (realpathSync(topLevel) !== realpathSync(rootPath)) return undefined;
+  const listing = execFileSync('git', ['-C', rootPath, 'ls-files', '--stage', '-z'], {
+    encoding: 'utf8',
+    maxBuffer: 256 * 1024 * 1024,
+  });
+  const files: string[] = [];
+  for (const record of listing.split('\0')) {
+    // "<mode> <oid> <stage>\t<path>"
+    const tab = record.indexOf('\t');
+    if (tab < 0) continue;
+    if (record.startsWith('160000 ')) continue;
+    files.push(record.slice(tab + 1));
+  }
+  return [...new Set(files)];
+}
+
+/**
+ * Digest one artifact directory from the working tree. Inside a Git checkout only tracked files
+ * count (once the artifact has any), so untracked/ignored files (.DS_Store, node_modules, a local
+ * .env) never change the digest, and a clean checkout digests exactly like the GitHub reader.
+ */
+function localArtifactDigest(
+  rootPath: string,
+  artifactRelPath: string,
+  tracked: readonly string[] | undefined,
+): string {
   const artifactDir = containedPath(rootPath, artifactRelPath);
   const entries: { path: string; blobOid: string }[] = [];
 
+  function addFile(absolute: string, relative: string) {
+    let stat: Stats;
+    try {
+      stat = lstatSync(absolute);
+    } catch (error) {
+      if (isMissingPathError(error)) return; // tracked but deleted in the working tree
+      throw error;
+    }
+    if (stat.isSymbolicLink()) {
+      entries.push({ path: relative, blobOid: gitBlobOid(Buffer.from(readlinkSync(absolute))) });
+    } else if (stat.isFile()) {
+      entries.push({ path: relative, blobOid: gitBlobOid(readCheckedRegularFile(absolute, relative, stat)) });
+    }
+  }
+
+  const prefix = `${artifactRelPath}/`;
+  const trackedHere = tracked?.filter((file) => file.startsWith(prefix)) ?? [];
+  // A never-committed artifact has no tracked files; digest what is on disk rather than nothing.
+  if (trackedHere.length > 0) {
+    for (const file of trackedHere) addFile(containedPath(rootPath, file), file.slice(prefix.length));
+    return artifactDirectoryDigest(entries);
+  }
+
   function walk(absoluteDir: string, relativeDir = '') {
-    for (const entry of readdirSync(absoluteDir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    for (const entry of readdirSync(absoluteDir, { withFileTypes: true })) {
       const absolute = path.join(absoluteDir, entry.name);
       const relative = relativeDir ? `${relativeDir}/${entry.name}` : entry.name;
-      const stat = lstatSync(absolute);
-      if (stat.isSymbolicLink()) {
-        entries.push({ path: relative, blobOid: gitBlobOid(Buffer.from(readlinkSync(absolute))) });
-      } else if (stat.isDirectory()) {
-        walk(absolute, relative);
-      } else if (stat.isFile()) {
-        entries.push({ path: relative, blobOid: gitBlobOid(readCheckedRegularFile(absolute, relative, stat)) });
-      }
+      if (entry.isDirectory()) walk(absolute, relative);
+      else addFile(absolute, relative);
     }
   }
 
@@ -275,6 +333,7 @@ function localArtifactDigest(rootPath: string, artifactRelPath: string): string 
 
 function scanLocalDetailed(rootPath: string, options: ScanOptions = {}): DetailedScanResult {
   const config = resolveDiscoveryConfig(readLocalRepoFile(rootPath, DISCOVERY_CONFIG_PATH));
+  const tracked = gitTrackedFiles(rootPath);
   const artifacts: RawArtifact[] = [];
   for (const relPath of listLocalArtifactDirs(rootPath, config.artifactRoots)) {
     const location = locationFor(relPath, config.artifactRoots);
@@ -283,7 +342,7 @@ function scanLocalDetailed(rootPath: string, options: ScanOptions = {}): Detaile
     const readme = readLocalRepoFile(rootPath, `${relPath}/README.md`);
     let raw = toRawArtifact(location, manifestText, readme, options);
     if (isAgent(raw)) raw = attachAgentCard(raw, readLocalRepoFile(rootPath, `${relPath}/agent-card.json`));
-    raw.contentDigest = localArtifactDigest(rootPath, relPath);
+    raw.contentDigest = localArtifactDigest(rootPath, relPath, tracked);
     artifacts.push(raw);
   }
   return { artifacts, config };
@@ -296,6 +355,7 @@ export function scan(rootPath: string, options: ScanOptions = {}): RawArtifact[]
 
 /** A complete local filesystem RepoReader, including portable artifact-directory digesting. */
 export function createLocalReader(rootPath: string): RepoReader {
+  let tracked: string[] | undefined | null = null;
   return {
     async listArtifactDirs(artifactRoots = ['.']) {
       return listLocalArtifactDirs(rootPath, artifactRoots);
@@ -304,7 +364,8 @@ export function createLocalReader(rootPath: string): RepoReader {
       return readLocalRepoFile(rootPath, relPath);
     },
     async artifactDigest(relPath) {
-      return localArtifactDigest(rootPath, relPath);
+      if (tracked === null) tracked = gitTrackedFiles(rootPath);
+      return localArtifactDigest(rootPath, relPath, tracked);
     },
   };
 }
@@ -316,9 +377,7 @@ export async function scanRepoDetailed(
 ): Promise<DetailedScanResult> {
   const config = resolveDiscoveryConfig(await reader.readFile(DISCOVERY_CONFIG_PATH));
   const artifacts: RawArtifact[] = [];
-  const dirs = [...new Set(await reader.listArtifactDirs(config.artifactRoots))].sort((a, b) =>
-    a.localeCompare(b),
-  );
+  const dirs = [...new Set(await reader.listArtifactDirs(config.artifactRoots))].sort(comparePaths);
   for (const relPath of dirs) {
     const location = locationFor(relPath, config.artifactRoots);
     const manifestText = await reader.readFile(`${relPath}/artifact.yaml`);

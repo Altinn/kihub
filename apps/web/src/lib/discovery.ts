@@ -117,9 +117,7 @@ async function runLocked(
     const scanned = await scanRepoDetailed(createReader(source), { expectedRepository: source.repo });
     // Source-scoped reconcile (015): ownership stamped on every upsert, deactivation limited to
     // this source's own artifacts — other sources' and unowned rows are never touched.
-    const destructiveOverride = Boolean(
-      (source as DiscoverySource & { allowDestructiveReconcile?: boolean }).allowDestructiveReconcile,
-    );
+    const destructiveOverride = Boolean(source.allowDestructiveReconcile);
     const report = await reconcile(payload, scanned.artifacts, {
       sourceId: source.id,
       allowEmptySource: destructiveOverride,

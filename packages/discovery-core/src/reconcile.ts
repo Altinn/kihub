@@ -29,6 +29,7 @@ export interface PayloadLike {
     collection: string;
     where?: unknown;
     limit?: number;
+    pagination?: boolean;
     depth?: number;
     overrideAccess?: boolean;
   }): Promise<{ docs: unknown[] }>;
@@ -60,6 +61,8 @@ interface ArtifactDoc {
   /** Scalar id at depth 0; tolerated as a populated `{ id }` object for safety. */
   discoverySource?: number | string | { id: number | string } | null;
   contentDigest?: string | null;
+  /** Manifest source metadata; `path` is the discovered directory at the last valid sighting. */
+  source?: { path?: string | null } | null;
 }
 
 /** Refuses an incomplete/accidentally empty source observation before reconcile performs writes. */
@@ -80,6 +83,9 @@ function ownerIdOf(doc: ArtifactDoc): number | string | null {
 }
 
 const sameId = (a: number | string, b: number | string) => String(a) === String(b);
+
+/** Rows indexed before 026 stored `source.path` unvalidated (e.g. "./skills/x/"); compare loosely. */
+const looseRepoPath = (value: string) => value.replace(/^(?:\.\/)+/, '').replace(/\/+$/, '');
 
 /**
  * Reconcile the catalog with a scan of ONE source (contracts/reconcile.md): create/update by
@@ -123,7 +129,8 @@ export async function reconcile(
     const active = await payload.find({
       collection: 'artifacts',
       where: { and: [{ active: { equals: true } }, { discoverySource: { equals: sourceId } }] },
-      limit: 1000,
+      // Every owned row: a capped page would leave rows past it un-deactivated forever.
+      pagination: false,
       depth: 0,
       overrideAccess: true,
     });
@@ -194,9 +201,14 @@ export async function reconcile(
   // Soft-deactivate previously-active artifacts not seen in this run — scoped to the scanned
   // source. Rows owned by other sources or unowned (legacy) rows are never candidates (FR-002),
   // and the break-glass mode (sourceId null) owns no source, so it deactivates nothing.
+  // A row whose directory is still present but whose manifest is now invalid is kept active: an
+  // authoring error (reported in skippedInvalid) must not silently unpublish the artifact.
   if (sourceId !== null) {
+    const invalidPaths = new Set(scanned.filter((s) => !s.valid).map((s) => looseRepoPath(s.path)));
     for (const doc of activeOwnedDocs) {
-      if (!seen.has(doc.artifactId)) {
+      const storedPath = doc.source?.path;
+      const stillPresent = Boolean(storedPath && invalidPaths.has(looseRepoPath(storedPath)));
+      if (!seen.has(doc.artifactId) && !stillPresent) {
         await payload.update({
           collection: 'artifacts',
           id: doc.id,

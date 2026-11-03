@@ -46,6 +46,10 @@ reconcile. Reconcile also guards against the destructive case where a source own
 rows but the scan observes zero valid unique artifacts. The run fails before any create, update, or
 deactivation.
 
+An owned artifact whose directory is still present but whose manifest is now invalid (for example a
+`source.path` that no longer matches) stays active with its last valid metadata; it is listed in
+`skippedInvalid` until fixed. Only artifacts whose directory is gone are soft-deactivated.
+
 For an intentional source cleanup, an Admin can arm `allowDestructiveReconcile` on the discovery
 source and run it once. A successful run may then soft-deactivate the source's missing artifacts and
 resets the option to false. A failed run does not consume the override.
@@ -53,9 +57,15 @@ resets the option to false. A failed run does not consume the override.
 ## Artifact revisions
 
 The scanner computes a portable `sha256:` digest from every Git blob under an artifact directory,
-recursively. The input is each artifact-relative file path plus its Git blob OID. File ordering and
+recursively. The input is each artifact-relative file path plus its Git blob OID, sorted by UTF-8
+bytes (never the host locale). File ordering and
 the artifact's outer repository path do not affect the value; content changes, additions, removals,
 and renames do. Symlinks are hashed as their Git target-text bytes and are not followed.
+
+The GitHub reader takes one recursive tree per run and reads every file by its blob SHA from that
+tree, so a push during a scan cannot mix two commits. A local scan of a Git checkout hashes only
+tracked files, so untracked or ignored clutter does not change the digest. A plain directory, or an
+artifact that has never been committed, hashes every file on disk.
 
 `artifacts.contentDigest` is technical discovery metadata. A successful re-index records an artifact
 in `revisionChangedIds` when a previous non-null digest differs. Initial backfill of legacy rows is
@@ -79,7 +89,10 @@ When content changes, KI Hub keeps the old decision and reviews as audit history
 older. The employee surface removes green current Approved/Recommended indicators, suppresses the
 effective recommendation, and shows a re-review warning. Lifecycle promotion to Approved or
 Recommended—and raising `recommended`—requires approval of the current revision. Legacy decisions
-without snapshots are intentionally treated as not current until re-approved. An Approver/Admin
+without snapshots are intentionally treated as not current until re-approved.
+
+**Release note:** right after deploying 026, every approval recorded before it shows as outdated
+("Re-review required"), and the Recommended indicator is hidden, until an Approver re-approves it. An Approver/Admin
 records that fresh decision with the one-shot `reapproveCurrentRevision` control; it re-stamps the
 current version/digest, resets immediately, and is audited as a new approval decision.
 

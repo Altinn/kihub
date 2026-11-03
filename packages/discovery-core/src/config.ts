@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { parseDocument } from 'yaml';
+import { comparePaths } from './digest';
 
 export const DISCOVERY_CONFIG_PATH = 'kihub.yaml';
 export const DEFAULT_ARTIFACT_ROOTS = ['.'] as const;
@@ -108,7 +109,7 @@ export function resolveDiscoveryConfig(text: string | undefined): ResolvedDiscov
       `${DISCOVERY_CONFIG_PATH}: discovery.artifactRoots must contain 1-${MAX_ARTIFACT_ROOTS} roots`,
     );
   }
-  const artifactRoots = rawRoots.map(normalizeArtifactRoot).sort((a, b) => a.localeCompare(b));
+  const artifactRoots = rawRoots.map(normalizeArtifactRoot).sort(comparePaths);
   if (new Set(artifactRoots).size !== artifactRoots.length) {
     throw new DiscoveryConfigError(`${DISCOVERY_CONFIG_PATH}: discovery.artifactRoots contains duplicates`);
   }

@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -167,6 +168,42 @@ describe('configured local scan', () => {
         "source.path: 'skills/not-the-real-path' does not match discovered path 'skills/wrong-source'",
         "source.repository: 'other/repository' does not match discovery source 'Digdir/AI-Artifacts.git'",
       ]);
+    });
+  });
+
+  it('in a Git checkout digests only tracked files, exactly like the GitHub tree for that commit', () => {
+    withRepo((repo) => {
+      const git = (...args: string[]) =>
+        execFileSync('git', ['-C', repo, '-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+          encoding: 'utf8',
+        });
+      git('init', '-q');
+      const rel = 'skills/tracked';
+      const manifest = VALID.replace('digdir.security-review', 'digdir.tracked')
+        .replace('Security Review', 'Tracked')
+        .replace('path: skills/security-review', `path: ${rel}`);
+      writeRepoArtifact(repo, rel, manifest);
+      writeFileSync(path.join(repo, rel, 'SKILL.md'), '# Tracked\n');
+      git('add', '.');
+      git('commit', '-q', '-m', 'init');
+      const committed = scan(repo)[0]?.contentDigest;
+
+      // Untracked and ignored clutter must not move the digest.
+      writeFileSync(path.join(repo, rel, '.DS_Store'), 'junk');
+      writeFileSync(path.join(repo, '.gitignore'), 'node_modules/\n');
+      mkdirSync(path.join(repo, rel, 'node_modules'));
+      writeFileSync(path.join(repo, rel, 'node_modules', 'x.js'), 'x');
+      expect(scan(repo)[0]?.contentDigest).toBe(committed);
+
+      // Same digest the GitHub reader computes from the commit's tree blob shas.
+      const treeEntries = git('ls-tree', '-r', 'HEAD', '--', rel)
+        .trim()
+        .split('\n')
+        .map((line) => {
+          const [meta, file] = line.split('\t') as [string, string];
+          return { path: file.slice(rel.length + 1), blobOid: meta.split(' ')[2]! };
+        });
+      expect(committed).toBe(artifactDirectoryDigest(treeEntries));
     });
   });
 

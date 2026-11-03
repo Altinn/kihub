@@ -56,10 +56,14 @@ record     = relativePath + NUL + gitBlobOid + LF
 digest     = "sha256:" + sha256(concat(sortBy(relativePath, records)))
 ```
 
-- Paths are relative to the artifact directory and use `/`.
+- Paths are relative to the artifact directory and use `/`; `sortBy` compares UTF-8 bytes
+  (`comparePaths`), never `localeCompare`.
 - File mode is not included.
 - A Git symlink is hashed as its blob bytes (link target text), not followed.
-- GitHub uses the recursive tree's blob `sha`; local scanning computes the Git blob OID.
+- GitHub uses the recursive tree's blob `sha`; local scanning computes the Git blob OID. In a Git
+  checkout the local scan hashes only tracked files (`git ls-files`, gitlinks skipped); outside Git,
+  or for a never-committed artifact, it hashes every file on disk.
+- GitHub file contents are read by blob sha from the same tree (`/git/blobs/{sha}`), never by ref.
 - GitHub rejects `truncated: true` tree responses.
 - The GitHub tree response is cached for enumeration and digesting within one reader/run.
 - If a test/custom reader omits `artifactDigest`, the scanner applies the same aggregation to the

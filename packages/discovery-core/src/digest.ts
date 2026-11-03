@@ -7,6 +7,14 @@ export interface ArtifactDigestEntry {
   blobOid: string;
 }
 
+/**
+ * Locale-independent path order (UTF-8 bytes, like Git). `localeCompare` follows the host locale,
+ * so the same directory could digest differently on, e.g., an nb_NO machine where "aa" sorts as "å".
+ */
+export function comparePaths(a: string, b: string): number {
+  return Buffer.compare(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8'));
+}
+
 /** The Git blob object id for raw file/symlink bytes. */
 export function gitBlobOid(content: string | Uint8Array): string {
   const bytes = typeof content === 'string' ? Buffer.from(content) : Buffer.from(content);
@@ -31,7 +39,7 @@ function validateRelativePath(value: string): string {
 export function artifactDirectoryDigest(entries: readonly ArtifactDigestEntry[]): string {
   const normalized = entries
     .map((entry) => ({ path: validateRelativePath(entry.path), blobOid: entry.blobOid.toLowerCase() }))
-    .sort((a, b) => a.path.localeCompare(b.path));
+    .sort((a, b) => comparePaths(a.path, b.path));
   const seen = new Set<string>();
   const hash = createHash('sha256');
   for (const entry of normalized) {

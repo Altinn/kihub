@@ -1,14 +1,6 @@
 import { canTransition, hasPermission, type LifecycleState, type Role } from '@kihub/governance-core';
 import { APIError, type CollectionConfig } from 'payload';
-
-function relationshipId(value: unknown): number | string | undefined {
-  if (typeof value === 'number' || typeof value === 'string') return value;
-  if (value && typeof value === 'object' && 'id' in value) {
-    const id = (value as { id?: unknown }).id;
-    if (typeof id === 'number' || typeof id === 'string') return id;
-  }
-  return undefined;
-}
+import { relationshipId } from '../lib/payload-queries';
 
 /** Governance metadata keyed to one stable artifact, with revision-bound approval decisions. */
 export const CatalogEntry: CollectionConfig = {
@@ -37,6 +29,7 @@ export const CatalogEntry: CollectionConfig = {
               id: artifactId,
               overrideAccess: true,
               depth: 0,
+              req,
             })) as { version: string; contentDigest?: string | null };
           return artifactCache;
         };

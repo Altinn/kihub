@@ -1,5 +1,6 @@
+import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { artifactDirectoryDigest, digestKnownFiles, gitBlobOid } from '../src/digest';
+import { artifactDirectoryDigest, comparePaths, digestKnownFiles, gitBlobOid } from '../src/digest';
 
 describe('gitBlobOid', () => {
   it('matches the documented Git blob oid for hello world', () => {
@@ -31,6 +32,16 @@ describe('artifactDirectoryDigest', () => {
     const digestAtRoot = artifactDirectoryDigest([manifest, skill]);
     const digestBelowSrc = artifactDirectoryDigest([manifest, skill]);
     expect(digestBelowSrc).toBe(digestAtRoot);
+  });
+
+  it('orders paths by UTF-8 bytes, not the host locale (nb collates "aa" after "z")', () => {
+    expect(['z.md', 'aa.md', 'B.md'].sort(comparePaths)).toEqual(['B.md', 'aa.md', 'z.md']);
+    const aa = { path: 'aa.md', blobOid: gitBlobOid('a') };
+    const z = { path: 'z.md', blobOid: gitBlobOid('z') };
+    const expected = createHash('sha256')
+      .update(`aa.md\0${aa.blobOid}\nz.md\0${z.blobOid}\n`)
+      .digest('hex');
+    expect(artifactDirectoryDigest([z, aa])).toBe(`sha256:${expected}`);
   });
 
   it('rejects duplicate or unsafe relative paths', () => {

@@ -170,6 +170,26 @@ describe('reconcile (source-scoped)', () => {
     expect(rows).toHaveLength(1);
   });
 
+  it('keeps an owned artifact active when its directory is still present but the manifest is now invalid', async () => {
+    const { payload, rows } = fakePayload();
+    await reconcile(payload, [valid('digdir.a'), valid('digdir.b')], { sourceId: SRC_A });
+    // Simulate a row indexed before 026 with a loosely written stored source.path.
+    byId(rows, 'digdir.b')!.source = { path: './skills/digdir.b/' };
+    const brokenB: RawArtifact = { path: 'skills/digdir.b', valid: false, errors: ['source.path: mismatch'] };
+    const report = await reconcile(payload, [valid('digdir.a'), brokenB], { sourceId: SRC_A });
+    expect(report.deactivated).toEqual([]);
+    expect(report.skippedInvalid).toEqual([{ path: 'skills/digdir.b', errors: ['source.path: mismatch'] }]);
+    expect(byId(rows, 'digdir.b')?.active).toBe(true);
+  });
+
+  it('reads every owned row without a page cap', async () => {
+    const { payload } = fakePayload();
+    const calls: unknown[] = [];
+    const spy: PayloadLike = { ...payload, find: (args) => (calls.push(args), payload.find(args)) };
+    await reconcile(spy, [valid('digdir.a')], { sourceId: SRC_A });
+    expect(calls).toContainEqual(expect.objectContaining({ pagination: false }));
+  });
+
   it('refuses a non-empty owned source becoming empty before any writes', async () => {
     const { payload, rows } = fakePayload([
       { artifactId: 'digdir.a', active: true, discoverySource: SRC_A, contentDigest: 'sha256:old' },
