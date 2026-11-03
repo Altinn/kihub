@@ -191,6 +191,10 @@ export interface Artifact {
     ('draft' | 'experimental' | 'in-review' | 'approved' | 'recommended' | 'deprecated' | 'archived') | null;
   active?: boolean | null;
   lastIndexedAt?: string | null;
+  /**
+   * SHA-256 identity of the current artifact-directory Git content.
+   */
+  contentDigest?: string | null;
   discoverySource?: (number | null) | DiscoverySource;
   agentCard?:
     | {
@@ -220,6 +224,10 @@ export interface DiscoverySource {
   webhookSecret: string;
   enabled?: boolean | null;
   /**
+   * One-shot safety override. Use only for an intentional emptying of this source; it resets after a successful scan.
+   */
+  allowDestructiveReconcile?: boolean | null;
+  /**
    * Per-source run lock; set while a run is in progress.
    */
   runningSince?: string | null;
@@ -246,6 +254,19 @@ export interface CatalogEntry {
   riskLevel?: ('low' | 'medium' | 'high') | null;
   reviewStatus?: ('not-submitted' | 'in-review') | null;
   approvalState?: ('not-approved' | 'approved' | 'rejected') | null;
+  /**
+   * Artifact version covered by the current decision.
+   */
+  approvalArtifactVersion?: string | null;
+  /**
+   * Artifact content digest covered by the current decision.
+   */
+  approvalArtifactDigest?: string | null;
+  approvalDecidedAt?: string | null;
+  /**
+   * One-shot: record a fresh Approved decision for the artifact’s current version and content digest.
+   */
+  reapproveCurrentRevision?: boolean | null;
   lifecycleState: 'draft' | 'experimental' | 'in-review' | 'approved' | 'recommended' | 'deprecated' | 'archived';
   recommended?: boolean | null;
   featured?: boolean | null;
@@ -270,6 +291,14 @@ export interface Review {
   riskLevel?: ('low' | 'medium' | 'high') | null;
   reviewDate?: string | null;
   expiryDate: string;
+  /**
+   * Artifact version reviewed (recorded server-side).
+   */
+  artifactVersion?: string | null;
+  /**
+   * Artifact content digest reviewed (recorded server-side).
+   */
+  artifactDigest?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -308,6 +337,9 @@ export interface DiscoveryRun {
   finishedAt?: string | null;
   outcome: 'success' | 'failure';
   failureReason?: string | null;
+  configPath?: string | null;
+  configDigest?: string | null;
+  artifactRoots?: string[] | null;
   summary?: {
     created?: number | null;
     updated?: number | null;
@@ -317,12 +349,14 @@ export interface DiscoveryRun {
     adopted?: number | null;
     reassigned?: number | null;
     cardIssues?: number | null;
+    revisionChanged?: number | null;
   };
   createdIds?: string[] | null;
   updatedIds?: string[] | null;
   deactivatedIds?: string[] | null;
   adoptedIds?: string[] | null;
   reassignedIds?: string[] | null;
+  revisionChangedIds?: string[] | null;
   skippedInvalid?:
     | {
         path?: string | null;
@@ -797,6 +831,7 @@ export interface ArtifactsSelect<T extends boolean = true> {
   lifecycleStatus?: T;
   active?: T;
   lastIndexedAt?: T;
+  contentDigest?: T;
   discoverySource?: T;
   agentCard?: T;
   updatedAt?: T;
@@ -813,6 +848,10 @@ export interface CatalogEntriesSelect<T extends boolean = true> {
   riskLevel?: T;
   reviewStatus?: T;
   approvalState?: T;
+  approvalArtifactVersion?: T;
+  approvalArtifactDigest?: T;
+  approvalDecidedAt?: T;
+  reapproveCurrentRevision?: T;
   lifecycleState?: T;
   recommended?: T;
   featured?: T;
@@ -836,6 +875,8 @@ export interface ReviewsSelect<T extends boolean = true> {
   riskLevel?: T;
   reviewDate?: T;
   expiryDate?: T;
+  artifactVersion?: T;
+  artifactDigest?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -863,6 +904,7 @@ export interface DiscoverySourcesSelect<T extends boolean = true> {
   tokenEnvVar?: T;
   webhookSecret?: T;
   enabled?: T;
+  allowDestructiveReconcile?: T;
   runningSince?: T;
   lastRunAt?: T;
   lastRunOutcome?: T;
@@ -889,6 +931,9 @@ export interface DiscoveryRunsSelect<T extends boolean = true> {
   finishedAt?: T;
   outcome?: T;
   failureReason?: T;
+  configPath?: T;
+  configDigest?: T;
+  artifactRoots?: T;
   summary?:
     | T
     | {
@@ -900,12 +945,14 @@ export interface DiscoveryRunsSelect<T extends boolean = true> {
         adopted?: T;
         reassigned?: T;
         cardIssues?: T;
+        revisionChanged?: T;
       };
   createdIds?: T;
   updatedIds?: T;
   deactivatedIds?: T;
   adoptedIds?: T;
   reassignedIds?: T;
+  revisionChangedIds?: T;
   skippedInvalid?:
     | T
     | {

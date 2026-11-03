@@ -1,39 +1,26 @@
 import { Tag } from '@digdir/designsystemet-react';
 import type { Governance } from '@/lib/governance';
+import { lifecycleBadgeView } from '@/lib/governance-view';
 
-const LABELS: Record<Governance['lifecycleState'], string> = {
-  draft: 'Draft',
-  experimental: 'Experimental',
-  'in-review': 'In Review',
-  approved: 'Approved',
-  recommended: 'Recommended',
-  deprecated: 'Deprecated',
-  archived: 'Archived',
-};
-
-const COLORS: Record<Governance['lifecycleState'], 'neutral' | 'info' | 'success' | 'warning' | 'danger'> = {
-  draft: 'neutral',
-  experimental: 'info',
-  'in-review': 'info',
-  approved: 'success',
-  recommended: 'success',
-  deprecated: 'warning',
-  archived: 'danger',
-};
-
-/** Lifecycle state + approved/recommended indicator (FR-011). */
+/** Lifecycle state + effective current approval/recommendation indicator. */
 export function LifecycleBadge({ governance }: { governance: Governance }) {
+  const view = lifecycleBadgeView(governance);
   return (
     <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-      <Tag data-color={COLORS[governance.lifecycleState]} data-size="sm">
-        {LABELS[governance.lifecycleState]}
+      <Tag data-color={view.lifecycleColor} data-size="sm">
+        {view.lifecycleLabel}
       </Tag>
-      {governance.approvalState === 'approved' ? (
+      {view.showApproved ? (
         <Tag data-color="success" data-size="sm">
           Approved
         </Tag>
       ) : null}
-      {governance.recommended ? (
+      {view.showStaleWarning ? (
+        <Tag data-color="warning" data-size="sm">
+          Re-review required
+        </Tag>
+      ) : null}
+      {view.showRecommended ? (
         <Tag data-color="success" data-size="sm">
           Recommended
         </Tag>

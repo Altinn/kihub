@@ -1,5 +1,14 @@
 import { hasPermission, type Role } from '@kihub/governance-core';
-import type { CollectionConfig } from 'payload';
+import { APIError, type CollectionConfig } from 'payload';
+
+function relationshipId(value: unknown): number | string | undefined {
+  if (typeof value === 'number' || typeof value === 'string') return value;
+  if (value && typeof value === 'object' && 'id' in value) {
+    const id = (value as { id?: unknown }).id;
+    if (typeof id === 'number' || typeof id === 'string') return id;
+  }
+  return undefined;
+}
 
 /**
  * A typed review of an artifact (data-model.md). Many per artifact — one per submission/type/
@@ -19,10 +28,26 @@ export const Review: CollectionConfig = {
   },
   hooks: {
     beforeChange: [
-      ({ data, req, operation }) => {
+      async ({ data, req, operation, originalDoc }) => {
         if (operation === 'create') {
           data.reviewer = req.user?.id;
           data.reviewDate = new Date().toISOString();
+          const artifactId = relationshipId(data.artifact);
+          if (artifactId === undefined) throw new APIError('Review requires an artifact', 400);
+          const artifact = await req.payload.findByID({
+            collection: 'artifacts',
+            id: artifactId,
+            overrideAccess: true,
+            depth: 0,
+          });
+          if (!artifact.contentDigest) {
+            throw new APIError('Run discovery before reviewing this artifact; its content digest is missing', 409);
+          }
+          data.artifactVersion = artifact.version;
+          data.artifactDigest = artifact.contentDigest;
+        } else {
+          data.artifactVersion = originalDoc?.artifactVersion ?? null;
+          data.artifactDigest = originalDoc?.artifactDigest ?? null;
         }
         return data;
       },
@@ -36,7 +61,13 @@ export const Review: CollectionConfig = {
             actor: req.user.id,
             action: 'review-recorded',
             artifact: typeof doc.artifact === 'object' ? doc.artifact.id : doc.artifact,
-            details: { type: doc.type, decision: doc.decision, status: doc.status },
+            details: {
+              type: doc.type,
+              decision: doc.decision,
+              status: doc.status,
+              artifactVersion: doc.artifactVersion,
+              artifactDigest: doc.artifactDigest,
+            },
           },
           overrideAccess: true,
           req,
@@ -61,5 +92,15 @@ export const Review: CollectionConfig = {
     { name: 'riskLevel', type: 'select', options: ['low', 'medium', 'high'] },
     { name: 'reviewDate', type: 'date' },
     { name: 'expiryDate', type: 'date', required: true },
+    {
+      name: 'artifactVersion',
+      type: 'text',
+      admin: { readOnly: true, description: 'Artifact version reviewed (recorded server-side).' },
+    },
+    {
+      name: 'artifactDigest',
+      type: 'text',
+      admin: { readOnly: true, description: 'Artifact content digest reviewed (recorded server-side).' },
+    },
   ],
 };

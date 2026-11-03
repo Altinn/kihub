@@ -1,8 +1,24 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import {
+  existsSync,
+  lstatSync,
+  readFileSync,
+  readdirSync,
+  readlinkSync,
+  realpathSync,
+  statSync,
+} from 'node:fs';
 import path from 'node:path';
 import { type ArtifactManifest, validateAgentCard, validateManifest } from '@kihub/artifact-schema';
+import {
+  DISCOVERY_CONFIG_PATH,
+  DiscoveryConfigError,
+  normalizeRepository,
+  resolveDiscoveryConfig,
+  type ResolvedDiscoveryConfig,
+} from './config';
+import { artifactDirectoryDigest, digestKnownFiles, gitBlobOid } from './digest';
 
-/** Type directories walked under the repo root; each subfolder with an artifact.yaml is one artifact. */
+/** Type directories walked below every configured artifact root. */
 export const TYPE_DIRS = [
   'skills',
   'prompts',
@@ -14,9 +30,14 @@ export const TYPE_DIRS = [
   'agents',
 ] as const;
 
+type TypeDir = (typeof TYPE_DIRS)[number];
+const TYPE_DIR_SET = new Set<string>(TYPE_DIRS);
+
 export interface RawArtifact {
-  /** Repo-relative folder, e.g. "skills/security-review". */
+  /** Actual repository-relative folder, e.g. "src/skills/security-review". */
   path: string;
+  /** Portable digest of the artifact directory's Git blobs. */
+  contentDigest?: string;
   manifest?: ArtifactManifest;
   readme?: string;
   valid: boolean;
@@ -27,20 +48,28 @@ export interface RawArtifact {
   agentCardErrors?: string[];
 }
 
-/**
- * A source of artifact bytes, independent of where they live (local checkout or remote repo).
- * `scanRepo` walks this so the identical validation logic serves the Phase 2 CLI (local) and
- * Phase 4 automated discovery (GitHub) — contracts/discovery-core-scanrepo.md.
- */
+export interface ScanOptions {
+  /** Registered `owner/repo`; when present, manifests must name the same normalized repository. */
+  expectedRepository?: string;
+}
+
+export interface DetailedScanResult {
+  artifacts: RawArtifact[];
+  config: ResolvedDiscoveryConfig;
+}
+
+/** A source of artifact bytes, independent of local checkout vs remote Git repository. */
 export interface RepoReader {
-  /** Repo-relative dirs under TYPE_DIRS that contain an artifact.yaml (e.g. "skills/foo"). */
-  listArtifactDirs(): Promise<string[]>;
-  /** File contents for a repo-relative path; undefined when absent (e.g. a missing README.md). */
+  /** Actual repo-relative artifact directories beneath the supplied exact roots. */
+  listArtifactDirs(artifactRoots?: readonly string[]): Promise<string[]>;
+  /** File contents for a repo-relative path; undefined when absent. */
   readFile(relPath: string): Promise<string | undefined>;
+  /** Optimized complete directory digest. Production local/GitHub readers implement this. */
+  artifactDigest?(relPath: string): Promise<string>;
 }
 
 /** The type directory each artifact type must live under (015 manifest contract rule 4). */
-const DIR_FOR_TYPE: Record<ArtifactManifest['type'], (typeof TYPE_DIRS)[number]> = {
+const DIR_FOR_TYPE: Record<ArtifactManifest['type'], TypeDir> = {
   skill: 'skills',
   prompt: 'prompts',
   workflow: 'workflows',
@@ -51,34 +80,75 @@ const DIR_FOR_TYPE: Record<ArtifactManifest['type'], (typeof TYPE_DIRS)[number]>
   agent: 'agents',
 };
 
-/**
- * Validate one artifact dir's manifest (+ optional README) into a RawArtifact. Never throws.
- * A schema-valid manifest whose `type` does not match its type directory is reported invalid
- * (015 US2-3): the directory decides where discovery looks, so a mismatch is always an authoring
- * error rather than something to silently register.
- */
-function toRawArtifact(relPath: string, manifestText: string, readme: string | undefined): RawArtifact {
-  const res = validateManifest(manifestText);
-  if (!res.valid) return { path: relPath, readme, valid: false, errors: res.errors };
-
-  const dir = relPath.split('/')[0] ?? '';
-  const expected = DIR_FOR_TYPE[res.data.type];
-  if (dir !== expected) {
-    return {
-      path: relPath,
-      readme,
-      valid: false,
-      errors: [`type: type '${res.data.type}' does not match directory '${dir}/' (expected '${expected}/')`],
-    };
-  }
-  return { path: relPath, manifest: res.data, readme, valid: true };
+interface ArtifactLocation {
+  path: string;
+  root: string;
+  typeDir: TypeDir;
 }
 
-/**
- * Attach the optional sibling agent-card.json to a valid agent's RawArtifact (015 US3).
- * Cards are only ever consulted for valid `type: agent` manifests (FR-014); an absent file is
- * normal, and an invalid card records errors WITHOUT invalidating the artifact (FR-012).
- */
+function repoJoin(...parts: string[]): string {
+  return parts.filter((part) => part && part !== '.').join('/');
+}
+
+function locationFor(relPath: string, artifactRoots: readonly string[]): ArtifactLocation {
+  if (relPath.startsWith('/') || relPath.includes('\\') || relPath.includes('\0')) {
+    throw new DiscoveryConfigError(`Reader returned unsafe artifact directory ${JSON.stringify(relPath)}`);
+  }
+  for (const root of artifactRoots) {
+    const prefix = root === '.' ? '' : `${root}/`;
+    if (!relPath.startsWith(prefix)) continue;
+    const remainder = relPath.slice(prefix.length);
+    const parts = remainder.split('/');
+    if (parts.length === 2 && TYPE_DIR_SET.has(parts[0] ?? '') && Boolean(parts[1])) {
+      return { path: relPath, root, typeDir: parts[0] as TypeDir };
+    }
+  }
+  throw new DiscoveryConfigError(
+    `Reader returned artifact directory outside the configured <root>/<type>/<slug> layout: ${relPath}`,
+  );
+}
+
+function sourceErrors(manifest: ArtifactManifest, location: ArtifactLocation, options: ScanOptions): string[] {
+  const errors: string[] = [];
+  const expectedDir = DIR_FOR_TYPE[manifest.type];
+  if (location.typeDir !== expectedDir) {
+    errors.push(
+      `type: type '${manifest.type}' does not match directory '${location.typeDir}/' (expected '${expectedDir}/')`,
+    );
+  }
+  if (manifest.source.path !== location.path) {
+    errors.push(`source.path: '${manifest.source.path}' does not match discovered path '${location.path}'`);
+  }
+  if (options.expectedRepository) {
+    try {
+      const actual = normalizeRepository(manifest.source.repository);
+      const expected = normalizeRepository(options.expectedRepository);
+      if (actual !== expected) {
+        errors.push(
+          `source.repository: '${manifest.source.repository}' does not match discovery source '${options.expectedRepository}'`,
+        );
+      }
+    } catch (error) {
+      errors.push(`source.repository: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  return errors;
+}
+
+/** Validate one manifest and its physical repository location into a RawArtifact. */
+function toRawArtifact(
+  location: ArtifactLocation,
+  manifestText: string,
+  readme: string | undefined,
+  options: ScanOptions,
+): RawArtifact {
+  const res = validateManifest(manifestText);
+  if (!res.valid) return { path: location.path, readme, valid: false, errors: res.errors };
+  const errors = sourceErrors(res.data, location, options);
+  if (errors.length > 0) return { path: location.path, readme, valid: false, errors };
+  return { path: location.path, manifest: res.data, readme, valid: true };
+}
+
 function attachAgentCard(raw: RawArtifact, cardText: string | undefined): RawArtifact {
   if (cardText === undefined) return raw;
   const res = validateAgentCard(cardText);
@@ -88,84 +158,151 @@ function attachAgentCard(raw: RawArtifact, cardText: string | undefined): RawArt
 
 const isAgent = (raw: RawArtifact) => raw.valid && raw.manifest?.type === 'agent';
 
-/**
- * Scan a local ai-artifacts checkout at `rootPath`. Reads each artifact's `artifact.yaml` and
- * sibling `README.md`, validating the manifest with `@kihub/artifact-schema`. Invalid manifests are
- * returned with `valid:false` + errors (never thrown); a missing README is fine. Synchronous and
- * behaviourally unchanged from Phase 2 — the CLI and existing tests depend on it.
- */
-export function scan(rootPath: string): RawArtifact[] {
-  const results: RawArtifact[] = [];
+function containedPath(rootPath: string, relPath: string): string {
+  const base = path.resolve(rootPath);
+  const target = path.resolve(base, ...relPath.split('/'));
+  const relative = path.relative(base, target);
+  if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    throw new DiscoveryConfigError(`Path escapes repository root: ${relPath}`);
+  }
+  return target;
+}
 
-  for (const dir of TYPE_DIRS) {
-    const typeDir = path.join(rootPath, dir);
-    if (!existsSync(typeDir) || !statSync(typeDir).isDirectory()) continue;
+/** Read a Git-worktree path without following a symlink (Git stores its target text as blob bytes). */
+function readLocalRepoFile(rootPath: string, relPath: string): string | undefined {
+  const absolute = containedPath(rootPath, relPath);
+  if (!existsSync(absolute)) return undefined;
+  const stat = lstatSync(absolute);
+  if (stat.isSymbolicLink()) return readlinkSync(absolute, 'utf8');
+  if (!stat.isFile()) return undefined;
+  return readFileSync(absolute, 'utf8');
+}
 
-    for (const entry of readdirSync(typeDir)) {
-      const artifactDir = path.join(typeDir, entry);
-      if (!statSync(artifactDir).isDirectory()) continue;
+function validateLocalRoot(rootPath: string, root: string): string {
+  const baseReal = realpathSync(rootPath);
+  const absolute = containedPath(rootPath, root);
+  if (!existsSync(absolute) || !statSync(absolute).isDirectory()) {
+    throw new DiscoveryConfigError(`Configured artifact root does not exist or is not a directory: ${root}`);
+  }
+  const rootReal = realpathSync(absolute);
+  const relative = path.relative(baseReal, rootReal);
+  if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    throw new DiscoveryConfigError(`Configured artifact root escapes repository through a symlink: ${root}`);
+  }
+  return absolute;
+}
 
-      const manifestPath = path.join(artifactDir, 'artifact.yaml');
-      if (!existsSync(manifestPath)) continue;
-
-      const relPath = `${dir}/${entry}`;
-      const readmePath = path.join(artifactDir, 'README.md');
-      const readme = existsSync(readmePath) ? readFileSync(readmePath, 'utf8') : undefined;
-
-      let raw = toRawArtifact(relPath, readFileSync(manifestPath, 'utf8'), readme);
-      if (isAgent(raw)) {
-        const cardPath = path.join(artifactDir, 'agent-card.json');
-        raw = attachAgentCard(raw, existsSync(cardPath) ? readFileSync(cardPath, 'utf8') : undefined);
+function listLocalArtifactDirs(rootPath: string, artifactRoots: readonly string[]): string[] {
+  const dirs: string[] = [];
+  for (const root of artifactRoots) {
+    const absoluteRoot = validateLocalRoot(rootPath, root);
+    for (const typeDir of TYPE_DIRS) {
+      const absoluteTypeDir = path.join(absoluteRoot, typeDir);
+      if (!existsSync(absoluteTypeDir) || !lstatSync(absoluteTypeDir).isDirectory()) continue;
+      for (const entry of readdirSync(absoluteTypeDir, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue;
+        const artifactDir = path.join(absoluteTypeDir, entry.name);
+        if (!existsSync(path.join(artifactDir, 'artifact.yaml'))) continue;
+        dirs.push(repoJoin(root, typeDir, entry.name));
       }
-      results.push(raw);
+    }
+  }
+  return [...new Set(dirs)].sort((a, b) => a.localeCompare(b));
+}
+
+function localArtifactDigest(rootPath: string, artifactRelPath: string): string {
+  const artifactDir = containedPath(rootPath, artifactRelPath);
+  const entries: { path: string; blobOid: string }[] = [];
+
+  function walk(absoluteDir: string, relativeDir = '') {
+    for (const entry of readdirSync(absoluteDir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+      const absolute = path.join(absoluteDir, entry.name);
+      const relative = relativeDir ? `${relativeDir}/${entry.name}` : entry.name;
+      const stat = lstatSync(absolute);
+      if (stat.isSymbolicLink()) {
+        entries.push({ path: relative, blobOid: gitBlobOid(Buffer.from(readlinkSync(absolute))) });
+      } else if (stat.isDirectory()) {
+        walk(absolute, relative);
+      } else if (stat.isFile()) {
+        entries.push({ path: relative, blobOid: gitBlobOid(readFileSync(absolute)) });
+      }
     }
   }
 
-  return results;
+  walk(artifactDir);
+  return artifactDirectoryDigest(entries);
 }
 
-/** A `RepoReader` over a local filesystem checkout — the source-agnostic form of `scan`. */
+function scanLocalDetailed(rootPath: string, options: ScanOptions = {}): DetailedScanResult {
+  const config = resolveDiscoveryConfig(readLocalRepoFile(rootPath, DISCOVERY_CONFIG_PATH));
+  const artifacts: RawArtifact[] = [];
+  for (const relPath of listLocalArtifactDirs(rootPath, config.artifactRoots)) {
+    const location = locationFor(relPath, config.artifactRoots);
+    const manifestText = readLocalRepoFile(rootPath, `${relPath}/artifact.yaml`);
+    if (manifestText === undefined) continue;
+    const readme = readLocalRepoFile(rootPath, `${relPath}/README.md`);
+    let raw = toRawArtifact(location, manifestText, readme, options);
+    if (isAgent(raw)) raw = attachAgentCard(raw, readLocalRepoFile(rootPath, `${relPath}/agent-card.json`));
+    raw.contentDigest = localArtifactDigest(rootPath, relPath);
+    artifacts.push(raw);
+  }
+  return { artifacts, config };
+}
+
+/** Synchronous local scan retained for the break-glass CLI and existing callers. */
+export function scan(rootPath: string, options: ScanOptions = {}): RawArtifact[] {
+  return scanLocalDetailed(rootPath, options).artifacts;
+}
+
+/** A complete local filesystem RepoReader, including portable artifact-directory digesting. */
 export function createLocalReader(rootPath: string): RepoReader {
   return {
-    async listArtifactDirs() {
-      const dirs: string[] = [];
-      for (const dir of TYPE_DIRS) {
-        const typeDir = path.join(rootPath, dir);
-        if (!existsSync(typeDir) || !statSync(typeDir).isDirectory()) continue;
-        for (const entry of readdirSync(typeDir)) {
-          const artifactDir = path.join(typeDir, entry);
-          if (!statSync(artifactDir).isDirectory()) continue;
-          if (!existsSync(path.join(artifactDir, 'artifact.yaml'))) continue;
-          dirs.push(`${dir}/${entry}`);
-        }
-      }
-      return dirs;
+    async listArtifactDirs(artifactRoots = ['.']) {
+      return listLocalArtifactDirs(rootPath, artifactRoots);
     },
     async readFile(relPath) {
-      const abs = path.join(rootPath, relPath);
-      return existsSync(abs) ? readFileSync(abs, 'utf8') : undefined;
+      return readLocalRepoFile(rootPath, relPath);
+    },
+    async artifactDigest(relPath) {
+      return localArtifactDigest(rootPath, relPath);
     },
   };
 }
 
-/**
- * Source-agnostic scan: for each artifact dir a `RepoReader` reports, read `artifact.yaml`
- * (skipping the dir if it has none) and the optional `README.md`, then validate. Same
- * `RawArtifact[]` output as `scan`; feeds the unchanged `reconcile`.
- */
-export async function scanRepo(reader: RepoReader): Promise<RawArtifact[]> {
-  const results: RawArtifact[] = [];
-  const dirs = await reader.listArtifactDirs();
+/** Resolve config + scan a source, returning provenance alongside artifacts. */
+export async function scanRepoDetailed(
+  reader: RepoReader,
+  options: ScanOptions = {},
+): Promise<DetailedScanResult> {
+  const config = resolveDiscoveryConfig(await reader.readFile(DISCOVERY_CONFIG_PATH));
+  const artifacts: RawArtifact[] = [];
+  const dirs = [...new Set(await reader.listArtifactDirs(config.artifactRoots))].sort((a, b) =>
+    a.localeCompare(b),
+  );
   for (const relPath of dirs) {
+    const location = locationFor(relPath, config.artifactRoots);
     const manifestText = await reader.readFile(`${relPath}/artifact.yaml`);
     if (manifestText === undefined) continue;
     const readme = await reader.readFile(`${relPath}/README.md`);
-    let raw = toRawArtifact(relPath, manifestText, readme);
+    let raw = toRawArtifact(location, manifestText, readme, options);
+    let cardText: string | undefined;
     if (isAgent(raw)) {
-      // One extra read per AGENT only (never for other types — FR-014); 404 → undefined → no card.
-      raw = attachAgentCard(raw, await reader.readFile(`${relPath}/agent-card.json`));
+      cardText = await reader.readFile(`${relPath}/agent-card.json`);
+      raw = attachAgentCard(raw, cardText);
     }
-    results.push(raw);
+    raw.contentDigest = reader.artifactDigest
+      ? await reader.artifactDigest(relPath)
+      : digestKnownFiles({
+          'artifact.yaml': manifestText,
+          'README.md': readme,
+          'agent-card.json': cardText,
+        });
+    artifacts.push(raw);
   }
-  return results;
+  return { artifacts, config };
+}
+
+/** Backward-compatible artifact-array wrapper over the detailed repository scan. */
+export async function scanRepo(reader: RepoReader, options: ScanOptions = {}): Promise<RawArtifact[]> {
+  return (await scanRepoDetailed(reader, options)).artifacts;
 }

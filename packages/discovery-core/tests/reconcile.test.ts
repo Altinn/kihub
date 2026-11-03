@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ArtifactManifest } from '@kihub/artifact-schema';
-import { reconcile, type PayloadLike } from '../src/reconcile';
+import { reconcile, UnsafeEmptyScanError, type PayloadLike } from '../src/reconcile';
 import type { RawArtifact } from '../src/scan';
 
 function manifest(id: string): ArtifactManifest {
@@ -18,7 +18,12 @@ function manifest(id: string): ArtifactManifest {
   };
 }
 
-const valid = (id: string): RawArtifact => ({ path: `skills/${id}`, manifest: manifest(id), valid: true });
+const valid = (id: string, contentDigest = `sha256:${id}`): RawArtifact => ({
+  path: `skills/${id}`,
+  contentDigest,
+  manifest: manifest(id),
+  valid: true,
+});
 
 const SRC_A = 1;
 const SRC_B = 2;
@@ -163,6 +168,42 @@ describe('reconcile (source-scoped)', () => {
     expect(report.created).toEqual(['digdir.a']);
     expect(report.duplicates).toEqual(['digdir.a']);
     expect(rows).toHaveLength(1);
+  });
+
+  it('refuses a non-empty owned source becoming empty before any writes', async () => {
+    const { payload, rows } = fakePayload([
+      { artifactId: 'digdir.a', active: true, discoverySource: SRC_A, contentDigest: 'sha256:old' },
+    ]);
+    const before = structuredClone(rows);
+    await expect(reconcile(payload, [], { sourceId: SRC_A })).rejects.toBeInstanceOf(UnsafeEmptyScanError);
+    expect(rows).toEqual(before);
+  });
+
+  it('allows an explicitly armed empty source to soft-deactivate, while break-glass stays exempt', async () => {
+    const allowed = fakePayload([{ artifactId: 'digdir.a', active: true, discoverySource: SRC_A }]);
+    const report = await reconcile(allowed.payload, [], { sourceId: SRC_A, allowEmptySource: true });
+    expect(report.deactivated).toEqual(['digdir.a']);
+    expect(byId(allowed.rows, 'digdir.a')?.active).toBe(false);
+
+    const local = fakePayload([{ artifactId: 'digdir.local', active: true, discoverySource: null }]);
+    await expect(reconcile(local.payload, [], { sourceId: null })).resolves.toMatchObject({ deactivated: [] });
+  });
+
+  it('reports a changed non-null digest, but not an equal digest or a null backfill', async () => {
+    const changed = fakePayload([
+      { artifactId: 'digdir.a', active: true, discoverySource: SRC_A, contentDigest: 'sha256:old' },
+    ]);
+    let report = await reconcile(changed.payload, [valid('digdir.a', 'sha256:new')], { sourceId: SRC_A });
+    expect(report.revisionChanged).toEqual(['digdir.a']);
+
+    report = await reconcile(changed.payload, [valid('digdir.a', 'sha256:new')], { sourceId: SRC_A });
+    expect(report.revisionChanged).toEqual([]);
+
+    const backfill = fakePayload([
+      { artifactId: 'digdir.b', active: true, discoverySource: SRC_A, contentDigest: null },
+    ]);
+    report = await reconcile(backfill.payload, [valid('digdir.b', 'sha256:first')], { sourceId: SRC_A });
+    expect(report.revisionChanged).toEqual([]);
   });
 
   it('stores, clears, and reports agent cards through the full lifecycle (015 US3)', async () => {

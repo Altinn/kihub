@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { toGovernance } from '@/lib/governance-view';
 
 /**
  * T017 — re-indexing (Phase 2) must never touch governance state (FR-010, SC-003). The indexer
@@ -64,6 +65,7 @@ beforeAll(async () => {
   mkdirSync(dir, { recursive: true });
   writeFileSync(path.join(dir, 'artifact.yaml'), manifest());
   writeFileSync(path.join(dir, 'README.md'), `# ${testSlug}`);
+  writeFileSync(path.join(dir, 'SKILL.md'), 'Original reviewed instructions.');
   await reconcile(payload, scan(root), { sourceId: null });
 }, 120000);
 
@@ -86,7 +88,8 @@ describe('re-indexing preserves governance state (T017, FR-010, SC-003)', () => 
       collection: 'catalog-entries',
       data: {
         artifact: artifactDocId,
-        lifecycleState: 'in-review',
+        lifecycleState: 'approved',
+        approvalState: 'approved',
         businessOwner: 'AI Enablement',
         riskLevel: 'medium',
         internalNotes: 'Should survive re-indexing untouched.',
@@ -94,21 +97,32 @@ describe('re-indexing preserves governance state (T017, FR-010, SC-003)', () => 
       overrideAccess: true,
     });
 
-    // Re-run the Phase 2 indexer, including a manifest edit (version bump) — technical metadata
-    // updates, governance must not.
-    writeFileSync(path.join(root, 'skills', testSlug, 'artifact.yaml'), manifest('2.0.0'));
+    expect(entry.approvalArtifactVersion).toBe('1.0.0');
+    expect(entry.approvalArtifactDigest).toBe(artifact.docs[0]!.contentDigest);
+
+    // Change only the actual skill body: the manifest/version stays the same, governance history
+    // stays byte-preserved, but its current-currency projection must become stale.
+    writeFileSync(path.join(root, 'skills', testSlug, 'SKILL.md'), 'Changed instructions after review.');
     const report = await reconcile(payload, scan(root), { sourceId: null });
     expect(report.updated).toContain(artifactId);
+    expect(report.revisionChanged).toContain(artifactId);
 
     const after = await payload.findByID({
       collection: 'catalog-entries',
       id: entry.id,
       overrideAccess: true,
     });
-    expect(after.lifecycleState).toBe('in-review');
+    expect(after.lifecycleState).toBe('approved');
     expect(after.businessOwner).toBe('AI Enablement');
     expect(after.riskLevel).toBe('medium');
     expect(after.internalNotes).toBe('Should survive re-indexing untouched.');
     expect(after.updatedAt).toBe(entry.updatedAt);
+
+    const currentArtifact = await payload.findByID({
+      collection: 'artifacts',
+      id: artifactDocId,
+      overrideAccess: true,
+    });
+    expect(toGovernance(after, currentArtifact).approvalCurrent).toBe(false);
   });
 });

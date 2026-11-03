@@ -13,6 +13,8 @@ export interface IndexReport {
   reassigned: string[];
   /** Agent-card validation problems per path — the artifact itself registered (015 FR-012). */
   cardIssues: { path: string; errors: string[] }[];
+  /** Existing artifacts whose previous non-null content digest changed during this scan. */
+  revisionChanged: string[];
 }
 
 /**
@@ -48,6 +50,8 @@ export interface ReconcileOptions {
    * (new rows stay unowned/adoptable) and nothing is ever deactivated.
    */
   sourceId: number | string | null;
+  /** Explicit one-run override for intentionally reconciling a non-empty source to zero valid ids. */
+  allowEmptySource?: boolean;
 }
 
 interface ArtifactDoc {
@@ -55,6 +59,17 @@ interface ArtifactDoc {
   artifactId: string;
   /** Scalar id at depth 0; tolerated as a populated `{ id }` object for safety. */
   discoverySource?: number | string | { id: number | string } | null;
+  contentDigest?: string | null;
+}
+
+/** Refuses an incomplete/accidentally empty source observation before reconcile performs writes. */
+export class UnsafeEmptyScanError extends Error {
+  constructor(sourceId: number | string, activeCount: number) {
+    super(
+      `Refusing empty scan for source ${sourceId}: it currently owns ${activeCount} active artifact${activeCount === 1 ? '' : 's'}`,
+    );
+    this.name = 'UnsafeEmptyScanError';
+  }
 }
 
 /** The row's owning source id, normalising a populated relationship down to its id. */
@@ -87,13 +102,34 @@ export async function reconcile(
     adopted: [],
     reassigned: [],
     cardIssues: [],
+    revisionChanged: [],
   };
-  const { sourceId } = opts;
+  const { sourceId, allowEmptySource = false } = opts;
 
   for (const s of scanned) {
     if (!s.valid) report.skippedInvalid.push({ path: s.path, errors: s.errors ?? [] });
     else if (s.agentCardErrors?.length) {
       report.cardIssues.push({ path: s.path, errors: s.agentCardErrors });
+    }
+  }
+
+  // Safety is evaluated before any create/update/deactivate call. Duplicate ids count once, exactly
+  // like the main loop's first-wins semantics.
+  const validUniqueIds = new Set(
+    scanned.filter((item) => item.valid && item.manifest).map((item) => item.manifest!.id),
+  );
+  let activeOwnedDocs: ArtifactDoc[] = [];
+  if (sourceId !== null) {
+    const active = await payload.find({
+      collection: 'artifacts',
+      where: { and: [{ active: { equals: true } }, { discoverySource: { equals: sourceId } }] },
+      limit: 1000,
+      depth: 0,
+      overrideAccess: true,
+    });
+    activeOwnedDocs = active.docs as ArtifactDoc[];
+    if (activeOwnedDocs.length > 0 && validUniqueIds.size === 0 && !allowEmptySource) {
+      throw new UnsafeEmptyScanError(sourceId, activeOwnedDocs.length);
     }
   }
 
@@ -110,7 +146,7 @@ export async function reconcile(
     seen.add(id);
 
     const data: Record<string, unknown> = {
-      ...buildRecord(s.manifest, s.readme ?? ''),
+      ...buildRecord(s.manifest, s.readme ?? '', s.contentDigest ?? ''),
       active: true,
       lastIndexedAt: now,
       // Card storage on EVERY upsert (015 FR-011/012 + analyze C2): non-agents and agents with a
@@ -131,6 +167,13 @@ export async function reconcile(
     if (existingDoc) {
       // Read the previous owner BEFORE the update — the update overwrites it.
       const prevOwner = ownerIdOf(existingDoc);
+      if (
+        existingDoc.contentDigest &&
+        s.contentDigest &&
+        existingDoc.contentDigest !== s.contentDigest
+      ) {
+        report.revisionChanged.push(id);
+      }
       await payload.update({
         collection: 'artifacts',
         id: existingDoc.id,
@@ -152,15 +195,7 @@ export async function reconcile(
   // source. Rows owned by other sources or unowned (legacy) rows are never candidates (FR-002),
   // and the break-glass mode (sourceId null) owns no source, so it deactivates nothing.
   if (sourceId !== null) {
-    const active = await payload.find({
-      collection: 'artifacts',
-      where: { and: [{ active: { equals: true } }, { discoverySource: { equals: sourceId } }] },
-      limit: 1000,
-      depth: 0,
-      overrideAccess: true,
-    });
-    for (const raw of active.docs) {
-      const doc = raw as ArtifactDoc;
+    for (const doc of activeOwnedDocs) {
       if (!seen.has(doc.artifactId)) {
         await payload.update({
           collection: 'artifacts',

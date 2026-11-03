@@ -1,5 +1,31 @@
 <!-- SPECKIT START -->
-Active feature: **025-inter-brand-colors** (DONE — specify + plan + tasks + implement 2026-10-19).
+Active feature: **026-flexible-artifact-discovery** (DONE — specify + plan + tasks + implement
+2026-11-03). Repositories may commit strict root-level `kihub.yaml` v1 with 1–32 exact artifact
+roots; absent config preserves `.`. Discovery still requires `<root>/<type>/<slug>/artifact.yaml`,
+validates the manifest's actual repo-relative `source.path` and registered `owner/repo`, rejects
+unsafe/missing roots and truncated GitHub trees, and records roots/config provenance per run. The
+GitHub reader uses one cached recursive tree; local and GitHub readers compute the same portable
+full-directory digest from sorted relative paths + Git blob OIDs (symlinks hash target text and are
+not followed). Reconcile refuses a previously non-empty owned source becoming zero-valid before any
+writes; Admins have an explicit `allowDestructiveReconcile` one-shot that resets only after success.
+Artifacts store `contentDigest`; runs report `revisionChangedIds` (non-null digest changes only).
+Reviews and approval/rejection decisions server-stamp version+digest snapshots. Old history is
+preserved, but stale/legacy approval is not current: green Approved/Recommended indicators and the
+effective recommendation are suppressed, governed lifecycle badges become warnings, and promotion
+or recommendation requires a current approval. Approver/Admin can use the virtual one-shot
+`reapproveCurrentRevision` control to stamp the same Approved state for new content; it is audited
+and role-enforced. Migration: `20261103_080248_artifact_revision_governance` (additive fields only;
+virtual reapproval needs no column), verified full-chain up→down→up on scratch DB
+`kihub_026_flexible_discovery`. Gates: packages **117/117** (artifact-schema 17, discovery-core 74,
+github-client 9, governance-core 17); web unit **251/251 across 22 files** and integration
+**178/178 across 29 files** (run file-by-file because the pre-existing combined Payload/Vitest
+process exits after a few files with status 0 and no summary); ESLint and `tsc --noEmit` clean;
+production `next build` green against the migrated scratch DB with `AUTH_MODE=entra`. Manual UI on
+`:3026` verified current → stale (no green success; re-review warning) → reapproved current. Docs:
+`documentation/artifact-discovery.md`; plan: `specs/026-flexible-artifact-discovery/plan.md`.
+Beads was not initialized because this checkout has no Beads workspace; Spec Kit tasks are the
+durable implementation record. Constitution Check: PASS, no amendment.
+Prior: **025-inter-brand-colors** (DONE — specify + plan + tasks + implement 2026-10-19).
 (1) **Inter everywhere**: the local override `styles/kihub-fonts.css` points
 `--kihub-font-display` at the Inter `next/font` variable and makes `.kihub-h1`–`h4` and
 `.kihub-tile__title` semibold (600). Source Serif 4 is DELETED (loader, woff2, OFL); the

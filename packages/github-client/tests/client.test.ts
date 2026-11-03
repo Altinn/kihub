@@ -1,15 +1,21 @@
 import { describe, expect, it, vi } from 'vitest';
+import { artifactDirectoryDigest, gitBlobOid } from '@kihub/discovery-core';
 import { createGithubRepoReader, GithubClientError } from '../src/client';
 
 const TREE = {
   tree: [
     { path: 'skills', type: 'tree' },
     { path: 'skills/security-review', type: 'tree' },
-    { path: 'skills/security-review/artifact.yaml', type: 'blob' },
-    { path: 'skills/security-review/README.md', type: 'blob' },
-    { path: 'prompts/tone/artifact.yaml', type: 'blob' },
-    { path: 'docs/notes.md', type: 'blob' }, // outside TYPE_DIRS → ignored
-    { path: 'skills/wip/notes.txt', type: 'blob' }, // no artifact.yaml → ignored
+    { path: 'skills/security-review/artifact.yaml', type: 'blob', sha: gitBlobOid('manifest') },
+    { path: 'skills/security-review/README.md', type: 'blob', sha: gitBlobOid('readme') },
+    { path: 'prompts/tone/artifact.yaml', type: 'blob', sha: gitBlobOid('prompt') },
+    { path: 'src', type: 'tree' },
+    { path: 'src/skills', type: 'tree' },
+    { path: 'src/skills/nested', type: 'tree' },
+    { path: 'src/skills/nested/artifact.yaml', type: 'blob', sha: gitBlobOid('nested') },
+    { path: 'src/deeper/skills/ignored/artifact.yaml', type: 'blob', sha: gitBlobOid('ignored') },
+    { path: 'docs/notes.md', type: 'blob', sha: gitBlobOid('notes') }, // outside TYPE_DIRS → ignored
+    { path: 'skills/wip/notes.txt', type: 'blob', sha: gitBlobOid('wip') }, // no artifact.yaml → ignored
   ],
 };
 
@@ -27,6 +33,58 @@ describe('createGithubRepoReader', () => {
     // recursive tree fetched once
     expect(fetchImpl).toHaveBeenCalledTimes(1);
     expect(String(fetchImpl.mock.calls[0]![0])).toContain('/git/trees/main?recursive=1');
+  });
+
+  it('enumerates exact configured roots, ignores arbitrary deeper manifests, and caches the tree for digesting', async () => {
+    const fetchImpl = vi.fn(async (_url: string | URL | Request) => jsonResponse(TREE));
+    const reader = createGithubRepoReader({ repo: 'digdir/ai-artifacts', token: 't', fetchImpl });
+
+    expect(await reader.listArtifactDirs(['src'])).toEqual(['src/skills/nested']);
+    expect(await reader.artifactDigest?.('src/skills/nested')).toBe(
+      artifactDirectoryDigest([{ path: 'artifact.yaml', blobOid: gitBlobOid('nested') }]),
+    );
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('digests every blob recursively and detects a SKILL.md-only revision change', async () => {
+    const treeFor = (skillText: string) => ({
+      tree: [
+        { path: 'src', type: 'tree' },
+        { path: 'src/skills', type: 'tree' },
+        { path: 'src/skills/nested', type: 'tree' },
+        { path: 'src/skills/nested/artifact.yaml', type: 'blob', sha: gitBlobOid('manifest') },
+        { path: 'src/skills/nested/SKILL.md', type: 'blob', sha: gitBlobOid(skillText) },
+        { path: 'src/skills/nested/instructions/notes.txt', type: 'blob', sha: gitBlobOid('notes') },
+      ],
+    });
+    const readerFor = (skillText: string) =>
+      createGithubRepoReader({
+        repo: 'digdir/ai-artifacts',
+        token: 't',
+        fetchImpl: vi.fn(async () => jsonResponse(treeFor(skillText))),
+      });
+
+    const first = await readerFor('# First\n').artifactDigest?.('src/skills/nested');
+    expect(first).toBe(
+      artifactDirectoryDigest([
+        { path: 'artifact.yaml', blobOid: gitBlobOid('manifest') },
+        { path: 'instructions/notes.txt', blobOid: gitBlobOid('notes') },
+        { path: 'SKILL.md', blobOid: gitBlobOid('# First\n') },
+      ]),
+    );
+    expect(await readerFor('# Second\n').artifactDigest?.('src/skills/nested')).not.toBe(first);
+  });
+
+  it('rejects a configured root missing from the tree', async () => {
+    const fetchImpl = vi.fn(async () => jsonResponse(TREE));
+    const reader = createGithubRepoReader({ repo: 'digdir/ai-artifacts', token: 't', fetchImpl });
+    await expect(reader.listArtifactDirs(['missing'])).rejects.toThrow('does not exist');
+  });
+
+  it('fails closed when GitHub reports a truncated recursive tree', async () => {
+    const fetchImpl = vi.fn(async () => jsonResponse({ ...TREE, truncated: true }));
+    const reader = createGithubRepoReader({ repo: 'digdir/ai-artifacts', token: 't', fetchImpl });
+    await expect(reader.listArtifactDirs()).rejects.toThrow('truncated');
   });
 
   it('readFile returns blob contents, and undefined on 404', async () => {

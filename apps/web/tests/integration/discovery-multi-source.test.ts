@@ -15,7 +15,7 @@ let payload: Payload;
 let srcA: number;
 let srcB: number;
 
-function manifest(id: string, slug: string, version = '1.0.0') {
+function manifest(id: string, slug: string, repository: string, version = '1.0.0') {
   return `id: ${id}
 type: skill
 name: ${slug}
@@ -26,7 +26,7 @@ owner:
   contact: ai-team@digdir.no
 source:
   provider: github
-  repository: digdir/multi-source-test
+  repository: ${repository}
   path: skills/${slug}
 visibility: internal
 lifecycle:
@@ -113,10 +113,10 @@ const MOVER = 'digdir.ms-mover';
 const DUPE = 'digdir.ms-dupe';
 
 const readerA = {
-  'ms-a-one': manifest(A1, 'ms-a-one'),
-  'ms-a-two': manifest(A2, 'ms-a-two'),
+  'ms-a-one': manifest(A1, 'ms-a-one', 'digdir/msrc-a'),
+  'ms-a-two': manifest(A2, 'ms-a-two', 'digdir/msrc-a'),
 };
-const readerB = { 'ms-b-one': manifest(B1, 'ms-b-one') };
+const readerB = { 'ms-b-one': manifest(B1, 'ms-b-one', 'digdir/msrc-b') };
 
 describe('multi-source discovery is source-scoped (015 US1)', () => {
   it('scans of disjoint sources never touch each other (US1-1, SC-001)', async () => {
@@ -175,7 +175,7 @@ describe('multi-source discovery is source-scoped (015 US1)', () => {
     // The first scan that finds the id adopts it.
     const adopting = await scanWith(srcB, {
       ...readerB,
-      'ms-legacy': manifest(LEGACY, 'ms-legacy'),
+      'ms-legacy': manifest(LEGACY, 'ms-legacy', 'digdir/msrc-b'),
     });
     expect(adopting.report?.adopted).toEqual([LEGACY]);
     expect((await artifactRow(LEGACY))?.discoverySource).toBe(srcB);
@@ -183,7 +183,7 @@ describe('multi-source discovery is source-scoped (015 US1)', () => {
 
   it('an artifact moves between repos with its governance intact (US1-4)', async () => {
     // MOVER starts in A…
-    await scanWith(srcA, { ...readerA, 'ms-mover': manifest(MOVER, 'ms-mover') });
+    await scanWith(srcA, { ...readerA, 'ms-mover': manifest(MOVER, 'ms-mover', 'digdir/msrc-a') });
     const moverDoc = await artifactRow(MOVER);
     expect(moverDoc?.discoverySource).toBe(srcA);
 
@@ -201,8 +201,8 @@ describe('multi-source discovery is source-scoped (015 US1)', () => {
     // …then appears in B (moved). B's scan takes ownership…
     const bScan = await scanWith(srcB, {
       ...readerB,
-      'ms-legacy': manifest(LEGACY, 'ms-legacy'),
-      'ms-mover': manifest(MOVER, 'ms-mover', '2.0.0'),
+      'ms-legacy': manifest(LEGACY, 'ms-legacy', 'digdir/msrc-b'),
+      'ms-mover': manifest(MOVER, 'ms-mover', 'digdir/msrc-b', '2.0.0'),
     });
     expect(bScan.report?.reassigned).toEqual([MOVER]);
     expect((await artifactRow(MOVER))?.discoverySource).toBe(srcB);
@@ -219,12 +219,12 @@ describe('multi-source discovery is source-scoped (015 US1)', () => {
   });
 
   it('an id present in two sources at once flip-flops ownership (flagged) but is never deactivated (US1-5)', async () => {
-    const withDupeA = { ...readerA, 'ms-dupe': manifest(DUPE, 'ms-dupe') };
+    const withDupeA = { ...readerA, 'ms-dupe': manifest(DUPE, 'ms-dupe', 'digdir/msrc-a') };
     const withDupeB = {
       ...readerB,
-      'ms-legacy': manifest(LEGACY, 'ms-legacy'),
-      'ms-mover': manifest(MOVER, 'ms-mover', '2.0.0'),
-      'ms-dupe': manifest(DUPE, 'ms-dupe'),
+      'ms-legacy': manifest(LEGACY, 'ms-legacy', 'digdir/msrc-b'),
+      'ms-mover': manifest(MOVER, 'ms-mover', 'digdir/msrc-b', '2.0.0'),
+      'ms-dupe': manifest(DUPE, 'ms-dupe', 'digdir/msrc-b'),
     };
 
     const first = await scanWith(srcA, withDupeA);
@@ -249,7 +249,10 @@ describe('multi-source discovery is source-scoped (015 US1)', () => {
     expect(b1?.discoverySource ?? null).toBeNull(); // FK ON DELETE SET NULL
 
     // A later scan of another source containing the id adopts it.
-    const adopting = await scanWith(srcA, { ...readerA, 'ms-b-one': manifest(B1, 'ms-b-one') });
+    const adopting = await scanWith(srcA, {
+      ...readerA,
+      'ms-b-one': manifest(B1, 'ms-b-one', 'digdir/msrc-a'),
+    });
     expect(adopting.report?.adopted).toContain(B1);
     expect((await artifactRow(B1))?.discoverySource).toBe(srcA);
   });
