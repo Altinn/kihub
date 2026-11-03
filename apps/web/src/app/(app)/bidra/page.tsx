@@ -8,7 +8,9 @@ import {
   COMMON_MISTAKES,
   EXAMPLE_AGENT_CARD,
   EXAMPLE_AGENT_MANIFEST,
+  EXAMPLE_KIHUB_CONFIG,
   EXAMPLE_MINIMAL_MANIFEST,
+  EXAMPLE_NESTED_REPO_TREE,
   EXAMPLE_README,
   EXAMPLE_REPO_TREE,
   EXAMPLE_SKILL_MANIFEST,
@@ -69,7 +71,7 @@ const BENEFITS = [
 const FLOW = [
   { title: 'Dere pusher', body: 'artifact.yaml i eget repo' },
   { title: 'KI Hub skanner', body: 'Via webhook eller daglig' },
-  { title: 'Validering', body: 'Manifest og agentkort sjekkes' },
+  { title: 'Validering', body: 'Manifest, plassering og agentkort sjekkes' },
   { title: 'Katalogen', body: 'Artefakten får sin egen side' },
   { title: 'Kollegaer bruker', body: 'Søker, leser og installerer' },
 ];
@@ -237,8 +239,10 @@ export default function ContributeGuidePage() {
             </ol>
             <div className="bidra-note">
               <strong>Hva leser KI Hub?</strong> Bare <code>artifact.yaml</code>,{' '}
-              <code>README.md</code> og, for agenter, <code>agent-card.json</code>. Selve innholdet,
-              som koden, SKILL.md eller promptene, blir liggende hos dere. KI Hub lenker til kilden.
+              <code>README.md</code>, for agenter <code>agent-card.json</code>, og{' '}
+              <code>kihub.yaml</code> hvis dere har en. Selve innholdet, som koden, SKILL.md eller
+              promptene, blir liggende hos dere. Av de andre filene i mappen lagrer KI Hub bare et
+              fingeravtrykk, slik at det synes når innholdet endres. KI Hub lenker til kilden.
             </div>
           </section>
 
@@ -287,6 +291,21 @@ export default function ContributeGuidePage() {
                     mindre.
                   </p>
                   <Code code={EXAMPLE_REPO_TREE} language="plaintext" />
+                  <details className="bidra-details">
+                    <summary>Vil dere ha artefaktene sammen med koden, for eksempel under src/?</summary>
+                    <p>
+                      Legg en <code>kihub.yaml</code> i roten av repoet og list mappene artefaktene ligger
+                      under. Inne i hver av dem gjelder den samme strukturen. KI Hub leter da bare i
+                      mappene i listen, så ta med <code>.</code> hvis dere også har artefakter i roten.
+                    </p>
+                    <Code code={EXAMPLE_KIHUB_CONFIG} language="yaml" />
+                    <Code code={EXAMPLE_NESTED_REPO_TREE} language="plaintext" />
+                    <p>
+                      Hver mappe i listen må finnes på grenen KI Hub leser. En feil i{' '}
+                      <code>kihub.yaml</code> stopper hele skanningen av repoet, så ingenting blir endret
+                      før feilen er rettet.
+                    </p>
+                  </details>
                 </div>
               </li>
 
@@ -310,6 +329,12 @@ export default function ContributeGuidePage() {
                     <strong>Tips om id:</strong> Velg den med omhu, for den skal aldri endres. Bruk{' '}
                     <code>digdir.</code> pluss et kort, beskrivende navn. Den er artefaktens faste
                     identitet, også om dere flytter repoet.
+                  </div>
+                  <div className="bidra-tip">
+                    <strong>Tips om source:</strong> <code>source.path</code> er hele stien til mappen fra
+                    roten av repoet, for eksempel <code>src/skills/skjemahjelp</code>, og{' '}
+                    <code>source.repository</code> er repoet som er koblet til KI Hub. Begge sjekkes ved
+                    hver skanning, og stemmer de ikke, blir manifestet avvist.
                   </div>
                 </div>
               </li>
@@ -402,6 +427,11 @@ export default function ContributeGuidePage() {
                     </div>
                   </div>
                   <Code code={VALIDATE_COMMAND} language="shell" />
+                  <p className="bidra-small">
+                    Validatoren sjekker innholdet i manifestet. Om <code>source.path</code> og{' '}
+                    <code>source.repository</code> stemmer med mappen og repoet, sjekkes først når KI Hub
+                    skanner.
+                  </p>
                 </div>
               </li>
 
@@ -513,6 +543,12 @@ export default function ContributeGuidePage() {
               <em>Til vurdering</em> til <em>Godkjent</em> og <em>Anbefalt</em> er det en godkjenner som
               bestemmer. En artefakt kan også bli <code>deprecated</code> (utfaset) eller{' '}
               <code>archived</code> (arkivert).
+            </div>
+            <div className="bidra-tip">
+              <strong>Godkjenningen følger innholdet.</strong> En godkjenning gjelder den versjonen og det
+              innholdet som ble godkjent. Endrer dere <code>version</code> eller en hvilken som helst fil
+              i artefaktmappen, viser KI Hub at godkjenningen gjelder en eldre versjon. Artefakten må da
+              godkjennes på nytt før den vises som godkjent eller anbefalt igjen. Historikken beholdes.
             </div>
           </section>
 
