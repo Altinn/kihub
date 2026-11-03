@@ -84,8 +84,17 @@ function ownerIdOf(doc: ArtifactDoc): number | string | null {
 
 const sameId = (a: number | string, b: number | string) => String(a) === String(b);
 
-/** Rows indexed before 026 stored `source.path` unvalidated (e.g. "./skills/x/"); compare loosely. */
-const looseRepoPath = (value: string) => value.replace(/^(?:\.\/)+/, '').replace(/\/+$/, '');
+/**
+ * Rows indexed before 026 stored `source.path` unvalidated (e.g. "./skills/x/"); compare loosely.
+ * Index scans, not regexes: `/\/+$/` backtracks quadratically on long runs of "/" (CodeQL).
+ */
+function looseRepoPath(value: string): string {
+  let start = 0;
+  while (value.startsWith('./', start)) start += 2;
+  let end = value.length;
+  while (end > start && value[end - 1] === '/') end -= 1;
+  return value.slice(start, end);
+}
 
 /**
  * Reconcile the catalog with a scan of ONE source (contracts/reconcile.md): create/update by

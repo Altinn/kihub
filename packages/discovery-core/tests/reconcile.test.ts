@@ -182,6 +182,17 @@ describe('reconcile (source-scoped)', () => {
     expect(byId(rows, 'digdir.b')?.active).toBe(true);
   });
 
+  it('compares stored paths in linear time even for long runs of "/" (no regex backtracking)', async () => {
+    const { payload, rows } = fakePayload();
+    await reconcile(payload, [valid('digdir.a'), valid('digdir.b')], { sourceId: SRC_A });
+    byId(rows, 'digdir.b')!.source = { path: `${'/'.repeat(200_000)}x` };
+    const hostile: RawArtifact = { path: `${'/'.repeat(200_000)}y`, valid: false, errors: ['bad'] };
+    const started = performance.now();
+    const report = await reconcile(payload, [valid('digdir.a'), hostile], { sourceId: SRC_A });
+    expect(performance.now() - started).toBeLessThan(1000);
+    expect(report.deactivated).toEqual(['digdir.b']);
+  });
+
   it('reads every owned row without a page cap', async () => {
     const { payload } = fakePayload();
     const calls: unknown[] = [];
