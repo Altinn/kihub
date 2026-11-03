@@ -16,7 +16,7 @@ or recommendation requires a current approval. Approver/Admin can use the virtua
 `reapproveCurrentRevision` control to stamp the same Approved state for new content; it is audited
 and role-enforced. Migration: `20261103_080248_artifact_revision_governance` (additive fields only;
 virtual reapproval needs no column), verified full-chain up→down→up on scratch DB
-`kihub_026_flexible_discovery`. Gates: packages **117/117** (artifact-schema 17, discovery-core 74,
+`kihub_026_flexible_discovery`. Gates: packages **118/118** (artifact-schema 17, discovery-core 75,
 github-client 9, governance-core 17); web unit **251/251 across 22 files** and integration
 **178/178 across 29 files** (run file-by-file because the pre-existing combined Payload/Vitest
 process exits after a few files with status 0 and no summary); ESLint and `tsc --noEmit` clean;

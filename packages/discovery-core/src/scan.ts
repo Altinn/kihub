@@ -1,11 +1,16 @@
 import {
+  closeSync,
+  constants,
   existsSync,
+  fstatSync,
   lstatSync,
+  openSync,
   readFileSync,
   readdirSync,
   readlinkSync,
   realpathSync,
   statSync,
+  type Stats,
 } from 'node:fs';
 import path from 'node:path';
 import { type ArtifactManifest, validateAgentCard, validateManifest } from '@kihub/artifact-schema';
@@ -171,11 +176,46 @@ function containedPath(rootPath: string, relPath: string): string {
 /** Read a Git-worktree path without following a symlink (Git stores its target text as blob bytes). */
 function readLocalRepoFile(rootPath: string, relPath: string): string | undefined {
   const absolute = containedPath(rootPath, relPath);
-  if (!existsSync(absolute)) return undefined;
-  const stat = lstatSync(absolute);
+  let stat: Stats;
+  try {
+    stat = lstatSync(absolute);
+  } catch (error) {
+    if (isMissingPathError(error)) return undefined;
+    throw error;
+  }
   if (stat.isSymbolicLink()) return readlinkSync(absolute, 'utf8');
   if (!stat.isFile()) return undefined;
-  return readFileSync(absolute, 'utf8');
+  return readCheckedRegularFile(absolute, relPath, stat).toString('utf8');
+}
+
+function isMissingPathError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null || !('code' in error)) return false;
+  return error.code === 'ENOENT' || error.code === 'ENOTDIR';
+}
+
+/** Open and read the same regular file that was inspected, refusing a final-component symlink. */
+function readCheckedRegularFile(absolute: string, relPath: string, checked: Stats): Buffer {
+  let descriptor: number | undefined;
+  try {
+    descriptor = openSync(absolute, constants.O_RDONLY | constants.O_NOFOLLOW);
+    const opened = fstatSync(descriptor);
+    if (!opened.isFile() || opened.dev !== checked.dev || opened.ino !== checked.ino) {
+      throw new DiscoveryConfigError(`File changed while scanning repository: ${relPath}`);
+    }
+    return readFileSync(descriptor);
+  } catch (error) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error.code === 'ELOOP' || isMissingPathError(error))
+    ) {
+      throw new DiscoveryConfigError(`File changed while scanning repository: ${relPath}`);
+    }
+    throw error;
+  } finally {
+    if (descriptor !== undefined) closeSync(descriptor);
+  }
 }
 
 function validateLocalRoot(rootPath: string, root: string): string {
@@ -224,7 +264,7 @@ function localArtifactDigest(rootPath: string, artifactRelPath: string): string 
       } else if (stat.isDirectory()) {
         walk(absolute, relative);
       } else if (stat.isFile()) {
-        entries.push({ path: relative, blobOid: gitBlobOid(readFileSync(absolute)) });
+        entries.push({ path: relative, blobOid: gitBlobOid(readCheckedRegularFile(absolute, relative, stat)) });
       }
     }
   }

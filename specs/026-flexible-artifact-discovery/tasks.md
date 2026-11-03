@@ -125,8 +125,8 @@ and stale UI/enforcement, then re-approve and observe current state.
 
 ## Completion record (2026-11-03)
 
-- Package gates: artifact-schema 17/17, discovery-core 74/74, GitHub client 9/9, governance-core
-  17/17 (117 total).
+- Package gates: artifact-schema 17/17, discovery-core 75/75, GitHub client 9/9, governance-core
+  17/17 (118 total).
 - Web gates: 251/251 unit tests across 22 files and 178/178 integration tests across 29 files.
   Integration files were run independently because the pre-existing combined Payload/Vitest process
   exits after a few files with status 0 and no final summary; the independent sweep is authoritative.

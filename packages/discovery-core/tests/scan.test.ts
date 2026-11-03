@@ -197,4 +197,23 @@ describe('configured local scan', () => {
       expect(scan(repo)[0]?.contentDigest).not.toBe(first);
     });
   });
+
+  it('treats a manifest symlink as Git link bytes instead of following it', () => {
+    withRepo((repo) => {
+      const outside = path.join(repo, 'outside-manifest.yaml');
+      writeFileSync(outside, VALID);
+      const artifactDir = path.join(repo, 'skills', 'linked-manifest');
+      mkdirSync(artifactDir, { recursive: true });
+      symlinkSync(outside, path.join(artifactDir, 'artifact.yaml'));
+
+      const artifact = scan(repo).find((result) => result.path === 'skills/linked-manifest');
+      expect(artifact?.valid).toBe(false);
+      expect(artifact?.errors?.join('\n')).toContain('expected object, received string');
+      expect(artifact?.contentDigest).toBe(
+        artifactDirectoryDigest([
+          { path: 'artifact.yaml', blobOid: gitBlobOid(outside) },
+        ]),
+      );
+    });
+  });
 });
