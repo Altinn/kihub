@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createLocalReader, type RepoReader, scan, scanRepo } from '../src/scan';
+import { createLocalReader, type RepoReader, scan, scanRepo, scanRepoDetailed } from '../src/scan';
 
 const VALID = `id: digdir.security-review
 type: skill
@@ -38,7 +38,12 @@ beforeAll(() => {
   writeArtifact('prompts/bad', INVALID); // invalid, no README
   mkdirSync(path.join(root, 'skills/not-an-artifact'), { recursive: true }); // no artifact.yaml
   // 015: an agent and a type↔dir mismatch — the parity test proves scanRepo matches scan on both.
-  writeArtifact('agents/support-agent', VALID.replace('type: skill', 'type: agent').replace('id: digdir.security-review', 'id: digdir.support-agent'));
+  writeArtifact(
+    'agents/support-agent',
+    VALID.replace('type: skill', 'type: agent')
+      .replace('id: digdir.security-review', 'id: digdir.support-agent')
+      .replace('path: skills/security-review', 'path: agents/support-agent'),
+  );
   writeArtifact('skills/misplaced-agent', VALID.replace('type: skill', 'type: agent').replace('id: digdir.security-review', 'id: digdir.misplaced'));
 });
 
@@ -75,12 +80,12 @@ describe('scanRepo', () => {
     const AGENT = VALID.replace('type: skill', 'type: agent').replace(
       'id: digdir.security-review',
       'id: digdir.carded',
-    );
+    ).replace('path: skills/security-review', 'path: agents/carded');
     const files: Record<string, string> = {
       'agents/carded/artifact.yaml': AGENT,
       'agents/carded/agent-card.json': JSON.stringify({ name: 'Carded Agent' }),
-      'agents/cardless/artifact.yaml': AGENT.replace('digdir.carded', 'digdir.cardless'),
-      'agents/badcard/artifact.yaml': AGENT.replace('digdir.carded', 'digdir.badcard'),
+      'agents/cardless/artifact.yaml': AGENT.replaceAll('carded', 'cardless'),
+      'agents/badcard/artifact.yaml': AGENT.replaceAll('carded', 'badcard'),
       'agents/badcard/agent-card.json': '{not json',
       'skills/security-review/artifact.yaml': VALID,
       // A card next to a NON-agent must be ignored (never fetched/stored — FR-014).
@@ -137,5 +142,42 @@ describe('scanRepo', () => {
 
     // A dir the reader lists but which has no artifact.yaml is skipped, not errored.
     expect(results.some((r) => r.path === 'skills/not-an-artifact')).toBe(false);
+  });
+
+  it('returns config provenance, passes normalized roots to the reader, and validates source truth', async () => {
+    const nestedManifest = VALID.replace('digdir.security-review', 'digdir.nested')
+      .replace('Security Review', 'Nested')
+      .replace('repository: digdir/ai-artifacts', 'repository: other/repository')
+      .replace('path: skills/security-review', 'path: wrong/path');
+    const rootsSeen: string[][] = [];
+    const reader: RepoReader = {
+      async listArtifactDirs(artifactRoots) {
+        rootsSeen.push([...(artifactRoots ?? [])]);
+        return ['src/skills/nested'];
+      },
+      async readFile(relPath) {
+        if (relPath === 'kihub.yaml') {
+          return 'schemaVersion: 1\ndiscovery:\n  artifactRoots: [src]\n';
+        }
+        if (relPath === 'src/skills/nested/artifact.yaml') return nestedManifest;
+        return undefined;
+      },
+    };
+
+    const result = await scanRepoDetailed(reader, { expectedRepository: 'digdir/ai-artifacts' });
+    expect(rootsSeen).toEqual([['src']]);
+    expect(result.config).toMatchObject({
+      configPath: 'kihub.yaml',
+      artifactRoots: ['src'],
+    });
+    expect(result.config.configDigest).toMatch(/^sha256:[a-f0-9]{64}$/);
+    expect(result.artifacts[0]).toMatchObject({
+      path: 'src/skills/nested',
+      valid: false,
+      errors: [
+        "source.path: 'wrong/path' does not match discovered path 'src/skills/nested'",
+        "source.repository: 'other/repository' does not match discovery source 'digdir/ai-artifacts'",
+      ],
+    });
   });
 });

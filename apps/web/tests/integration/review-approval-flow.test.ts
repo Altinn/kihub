@@ -40,8 +40,8 @@ async function cleanup() {
 
   const existingArtifacts = await payload.find({
     collection: 'artifacts',
-    where: { artifactId: { equals: `digdir.${testId}` } },
-    limit: 1,
+    where: { artifactId: { like: `digdir.${testId}%` } },
+    limit: 100,
     overrideAccess: true,
   });
   const artifactIds = existingArtifacts.docs.map((d) => d.id);
@@ -99,6 +99,7 @@ beforeAll(async () => {
       name: 'Review flow test artifact',
       description: 'Fixture for T025.',
       version: '1.0.0',
+      contentDigest: 'sha256:review-flow-v1',
       active: true,
     },
     overrideAccess: true,
@@ -175,6 +176,8 @@ describe('submit -> review -> approve/reject flow (T025)', () => {
         requiredChanges: 'Add rate limiting to the public endpoint.',
         riskLevel: 'medium',
         expiryDate: '2027-01-01T00:00:00.000Z',
+        artifactVersion: '9.9.9',
+        artifactDigest: 'sha256:client-must-not-win',
       },
       overrideAccess: false,
       user: users.reviewer,
@@ -182,6 +185,8 @@ describe('submit -> review -> approve/reject flow (T025)', () => {
     expect(review.decision).toBe('changes-requested');
     expect((review.reviewer as { id: unknown }).id ?? review.reviewer).toBe(users.reviewer.id);
     expect(review.reviewDate).toBeTruthy();
+    expect(review.artifactVersion).toBe('1.0.0');
+    expect(review.artifactDigest).toBe('sha256:review-flow-v1');
   });
 
   it('Approver approves despite the changes-requested review (advisory policy, FR-017)', async () => {
@@ -196,11 +201,18 @@ describe('submit -> review -> approve/reject flow (T025)', () => {
     const approved = await payload.update({
       collection: 'catalog-entries',
       id,
-      data: { approvalState: 'approved' },
+      data: {
+        approvalState: 'approved',
+        approvalArtifactVersion: '9.9.9',
+        approvalArtifactDigest: 'sha256:client-must-not-win',
+      },
       overrideAccess: false,
       user: users.approver,
     });
     expect(approved.approvalState).toBe('approved');
+    expect(approved.approvalArtifactVersion).toBe('1.0.0');
+    expect(approved.approvalArtifactDigest).toBe('sha256:review-flow-v1');
+    expect(approved.approvalDecidedAt).toBeTruthy();
 
     // Approved lifecycle transition now permitted for the Approver.
     const promoted = await payload.update({
@@ -241,5 +253,116 @@ describe('submit -> review -> approve/reject flow (T025)', () => {
     expect(actions).toContain('lifecycle-transition');
     expect(actions).toContain('review-recorded');
     expect(actions).toContain('approval-decision');
+  });
+
+  it('requires an indexed digest, and a source revision change requires a new approval', async () => {
+    const undigested = await payload.create({
+      collection: 'artifacts',
+      data: {
+        artifactId: `digdir.${testId}-undigested`,
+        type: 'skill',
+        name: 'Undigested fixture',
+        description: 'Must be indexed before review.',
+        version: '1.0.0',
+        active: true,
+      },
+      overrideAccess: true,
+    });
+    await expect(
+      payload.create({
+        collection: 'reviews',
+        data: { artifact: undigested.id, type: 'technical', expiryDate: '2027-01-01T00:00:00.000Z' },
+        overrideAccess: false,
+        user: users.reviewer,
+      }),
+    ).rejects.toThrow(/Run discovery/);
+    await payload.delete({ collection: 'artifacts', id: undigested.id, overrideAccess: true });
+
+    const entry = await payload.find({
+      collection: 'catalog-entries',
+      where: { artifact: { equals: artifactId } },
+      overrideAccess: true,
+      limit: 1,
+    });
+    const id = entry.docs[0]!.id;
+    await payload.update({
+      collection: 'artifacts',
+      id: artifactId,
+      data: { version: '1.0.1', contentDigest: 'sha256:review-flow-v2' },
+      overrideAccess: true,
+    });
+
+    // Re-approve first (the preceding test left the decision rejected), then change again so the
+    // stored approved snapshot is demonstrably stale.
+    await payload.update({
+      collection: 'catalog-entries',
+      id,
+      data: { approvalState: 'approved' },
+      overrideAccess: false,
+      user: users.approver,
+    });
+    await payload.update({
+      collection: 'artifacts',
+      id: artifactId,
+      data: { contentDigest: 'sha256:review-flow-v3' },
+      overrideAccess: true,
+    });
+
+    await expect(
+      payload.update({
+        collection: 'catalog-entries',
+        id,
+        data: { lifecycleState: 'recommended' },
+        overrideAccess: false,
+        user: users.approver,
+      }),
+    ).rejects.toThrow(/current artifact revision/);
+    await expect(
+      payload.update({
+        collection: 'catalog-entries',
+        id,
+        data: { recommended: true },
+        overrideAccess: false,
+        user: users.approver,
+      }),
+    ).rejects.toThrow(/current artifact revision/);
+
+    const reapproved = await payload.update({
+      collection: 'catalog-entries',
+      id,
+      data: { reapproveCurrentRevision: true },
+      overrideAccess: false,
+      user: users.approver,
+    });
+    expect(reapproved.approvalState).toBe('approved');
+    expect(reapproved.approvalArtifactVersion).toBe('1.0.1');
+    expect(reapproved.approvalArtifactDigest).toBe('sha256:review-flow-v3');
+    const reapprovalAudit = await payload.find({
+      collection: 'audit-log',
+      where: {
+        and: [
+          { artifact: { equals: artifactId } },
+          { action: { equals: 'approval-decision' } },
+        ],
+      },
+      sort: '-createdAt',
+      limit: 1,
+      overrideAccess: true,
+    });
+    expect(reapprovalAudit.docs[0]?.details).toMatchObject({
+      from: 'approved',
+      to: 'approved',
+      artifactVersion: '1.0.1',
+      artifactDigest: 'sha256:review-flow-v3',
+    });
+
+    const recommended = await payload.update({
+      collection: 'catalog-entries',
+      id,
+      data: { lifecycleState: 'recommended' },
+      overrideAccess: false,
+      user: users.approver,
+    });
+    expect(recommended.lifecycleState).toBe('recommended');
   });
 });

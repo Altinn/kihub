@@ -31,7 +31,7 @@ describe('deriveInstallCommand', () => {
 
 describe('buildRecord', () => {
   it('maps manifest fields and README to the catalog record', () => {
-    const record = buildRecord(base, '# Readme');
+    const record = buildRecord(base, '# Readme', 'sha256:abc');
     expect(record).toMatchObject({
       artifactId: 'digdir.security-review',
       type: 'skill',
@@ -42,6 +42,7 @@ describe('buildRecord', () => {
       tags: ['security', 'review'],
       visibility: 'internal',
       lifecycleStatus: 'experimental',
+      contentDigest: 'sha256:abc',
     });
     expect(record.source).toEqual({
       provider: 'github',

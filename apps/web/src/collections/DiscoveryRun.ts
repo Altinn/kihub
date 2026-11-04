@@ -28,6 +28,9 @@ export const DiscoveryRun: CollectionConfig = {
     { name: 'finishedAt', type: 'date' },
     { name: 'outcome', type: 'select', required: true, options: ['success', 'failure'] },
     { name: 'failureReason', type: 'text' },
+    { name: 'configPath', type: 'text', admin: { readOnly: true } },
+    { name: 'configDigest', type: 'text', admin: { readOnly: true } },
+    { name: 'artifactRoots', type: 'text', hasMany: true, admin: { readOnly: true } },
     {
       name: 'summary',
       type: 'group',
@@ -40,6 +43,7 @@ export const DiscoveryRun: CollectionConfig = {
         { name: 'adopted', type: 'number' },
         { name: 'reassigned', type: 'number' },
         { name: 'cardIssues', type: 'number' },
+        { name: 'revisionChanged', type: 'number' },
       ],
     },
     { name: 'createdIds', type: 'text', hasMany: true },
@@ -47,6 +51,7 @@ export const DiscoveryRun: CollectionConfig = {
     { name: 'deactivatedIds', type: 'text', hasMany: true },
     { name: 'adoptedIds', type: 'text', hasMany: true },
     { name: 'reassignedIds', type: 'text', hasMany: true },
+    { name: 'revisionChangedIds', type: 'text', hasMany: true },
     {
       name: 'skippedInvalid',
       type: 'array',

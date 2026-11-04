@@ -14,6 +14,7 @@ export interface ArtifactRecord {
   tags: string[];
   visibility: string;
   lifecycleStatus: string;
+  contentDigest: string;
 }
 
 /** Derive the install command from the manifest's APM reference; empty when none (Principle V). */
@@ -23,7 +24,7 @@ export function deriveInstallCommand(manifest: ArtifactManifest): string {
 }
 
 /** Map a valid manifest (+ optional README) to the catalog record. Metadata only — no body. */
-export function buildRecord(manifest: ArtifactManifest, readme = ''): ArtifactRecord {
+export function buildRecord(manifest: ArtifactManifest, readme = '', contentDigest = ''): ArtifactRecord {
   return {
     artifactId: manifest.id,
     type: manifest.type,
@@ -41,5 +42,6 @@ export function buildRecord(manifest: ArtifactManifest, readme = ''): ArtifactRe
     tags: manifest.tags ?? [],
     visibility: manifest.visibility,
     lifecycleStatus: manifest.lifecycle.status,
+    contentDigest,
   };
 }

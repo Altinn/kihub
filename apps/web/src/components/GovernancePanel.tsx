@@ -1,6 +1,6 @@
 import { isExpired } from '@kihub/governance-core';
 import { Card, Heading, Paragraph, Tag } from '@digdir/designsystemet-react';
-import { listAuditLog, listReviews, type Governance } from '@/lib/governance';
+import { listAuditLog, listReviews, reviewIsOlderRevision, type Governance } from '@/lib/governance';
 
 const STATE_LABELS: Record<string, string> = {
   draft: 'Draft',
@@ -57,7 +57,21 @@ export async function GovernancePanel({
         <dt><strong>Review status</strong></dt>
         <dd style={{ margin: 0 }}>{REVIEW_STATUS_LABELS[governance.reviewStatus]}</dd>
         <dt><strong>Approval</strong></dt>
-        <dd style={{ margin: 0 }}>{APPROVAL_LABELS[governance.approvalState]}</dd>
+        <dd style={{ margin: 0 }}>
+          {governance.approvalState === 'approved' && !governance.approvalCurrent
+            ? 'Approval outdated — re-review required'
+            : APPROVAL_LABELS[governance.approvalState]}
+        </dd>
+        <dt><strong>Current revision</strong></dt>
+        <dd style={{ margin: 0 }}>
+          {governance.currentArtifactVersion}
+          {governance.currentArtifactDigest ? ` · ${governance.currentArtifactDigest.slice(0, 19)}…` : ' · not indexed'}
+        </dd>
+        <dt><strong>Decision revision</strong></dt>
+        <dd style={{ margin: 0 }}>
+          {governance.approvalArtifactVersion ?? '—'}
+          {governance.approvalArtifactDigest ? ` · ${governance.approvalArtifactDigest.slice(0, 19)}…` : ''}
+        </dd>
         <dt><strong>Business owner</strong></dt>
         <dd style={{ margin: 0 }}>{governance.businessOwner ?? '—'}</dd>
         <dt><strong>Technical owner</strong></dt>
@@ -75,6 +89,7 @@ export async function GovernancePanel({
         <div style={{ display: 'grid', gap: '0.5rem' }}>
           {reviews.map((r) => {
             const expired = r.expiryDate ? isExpired(r.expiryDate, now) : false;
+            const olderRevision = reviewIsOlderRevision(r.artifactDigest, governance.currentArtifactDigest);
             const reviewer = typeof r.reviewer === 'object' && r.reviewer ? r.reviewer.email : r.reviewer;
             return (
               <div key={r.id} style={{ border: '1px solid var(--ds-color-neutral-border-subtle, #ddd)', borderRadius: '4px', padding: '0.5rem 0.75rem' }}>
@@ -88,6 +103,11 @@ export async function GovernancePanel({
                   {expired ? (
                     <Tag data-color="danger" data-size="sm">
                       Expired — needs renewal
+                    </Tag>
+                  ) : null}
+                  {olderRevision ? (
+                    <Tag data-color="warning" data-size="sm">
+                      Older artifact revision
                     </Tag>
                   ) : null}
                 </div>

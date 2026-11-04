@@ -1,9 +1,12 @@
 import { ARTIFACT_TYPES, validateAgentCard, validateManifest } from '@kihub/artifact-schema';
+import { resolveDiscoveryConfig } from '@kihub/discovery-core';
 import { describe, expect, it } from 'vitest';
 import {
   EXAMPLE_AGENT_CARD,
   EXAMPLE_AGENT_MANIFEST,
+  EXAMPLE_KIHUB_CONFIG,
   EXAMPLE_MINIMAL_MANIFEST,
+  EXAMPLE_NESTED_REPO_TREE,
   EXAMPLE_SKILL_MANIFEST,
   GUIDE_ARTIFACT_TYPES,
   MANIFEST_FIELDS,
@@ -35,6 +38,20 @@ describe('contribute-guide', () => {
   it('the example agent card is valid', () => {
     const result = validateAgentCard(EXAMPLE_AGENT_CARD);
     expect(result.valid ? [] : result.errors).toEqual([]);
+  });
+
+  it('the example kihub.yaml is valid and matches the nested example tree', () => {
+    const { artifactRoots } = resolveDiscoveryConfig(EXAMPLE_KIHUB_CONFIG);
+    expect(artifactRoots).toEqual(['services/skjema', 'src']);
+    const paths = [...EXAMPLE_NESTED_REPO_TREE.matchAll(/source\.path: (\S+)/g)].map((m) => m[1]!);
+    expect(paths).toHaveLength(2);
+    for (const path of paths) {
+      const root = artifactRoots.find((r) => path.startsWith(`${r}/`));
+      expect(root, path).toBeDefined();
+      const [typeDir, slug, ...rest] = path.slice(root!.length + 1).split('/');
+      expect(Object.values(TYPE_DIRECTORIES), path).toContain(typeDir);
+      expect(slug && rest.length === 0, path).toBe(true);
+    }
   });
 
   it('covers every artifact type exactly once', () => {

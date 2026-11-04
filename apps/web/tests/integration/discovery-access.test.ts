@@ -93,7 +93,7 @@ describe('discovery access control (T019)', () => {
       payload.update({
         collection: 'discovery-sources',
         id: sourceId,
-        data: { enabled: false },
+        data: { enabled: false, allowDestructiveReconcile: true },
         overrideAccess: false,
         user: contributor,
       }),
