@@ -1,5 +1,7 @@
-import Link from 'next/link';
+import type { Metadata } from 'next';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import { LearningBody } from '@/components/LearningBody';
 import { LearningShell } from '@/components/LearningShell';
 import { getPublishedLearningPageBySlug, readLearningLibrary } from '@/lib/learning';
@@ -16,11 +18,25 @@ import type { LearningCategory, LearningSubcategory, User } from '@/payload-type
  *
  * The byline (#140) mirrors the News detail page: name if set, else email, else omitted — so a
  * colleague reading a page can tell who to contact about it.
+ *
+ * 026: Designsystemet markup; the context line is sentence case (no uppercase eyebrow) and the
+ * page has its own `<title>`.
  */
 function relationTitle(
   value: number | LearningCategory | LearningSubcategory | null | undefined,
 ): string {
   return value && typeof value === 'object' ? value.title : '';
+}
+
+const loadPage = cache((slug: string) => getPublishedLearningPageBySlug(slug));
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const page = await loadPage(decodeURIComponent((await params).slug));
+  return page ? { title: page.title } : {};
 }
 
 export default async function LearningPageRoute({
@@ -32,7 +48,7 @@ export default async function LearningPageRoute({
   const decoded = decodeURIComponent(slug);
 
   const [page, library] = await Promise.all([
-    getPublishedLearningPageBySlug(decoded),
+    loadPage(decoded),
     readLearningLibrary(),
   ]);
   if (!page) notFound();
@@ -46,31 +62,39 @@ export default async function LearningPageRoute({
 
   return (
     <LearningShell tree={tree}>
-      <article className="lp-page">
-        <p className="lp-page__back">
-          <Link href="/laering" className="kihub-link">
-            ← Til KI Læring
-          </Link>
-        </p>
+      <article className="app-article">
+        <Breadcrumbs
+          trail={[
+            { label: 'Hjem', href: '/' },
+            { label: 'KI Læring', href: '/laering' },
+          ]}
+          current={{ label: page.title, href: `/laering/${decoded}` }}
+        />
 
         {categoryTitle ? (
-          <p className="lp-page__context">
+          <p className="ds-paragraph app-kicker" data-size="sm">
             {categoryTitle}
             {subcategoryTitle ? ` · ${subcategoryTitle}` : ''}
           </p>
         ) : null}
 
-        <h1 className="kihub-h2 lp-page__title">{page.title}</h1>
+        <h1 className="ds-heading" data-size="xl">
+          {page.title}
+        </h1>
 
         {byline || updated ? (
-          <p className="lp-page__meta">
+          <p className="ds-paragraph app-meta" data-size="sm">
             {byline ? `Av ${byline}` : null}
             {byline && updated ? ' · ' : null}
             {updated ? `Sist oppdatert ${updated}` : null}
           </p>
         ) : null}
 
-        {page.summary ? <p className="kihub-lead lp-page__summary">{page.summary}</p> : null}
+        {page.summary ? (
+          <p className="ds-paragraph app-learning-page__summary" data-size="lg">
+            {page.summary}
+          </p>
+        ) : null}
 
         <LearningBody body={page.body} />
       </article>

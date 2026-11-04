@@ -1,5 +1,90 @@
 <!-- SPECKIT START -->
-Active feature: **025-inter-brand-colors** (DONE — specify + plan + tasks + implement 2026-10-19).
+Active feature: **026-designsystemet-alignment** (DONE — specify + plan + tasks + implement
+2026-10-21; tasks 76/76; unit 267/267, lint + `tsc` clean, `next build` green).
+- **What it did.** Rebuilt the employee-facing UI on Designsystemet and Digdir's profile.
+  - **Theme:** `designsystemet.config.json` is Digdir's official theme with NO overrides: accent
+    `#0062BA`, brand1 Rød `#F45F63`, brand2 Gul `#E5AA20`, brand3 Blå `#1E98F5`, neutral Blåsvart
+    `#1E2B3C`. Full-strength brand1–3 are graphics only. Their light tints are card surfaces
+    behind Blåsvart text (`.app-tint`), as on digdir.no: its card colours are exactly these
+    tokens, e.g. `#F8E7C1` = brand2 `surface-tinted` (constitution v4.1.0).
+  - **Markup:** plain HTML with `ds-*` classes in Server Components. `@digdir/designsystemet-react`
+    is REMOVED: in 1.18 every wrapper is `'use client'`, even `Heading`. `@digdir/designsystemet-web`
+    is loaded once (`components/DesignsystemetWeb.tsx`) for the Invoker Commands polyfill and
+    `data-clickdelegatefor`.
+  - **Removed:** the kihub layer, bridge, `kihub-fonts.css` and `portal.css`. The only app
+    stylesheet is `styles/app.css`, on `--ds-*` tokens only. It defines NO custom properties of
+    its own (the `--app-*` ones were removed): only `--ds-font-family`, `--dsc-*` and shiki's
+    variables.
+  - **Header:** Designsystemet's own site-header behaviour. There is no breakpoint: `SiteNav`
+    switches to a hamburger when the nav list wraps; the panel is a Designsystemet right-hand drawer
+    (`dialog.ds-dialog[data-placement=right]`, `command="show-modal"`, `closedby="any"`), with 50px hysteresis
+    (`lib/header-view.ts`).
+  - **Breadcrumbs:** `components/Breadcrumbs.tsx` renders the `<ds-breadcrumbs>` web component.
+    It manages role, label and `aria-current` by viewport. The server renders those too, with
+    `suppressHydrationWarning`.
+  - **User menu:** `components/UserMenu.tsx`: a `ds-button` with a `ds-avatar` (Entra photo, else
+    initials) and the name opens a Designsystemet Dropdown (`div.ds-dropdown[popover]` via
+    `popoverTarget`) with Admin (contributor+), a "Mørk modus" `ds-field` switch
+    (`ColorSchemeSwitch`, client) and "Logg ut" (submit tied by `form=` to a hidden server-action
+    form). The switch sets `data-color-scheme` on `<html>` and the `kihub-color-scheme` cookie;
+    `ThemedHtml` (now async) reads it, light by default (`lib/user-menu-view.ts`). The photo needs
+    the Entra `User.Read` scope, now requested with `profilePhotoSize: 64`. It only appears after a
+    fresh sign-in, and only if the tenant grants `User.Read`. Dark mode: the header logo is
+    white-filtered and the footer gets a tinted ground plus top border. 0 axe violations on 14
+    URLs in dark.
+  - **Pagination:** `components/NewsPagination.tsx` renders the `<ds-pagination>` web component
+    with our own server-rendered `ds-button` links and NO `data-current`/`data-total` (those make
+    the element fill empty links client-side). It only adds `role="navigation"` and the label
+    "Bla i sider", which the server renders too.
+  - **Types:** `apps/web/tsconfig.json` `types` lists `@digdir/designsystemet-web` (JSX types for its
+    elements, e.g. `<ds-breadcrumbs>`), `@digdir/designsystemet-types` (devDependency) and the
+    generated `design-tokens-build/types.d.ts`, per designsystemet.no's setup guide. Computed
+    `data-color` values are typed `Color`/`SeverityColors`, so a colour missing from the theme fails
+    `tsc`. Listing `types` stops automatic `@types` inclusion, so `node` is listed too.
+    `types/dom-invoker-commands.d.ts` stays: neither `@types/react` 19.2 nor Designsystemet types
+    `command`/`commandfor`.
+  - **Icons:** `@navikt/aksel-icons`, imported as React components. They are `'use client'`; no
+    hand-made glyphs or SVGs remain.
+  - **Footer:** digdir.no style, on a Blåsvart ground (`neutral-base-default`) with a TRANSPARENT
+    dark-scheme inner wrapper for light text and focus tokens, plus chevron link lists.
+  - **Constitution:** v4.1.0 (Design System constraint rewritten with a WCAG 2.2 AA gate in 4.0.0;
+    4.1.0 allows the brand tints).
+- **Verified:** 0 axe violations (incl. best-practice) and 0px overflow at 320px on 18 URLs. Each
+  page has a skip link to `main#main-content`, which lives in `(app)/layout.tsx`.
+- **Durable rules and gotchas:**
+  - **Colour context.** `<html data-color="accent">`, so unprefixed `--ds-color-text-*` resolve to
+    ACCENT (navy/blue). Neutral surfaces (content cards, nav, empty states) MUST set
+    `data-color="neutral"`, and meta text uses `--ds-color-neutral-text-subtle`.
+  - **Card spacing.** A `ds-card` spaces its children with `>*+*` margins, so never set `margin: 0`
+    on a card child list; use `margin-inline: 0; margin-block-end: 0`.
+  - **Grid sizing.** Grids holding code need `grid-template-columns: minmax(0, 1fr)`, and auto-fit
+    grid items need `min-width: 0`.
+  - **Body font.** Designsystemet does NOT set the body `font-family`; app.css does.
+  - **Dark surfaces.** Use `data-color-scheme="dark"` (footer, subscriptions card), never
+    hand-written rgba.
+  - **Rich text** goes through `lib/ds-richtext-converters.tsx`. The pure heading clamp lives in
+    `lib/ds-richtext.ts`, because vitest cannot parse JSX. Payload wraps output in
+    `div.payload-richtext`.
+  - **Scroll wrappers** for code and tables are `role="group"`, not `region`: axe requires unique
+    landmark names. `.app-scroll-region` is positioned, so `ds-sr-only` captions are contained.
+  - **Filters and search** are GET forms. Parsers: `parseEventsSearchParams`,
+    `parseRegistrySearchParams`.
+  - **Turbopack.** A parse error caught mid-edit, or deleting an imported CSS file, leaves it
+    serving stale modules (hydration mismatch or a 500). Restart `next dev`.
+  - **Animation.** Designsystemet animates `ds-details` opening over 0.4s, so screenshots taken
+    right after a click look closed.
+- **Local env (2026-10-21):**
+  - Docker container `kihub-postgres` (postgres:16, `localhost:55432`, volume `kihub-pgdata`), with
+    DB `kihub` (push mode, seeded with scratchpad sample data) and `kihub_build` (migrated, for
+    `next build`).
+  - `apps/web/.env` uses `AUTH_MODE=mock` with generated secrets.
+  - axe: inject axe 4.10.2 from jsdelivr into the dev page.
+- **SC-007 accepted at −36%** (2,070 → 1,330 lines) by the user, 2026-10-21; recorded in spec.md.
+- **Not done:** real screen-reader and non-Chromium testing.
+- **Plan files.** `specs/026-designsystemet-alignment/plan.md` (`research.md` R1–R14,
+  `contracts/`, `quickstart.md`, and `tasks.md` with per-slice implementation records).
+
+Prior: **025-inter-brand-colors** (DONE — specify + plan + tasks + implement 2026-10-19).
 (1) **Inter everywhere**: the local override `styles/kihub-fonts.css` points
 `--kihub-font-display` at the Inter `next/font` variable and makes `.kihub-h1`–`h4` and
 `.kihub-tile__title` semibold (600). Source Serif 4 is DELETED (loader, woff2, OFL); the

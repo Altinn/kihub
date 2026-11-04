@@ -24,8 +24,8 @@ import { LEARNING_CODE_LANGUAGES } from '@/lib/learning-view';
  * 2. **No WebAssembly.** `createJavaScriptRegexEngine` ships none, so there is no `.wasm` asset to
  *    trace into the `.next/standalone` build this repo produces.
  * 3. **A CSS-variables theme.** Emitted colours are `var(--shiki-…)` references rather than hex, so
- *    the palette resolves through the kihub token layer (FR-034). The variables are defined in the
- *    `014 /laering` section of `portal.css` as aliases of existing theme tokens.
+ *    the palette resolves through the design tokens (FR-034). The variables are defined in the
+ *    KI Læring section of `styles/app.css` as aliases of Designsystemet text-role tokens (026).
  *
  * The highlighter is created ONCE at module scope: grammars compile per server process, not per
  * request and not per code block (SC-010).

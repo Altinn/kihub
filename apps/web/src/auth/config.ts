@@ -14,7 +14,11 @@ function buildProviders(): NextAuthConfig['providers'] {
         clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
         clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
         issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
-        authorization: { params: { scope: 'openid profile email' } },
+        // User.Read lets the provider fetch the profile photo from Microsoft Graph for the
+        // header Avatar (026); without it the photo request fails and the Avatar shows initials.
+        // 64px keeps the base64 photo small, since it travels in the session cookie.
+        authorization: { params: { scope: 'openid profile email User.Read' } },
+        profilePhotoSize: 64,
       }),
     ];
   }
