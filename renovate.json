@@ -1,14 +1,23 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>Altinn/renovate-config"
+    "local>Altinn/renovate-config",
+    "helpers:pinGitHubActionDigests"
   ],
+  "vulnerabilityAlerts": {
+    "minimumReleaseAge": null
+  },
   "packageRules": [
     {
       "description": "Payload packages pin each other's exact version (e.g. @payloadcms/next peers payload@<same>); bumping one alone ships two copies of @payloadcms/ui and breaks /cms.",
       "matchPackageNames": ["payload", "@payloadcms/**"],
       "groupName": "payload",
       "groupSlug": "payload"
+    },
+    {
+      "description": "Supply-chain guard: hijacked npm releases are usually caught and unpublished within days, so wait 3 days before proposing a new version. Security fixes (vulnerabilityAlerts) are exempt.",
+      "matchDatasources": ["npm"],
+      "minimumReleaseAge": "3 days"
     }
   ]
 }

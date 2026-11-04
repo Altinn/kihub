@@ -1,6 +1,8 @@
 import { fileURLToPath } from 'node:url';
 import { withPayload } from '@payloadcms/next/withPayload';
 
+import { SECURITY_HEADERS } from './security-headers.mjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Payload embeds its admin + API into this Next.js app.
@@ -13,6 +15,9 @@ const nextConfig = {
   // the container 500s with ERR_DLOPEN_FAILED.
   outputFileTracingIncludes: {
     '*': ['../../node_modules/.pnpm/@img+sharp-libvips-*/**/*'],
+  },
+  async headers() {
+    return [{ source: '/:path*', headers: SECURITY_HEADERS }];
   },
 };
 
