@@ -4,6 +4,10 @@ All decisions below were checked against the installed **Payload 3.92.1** / **Ne
 (`node_modules/payload/dist/versions/types.d.ts`, `config/sanitize.js`, `versions/schedule/job.js`,
 `@payloadcms/ui/dist/utilities/schedulePublishHandler.js`). No open NEEDS CLARIFICATION remain.
 
+> **Update 2026-11-05 (implementation):** scheduled publishing was dropped at the product owner's
+> request. `schedulePublish` is NOT enabled, so there is no `payload-jobs` collection, no runner and
+> no boot-time job run. R8 is kept below only as the record of what was considered.
+
 ---
 
 ## R1 — Payload's built-in drafts replace the hand-rolled `status` select
@@ -15,14 +19,13 @@ versions: {
   maxPerDoc: 50,
   drafts: {
     autosave: { interval: 2000 },
-    schedulePublish: { timeFormat: 'HH:mm', timeIntervals: 15 },
   },
 },
 ```
 
 and the custom `status` field is **removed**. Payload adds its own `_status` (`draft` | `published`),
-the *Lagre utkast / Publiser / Avpubliser* actions, version history with compare + restore, and the
-schedule drawer.
+the *Lagre utkast / Publiser / Avpubliser* actions, and version history with compare + restore.
+(No schedule drawer: `schedulePublish` is off, see the update note above.)
 
 **Storage semantics that the rest of the plan relies on** (Payload drafts model):
 - The **main table** (`news`, `projects`, …) holds the **published** version of a published document.
@@ -56,8 +59,10 @@ hand-edited in `up()` so the order is:
 
 1. (generated) create `_status` columns/enums on `news`, `learning_pages`, `projects`, `events`; create
    the version tables (`_news_v`, `_news_v_texts` for `tags`, `_learning_pages_v`, `_projects_v`,
-   `_events_v`, …); create `pages` + `_pages_v`; create `payload_jobs` (R8); relax NOT NULLs (R1).
-2. (hand-written) `UPDATE <table> SET _status = status` for each of the four tables. This copies
+   `_events_v`, …); create `pages` + `_pages_v`; relax NOT NULLs (R1). (No `payload_jobs`: scheduling dropped.)
+2. ~~(hand-written) `UPDATE <table> SET _status = status`~~ — as implemented, the generator was told
+   the column is a **rename**, so `ALTER TABLE … RENAME COLUMN status TO _status` does this.
+   Original note: This copies
    visibility exactly (FR-004, SC-003). Payload names the `_status` enum `enum_<table>_status`, which
    is the SAME type the old `status` column already uses (`enum_news_status` etc., values
    `draft`/`published`, per the existing migrations). So the type is shared and no cast is needed.
@@ -179,7 +184,10 @@ Every `(app)` route is already dynamic: the layout calls `auth()` (cookies), the
 cached and served to a reader (FR-017). A regression test asserts the grep stays empty for the
 draft-aware routes.
 
-## R8 — Scheduled publishing on a scale-to-zero container
+## R8 — Scheduled publishing on a scale-to-zero container — DROPPED (2026-11-05)
+
+> Not implemented: the product owner decided against scheduled publishing and a job runner.
+> Kept for the record.
 
 **Facts**: enabling `schedulePublish` makes Payload register a `schedulePublish` task and the
 `payload-jobs` collection; the admin's schedule drawer queues a job on the **`default`** queue with
@@ -209,8 +217,8 @@ infra + identity for one feature, YAGNI).
 
 ## R9 — News `publishDate` and other status-dependent logic
 
-- `News.beforeChange`: `if (data._status === 'published' && !data.publishDate)` — covers manual publish
-  AND the scheduled job (it calls `payload.update({ _status: 'published' })`, which runs hooks). Draft
+- `News.beforeChange`: `if (data._status === 'published' && !data.publishDate)` — covers publishing.
+  Draft
   and autosave saves don't stamp (FR-009).
 - `admin.defaultColumns`: `'status'` → `'_status'` in all four collections.
 - `Event` and `News` comments/docs that mention `status: published` are updated; the read-layer
@@ -235,7 +243,7 @@ access: {
 bodies to any signed-in employee via the Payload API (FR-003). `LearningPage.ts` and `News.ts` still
 carry private `isEditor` copies — they switch to `lib/access.ts`'s shared one.
 
-Publishing rights unchanged (spec FR-010): any contributor+ can publish/unpublish/schedule.
+Publishing rights unchanged (spec FR-010): any contributor+ can publish/unpublish.
 
 ## R11 — Pages collection
 

@@ -17,7 +17,7 @@ Today News, KI Læring pages, Projects and Events each have a simple *draft / pu
 - an editor cannot see what a draft will look like on the site without publishing it (i.e. making it live);
 - a published item cannot be changed without the change going live on save;
 - there is no history of earlier versions and no way to undo an edit;
-- publishing cannot be scheduled.
+- publishing cannot be scheduled (scheduling stays out of scope, see Clarifications).
 
 Separately, there is no way to create a free-standing information page (e.g. "Om KI Hub", "Retningslinjer for KI-bruk") without a code change.
 
@@ -109,18 +109,10 @@ While writing a long article, the editor's work is saved as a draft automaticall
 
 ---
 
-### User Story 6 - Schedule publishing (Priority: P3)
+### User Story 6 - Schedule publishing — REMOVED
 
-An editor prepares a news article announcing an event and schedules it to be published on Monday at 08:00. It becomes visible to employees at that time without anyone having to log in.
-
-**Why this priority**: Useful for announcements, but editors can publish manually in the meantime.
-
-**Independent Test**: Schedule a draft to publish a few minutes ahead; confirm it is not visible before the time and is visible shortly after.
-
-**Acceptance Scenarios**:
-
-1. **Given** a reviewed draft, **When** an editor schedules it for a future date and time (Norwegian time), **Then** it stays invisible to employees until that time and becomes visible within a few minutes after.
-2. **Given** a scheduled publication, **When** the editor cancels or changes it before the time, **Then** the original schedule does not take effect.
+Dropped on 2026-11-05 at the product owner's request (see Clarifications). Publishing is
+always a manual editor action.
 
 ---
 
@@ -129,14 +121,13 @@ An editor prepares a news article announcing an event and schedules it to be pub
 - **Existing content on rollout**: every existing News article, KI Læring page, Project and Event keeps exactly its current visibility — published stays published, draft stays draft — with no editor action and no content loss (including publish dates, hero images and ordering).
 - **Draft leakage through side channels**: drafts must not appear in any listing, count, navigation tree, frontpage widget, pagination total, calendar export (`.ics`), or metadata (page title) for non-preview visitors.
 - **Preview of an item whose category/parent is unpublished** (e.g. a KI Læring page in a context that only exists as draft): preview still renders the item; it never makes other drafts visible outside preview.
-- **News publish date**: a news article that is published without a publish date gets today's date, as it does now — including when published via schedule.
+- **News publish date**: a news article that is published without a publish date gets today's date, as it does now.
 - **Preview session lingering**: an editor who previewed and then browses normally must not mistake drafts for live content — the preview banner is visible on every page while preview is active, and preview ends automatically after a limited time.
 - **Preview link sent to someone without a CMS role**: they see "not found" (never a draft), and nothing indicates the content exists.
 - **Losing a CMS role while previewing**: preview stops showing drafts on their next page view.
 - **Page address edge cases**: addresses are lowercase, URL-safe, single-segment, and derived from the title when left blank (same behaviour as News/Projects); leading/trailing slashes and case differences do not bypass the reserved-address rule.
 - **Future portal routes**: if a new built-in section is added later with an address an existing page already uses, the built-in section wins; the conflict must be detectable (the reserved list lives in one place).
 - **Concurrent editing**: two editors editing the same item — the CMS's normal behaviour applies (document lock / last save wins); version history allows recovery.
-- **Scheduled time in the past or while the site is restarting**: a missed scheduled publication is carried out as soon as possible afterward, not silently dropped.
 - **Deleting an item**: deletes all its versions; deleting a page linked from the header leaves a dead link that shows "not found" (editors are responsible for nav links, as today).
 
 ## Requirements *(mandatory)*
@@ -152,9 +143,9 @@ An editor prepares a news article announcing an event and schedules it to be pub
 - **FR-005**: The CMS MUST keep a version history per item, showing for each version when it was saved, by whom, and whether it was a draft or a publication.
 - **FR-006**: Editors MUST be able to compare two versions of an item and restore an earlier version.
 - **FR-007**: The CMS MUST autosave drafts at short intervals while an editor is working; autosave MUST never publish or change the published version.
-- **FR-008**: Editors MUST be able to schedule a draft for publication at a future date/time and cancel or change that schedule; scheduled publications MUST happen without anyone being signed in.
+- **FR-008**: *(Removed 2026-11-05.)* Scheduled publishing is out of scope: the CMS MUST NOT offer it.
 - **FR-009**: Existing behaviour that depends on publishing MUST be preserved — in particular, a news article published without a publish date gets the publication date automatically.
-- **FR-010**: Publishing rights stay as today: every CMS user (contributor and above) can save drafts, publish, unpublish and schedule. Review before publishing is by team convention (share the preview link), not enforced by role.
+- **FR-010**: Publishing rights stay as today: every CMS user (contributor and above) can save drafts, publish and unpublish. Review before publishing is by team convention (share the preview link), not enforced by role.
 
 **Preview (Part A)**
 
@@ -168,7 +159,7 @@ An editor prepares a news article announcing an event and schedules it to be pub
 
 **Pages (Part B)**
 
-- **FR-018**: Editors MUST be able to create, edit, preview, publish, unpublish, schedule, version and delete standalone pages in the CMS, with the same draft behaviour as FR-001–FR-017.
+- **FR-018**: Editors MUST be able to create, edit, preview, publish, unpublish, version and delete standalone pages in the CMS, with the same draft behaviour as FR-001–FR-017.
 - **FR-019**: A page MUST have a title, a single-segment address (derived from the title if left blank), an optional short introduction, and a rich-text body supporting the same content as KI Læring pages (headings, lists, links, images, code blocks with highlighting, YouTube embeds).
 - **FR-020**: A published page MUST be reachable at `/<address>` on the employee site, inside the standard portal layout, with the page title in the browser tab.
 - **FR-021**: Page addresses MUST be unique, and MUST NOT equal any address already used by a built-in portal section or system route; the CMS MUST reject such saves with a Norwegian explanation. Built-in sections MUST always take precedence over pages.
@@ -185,10 +176,9 @@ An editor prepares a news article announcing an event and schedules it to be pub
 
 ### Key Entities
 
-- **Content item (News article, KI Læring page, Project, Event)**: existing editorial content; gains a *published version* (what employees see), an optional *pending draft*, a *version history*, and an optional *scheduled publication*.
+- **Content item (News article, KI Læring page, Project, Event)**: existing editorial content; gains a *published version* (what employees see), an optional *pending draft*, and a *version history*.
 - **Version**: a saved snapshot of a content item, with timestamp, author and kind (draft or published). Restorable.
-- **Scheduled publication**: an intended future publish (or unpublish) of a specific item at a given date/time; can be cancelled.
-- **Page** (new): standalone editorial content with title, address, optional introduction, rich-text body, and the same draft/version/schedule behaviour. Not an artifact; has no category or parent.
+- **Page** (new): standalone editorial content with title, address, optional introduction, rich-text body, and the same draft/version behaviour. Not an artifact; has no category or parent.
 - **Reserved address list**: the set of top-level addresses owned by built-in portal sections and system routes, which pages may not use.
 - **Preview session**: a time-limited state on an editor's browser that lets them see drafts on the employee site; only effective while the user holds a CMS role.
 
@@ -202,7 +192,7 @@ An editor prepares a news article announcing an event and schedules it to be pub
 - **SC-004**: Editing and saving a published item as a draft causes 0 visible changes for readers until it is published.
 - **SC-005**: An editor can create and publish a new standalone page, and link it from the footer, in under 5 minutes without developer help.
 - **SC-006**: An editor can restore any earlier version of an item in under 1 minute.
-- **SC-007**: A scheduled publication becomes visible to employees within 5 minutes of the scheduled time.
+- **SC-007**: *(Removed with scheduled publishing.)*
 - **SC-008**: When a writing session is interrupted (tab closed), at most the last ~30 seconds of edits are lost.
 
 ## Assumptions
@@ -218,9 +208,10 @@ An editor prepares a news article announcing an event and schedules it to be pub
 ### Session 2026-11-05
 
 - Q: Who may publish? → A: Keep as today — any CMS user (contributor+) can publish; review is by convention via the preview link (FR-010).
+- Q (during implementation): Keep scheduled publishing (needs a job runner on a scale-to-zero app)? → A: No — no runner and no scheduled release. US6, FR-008 and SC-007 removed; the CMS shows no schedule option.
 - **Version retention**: the CMS keeps a bounded number of versions per item (on the order of the most recent 50–100); older versions may be pruned.
 - **Page hierarchy and SEO fields** are out of scope (Start Simple / YAGNI): pages are flat, and the portal is employee-only behind sign-in, so search-engine metadata has no audience.
 - **Page body capabilities are reused** from KI Læring rather than introducing a block-based page builder.
 - **Media**: pages use the existing media library and storage; no new storage.
 - **Navigation is editor-managed**: adding/removing page links in the header/footer is a manual editor step via existing site settings, as it is today for other links.
-- **Scheduled publishing time zone** is Norwegian local time (Europe/Oslo) as shown in the CMS.
+- **Scheduled publishing is out of scope** (Clarifications 2026-11-05).

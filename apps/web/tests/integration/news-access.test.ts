@@ -55,7 +55,7 @@ function createNews(
     title: string;
     body: News['body'];
     slug?: string;
-    status?: 'draft' | 'published';
+    _status?: 'draft' | 'published';
     publishDate?: string;
   },
   user?: Doc,
@@ -115,7 +115,7 @@ beforeAll(async () => {
   users.contributor = await makeUser('contributor');
 
   const published = await createNews(
-    { title: `Published ${testId}`, body: lexical('published body'), status: 'published' },
+    { title: `Published ${testId}`, body: lexical('published body'), _status: 'published' },
     users.contributor,
   );
   publishedId = published.id;
@@ -137,12 +137,12 @@ describe('News authoring access + visibility (T009)', () => {
 
   it('sets publishDate and status on publish; defaults new docs to draft (FR-003)', async () => {
     const pub = await payload.findByID({ collection: 'news', id: publishedId, overrideAccess: true });
-    expect(pub.status).toBe('published');
+    expect(pub._status).toBe('published');
     expect(pub.publishDate).toBeTruthy();
     expect(authorId(pub)).toBe(users.contributor.id);
 
     const draft = await payload.findByID({ collection: 'news', id: draftId, overrideAccess: true });
-    expect(draft.status).toBe('draft');
+    expect(draft._status).toBe('draft');
   });
 
   it('refuses create for a Reader and for an anonymous request (FR-007)', async () => {
@@ -158,11 +158,11 @@ describe('News authoring access + visibility (T009)', () => {
     const published = await payload.update({
       collection: 'news',
       id: created.id,
-      data: { status: 'published' },
+      data: { _status: 'published' },
       overrideAccess: false,
       user: users.contributor,
     });
-    expect(published.status).toBe('published');
+    expect(published._status).toBe('published');
     expect(published.publishDate).toBeTruthy();
 
     await payload.delete({
@@ -199,7 +199,7 @@ describe('News authoring access + visibility (T009)', () => {
       user: users.reader,
     });
     expect(asReader.docs.length).toBeGreaterThan(0);
-    expect(asReader.docs.every((d) => d.status === 'published')).toBe(true);
+    expect(asReader.docs.every((d) => d._status === 'published')).toBe(true);
     expect(asReader.docs.some((d) => d.id === draftId)).toBe(false);
 
     const bySlug = await payload.find({
@@ -233,7 +233,7 @@ describe('Paginated news reads (013 T010/T014)', () => {
         {
           title: `Paged ${String(i).padStart(2, '0')} ${testId}`,
           body: lexical(`paged body ${i}`),
-          status: 'published',
+          _status: 'published',
           // Descending, distinct dates — except the last two, which collide on purpose.
           publishDate:
             i >= SEED_COUNT - 2
@@ -287,7 +287,7 @@ describe('Paginated news reads (013 T010/T014)', () => {
 
   it('never returns a draft on any page (FR-012)', async () => {
     const { all } = await walkAllPages();
-    expect(all.every((a) => a.status === 'published')).toBe(true);
+    expect(all.every((a) => a._status === 'published')).toBe(true);
     expect(all.some((a) => a.id === draftId)).toBe(false);
   });
 

@@ -1,6 +1,6 @@
 <!-- SPECKIT START -->
-Active feature: **027-drafts-preview-pages** (specify + plan 2026-11-05; tasks/implement pending).
-Turns on Payload's built-in versions + drafts (autosave 2s, schedulePublish, maxPerDoc 50) for
+Active feature: **027-drafts-preview-pages** (specify + plan + tasks 2026-11-05; MVP T001–T030 implemented, uncommitted).
+Turns on Payload's built-in versions + drafts (autosave 2s, maxPerDoc 50; NO scheduled publishing) for
 news, learning-pages, projects and events. This REPLACES the hand-rolled `status` select with
 `_status`. The migration copies status → _status, then backfills ONE `latest` version row per
 existing doc, otherwise `find({ draft: true })` cannot see old content, then drops `status`.
@@ -13,8 +13,9 @@ FRESH contributor+ role lookup (the JWT role is stale) and has no shared secret.
 Designsystemet `Alert` banner. Listings NEVER show drafts. A new flat `pages` collection is
 served at `(app)/[slug]`: static routes win, and `RESERVED_PAGE_SLUGS` has a route-tree drift
 test. The editor is extracted from LearningPage into `lib/article-editor.ts`, and pages reuse
-`LearningBody`. Scheduled publish needs a job runner and prod scales 0–1, so it uses
-`jobs.autoRun` every minute plus a boot-time `payload.jobs.run` in `instrumentation.ts`.
+`LearningBody`. Scheduled publishing was DROPPED during implementation (2026-11-05): no job runner
+and no `payload_jobs` table. Generate migrations/types in `MEDIA_STORAGE_MODE=azure`, otherwise
+they drop `media._objectkey`.
 Constitution → 3.3.0 (Pages module). Plan: `specs/027-drafts-preview-pages/plan.md`
 (research R1–R15, data-model, contracts ×3, quickstart).
 Prior: **025-inter-brand-colors** (DONE — specify + plan + tasks + implement 2026-10-19).

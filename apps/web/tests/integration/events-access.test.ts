@@ -57,7 +57,7 @@ function createEvent(
     startDateTime: string;
     endDateTime?: string;
     slug?: string;
-    status?: 'draft' | 'published';
+    _status?: 'draft' | 'published';
     eventType?: Event['eventType'];
     format?: Event['format'];
     location?: string;
@@ -121,7 +121,7 @@ beforeAll(async () => {
   users.contributor = await makeUser('contributor');
 
   const published = await createEvent(
-    { title: `Published ${testId}`, description: lexical('published body'), startDateTime: START, status: 'published' },
+    { title: `Published ${testId}`, description: lexical('published body'), startDateTime: START, _status: 'published' },
     users.contributor,
   );
   publishedId = published.id;
@@ -142,9 +142,9 @@ describe('Events authoring access + visibility (T010)', () => {
   it('auto-derives a slug and defaults new events to draft (FR-013/003)', async () => {
     expect(draftSlug).toBe(`draft-${testId}`);
     const draft = await payload.findByID({ collection: 'events', id: draftId, overrideAccess: true });
-    expect(draft.status).toBe('draft');
+    expect(draft._status).toBe('draft');
     const pub = await payload.findByID({ collection: 'events', id: publishedId, overrideAccess: true });
-    expect(pub.status).toBe('published');
+    expect(pub._status).toBe('published');
   });
 
   it('refuses create for a Reader and for an anonymous request (FR-007)', async () => {
@@ -165,11 +165,11 @@ describe('Events authoring access + visibility (T010)', () => {
     const published = await payload.update({
       collection: 'events',
       id: created.id,
-      data: { status: 'published' },
+      data: { _status: 'published' },
       overrideAccess: false,
       user: users.contributor,
     });
-    expect(published.status).toBe('published');
+    expect(published._status).toBe('published');
 
     await payload.delete({
       collection: 'events',
@@ -222,7 +222,7 @@ describe('Events authoring access + visibility (T010)', () => {
       user: users.reader,
     });
     expect(asReader.docs.length).toBeGreaterThan(0);
-    expect(asReader.docs.every((d) => d.status === 'published')).toBe(true);
+    expect(asReader.docs.every((d) => d._status === 'published')).toBe(true);
     expect(asReader.docs.some((d) => d.id === draftId)).toBe(false);
 
     const bySlug = await payload.find({
@@ -324,7 +324,7 @@ describe('012 read layer: filters + range query (FR-005/007/016, US1/US2)', () =
       data: Partial<Parameters<typeof createEvent>[0]> & { startDateTime: string },
     ) =>
       createEvent(
-        { title: `${title} ${testId}`, description: lexical('x'), status: 'published', ...data },
+        { title: `${title} ${testId}`, description: lexical('x'), _status: 'published', ...data },
         users.contributor,
       );
 
@@ -356,7 +356,7 @@ describe('012 read layer: filters + range query (FR-005/007/016, US1/US2)', () =
     await make('Range outside', { startDateTime: '2020-04-10T10:00:00.000Z' });
     await make('Range draft', {
       startDateTime: '2020-03-15T10:00:00.000Z',
-      status: 'draft',
+      _status: 'draft',
     });
   }, 60000);
 
@@ -404,6 +404,6 @@ describe('012 read layer: filters + range query (FR-005/007/016, US1/US2)', () =
     );
     expect(docs.some((d) => d.title === `Range outside ${testId}`)).toBe(false);
     expect(docs.some((d) => d.title === `Range draft ${testId}`)).toBe(false);
-    expect(docs.every((d) => d.status === 'published')).toBe(true);
+    expect(docs.every((d) => d._status === 'published')).toBe(true);
   });
 });

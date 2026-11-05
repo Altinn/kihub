@@ -11,15 +11,15 @@ description: "Task list for 027 — editorial drafts with preview, and CMS-manag
 
 **Tests**: INCLUDED. The constitution's Testing gate requires new modules to test their access control
 and state rules, and the plan's design depends on the no-draft-leak invariants (contract
-content-drafts A1–A9).
+content-drafts A1–A8).
 
-**Organization**: Grouped by user story (spec.md US1–US6) so each can be implemented, tested and
+**Organization**: Grouped by user story (spec.md US1–US5; US6 scheduling was dropped 2026-11-05) so each can be implemented, tested and
 demonstrated on its own once Phase 2 is done.
 
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependency on an unfinished task)
-- **[Story]**: US1 … US6 from spec.md
+- **[Story]**: US1 … US5 from spec.md
 - All paths are repo-relative; `web/` below means `apps/web/`
 
 ## Conventions for every task
@@ -36,9 +36,9 @@ demonstrated on its own once Phase 2 is done.
 
 **Purpose**: Isolated databases and a known-good baseline.
 
-- [ ] T001 Confirm the branch is based on current `origin/main` and has Payload **3.92.1** installed (`apps/web/package.json`, `pnpm install --frozen-lockfile`). Run `pnpm --filter web test` once against the shared DB to record the baseline pass count in `specs/027-drafts-preview-pages/tasks.md` Notes.
-- [ ] T002 Create the per-branch dev DB `kihub_027` as a copy of the local `kihub` DB inside `kihub-postgres` (`createdb -T kihub kihub_027` via `docker exec`). Point `DATABASE_URI` in `apps/web/.env` at it. Add a launch config `kihub-web-027` (port 3027) to `.claude/launch.json`, preserving the user's existing uncommitted edits in that file.
-- [ ] T003 [P] Create the scratch migration DB `kihub_migtest_027`, migrated to `main`'s latest migration (`pnpm --filter web migrate` with `DATABASE_URI` overridden). Seed it with real-shaped rows: at least one published and one draft per collection (`news`, `learning_pages`, `projects`, `events`), one news item with `tags` + `heroImage`, one learning page with a subcategory. Save the SC-003 baseline query (per table: `count(*)`, count published, sorted `(slug,title)`) as `specs/027-drafts-preview-pages/scripts/sc003-baseline.sql`.
+- [X] T001 Confirm the branch is based on current `origin/main` and has Payload **3.92.1** installed (`apps/web/package.json`, `pnpm install --frozen-lockfile`). Run `pnpm --filter web test` once against the shared DB to record the baseline pass count in `specs/027-drafts-preview-pages/tasks.md` Notes.
+- [X] T002 Create the per-branch dev DB `kihub_027` as a copy of the local `kihub` DB inside `kihub-postgres` (`createdb -T kihub kihub_027` via `docker exec`). Point `DATABASE_URI` in `apps/web/.env` at it. Add a launch config `kihub-web-027` (port 3027) to `.claude/launch.json`, preserving the user's existing uncommitted edits in that file.
+- [X] T003 [P] Create the scratch migration DB `kihub_migtest_027`, migrated to `main`'s latest migration (`pnpm --filter web migrate` with `DATABASE_URI` overridden). Seed it with real-shaped rows: at least one published and one draft per collection (`news`, `learning_pages`, `projects`, `events`), one news item with `tags` + `heroImage`, one learning page with a subcategory. Save the SC-003 baseline query (per table: `count(*)`, count published, sorted `(slug,title)`) as `specs/027-drafts-preview-pages/scripts/sc003-baseline.sql`.
 
 ---
 
@@ -50,27 +50,27 @@ phases add the tests that prove them.
 
 **⚠️ CRITICAL**: No user-story work starts before this phase is green.
 
-- [ ] T004 [P] Create `apps/web/src/lib/content-versions.ts` exporting `CONTENT_VERSIONS` (`maxPerDoc: 50`, `drafts: { autosave: { interval: 2000 }, schedulePublish: { timeFormat: 'HH:mm', timeIntervals: 15 } }`) and `contentAccess` (`read` → editors `true` else `{ _status: { equals: 'published' } }`; `readVersions`/`create`/`update`/`delete` → `isEditor`). Import `isEditor` from `apps/web/src/lib/access.ts`. See contracts/content-drafts.md §A and research R1/R10.
-- [ ] T005 [P] Change `PUBLISHED` in `apps/web/src/lib/payload-queries.ts` to `{ _status: { equals: 'published' } }` and update its docblock.
-- [ ] T006 Apply drafts to `apps/web/src/collections/News.ts`: `versions: CONTENT_VERSIONS`, `access: contentAccess`. Delete the private `isEditor` and the `status` field. Change `defaultColumns` `'status'` → `'_status'`. Change the `beforeChange` publishDate stamp to test `data._status === 'published'` (R9). Update the header docblock.
-- [ ] T007 [P] Apply the same to `apps/web/src/collections/LearningPage.ts`: versions, contentAccess, delete the private `isEditor` + `status` field, `defaultColumns` → `_status`. Keep both `beforeValidate` hooks unchanged.
-- [ ] T008 [P] Apply the same to `apps/web/src/collections/Project.ts` (versions, contentAccess, remove `status`, `defaultColumns` → `_status`).
-- [ ] T009 [P] Apply the same to `apps/web/src/collections/Event.ts` (versions, contentAccess, remove `status`, `defaultColumns` → `_status`).
-- [ ] T010 Switch `apps/web/src/lib/news.ts`, `apps/web/src/lib/learning.ts` and `apps/web/src/lib/events.ts` from their local `PUBLISHED` / inline `{ status: … }` filters to the shared `PUBLISHED` from `lib/payload-queries.ts`. Also switch `apps/web/src/lib/projects.ts`, which already imports it. Keep docblocks' "published by construction" contract.
-- [ ] T011 Rename the by-slug readers and add `opts?: { preview?: boolean }` per contracts/content-drafts.md §B: `getNewsBySlug`, `getLearningPageBySlug`, `getProjectBySlug`, `getEventBySlug`. Preview → `find({ where: { slug: { equals } }, draft: true, overrideAccess: true, limit: 1 })`; else the existing published query. Update all call sites: `apps/web/src/app/(app)/{news,laering,prosjekter,events}/[slug]/page.tsx` and `apps/web/src/app/(app)/events/[slug]/ics/route.ts` (no preview arg yet).
-- [ ] T012 Generate the migration: `pnpm --filter web migrate:create drafts` against `kihub_migtest_027`, producing `apps/web/src/migrations/<ts>_drafts.{ts,json}` and the `index.ts` entry.
-- [ ] T013 Hand-edit `apps/web/src/migrations/<ts>_drafts.ts` `up()` into this order (research R2):
-  1. The generated create of `_status` + `_*_v` tables + `payload_jobs` + NOT-NULL relaxations.
+- [X] T004 [P] Create `apps/web/src/lib/content-versions.ts` exporting `CONTENT_VERSIONS` (`maxPerDoc: 50`, `drafts: { autosave: { interval: 2000 } }` — `schedulePublish` was removed 2026-11-05) and `contentAccess` (`read` → editors `true` else `{ _status: { equals: 'published' } }`; `readVersions`/`create`/`update`/`delete` → `isEditor`). Import `isEditor` from `apps/web/src/lib/access.ts`. See contracts/content-drafts.md §A and research R1/R10.
+- [X] T005 [P] Change `PUBLISHED` in `apps/web/src/lib/payload-queries.ts` to `{ _status: { equals: 'published' } }` and update its docblock.
+- [X] T006 Apply drafts to `apps/web/src/collections/News.ts`: `versions: CONTENT_VERSIONS`, `access: contentAccess`. Delete the private `isEditor` and the `status` field. Change `defaultColumns` `'status'` → `'_status'`. Change the `beforeChange` publishDate stamp to test `data._status === 'published'` (R9). Update the header docblock.
+- [X] T007 [P] Apply the same to `apps/web/src/collections/LearningPage.ts`: versions, contentAccess, delete the private `isEditor` + `status` field, `defaultColumns` → `_status`. Keep both `beforeValidate` hooks unchanged.
+- [X] T008 [P] Apply the same to `apps/web/src/collections/Project.ts` (versions, contentAccess, remove `status`, `defaultColumns` → `_status`).
+- [X] T009 [P] Apply the same to `apps/web/src/collections/Event.ts` (versions, contentAccess, remove `status`, `defaultColumns` → `_status`).
+- [X] T010 Switch `apps/web/src/lib/news.ts`, `apps/web/src/lib/learning.ts` and `apps/web/src/lib/events.ts` from their local `PUBLISHED` / inline `{ status: … }` filters to the shared `PUBLISHED` from `lib/payload-queries.ts`. Also switch `apps/web/src/lib/projects.ts`, which already imports it. Keep docblocks' "published by construction" contract.
+- [X] T011 Rename the by-slug readers and add `opts?: { preview?: boolean }` per contracts/content-drafts.md §B: `getNewsBySlug`, `getLearningPageBySlug`, `getProjectBySlug`, `getEventBySlug`. Preview → `find({ where: { slug: { equals } }, draft: true, overrideAccess: true, limit: 1 })`; else the existing published query. Update all call sites: `apps/web/src/app/(app)/{news,laering,prosjekter,events}/[slug]/page.tsx` and `apps/web/src/app/(app)/events/[slug]/ics/route.ts` (no preview arg yet).
+- [X] T012 Generate the migration: `pnpm --filter web migrate:create drafts` against `kihub_migtest_027`, producing `apps/web/src/migrations/<ts>_drafts.{ts,json}` and the `index.ts` entry.
+- [X] T013 Hand-edit `apps/web/src/migrations/<ts>_drafts.ts` `up()` into this order (research R2):
+  1. The generated create of `_status` + `_*_v` tables + NOT-NULL relaxations (no `payload_jobs` since scheduling was dropped).
   2. `UPDATE <t> SET _status = status` for news / learning_pages / projects / events. Payload names the `_status` enum `enum_<t>_status`, the SAME type name the old `status` column already uses (`enum_news_status` etc., values `draft`/`published`). So drizzle should reuse the type, and no cast is needed. Check the generated SQL does NOT drop that type while `_status` still uses it.
   3. Backfill one `latest = true` version row per existing document into `_news_v`, `_learning_pages_v`, `_projects_v`, `_events_v`. Copy every `version_*` column from the main row, plus child tables named by the generated SQL (e.g. `news_texts` → `_news_v_texts`, any `*_rels` → `_*_v_rels`).
   4. The generated drops of the old `status` columns, moved last. Keep the shared `enum_<t>_status` type (see step 2).
 
   In `down()`: restore `status` from `_status` before the drops, and add `IF EXISTS` to every constraint/index drop (014/015/016 hand-patch).
-- [ ] T014 Verify the migration on `kihub_migtest_027`. Run `migrate` and the T003 baseline query: results must be identical (SC-003). Each `_X_v WHERE latest` count must equal the main-table count. Run `migrate:down`: `status` restored and identical. Run `migrate` again: clean. Record the results in tasks.md Notes.
-- [ ] T015 Apply the migration to `kihub_027` with `pnpm --filter web migrate`, so push-mode sees a matching schema. Then regenerate types with `pnpm --filter web payload generate:types` → `apps/web/src/payload-types.ts`, and run `pnpm --filter web exec tsc --noEmit` to surface every remaining `status` reference.
-- [ ] T016 Update the existing integration tests to `_status` and the renamed readers: `apps/web/tests/integration/{news-access,news-hero,events-access,learning-access,learning-tree-reads,learning-hierarchy,projects-access}.test.ts`. Docs created as published pass `_status: 'published'`. Drafts are created with `_status: 'draft'` (or `draft: true`).
-- [ ] T017 Create `apps/web/tests/integration/content-drafts.test.ts`, table-driven over `['news','learning-pages','projects','events']` with reader + contributor users (the projects-access pattern, `overrideAccess: false`). Cover **A1**: a never-published draft is invisible to the reader via `find`/`findByID` and via the `lib/*` readers. **A3**: the reader's `findVersions` is forbidden. **A4**: the contributor's `findVersions` lists versions and `find({ draft: true })` returns the latest draft. **A5**: the contributor can publish.
-- [ ] T018 Run the full suite, lint and `tsc --noEmit` on `kihub_027`. Everything must be green before Phase 3.
+- [X] T014 Verify the migration on `kihub_migtest_027`. Run `migrate` and the T003 baseline query: results must be identical (SC-003). Each `_X_v WHERE latest` count must equal the main-table count. Run `migrate:down`: `status` restored and identical. Run `migrate` again: clean. Record the results in tasks.md Notes.
+- [X] T015 Apply the migration to `kihub_027` with `pnpm --filter web migrate`, so push-mode sees a matching schema. Then regenerate types with `pnpm --filter web payload generate:types` → `apps/web/src/payload-types.ts`, and run `pnpm --filter web exec tsc --noEmit` to surface every remaining `status` reference.
+- [X] T016 Update the existing integration tests to `_status` and the renamed readers: `apps/web/tests/integration/{news-access,news-hero,events-access,learning-access,learning-tree-reads,learning-hierarchy,projects-access}.test.ts`. Docs created as published pass `_status: 'published'`. Drafts are created with `_status: 'draft'` (or `draft: true`).
+- [X] T017 Create `apps/web/tests/integration/content-drafts.test.ts`, table-driven over `['news','learning-pages','projects','events']` with reader + contributor users (the projects-access pattern, `overrideAccess: false`). Cover **A1**: a never-published draft is invisible to the reader via `find`/`findByID` and via the `lib/*` readers. **A3**: the reader's `findVersions` is forbidden. **A4**: the contributor's `findVersions` lists versions and `find({ draft: true })` returns the latest draft. **A5**: the contributor can publish.
+- [X] T018 Run the full suite, lint and `tsc --noEmit` on `kihub_027`. Everything must be green before Phase 3.
 
 **Checkpoint**: Drafts work in `/cms` for the four collections (Save draft / Publish / Unpublish /
 Versions tab), readers see only published content, and all existing content keeps its visibility.
@@ -88,21 +88,21 @@ list it.
 
 ### Tests for User Story 1
 
-- [ ] T019 [P] [US1] Create `apps/web/tests/unit/preview-paths.test.ts` with tables for `previewPathFor` (5 collections, slug encoding) and `previewUrl` (null/empty slug → null). Cover `isSafeInternalPath`: accept `/news/x`, `/om-ki-hub?x=1`; reject `//evil.com`, `/\evil.com`, `https://evil.com`, `javascript:alert(1)`, `%2F%2Fevil.com`-decoded variants, control characters, >512 chars, non-strings.
-- [ ] T020 [P] [US1] Create `apps/web/tests/unit/route-caching.test.ts`. It reads the 5 detail route files + `apps/web/src/app/(app)/layout.tsx` and asserts none contains `revalidate`, `force-static`, `generateStaticParams`, `unstable_cache` or `'use cache'` (R7). Include `apps/web/src/app/(app)/[slug]/page.tsx` once it exists, skipping it while absent.
-- [ ] T021 [P] [US1] Create `apps/web/tests/integration/preview-state.test.ts` for `resolvePreviewActive({ draftModeEnabled, userId }, payload)` (the pure core behind `getPreviewState`). Cases: draft mode off → false. Contributor → true. Reader → false. Unknown user id → false. A contributor whose role is updated to reader → false on the next call. A lookup throwing → false (fail closed).
+- [X] T019 [P] [US1] Create `apps/web/tests/unit/preview-paths.test.ts` with tables for `previewPathFor` (5 collections, slug encoding) and `previewUrl` (null/empty slug → null). Cover `isSafeInternalPath`: accept `/news/x`, `/om-ki-hub?x=1`; reject `//evil.com`, `/\evil.com`, `https://evil.com`, `javascript:alert(1)`, `%2F%2Fevil.com`-decoded variants, control characters, >512 chars, non-strings.
+- [X] T020 [P] [US1] Create `apps/web/tests/unit/route-caching.test.ts`. It reads the 5 detail route files + `apps/web/src/app/(app)/layout.tsx` and asserts none contains `revalidate`, `force-static`, `generateStaticParams`, `unstable_cache` or `'use cache'` (R7). Include `apps/web/src/app/(app)/[slug]/page.tsx` once it exists, skipping it while absent.
+- [X] T021 [P] [US1] Create `apps/web/tests/integration/preview-state.test.ts` for `resolvePreviewActive({ draftModeEnabled, userId }, payload)` (the pure core behind `getPreviewState`). Cases: draft mode off → false. Contributor → true. Reader → false. Unknown user id → false. A contributor whose role is updated to reader → false on the next call. A lookup throwing → false (fail closed).
 
 ### Implementation for User Story 1
 
-- [ ] T022 [P] [US1] Create `apps/web/src/lib/preview-paths.ts` (pure) exporting `PreviewCollection`, `previewPathFor`, `previewUrl` and `isSafeInternalPath` per contracts/preview-route.md §A.
-- [ ] T023 [US1] Create `apps/web/src/lib/preview.ts` exporting `resolvePreviewActive(input, payload)`, which does a fresh `users` `findByID` at `depth: 0` with `overrideAccess: true` and returns `isEditor(user)`, wrapped in try/catch → false. Also export `getPreviewState = cache(async () => …)`, which reads `(await draftMode()).isEnabled` + `auth()` session `user.id`. The contract is preview-route.md §D.
-- [ ] T024 [US1] Create `apps/web/src/app/api/preview/route.ts` (GET, Node runtime) per contracts/preview-route.md §B. Steps: 400 on unsafe/missing `path`. 307 → `/signin` when there is no session. Fresh role check, and a non-editor gets a 303 → `path` without enabling. An editor gets `draftMode().enable()`, then the `__prerender_bypass` cookie is re-set with `maxAge: 3600, httpOnly, secure, sameSite: 'lax', path: '/'`, then a 303 → `path`.
-- [ ] T025 [P] [US1] Create `apps/web/src/app/api/preview/exit/route.ts` (GET): `draftMode().disable()`, then 303 → the same-origin `Referer` pathname+search when `isSafeInternalPath`, else `/`.
-- [ ] T026 [P] [US1] Create the Server Component `apps/web/src/components/PreviewBanner.tsx`: Designsystemet `Alert` `data-color="warning"`, `role="status"`, copy and exit link exactly as in contracts/preview-route.md §E. Add minimal spacing in a new `/* 027 preview banner */` section of `apps/web/src/styles/portal.css` (tokens only).
-- [ ] T027 [US1] Render `<PreviewBanner />` first inside `.portal-shell` in `apps/web/src/app/(app)/layout.tsx` when `(await getPreviewState()).active`.
-- [ ] T028 [US1] Pass preview into the detail routes: `apps/web/src/app/(app)/news/[slug]/page.tsx`, `laering/[slug]/page.tsx`, `prosjekter/[slug]/page.tsx`, `events/[slug]/page.tsx` call `getPreviewState()` and pass `{ preview: active }` to their by-slug reader. The `.ics` route stays published-only. `laering/[slug]` still builds the sidebar from the published library (R3).
-- [ ] T029 [US1] Add `admin.preview: (doc) => previewUrl('<collection>', doc?.slug)` to `News.ts`, `LearningPage.ts`, `Project.ts`, `Event.ts` in `apps/web/src/collections/`.
-- [ ] T030 [US1] Browser check (dev server `kihub-web-027`, mock auth): run quickstart §3 US1 steps 1–4 plus "Pre-existing content" (preview an item created before the migration). Screenshot the banner. Record the results in tasks.md Notes.
+- [X] T022 [P] [US1] Create `apps/web/src/lib/preview-paths.ts` (pure) exporting `PreviewCollection`, `previewPathFor`, `previewUrl` and `isSafeInternalPath` per contracts/preview-route.md §A.
+- [X] T023 [US1] Create `apps/web/src/lib/preview.ts` exporting `resolvePreviewActive(input, payload)`, which does a fresh `users` `findByID` at `depth: 0` with `overrideAccess: true` and returns `isEditor(user)`, wrapped in try/catch → false. Also export `getPreviewState = cache(async () => …)`, which reads `(await draftMode()).isEnabled` + `auth()` session `user.id`. The contract is preview-route.md §D.
+- [X] T024 [US1] Create `apps/web/src/app/api/preview/route.ts` (GET, Node runtime) per contracts/preview-route.md §B. Steps: 400 on unsafe/missing `path`. 307 → `/signin` when there is no session. Fresh role check, and a non-editor gets a 303 → `path` without enabling. An editor gets `draftMode().enable()`, then the `__prerender_bypass` cookie is re-set with `maxAge: 3600, httpOnly, secure, sameSite: 'lax', path: '/'`, then a 303 → `path`.
+- [X] T025 [P] [US1] Create `apps/web/src/app/api/preview/exit/route.ts` (GET): `draftMode().disable()`, then 303 → the same-origin `Referer` pathname+search when `isSafeInternalPath`, else `/`.
+- [X] T026 [P] [US1] Create the Server Component `apps/web/src/components/PreviewBanner.tsx`: Designsystemet `Alert` `data-color="warning"`, `role="status"`, copy and exit link exactly as in contracts/preview-route.md §E. Add minimal spacing in a new `/* 027 preview banner */` section of `apps/web/src/styles/portal.css` (tokens only).
+- [X] T027 [US1] Render `<PreviewBanner />` first inside `.portal-shell` in `apps/web/src/app/(app)/layout.tsx` when `(await getPreviewState()).active`.
+- [X] T028 [US1] Pass preview into the detail routes: `apps/web/src/app/(app)/news/[slug]/page.tsx`, `laering/[slug]/page.tsx`, `prosjekter/[slug]/page.tsx`, `events/[slug]/page.tsx` call `getPreviewState()` and pass `{ preview: active }` to their by-slug reader. The `.ics` route stays published-only. `laering/[slug]` still builds the sidebar from the published library (R3).
+- [X] T029 [US1] Add `admin.preview: (doc) => previewUrl('<collection>', doc?.slug)` to `News.ts`, `LearningPage.ts`, `Project.ts`, `Event.ts` in `apps/web/src/collections/`.
+- [X] T030 [US1] Browser check (dev server `kihub-web-027`, mock auth): run quickstart §3 US1 steps 1–4 plus "Pre-existing content" (preview an item created before the migration). Screenshot the banner. Record the results in tasks.md Notes.
 
 **Checkpoint**: The MVP is shippable: editors can review drafts on the real site, and readers can't see them.
 
@@ -182,30 +182,18 @@ Reserved and duplicate addresses are refused, and `/news` etc. are unaffected.
 
 ---
 
-## Phase 8: User Story 6 — Schedule publishing (Priority: P3)
+## Phase 8: User Story 6 — Schedule publishing — DROPPED
 
-**Goal**: Scheduled publish/unpublish runs without anyone signed in, including after a cold start (R8).
-
-**Independent Test**: Schedule 2 minutes ahead → the reader gets 404 before and sees the item ≤ ~1 minute after. A cancelled schedule does nothing. A due job is run at server boot.
-
-### Tests for User Story 6
-
-- [ ] T051 [P] [US6] Create `apps/web/tests/integration/schedule-publish.test.ts`. **A9**: queue the `schedulePublish` task the way the admin does (`payload.jobs.queue({ task: 'schedulePublish', input: { type: 'publish', doc: { relationTo: 'news', value: String(id) }, user: { relationTo: 'users', value: contributorId } }, waitUntil: past })`). Before `payload.jobs.run({ queue: 'default' })` the reader can't see the item; after, it is published and `publishDate` is stamped. A job with a future `waitUntil` is not run. A reader is forbidden from `find`-ing `payload-jobs`.
-
-### Implementation for User Story 6
-
-- [ ] T052 [US6] Add a `jobs` config in `apps/web/src/payload.config.ts`: `autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }]`, `shouldAutoRun: () => process.env.NODE_ENV === 'production' || process.env.PAYLOAD_JOBS_AUTORUN === 'true'`, `access: { queue, run, cancel }` → `isEditor`, and `jobsCollectionOverrides` setting `admin.hidden: true` plus `access.read` → `isEditor`.
-- [ ] T053 [US6] In `apps/web/src/instrumentation.ts`, after the boot `getPayload()`, run `await payload.jobs.run({ queue: 'default', limit: 50 })` inside try/catch with a `console.error`. A failed catch-up must not crash boot, unlike a failed migration. Update the docblock.
-- [ ] T054 [US6] If T052 changes the `payload_jobs` schema relative to the T012 migration, generate `migrate:create jobs_access` (expect none: overrides are access/admin only). Then regenerate types.
-- [ ] T055 [P] [US6] Document scheduled publishing in `documentation/infrastructure.md`: the in-process cron + boot run, scale-to-zero behaviour, and the `--min-replicas 1` option for exact-time needs. Document `PAYLOAD_JOBS_AUTORUN` in `documentation/runtime-config.md`.
-- [ ] T056 [US6] Browser check (dev with `PAYLOAD_JOBS_AUTORUN=true`): quickstart §3 US6. Schedule 2 min ahead and observe. Cancel a second schedule. Restart the dev server after a due time → boot run publishes it. Record the results in tasks.md Notes.
+Removed on 2026-11-05 at the product owner's request: no job runner and no scheduled release.
+T051–T056 are cancelled. `schedulePublish` is off in `lib/content-versions.ts`, and the drafts
+migration was regenerated without the `payload_jobs` tables.
 
 ---
 
 ## Phase 9: Polish & cross-cutting
 
 - [ ] T057 [P] Run the role-loss check from quickstart §3: a contributor previewing is downgraded to reader → the next navigation has no banner and the draft 404s. Record the result in tasks.md Notes.
-- [ ] T058 [P] Write the editors' release note (Norwegian) in `specs/027-drafts-preview-pages/quickstart.md` §4 (or `documentation/`). Cover: the Status field is replaced by Lagre utkast / Publiser / Avpubliser; how to use Forhåndsvis; Versjoner; scheduling and its cold-start caveat; how to create a page and link it in Site Chrome.
+- [ ] T058 [P] Write the editors' release note (Norwegian) in `specs/027-drafts-preview-pages/quickstart.md` §4 (or `documentation/`). Cover: the Status field is replaced by Lagre utkast / Publiser / Avpubliser; how to use Forhåndsvis; Versjoner; that there is no scheduled publishing; how to create a page and link it in Site Chrome.
 - [ ] T059 Update the `CLAUDE.md` Spec Kit block for 027 to DONE: tasks count, suite count, gotchas found during implementation. Update the `project_kihub_new_architecture` memory note.
 - [ ] T060 Final gates: `pnpm --filter web test` (record the count vs the T001 baseline), `pnpm --filter web lint`, `pnpm --filter web exec tsc --noEmit`, `pnpm --filter web generate:importmap` if the admin import map changed. Run `next build` against the migrated `kihub_migtest_027` with `AUTH_MODE=entra`.
 - [ ] T061 Re-run quickstart §1 (migration up/down/up + SC-003 compare) on a fresh scratch copy with both migrations, and record the results in tasks.md Notes.
@@ -224,7 +212,7 @@ Reserved and duplicate addresses are refused, and `/news` etc. are unaffected.
 - **US3 (5)** needs Phase 2 and US1's `lib/preview-paths.ts` (T022) + `lib/preview.ts` (T023) for
   `admin.preview` and the route. Do T022/T023 first if US3 is staffed in parallel.
 - **US4 (6)** and **US5 (7)** need Phase 2 (and T039 for the `pages` rows in their tables).
-- **US6 (8)** needs Phase 2; independent of the other stories.
+- **US6 (8)** dropped.
 - **Polish (9)** after the stories you intend to ship.
 
 ### Within stories
@@ -236,8 +224,7 @@ Tests first and failing → pure helpers → collection/config → readers → r
 - Phase 2: T004 ‖ T005, then T007 ‖ T008 ‖ T009 (after T006 sets the pattern, or all four at once).
 - US1: T019 ‖ T020 ‖ T021 ‖ T022, then T025 ‖ T026 while T023 → T024 proceed.
 - US3: T035 ‖ T036 ‖ T037 ‖ T038, then T042 ‖ T044 after T039.
-- US4/US5/US6 test tasks (T047, T049, T051) touch different `describe` blocks or files and can be
-  written in parallel. Note T047/T049 edit the same file as T031: coordinate, or append in sequence.
+- US4/US5 test tasks (T047, T049) touch different `describe` blocks and can be written in parallel. Note T047/T049 edit the same file as T031: coordinate, or append in sequence.
 
 ## Parallel Example: User Story 1
 
@@ -261,7 +248,6 @@ before we publish it to prod"). Stop after T030, run T060, and it can ship as it
 2. US3 Pages: its own migration (T041) makes it a separable PR, and it carries the constitution
    amendment.
 3. US4 + US5: verification-only increments, tests plus checks.
-4. US6 scheduling: its own PR, with the infra doc note.
 
 ## Notes
 
@@ -273,4 +259,64 @@ before we publish it to prod"). Stop after T030, run T060, and it can ship as it
 
 ### Implementation record
 
-_(empty — filled during /speckit-implement)_
+**MVP (Phases 1–3, T001–T030) implemented 2026-11-05.** Suite **488/488 across 55 files**
+(baseline 422/422 across 51), lint clean, `tsc --noEmit` clean, `next build` green against the
+migrated `kihub_migtest_027` with `AUTH_MODE=entra` + azure media mode.
+
+- **T001** baseline on the shared `kihub` DB: 422/422 across 51 files.
+- **T002** deviation: `apps/web/.env` was NOT repointed. `kihub-web-026` derives its DB from that
+  file by stripping `/kihub`, so editing it would break the other worktree. Every command instead
+  overrides `DATABASE_URI="${DATABASE_URI%/kihub}/kihub_027"`, and so does the new `kihub-web-027`
+  launch config (port 3027).
+- **T003** `kihub_migtest_027` was seeded from the dev DB with a `pg_dump --data-only` of the content
+  tables: 10 news (8 published, 4 tag rows, 1 with hero image), 7 projects (6 published), 16 events
+  (14 published, 16 tag rows), 8 learning pages (7 published, 2 with subcategory). The fingerprint
+  query is in `scripts/sc003-baseline.sql`.
+- **T012** `migrate:create` asks interactively whether `_status` is new or renamed from `status`.
+  We answered **rename** (driven with `expect`) in both directions. The old column already uses the
+  enum type Payload names for `_status` (`enum_<t>_status`), so the rename keeps every value with
+  no copy step. Research R2 step 2 is therefore a rename, not an UPDATE.
+- **T012 gotcha:** generate in `MEDIA_STORAGE_MODE=azure` (dummy Azure settings are fine). In disk
+  mode the storage plugin is absent, and the generator emits `ALTER TABLE "media" DROP COLUMN
+  "_objectkey"`, which would destroy prod data from #175. The same applies to `generate:types`:
+  disk mode drops `_objectkey` from `payload-types.ts`.
+- **T013** the backfill inserts one `latest` version per doc into `_news_v`, `_projects_v`,
+  `_events_v` and `_learning_pages_v`, plus `_news_v_texts`/`_events_v_texts`. Events'
+  `event_type`/`format` need a `::text::` cast to the version enums. `down` only needed `IF EXISTS`
+  (only CASCADE table drops, no named FK drops).
+- **T014** on scratch: `up` gives an identical SC-003 fingerprint, and `latest` versions equal the
+  doc counts in all 4 tables (texts 4/4, 16/16; hero image and subcategories preserved). `down`
+  gives `status` back identical. Re-`up` is identical.
+- **T015** `kihub_027` is a push-mode DB (only the `dev` marker), so the `up` SQL was applied
+  directly with psql (017 gotcha). Afterwards push-mode accepted the schema without a prompt,
+  confirming the migration matches the config.
+- **T021** `lib/preview.ts` imports Auth.js, which vitest cannot load. The pure rule therefore
+  lives in `lib/preview-access.ts` (`resolvePreviewActive`), used by both `getPreviewState` and
+  `/api/preview`. The test's role downgrade must run as an Admin (Users hook), and its cleanup
+  deletes the resulting `audit-log` row first (`actor` is NOT NULL, a pre-existing constraint).
+- **T030** browser + curl on `kihub-web-027`, mock auth:
+  - In `/cms` → News → create, autosave created the draft immediately ("Last saved…", Versions
+    tab), derived the slug, and showed the preview button
+    (`/api/preview?path=%2Fnews%2Fforhandsvisning-test-027`).
+  - **Contributor:** 303 to the article, which renders with the banner. The banner shows on
+    every page while active. `/news` and the frontpage do NOT list the draft. The cookie is
+    re-issued as `Max-Age=3600; HttpOnly; SameSite=lax`.
+  - **Reader:** `/api/preview` gives a 303 with no cookie, then 404. A reader sending the
+    contributor's own bypass cookie still gets 404.
+  - **Error cases:** no session → 307 `/signin`. `//evil.com`, `https://evil.com`, `/\evil.com`
+    and an empty path → 400.
+  - **Exit:** «Avslutt forhåndsvisning» clears the cookie and returns to the same page (now 404,
+    no banner). A foreign Referer → `/`.
+  - **Pre-existing content:** a learning-page draft from August previews with full body and
+    sidebar (backfill verified).
+  - Test draft left in `kihub_027`: news #1170 «Forhåndsvisning test 027».
+- **Scheduling dropped (2026-11-05, after T030).** At the product owner's request, `schedulePublish`
+  was removed from `CONTENT_VERSIONS`. The scratch DB was rolled back, the old
+  `20261105_121419_drafts` migration was deleted, and it was regenerated as
+  **`20261105_122923_drafts`** (same azure-mode + rename procedure, same hand-written backfill and
+  `IF EXISTS` patch), now without the `payload_jobs`/`payload_jobs_log` tables and their enums.
+  Re-verified on `kihub_migtest_027`: up/down/up with an identical SC-003 fingerprint, `latest`
+  versions = doc counts, no `payload_jobs*` tables. The jobs tables were dropped from `kihub_027` by
+  hand, and types regenerated in azure mode (`tasks: unknown` as on main). The CMS «Publish changes»
+  button no longer has the schedule dropdown. Suite 488/488 across 55 files, lint, `tsc` and
+  `next build` all green.

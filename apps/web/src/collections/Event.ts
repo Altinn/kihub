@@ -1,5 +1,6 @@
-import type { Role } from '@kihub/governance-core';
 import type { CollectionConfig } from 'payload';
+import { CONTENT_VERSIONS, contentAccess } from '../lib/content-versions';
+import { previewUrl } from '../lib/preview-paths';
 import { validateEventInterval } from '../lib/event-dates';
 import { EVENT_FORMAT_LABELS, EVENT_TYPE_LABELS, validateSeatCapacity } from '../lib/events-view';
 import { slugify } from '../lib/slug';
@@ -13,28 +14,26 @@ import { slugify } from '../lib/slug';
  * Authoring is gated to Contributor+ (the same posture as the Phase 6 admin gate); Events is
  * intentionally NOT wired into `@kihub/governance-core`'s Registry permission matrix (research §3).
  * Employees only ever see `published` events — enforced both here (the `read` access rule constrains
- * non-editors) and in `lib/events.ts` (the read queries filter `status: published`). The employee
+ * non-editors) and in `lib/events.ts` (the read queries filter `_status: published`). The employee
  * list additionally hides past events, which is a list-only concern in `lib/events.ts` (FR-004) — a
  * published past event stays reachable by its detail URL.
+ *
+ * 027: Payload's built-in drafts (`lib/content-versions.ts`) replaced the hand-rolled `status`
+ * select; `readVersions` keeps version history (which holds draft content) editor-only.
  */
-function isEditor(user: { role?: unknown } | null | undefined): boolean {
-  return Boolean(user) && (user?.role as Role) !== 'reader';
-}
 
 export const Event: CollectionConfig = {
   slug: 'events',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'status', 'startDateTime', 'eventType', 'format', 'location'],
+    defaultColumns: ['title', '_status', 'startDateTime', 'eventType', 'format', 'location'],
+    // 027 — «Forhåndsvis»: opens the latest draft on the employee site for editors (lib/preview-paths.ts).
+    preview: (doc) => previewUrl('events', doc?.slug as string | undefined),
   },
-  access: {
-    // Contributor+ read everything (drafts + published) in the back-office/API; everyone else is
-    // constrained to published — API-path defense in depth for the "no draft leaks" invariant (US3).
-    read: ({ req }) => (isEditor(req.user) ? true : { status: { equals: 'published' } }),
-    create: ({ req }) => isEditor(req.user),
-    update: ({ req }) => isEditor(req.user),
-    delete: ({ req }) => isEditor(req.user),
-  },
+  // Contributor+ read everything (drafts + published, and version history) in the back-office/API;
+  // everyone else is constrained to published — API-path defense in depth for "no draft leaks".
+  access: contentAccess,
+  versions: CONTENT_VERSIONS,
   hooks: {
     beforeValidate: [
       ({ data }) => {
@@ -145,13 +144,6 @@ export const Event: CollectionConfig = {
         description:
           'Seats already taken (maintained editorially — no registration flow). Never above capacity.',
       },
-    },
-    {
-      name: 'status',
-      type: 'select',
-      required: true,
-      defaultValue: 'draft',
-      options: ['draft', 'published'],
     },
     { name: 'tags', type: 'text', hasMany: true },
     { name: 'featured', type: 'checkbox', defaultValue: false },

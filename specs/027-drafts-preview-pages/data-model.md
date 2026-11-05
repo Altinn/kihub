@@ -11,7 +11,7 @@ Applies to `news`, `learning-pages`, `projects`, `events`, and the new `pages`.
 |---|---|---|
 | Visibility field | `status: select('draft' \| 'published')`, required, default `draft` | **removed** |
 | Payload status | — | `_status: 'draft' \| 'published'` (added by `versions.drafts`), default `draft` |
-| Versions | none | `versions: { maxPerDoc: 50, drafts: { autosave: { interval: 2000 }, schedulePublish: { timeFormat: 'HH:mm', timeIntervals: 15 } } }` (R1) |
+| Versions | none | `versions: { maxPerDoc: 50, drafts: { autosave: { interval: 2000 } } }` (R1; no scheduling) |
 | Access | `read`, `create`, `update`, `delete` | + `readVersions: isEditor` (R10); `read` filter uses `_status` |
 | Admin | `defaultColumns: [..., 'status', ...]` | `'_status'`; `admin.preview` → `/api/preview?path=…` (R4) |
 | Required fields | NOT NULL columns | nullable in DB (drafts may be partial); enforced on publish (R1) |
@@ -21,7 +21,7 @@ Applies to `news`, `learning-pages`, `projects`, `events`, and the new `pages`.
 ```text
             create (save draft / autosave)
    ∅ ───────────────────────────────────────▶ DRAFT-ONLY            main row: _status=draft
-                                                │  publish (manual or scheduled)
+                                                │  publish
                                                 ▼
                                             PUBLISHED               main row: _status=published
                                               │   ▲                  (readers see main row)
@@ -33,7 +33,7 @@ Applies to `news`, `learning-pages`, `projects`, `events`, and the new `pages`.
                                               ▼
                                           DRAFT-ONLY                 main row: _status=draft
    restore version N  → creates a new latest version with N's content (draft, or published if chosen)
-   delete             → removes the main row and all versions (and pending scheduled jobs)
+   delete             → removes the main row and all versions
 ```
 
 Visible to readers ⇔ main row `_status = 'published'`. Visible in preview ⇔ `latest` version
@@ -65,12 +65,10 @@ Not modelled (deliberate, R11): parent/child hierarchy, SEO meta fields, layout 
 (navigation stays in the `site-chrome` global's `nav` / `footer.links` arrays, which already take any
 `href`).
 
-## 3. `payload-jobs` (new, Payload-managed)
+## 3. ~~`payload-jobs`~~ — not created
 
-Created because `schedulePublish` is enabled (R8). One row per scheduled publish/unpublish:
-`taskSlug: 'schedulePublish'`, `input: { type, doc: { relationTo, value }, user, timezone }`,
-`waitUntil`, `queue: 'default'`, processing/completed/error state. Hidden in the admin; read/run/
-queue/cancel restricted to editors. Rows are deleted on completion (Payload default).
+Scheduled publishing was dropped (2026-11-05), so `schedulePublish` is off and Payload creates no
+jobs collection.
 
 ## 4. Reserved address list (code, not data)
 
@@ -87,7 +85,7 @@ that scans `src/app/**` top-level segments and `public/`.
 
 ## 6. Migration `<timestamp>_drafts_pages` (R2)
 
-`up`: create `_status` + version tables + `pages` (+ `_pages_v`) + `payload_jobs` → copy `status` →
+`up`: create `_status` + version tables + `pages` (+ `_pages_v`, in its own later migration) → rename `status` →
 `_status` → seed one `latest` version row per existing document (incl. child tables) → drop `status`
 columns. The `enum_<table>_status` types are shared by old `status` and new `_status`, so they stay. `down`: reverse, restoring `status` from `_status`; `IF EXISTS` hand-patch.
 

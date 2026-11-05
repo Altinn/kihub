@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { EventTypeBadge } from '@/components/EventTypeBadge';
 import { formatEventWhen } from '@/lib/event-dates';
-import { getPublishedEventBySlug } from '@/lib/events';
+import { getEventBySlug } from '@/lib/events';
 import {
   EVENT_FORMAT_LABELS,
   placeText,
@@ -11,6 +11,7 @@ import {
   type EventFormatValue,
   type EventTypeValue,
 } from '@/lib/events-view';
+import { getPreviewState } from '@/lib/preview';
 
 /**
  * 012 US4 (FR-013/014) — the event detail page on the kihub token layer, Norwegian copy: type
@@ -20,7 +21,8 @@ import {
  */
 export default async function EventDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const event = await getPublishedEventBySlug(decodeURIComponent(slug));
+  const { active: preview } = await getPreviewState();
+  const event = await getEventBySlug(decodeURIComponent(slug), { preview });
   if (!event) notFound();
 
   const format = event.format as EventFormatValue;

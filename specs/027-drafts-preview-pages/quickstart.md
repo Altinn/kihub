@@ -34,7 +34,7 @@ cd apps/web && set -a && source .env && set +a
 pnpm --filter web test && pnpm --filter web lint && pnpm --filter web exec tsc --noEmit
 ```
 
-Expect new/updated tests to pass: content-drafts A1–A9 per collection, `preview-paths` +
+Expect new/updated tests to pass: content-drafts A1–A8 per collection, `preview-paths` +
 `isSafeInternalPath` unit tables, `page-slug` (validation table + route-tree drift test), route
 "no static caching" grep test, `getPreviewState` (reader-with-cookie → inactive). Then `next build`
 against the migrated scratch DB with `AUTH_MODE=entra` (the only gate that catches some type errors).
@@ -70,10 +70,6 @@ against the migrated scratch DB with `AUTH_MODE=entra` (the only gate that catch
 
 **US5 – autosave** — type, wait ~3 s, reload `/cms` → text kept; published version unchanged for reader.
 
-**US6 – scheduling** (dev: `PAYLOAD_JOBS_AUTORUN=true`) — schedule publish 2 minutes ahead → reader
-404 before, visible ≤ 1–2 min after. Cancel a second schedule → nothing happens. Restart the dev server
-after a due time passes → boot run publishes it.
-
 **Role loss** — contributor in preview; admin downgrades them to reader → next navigation: banner
 gone, draft 404s.
 
@@ -82,4 +78,4 @@ gone, draft 404s.
 - Container boot log: migration `*_drafts_pages` applied; app healthy.
 - Spot-check three existing published items per collection still visible to a reader; one draft still hidden.
 - Editors' release note: «Status»-feltet er erstattet av *Lagre utkast / Publiser*; bruk *Forhåndsvis*;
-  planlagt publisering skjer innen ett minutt når nettstedet er i bruk (scale-to-zero, research R8).
+  det finnes ingen planlagt publisering — publiser manuelt når utkastet er godkjent.

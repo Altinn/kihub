@@ -10,7 +10,7 @@ export const CONTENT_VERSIONS = {
   maxPerDoc: 50,
   drafts: {
     autosave: { interval: 2000 },
-    schedulePublish: { timeFormat: 'HH:mm', timeIntervals: 15 },
+    // no schedulePublish — scheduling dropped 2026-11-05
   },
 } satisfies CollectionConfig['versions'];
 
@@ -42,7 +42,6 @@ Guarantees (each covered by an integration test through the Payload local API wi
 | A6 | published | contributor | `update({ _status: 'draft' }, { draft: true })` leaves main row published |
 | A7 | published | contributor | unpublish (`update({ _status: 'draft' })` without `draft: true`) → reader no longer sees it |
 | A8 | news without `publishDate` | contributor | publish → `publishDate` set; draft save → not set (FR-009) |
-| A9 | scheduled publish job due | job runner | `payload.jobs.run()` publishes it; reader sees it after (US6) |
 
 ## B. Read-layer contract
 

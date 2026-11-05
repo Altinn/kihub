@@ -6,7 +6,7 @@
 
 ## Summary
 
-Turn on Payload's built-in **versions + drafts** (autosave, scheduled publish, history/restore) for
+Turn on Payload's built-in **versions + drafts** (autosave, history/restore) for
 News, KI Læring pages, Projects and Events, replacing the hand-rolled `status` select. Then add a
 **Forhåndsvis** button that opens the draft on the real employee site through Next.js draft mode. The
 button is gated by the visitor's own Entra session plus a *fresh* contributor+ role lookup, with no
@@ -14,8 +14,8 @@ shared secret. One migration copies `status` → `_status` exactly and backfills
 existing document, so old content is previewable too. Add a flat **`pages`** collection (title,
 address, ingress, the KI Læring rich-text editor) served at `/<slug>` by a single dynamic segment
 under `(app)`. Built-in routes always win, and a reserved-address list guards against collisions,
-kept in sync by a route-tree test. Scheduled publishing runs on Payload's job queue: every minute
-while the replica is up, plus once at boot, because prod scales to zero. Constitution 3.2.0 →
+kept in sync by a route-tree test. Scheduled publishing was dropped during implementation
+(2026-11-05): there is no job queue or runner. Constitution 3.2.0 →
 3.3.0 adds Pages as a module.
 
 ## Technical Context
@@ -24,11 +24,10 @@ while the replica is up, plus once at boot, because prod scales to zero. Constit
 
 **Primary Dependencies**: Payload **3.92.1** (`payload`, `@payloadcms/next`, `@payloadcms/richtext-lexical`,
 `@payloadcms/db-postgres`, `@payloadcms/storage-azure`), Next.js **16.4.1** App Router, Auth.js (Entra),
-`@digdir/designsystemet-react` 1.18.0. **No new dependencies** (drafts, schedule, jobs and draft mode
-are all built in).
+`@digdir/designsystemet-react` 1.18.0. **No new dependencies** (drafts and draft mode are built in).
 
 **Storage**: Azure PostgreSQL (local: docker `kihub-postgres` :55432). New: version tables per
-draft-enabled collection, `pages` + `_pages_v`, `payload_jobs`. Media unchanged (Azure Blob / disk).
+draft-enabled collection, `pages` + `_pages_v`. Media unchanged (Azure Blob / disk).
 
 **Testing**: vitest — unit (`tests/unit`) + integration against Postgres (`tests/integration`), the
 local-API `overrideAccess: false` access-matrix pattern; lint; `tsc --noEmit`; `next build` against a
@@ -61,12 +60,12 @@ low-100s of documents, with 50 versions max per doc. 5 collections touched, 1 ne
 | III. Every AI asset is an artifact | ✅ Pages are explicitly NOT artifacts (own collection), the same as Projects. |
 | IV. Stable artifact identity | ✅ N/A (Registry untouched). |
 | V. APM distribution | ✅ N/A. |
-| VI. Governance is the Registry's core | ✅ N/A. Editorial publishing is not Registry governance. Role gating stays server-side (`access`, `readVersions`, jobs access, preview route). |
-| VII. Start Simple / YAGNI | ✅ Built-in features only, with no new dependencies. Rejected: live preview, nested pages, SEO plugin, layout-block builder, drafts on globals, a staging environment, external cron (research R8/R11/R13/R14). |
-| VIII. Two surfaces | ✅ Authoring/publishing/scheduling stay in `/cms`. The employee app only *renders* drafts for editors in preview and gains no editing UI. Server-side role gate on preview. |
+| VI. Governance is the Registry's core | ✅ N/A. Editorial publishing is not Registry governance. Role gating stays server-side (`access`, `readVersions`, preview route). |
+| VII. Start Simple / YAGNI | ✅ Built-in features only, with no new dependencies. Rejected: live preview, nested pages, SEO plugin, layout-block builder, drafts on globals, a staging environment, scheduled publishing and its job runner (research R8/R11/R13/R14). |
+| VIII. Two surfaces | ✅ Authoring/publishing stay in `/cms`. The employee app only *renders* drafts for editors in preview and gains no editing UI. Server-side role gate on preview. |
 | Design System | ✅ The banner uses Designsystemet `Alert` (a presentational leaf from a Server Component). The page route reuses `LearningBody` + kihub tokens, and new CSS is tokens only. The admin is exempt. |
-| Security (Entra, roles server-side) | ✅ Preview requires an Entra session plus a fresh DB role. There's no secret in URLs, the open redirect is closed by `isSafeInternalPath`, `readVersions` stops version leaks, and the jobs collection is editor-only. |
-| Testing gate (new modules test access + rules) | ✅ Access matrix A1–A9 per collection (including Pages), slug validation, reserved-list drift test, preview-state tests, migration verification. |
+| Security (Entra, roles server-side) | ✅ Preview requires an Entra session plus a fresh DB role. There's no secret in URLs, the open redirect is closed by `isSafeInternalPath`, `readVersions` stops version leaks. |
+| Testing gate (new modules test access + rules) | ✅ Access matrix A1–A8 per collection (including Pages), slug validation, reserved-list drift test, preview-state tests, migration verification. |
 | Amendment needed? | **Yes, MINOR 3.2.0 → 3.3.0**: add Pages as a sixth Product Module (R15), with the Learning v3.1.0 / Projects v3.2.0 precedent. This is not a violation, so Complexity Tracking stays empty. |
 
 **Post-design re-check (after Phase 1)**: still PASS. The design adds no services, packages or
@@ -86,7 +85,7 @@ specs/027-drafts-preview-pages/
 ├── data-model.md
 ├── quickstart.md
 ├── contracts/
-│   ├── content-drafts.md   # versions/access config + read-layer contract (A1–A9)
+│   ├── content-drafts.md   # versions/access config + read-layer contract (A1–A8)
 │   ├── preview-route.md    # /api/preview, /api/preview/exit, getPreviewState, banner
 │   └── pages.md            # pages collection, validatePageSlug, /<slug> route
 ├── checklists/requirements.md
@@ -99,8 +98,7 @@ specs/027-drafts-preview-pages/
 .specify/memory/constitution.md                 # 3.3.0 amendment (Pages module)
 
 apps/web/src/
-├── payload.config.ts                           # + Page; + jobs { autoRun, shouldAutoRun, access, jobsCollectionOverrides }
-├── instrumentation.ts                          # + boot-time payload.jobs.run({ queue: 'default' })
+├── payload.config.ts                           # + Page
 ├── collections/
 │   ├── News.ts            (changed)            # versions, contentAccess, preview, _status hook, no `status`
 │   ├── LearningPage.ts    (changed)            # same + body editor → articleEditor
@@ -133,13 +131,12 @@ apps/web/src/
 apps/web/tests/
 ├── unit/preview-paths.test.ts, page-slug.test.ts (incl. route-tree drift), route-caching.test.ts (NEW)
 └── integration/
-    ├── content-drafts.test.ts (NEW: A1–A9 across the 5 collections, table-driven)
+    ├── content-drafts.test.ts (NEW: A1–A8 across the 5 collections, table-driven)
     ├── preview-state.test.ts  (NEW: fresh-role gate, fail-closed)
     ├── pages-access.test.ts   (NEW: Pages-specific — reserved/uniqueness/route read)
     └── news-access, news-hero, events-access, learning-access, learning-tree-reads,
         learning-hierarchy, projects-access (changed: status → _status, renamed read fns)
 
-documentation/infrastructure.md                 # note: scheduled publish + scale-to-zero (R8)
 CLAUDE.md                                       # Spec Kit active-feature block → 027
 ```
 
@@ -161,7 +158,7 @@ config goes in small `lib/` modules so that five collection files stay declarati
    `LearningYouTubeBlock`), `page-slug.ts` + drift test, `Page.ts`, `pages.ts`, the `(app)/[slug]`
    route + CSS. It has its own second migration (`<ts>_pages`), so Pages stays a separable increment.
    Add `pages-access.test.ts`.
-5. **US6 scheduling**: `jobs` config + boot run + jobs access/overrides, and a job test (A9).
+5. ~~**US6 scheduling**~~ — dropped 2026-11-05 (no runner, no scheduled release).
 6. **Governance + docs**: constitution 3.3.0, infrastructure note, CLAUDE.md, and the editors'
    release note.
 7. **Verification**: suite, lint, `tsc`, `next build` (scratch DB + entra), then the quickstart
@@ -176,7 +173,6 @@ US4 (history) and US5 (autosave) come with step 2 and need only verification.
 | Version backfill SQL misses a child table (e.g. `news_texts`, `*_rels`) → preview of old docs shows missing tags/relations | Derive the child-table list from the generated migration's `_v_*` tables. The quickstart §1 step 4 check plus a pre-migration-doc preview test. |
 | Push-mode hang on the shared dev DB (column DROP) | Per-branch DB clone, with the migration applied via `migrate` before tests (R2). |
 | Duplicate `interfaceName` when sharing the YouTube block | Verify at `generate:types`; fall back to config-level `blocks` + `blockReferences` (R11). |
-| Scheduled publish late on cold start | Boot-time run; document `--min-replicas 1` as the option for exact-time needs (R8). |
 | `readVersions` forgotten on a future collection | It lives in the shared `contentAccess`, and A3 is table-driven over all draft-enabled slugs. |
 | A future built-in route collides with a page slug | The route wins by Next precedence, and the drift test fails until `RESERVED_PAGE_SLUGS` is updated (R12). |
 
