@@ -159,7 +159,7 @@ config goes in small `lib/` modules so that five collection files stay declarati
    `{ preview }` in the 4 detail routes, the route-caching test, and `preview-state.test.ts`.
 4. **US3 Pages**: `article-editor.ts` extraction (verify `generate:types` gives one
    `LearningYouTubeBlock`), `page-slug.ts` + drift test, `Page.ts`, `pages.ts`, the `(app)/[slug]`
-   route + CSS. This extends the same migration if it hasn't shipped, else adds a second one.
+   route + CSS. It has its own second migration (`<ts>_pages`), so Pages stays a separable increment.
    Add `pages-access.test.ts`.
 5. **US6 scheduling**: `jobs` config + boot run + jobs access/overrides, and a job test (A9).
 6. **Governance + docs**: constitution 3.3.0, infrastructure note, CLAUDE.md, and the editors'

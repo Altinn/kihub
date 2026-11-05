@@ -89,7 +89,7 @@ that scans `src/app/**` top-level segments and `public/`.
 
 `up`: create `_status` + version tables + `pages` (+ `_pages_v`) + `payload_jobs` → copy `status` →
 `_status` → seed one `latest` version row per existing document (incl. child tables) → drop `status`
-columns and enums. `down`: reverse, restoring `status` from `_status`; `IF EXISTS` hand-patch.
+columns. The `enum_<table>_status` types are shared by old `status` and new `_status`, so they stay. `down`: reverse, restoring `status` from `_status`; `IF EXISTS` hand-patch.
 
 Invariant to verify (SC-003): per collection, `count(*)` and `count(*) filter (where published)` and
 the set of `(slug, title)` are identical before and after `up`.

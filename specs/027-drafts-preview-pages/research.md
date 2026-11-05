@@ -57,13 +57,16 @@ hand-edited in `up()` so the order is:
 1. (generated) create `_status` columns/enums on `news`, `learning_pages`, `projects`, `events`; create
    the version tables (`_news_v`, `_news_v_texts` for `tags`, `_learning_pages_v`, `_projects_v`,
    `_events_v`, …); create `pages` + `_pages_v`; create `payload_jobs` (R8); relax NOT NULLs (R1).
-2. (hand-written) `UPDATE <table> SET _status = status::text::enum_<table>_status` for each of the
-   four tables — copies visibility exactly (FR-004, SC-003).
+2. (hand-written) `UPDATE <table> SET _status = status` for each of the four tables. This copies
+   visibility exactly (FR-004, SC-003). Payload names the `_status` enum `enum_<table>_status`, which
+   is the SAME type the old `status` column already uses (`enum_news_status` etc., values
+   `draft`/`published`, per the existing migrations). So the type is shared and no cast is needed.
+   The generated SQL must not drop that type in step 4.
 3. (hand-written) seed **one version row per existing document** with `latest = true`, copying the
    main row (and child rows such as `news_texts` → `_news_v_texts`, `news_rels` → `_news_v_rels` where
    present). Without this, `find({ draft: true })` (preview, the admin's version tab) does not see
    pre-existing documents, because draft reads go to the versions table.
-4. (generated, moved last) drop the old `status` columns and their `enum_*_status` types.
+4. (generated, moved last) drop the old `status` columns, keeping the shared `enum_*_status` types.
 
 `down()` restores `status` from `_status` before dropping the new structures, and gets the usual
 `IF EXISTS` hand-patch on constraint/index drops (the 014/015/016 generator bug: CASCADE table drops
