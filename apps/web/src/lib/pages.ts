@@ -9,7 +9,7 @@ import {
   type PageRef,
   type PageSection,
 } from './page-tree';
-import { PUBLISHED, type ReadOptions } from './payload-queries';
+import { findBySlug, PUBLISHED, type ReadOptions } from './payload-queries';
 import type { Page } from '@/payload-types';
 
 /**
@@ -29,57 +29,21 @@ import type { Page } from '@/payload-types';
  *
  * `[...path]` catches every unmatched address (`/favicon.png`, `/wp-login.php`, …), so a slug that
  * could never have been saved is rejected here without a database round trip.
+ *
+ * A preview read resolves a slug collision in `_pages_v` (another page's autosave claiming the same
+ * address) in favour of the page that owns the address — see `findBySlug`.
  */
 export async function getPageBySlug(slug: string, opts: ReadOptions = {}): Promise<Page | null> {
   if (!PAGE_SLUG_PATTERN.test(slug)) return null;
   const payload = await getPayload({ config });
-  const bySlug = { slug: { equals: slug } };
 
   if (!opts.preview) {
     // depth 2 populates `parent` and `parent.parent` (main-table rows, so an ancestor that was never
     // published comes back with `_status: 'draft'`; `pageAddress({ publishedOnly })` hides it).
-    const result = await payload.find({
-      collection: 'pages',
-      where: { and: [bySlug, PUBLISHED] },
-      limit: 1,
-      depth: MAX_PAGE_DEPTH - 1,
-      overrideAccess: true,
-    });
-    return (result.docs[0] as Page) ?? null;
+    return findBySlug(payload, 'pages', slug, { depth: MAX_PAGE_DEPTH - 1 });
   }
-  const page = await getLatestPageBySlug(slug);
+  const page = await findBySlug(payload, 'pages', slug, { preview: true });
   return page ? withLatestAncestors(page) : null;
-}
-
-/**
- * Preview: the latest version claiming `slug`. `slug` is unique only in the main table, NOT in
- * `_pages_v`, so another page's draft can claim the same address (an autosave while the editor types
- * an address that is taken); the page whose saved row owns the address wins.
- */
-async function getLatestPageBySlug(slug: string): Promise<Page | null> {
-  const payload = await getPayload({ config });
-  const bySlug = { slug: { equals: slug } };
-
-  // Every draft claiming the address, not a fixed window: with three or more claimants the owner
-  // could otherwise fall outside it. Normally this is one row.
-  const drafts = await payload.find({
-    collection: 'pages',
-    where: bySlug,
-    draft: true,
-    pagination: false,
-    overrideAccess: true,
-  });
-  if (drafts.docs.length <= 1) return (drafts.docs[0] as Page) ?? null;
-
-  const owner = await payload.find({
-    collection: 'pages',
-    where: bySlug, // main table, any status
-    limit: 1,
-    depth: 0,
-    overrideAccess: true,
-  });
-  const ownerId = owner.docs[0]?.id;
-  return ((drafts.docs.find((doc) => doc.id === ownerId) ?? drafts.docs[0]) as Page) ?? null;
 }
 
 /**

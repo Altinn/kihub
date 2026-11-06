@@ -1,6 +1,6 @@
 import config from '@payload-config';
 import { getPayload } from 'payload';
-import { PUBLISHED, type ReadOptions } from './payload-queries';
+import { findBySlug, PUBLISHED, type ReadOptions } from './payload-queries';
 import type { Project } from '@/payload-types';
 
 /**
@@ -35,13 +35,5 @@ export async function listPublishedProjects(): Promise<Project[]> {
  * 027: `{ preview: true }` returns the latest version (draft or not) for an editor's preview.
  */
 export async function getProjectBySlug(slug: string, opts: ReadOptions = {}): Promise<Project | null> {
-  const payload = await payloadClient();
-  const result = await payload.find({
-    collection: 'projects',
-    where: opts.preview ? { slug: { equals: slug } } : { and: [{ slug: { equals: slug } }, PUBLISHED] },
-    draft: Boolean(opts.preview),
-    limit: 1,
-    overrideAccess: true,
-  });
-  return (result.docs[0] as Project) ?? null;
+  return findBySlug(await payloadClient(), 'projects', slug, opts);
 }

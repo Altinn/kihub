@@ -1,7 +1,7 @@
 import config from '@payload-config';
 import { getPayload } from 'payload';
 import type { EventFormatValue, EventTypeValue } from '@/lib/events-view';
-import { PUBLISHED, type ReadOptions } from '@/lib/payload-queries';
+import { findBySlug, PUBLISHED, type ReadOptions } from '@/lib/payload-queries';
 import type { Event } from '@/payload-types';
 
 /**
@@ -98,13 +98,5 @@ export async function listEventsInRange(fromIso: string, toIso: string): Promise
  * `.ics` download never passes it.
  */
 export async function getEventBySlug(slug: string, opts: ReadOptions = {}): Promise<Event | null> {
-  const payload = await payloadClient();
-  const result = await payload.find({
-    collection: 'events',
-    where: opts.preview ? { slug: { equals: slug } } : { and: [{ slug: { equals: slug } }, PUBLISHED] },
-    draft: Boolean(opts.preview),
-    limit: 1,
-    overrideAccess: true,
-  });
-  return (result.docs[0] as Event) ?? null;
+  return findBySlug(await payloadClient(), 'events', slug, opts);
 }
