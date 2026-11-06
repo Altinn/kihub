@@ -1,7 +1,7 @@
 import config from '@payload-config';
 import { getPayload } from 'payload';
 import type { LearningLibrary } from '@/lib/learning-view';
-import { PUBLISHED, type ReadOptions } from '@/lib/payload-queries';
+import { findBySlug, PUBLISHED, type ReadOptions } from '@/lib/payload-queries';
 import type { LearningPage } from '@/payload-types';
 
 /**
@@ -95,13 +95,5 @@ export async function getLearningPageBySlug(
   slug: string,
   opts: ReadOptions = {},
 ): Promise<LearningPage | null> {
-  const payload = await payloadClient();
-  const result = await payload.find({
-    collection: 'learning-pages',
-    where: opts.preview ? { slug: { equals: slug } } : { and: [{ slug: { equals: slug } }, PUBLISHED] },
-    draft: Boolean(opts.preview),
-    limit: 1,
-    overrideAccess: true,
-  });
-  return (result.docs[0] as LearningPage) ?? null;
+  return findBySlug(await payloadClient(), 'learning-pages', slug, opts);
 }
