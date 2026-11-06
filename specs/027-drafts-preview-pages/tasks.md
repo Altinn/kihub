@@ -140,21 +140,21 @@ Reserved and duplicate addresses are refused, and `/news` etc. are unaffected.
 
 ### Tests for User Story 3
 
-- [ ] T035 [P] [US3] Create `apps/web/tests/unit/page-slug.test.ts`. (a) The `validatePageSlug` table from contracts/pages.md §B: ok, reserved (incl. case/slash variants), and pattern failures with the exact Norwegian messages. (b) The **drift test**: list the top-level directory names under `apps/web/src/app/(app)`, `(auth)`, `(payload)`, `apps/web/src/app/api` and `apps/web/public`. Ignore route groups `(…)` and dynamic `[…]` segments, and assert each is in `RESERVED_PAGE_SLUGS`.
-- [ ] T036 [P] [US3] Create `apps/web/tests/integration/pages-access.test.ts` (reader + contributor, `overrideAccess: false`): contributor create/publish/delete; reader create → forbidden. A draft page is invisible to the reader and to `getPageBySlug(slug)`, but returned with `{ preview: true }`. A published page is returned. Slug `news` → ValidationError. A duplicate slug → error. A title «News» with a blank slug → derived `news` → ValidationError. `findVersions` is forbidden for the reader. Add `'pages'` to the collection table in `content-drafts.test.ts`.
+- [X] T035 [P] [US3] Create `apps/web/tests/unit/page-slug.test.ts`. (a) The `validatePageSlug` table from contracts/pages.md §B: ok, reserved (incl. case/slash variants), and pattern failures with the exact Norwegian messages. (b) The **drift test**: list the top-level directory names under `apps/web/src/app/(app)`, `(auth)`, `(payload)`, `apps/web/src/app/api` and `apps/web/public`. Ignore route groups `(…)` and dynamic `[…]` segments, and assert each is in `RESERVED_PAGE_SLUGS`.
+- [X] T036 [P] [US3] Create `apps/web/tests/integration/pages-access.test.ts` (reader + contributor, `overrideAccess: false`): contributor create/publish/delete; reader create → forbidden. A draft page is invisible to the reader and to `getPageBySlug(slug)`, but returned with `{ preview: true }`. A published page is returned. Slug `news` → ValidationError. A duplicate slug → error. A title «News» with a blank slug → derived `news` → ValidationError. `findVersions` is forbidden for the reader. Add `'pages'` to the collection table in `content-drafts.test.ts`.
 
 ### Implementation for User Story 3
 
-- [ ] T037 [P] [US3] Create `apps/web/src/lib/page-slug.ts` (pure) exporting `PAGE_SLUG_PATTERN`, `RESERVED_PAGE_SLUGS` (list in research R12) and `validatePageSlug` (normalise → reserved check → pattern), returning `true` or the Norwegian message.
-- [ ] T038 [P] [US3] Extract the lexical editor from `apps/web/src/collections/LearningPage.ts` verbatim into `apps/web/src/lib/article-editor.ts` (`export const articleEditor = lexicalEditor({ features: … })`, including the CodeBlock and the `youtube` block with `interfaceName: 'LearningYouTubeBlock'`). Make `LearningPage.ts` import it, then run `generate:types` and confirm `payload-types.ts` is unchanged for learning pages.
-- [ ] T039 [US3] Create `apps/web/src/collections/Page.ts` per contracts/pages.md §A: labels Side/Sider; versions/contentAccess; `admin.preview` via `previewUrl('pages', …)`; slug derivation (`beforeValidate`); author default (`beforeChange`); fields title (non-blank validate), slug (`validatePageSlug`, unique, index), summary, body (`articleEditor`), author. Register it in `apps/web/src/payload.config.ts` after `Media`.
-- [ ] T040 [US3] Run `generate:types` and confirm there is exactly one `LearningYouTubeBlock` interface and no duplicate-name error. If Payload rejects the shared block, move the Code and YouTube blocks to config-level `blocks` in `payload.config.ts` and reference them via `blockReferences` in `lib/article-editor.ts` (R11 fallback).
-- [ ] T041 [US3] Generate a second migration with `migrate:create pages` against `kihub_migtest_027` → `apps/web/src/migrations/<ts>_pages.{ts,json}` (the `pages`, `_pages_v` and rels tables). Add the `IF EXISTS` down-patch. Verify up/down/up on the scratch DB, then `migrate` `kihub_027`.
-- [ ] T042 [P] [US3] Create `apps/web/src/lib/pages.ts` with `getPageBySlug(slug, opts?: { preview?: boolean })`, same shape as T011. It returns `null` without querying when the slug fails `PAGE_SLUG_PATTERN`.
-- [ ] T043 [US3] Create `apps/web/src/app/(app)/[slug]/page.tsx` per contracts/pages.md §C: `getPreviewState()` → `getPageBySlug` → `notFound()` when null. Render `<main className="kihub-container">` with an `h1.kihub-h2`, the optional `.kihub-lead` summary and `<LearningBody body={page.body} />`. `generateMetadata` → `'<title> · KI Hub'`.
-- [ ] T044 [P] [US3] Add a `/* 027 /<slug> CMS pages */` section to `apps/web/src/styles/portal.css` (`.cms-page`, `.cms-page__title`, `.cms-page__summary`), tokens only, reusing `.lp-page` rhythm values.
-- [ ] T045 [US3] Amend `.specify/memory/constitution.md` 3.2.0 → **3.3.0** (MINOR, research R15). Add the **Pages** Product Module bullet. Add Pages to the native-content scoping sentences in Principles I, II.2, III and VIII (both bullets), and to Data ownership and the Testing gate. Add a Sync Impact Report header and set Last Amended 2026-11-05.
-- [ ] T046 [US3] Browser check: quickstart §3 US3 steps 1–5, including built-in routes still rendering and a Site Chrome footer link to the page. Record the results in tasks.md Notes.
+- [X] T037 [P] [US3] Create `apps/web/src/lib/page-slug.ts` (pure) exporting `PAGE_SLUG_PATTERN`, `RESERVED_PAGE_SLUGS` (list in research R12) and `validatePageSlug` (normalise → reserved check → pattern), returning `true` or the Norwegian message.
+- [X] T038 [P] [US3] Extract the lexical editor from `apps/web/src/collections/LearningPage.ts` verbatim into `apps/web/src/lib/article-editor.ts` (`export const articleEditor = lexicalEditor({ features: … })`, including the CodeBlock and the `youtube` block with `interfaceName: 'LearningYouTubeBlock'`). Make `LearningPage.ts` import it, then run `generate:types` and confirm `payload-types.ts` is unchanged for learning pages.
+- [X] T039 [US3] Create `apps/web/src/collections/Page.ts` per contracts/pages.md §A: labels Side/Sider; versions/contentAccess; `admin.preview` via `previewUrl('pages', …)`; slug derivation (`beforeValidate`); author default (`beforeChange`); fields title (non-blank validate), slug (`validatePageSlug`, unique, index), summary, body (`articleEditor`), author. Register it in `apps/web/src/payload.config.ts` after `Media`.
+- [X] T040 [US3] Run `generate:types` and confirm there is exactly one `LearningYouTubeBlock` interface and no duplicate-name error. If Payload rejects the shared block, move the Code and YouTube blocks to config-level `blocks` in `payload.config.ts` and reference them via `blockReferences` in `lib/article-editor.ts` (R11 fallback).
+- [X] T041 [US3] Generate a second migration with `migrate:create pages` against `kihub_migtest_027` → `apps/web/src/migrations/<ts>_pages.{ts,json}` (the `pages`, `_pages_v` and rels tables). Add the `IF EXISTS` down-patch. Verify up/down/up on the scratch DB, then `migrate` `kihub_027`.
+- [X] T042 [P] [US3] Create `apps/web/src/lib/pages.ts` with `getPageBySlug(slug, opts?: { preview?: boolean })`, same shape as T011. It returns `null` without querying when the slug fails `PAGE_SLUG_PATTERN`.
+- [X] T043 [US3] Create `apps/web/src/app/(app)/[slug]/page.tsx` per contracts/pages.md §C: `getPreviewState()` → `getPageBySlug` → `notFound()` when null. Render `<main className="kihub-container">` with an `h1.kihub-h2`, the optional `.kihub-lead` summary and `<LearningBody body={page.body} />`. `generateMetadata` → `'<title> · KI Hub'`.
+- [X] T044 [P] [US3] Add a `/* 027 /<slug> CMS pages */` section to `apps/web/src/styles/portal.css` (`.cms-page`, `.cms-page__title`, `.cms-page__summary`), tokens only, reusing `.lp-page` rhythm values.
+- [X] T045 [US3] Amend `.specify/memory/constitution.md` 3.2.0 → **3.3.0** (MINOR, research R15). Add the **Pages** Product Module bullet. Add Pages to the native-content scoping sentences in Principles I, II.2, III and VIII (both bullets), and to Data ownership and the Testing gate. Add a Sync Impact Report header and set Last Amended 2026-11-05.
+- [X] T046 [US3] Browser check: quickstart §3 US3 steps 1–5, including built-in routes still rendering and a Site Chrome footer link to the page. Record the results in tasks.md Notes.
 
 **Checkpoint**: Editors can publish standalone pages with no developer involvement (SC-005).
 
@@ -320,3 +320,66 @@ migrated `kihub_migtest_027` with `AUTH_MODE=entra` + azure media mode.
   hand, and types regenerated in azure mode (`tasks: unknown` as on main). The CMS «Publish changes»
   button no longer has the schedule dropdown. Suite 488/488 across 55 files, lint, `tsc` and
   `next build` all green.
+
+**US3 Pages (Phase 5, T035–T046) implemented 2026-11-06** in worktree `027-static-pages-ac4f7a`.
+Suite **551/551 across 57 files** (MVP: 488/55), lint clean, `tsc --noEmit` clean, `next build` green against
+`kihub_migtest_027` (migrated through `_pages`) with `AUTH_MODE=entra` + azure media mode; `/[slug]`
+builds as dynamic (ƒ).
+
+- **DB:** a private clone **`kihub_027p`** (`createdb -T kihub_027`) instead of `kihub_027`, so adding
+  the `pages` tables cannot make push-mode prompt in another worktree that shares `kihub_027`. Launch
+  config `kihub-web-027p` (port 3028, this worktree, not committed: it holds absolute paths).
+- **T035/T037** `lib/page-slug.ts`: the R12 list plus the API sub-routes `auth`, `discovery` (the drift
+  test scans `src/app/api`'s children too, so they had to be listed). The pattern is checked on the
+  raw value; the collection's `beforeValidate` normalises first (trim, lowercase, strip slashes), so
+  `/Laering/` is stored/validated as `laering` and gets the «reservert» message.
+- **T038/T040** `lib/article-editor.ts` holds LearningPage's editor verbatim. `generate:types` (azure
+  mode) emits exactly ONE `LearningYouTubeBlock` and the `LearningPage` interface is unchanged (the
+  diff is additive: `Page`, `PagesSelect`, the `pages` relation entries). No `blockReferences`
+  fallback needed.
+- **T039** drafts skip field validation (`drafts.validate: false`), so autosave can store a draft on a
+  reserved address; the rule bites on publish. Covered by a test.
+- **T041** `20261106_090856_pages` (azure mode, no prompts; does not touch `media._objectkey`). Down
+  hand-patched with `IF EXISTS` (the CASCADE drop of `pages` already removes
+  `payload_locked_documents_rels_pages_fk`). On `kihub_migtest_027`: up / down / up clean, SC-003
+  fingerprint identical across all three, down leaves no `pages`/`_pages_v`/`pages_id`/enum objects.
+  The `up` SQL was applied to `kihub_027p` with psql; push-mode then accepted the schema without a
+  prompt.
+- **T042 + walkthrough bug fixed:** `slug` is unique only in the main table, not in `_pages_v`. In the
+  walkthrough, a second page's autosave claimed `om-ki-hub` while testing the duplicate error, and the
+  preview read (`draft: true, limit: 1`) then showed THAT page at `/om-ki-hub`. `getPageBySlug` in
+  preview now fetches up to 2 and prefers the page whose saved row owns the address (regression test
+  in `pages-access.test.ts`). **The four MVP by-slug readers (`news`, `learning`, `projects`,
+  `events`) share the same latent preview-only issue** (editor-only, never a reader leak); left as a
+  follow-up.
+- **Lint:** once `(app)/[slug]` exists, `@next/next/no-html-link-for-pages` flags `PreviewBanner`'s
+  `<a href="/api/preview/exit">`. It must stay a plain `<a>` (a `<Link>` would prefetch the route
+  handler and switch preview off), so the rule is disabled on that line with the reason.
+- **Gotcha (again):** running the dev server in disk mode rewrites `importMap.js` (drops
+  `AzureClientUploadHandler`) and `payload-types.ts` (drops `media._objectKey`). Both were restored
+  / regenerated in azure mode before committing. `main`'s committed `payload-types.ts` already lacked
+  `_objectKey` (the MVP's types were overwritten the same way); this branch restores it.
+- **T045** constitution 3.2.0 → **3.3.0** (Pages module; Last Amended 2026-11-06, the day it was
+  actually amended).
+- **T046** browser + curl on `kihub-web-027p`, mock auth:
+  1. `/cms` → Sider → new: autosave created the draft at once and derived `om-ki-hub`; author
+     defaulted to the contributor; «Forhåndsvis» shown. Body: h2, paragraph, image (media #47), Code
+     block, YouTube block (set via the REST API as the contributor, because synthetic keystrokes do
+     not drive Lexical reliably). Preview renders all five with the banner and the tab title
+     «Om KI Hub · KI Hub». Publish → «Published».
+  2. Reader: `/om-ki-hub` 200, `<title>Om KI Hub · KI Hub</title>`, no banner. Before publish: 404,
+     `/api/preview` 303 without the cookie and still 404, REST list empty, `?draft=true` by id
+     Not Found, `/payload-api/pages/versions` 403. Anonymous → 307 `/signin`.
+  3. Publishing with address `news`, `/Laering/`, `om/kontakt` is refused with the Norwegian field
+     messages; a second page on `om-ki-hub` is refused with Payload's built-in «Value must be
+     unique» (the CMS UI is English).
+  4. `/`, `/news`, `/laering`, `/prosjekter`, `/events`, `/registry`, `/bidra`, `/signin` 200 for the
+     reader (`/cms` 307, admin gate). `/finnes-ikke`, `/om-ki-hub/x`, `/Om-KI-Hub`, `/wp-login.php`
+     404; `/%E0` 400 (Next). `/api/preview/exit` still wins over `[slug]` (303).
+  5. Site Chrome → footer link «Om KI Hub» `/om-ki-hub` saved; it shows in the footer and opens the
+     page. After *Unpublish* the link gives the reader 404.
+  - Local image note: disk-mode media lives per checkout, so `media/demo-1*.png` was copied from the
+    main checkout into this worktree's (gitignored) `apps/web/media/`.
+  - Test data left in `kihub_027p`: page #25 «Om KI Hub» (unpublished), page #26 «Testside reservert»
+    (draft), the extra Site Chrome footer link.
+

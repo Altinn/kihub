@@ -4,7 +4,7 @@ import { isEditor } from './access';
 /**
  * 027 — Payload's built-in versions + drafts for native editorial content (research R1).
  *
- * Shared by News, Learning pages, Projects and Events (and, later, Pages) so the five collections
+ * Shared by News, Learning pages, Projects, Events and Pages (US3) so the five collections
  * stay declarative and cannot drift apart. Replaces the hand-rolled `status` select: Payload adds
  * its own `_status` (`draft` | `published`) plus Save draft / Publish / Unpublish, version history
  * with compare + restore, and autosave. Scheduled publishing is deliberately NOT enabled (decided
