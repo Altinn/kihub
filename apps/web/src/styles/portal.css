@@ -1714,3 +1714,8 @@ a.news-pagination__btn:hover {
   .bidra-hero__card { animation: none; opacity: 1; }
   .bidra-benefit, .bidra-type-card, .bidra-btn { transition: none; }
 }
+
+/* ==================== 027 preview banner — Forhåndsvisning ==================== */
+/* Shown above the site header while an editor previews drafts (components/PreviewBanner.tsx). */
+.preview-banner { padding-top: var(--kihub-space-3); padding-bottom: var(--kihub-space-3); }
+.preview-banner .kihub-link { font-weight: var(--kihub-weight-medium); }

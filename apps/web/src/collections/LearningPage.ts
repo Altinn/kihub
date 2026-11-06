@@ -1,4 +1,3 @@
-import type { Role } from '@kihub/governance-core';
 import {
   BlockquoteFeature,
   BlocksFeature,
@@ -16,6 +15,8 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical';
 import { APIError, type CollectionConfig } from 'payload';
+import { CONTENT_VERSIONS, contentAccess } from '../lib/content-versions';
+import { previewUrl } from '../lib/preview-paths';
 import { LEARNING_CODE_LANGUAGES } from '../lib/learning-view';
 import { slugify } from '../lib/slug';
 import { parseYouTubeId } from '../lib/youtube';
@@ -25,7 +26,7 @@ import { parseYouTubeId } from '../lib/youtube';
  *
  * Access is copied from `News.ts` rather than reinvented (FR-031/032): Contributor+ reads everything
  * including drafts, everyone else is constrained to `published`. That access rule is the SECOND line
- * of defence — `lib/learning.ts` also filters `status: published` in every query — so a draft cannot
+ * of defence — `lib/learning.ts` also filters `_status: published` in every query — so a draft cannot
  * leak through either the employee pages or the REST/GraphQL path (research §7, the 007 posture).
  *
  * Addresses are flat: `/laering/<slug>`, with the category NOT in the URL, so moving a page between
@@ -33,25 +34,23 @@ import { parseYouTubeId } from '../lib/youtube';
  *
  * "Sist oppdatert" (FR-018) uses Payload's built-in `updatedAt`; there is deliberately no
  * `publishDate` field, because nothing on the surface asks a second date question (data-model.md).
+ *
+ * 027: Payload's built-in drafts (`lib/content-versions.ts`) replaced the hand-rolled `status`
+ * select; `readVersions` keeps version history (which holds draft content) editor-only.
  */
-function isEditor(user: { role?: unknown } | null | undefined): boolean {
-  return Boolean(user) && (user?.role as Role) !== 'reader';
-}
 
 export const LearningPage: CollectionConfig = {
   slug: 'learning-pages',
   labels: { singular: 'Læringsside', plural: 'Læringssider' },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'status', 'category', 'order', 'updatedAt'],
+    defaultColumns: ['title', '_status', 'category', 'order', 'updatedAt'],
+    // 027 — «Forhåndsvis»: opens the latest draft on the employee site for editors (lib/preview-paths.ts).
+    preview: (doc) => previewUrl('learning-pages', doc?.slug as string | undefined),
     group: 'KI Læring',
   },
-  access: {
-    read: ({ req }) => (isEditor(req.user) ? true : { status: { equals: 'published' } }),
-    create: ({ req }) => isEditor(req.user),
-    update: ({ req }) => isEditor(req.user),
-    delete: ({ req }) => isEditor(req.user),
-  },
+  access: contentAccess,
+  versions: CONTENT_VERSIONS,
   hooks: {
     beforeValidate: [
       ({ data }) => {
@@ -252,17 +251,6 @@ export const LearningPage: CollectionConfig = {
           }),
         ],
       }),
-    },
-    {
-      name: 'status',
-      type: 'select',
-      required: true,
-      defaultValue: 'draft',
-      label: 'Status',
-      options: [
-        { label: 'Utkast', value: 'draft' },
-        { label: 'Publisert', value: 'published' },
-      ],
     },
     {
       name: 'order',

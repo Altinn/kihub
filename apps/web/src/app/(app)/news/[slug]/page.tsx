@@ -1,20 +1,23 @@
 import { RichText } from '@payloadcms/richtext-lexical/react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getPublishedNewsBySlug } from '@/lib/news';
+import { getNewsBySlug } from '@/lib/news';
 import { formatNewsDate, pickArticleImage, resolveHeroSource } from '@/lib/news-view';
+import { getPreviewState } from '@/lib/preview';
 
 /**
  * 013 US3 (FR-014) — the article page on the kihub token layer, Norwegian copy: title, byline +
  * Oslo-correct date, tags, hero image, rich-text body, and a link back to "Nyheter". A draft or
- * unknown slug resolves to `null` → 404 (no draft leaks, FR-012).
+ * unknown slug resolves to `null` → 404 (no draft leaks, FR-012). 027: an editor in preview gets the
+ * latest version (draft or not) instead.
  *
  * 020 — an uploaded hero is shown WHOLE at reading width with its media alt text (`pickArticleImage`,
  * never a 16:10 card crop, FR-006/007); a legacy `heroImageUrl` renders exactly as before.
  */
 export default async function NewsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const article = await getPublishedNewsBySlug(decodeURIComponent(slug));
+  const { active: preview } = await getPreviewState();
+  const article = await getNewsBySlug(decodeURIComponent(slug), { preview });
   if (!article) notFound();
 
   const author = typeof article.author === 'object' && article.author ? article.author : null;

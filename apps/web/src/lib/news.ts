@@ -1,6 +1,7 @@
 import config from '@payload-config';
 import { getPayload } from 'payload';
 import { NEWS_PAGE_SIZE } from '@/lib/news-view';
+import { PUBLISHED, type ReadOptions } from '@/lib/payload-queries';
 import type { News } from '@/payload-types';
 
 /**
@@ -13,8 +14,6 @@ import type { News } from '@/payload-types';
 async function payloadClient() {
   return getPayload({ config });
 }
-
-const PUBLISHED = { status: { equals: 'published' } } as const;
 
 /**
  * Published articles, strictly newest-first (013 FR-005).
@@ -84,12 +83,18 @@ export async function listPublishedNewsPage(page: number): Promise<NewsPage> {
   };
 }
 
-/** A single published article by slug, or `null` (draft/unknown → the page returns 404) (FR-005/006). */
-export async function getPublishedNewsBySlug(slug: string): Promise<News | null> {
+/**
+ * A single published article by slug, or `null` (draft/unknown → the page returns 404) (FR-005/006).
+ *
+ * 027: with `{ preview: true }` it returns the LATEST version instead (Payload `draft: true` reads the
+ * versions table), including never-published drafts and a pending draft's renamed slug.
+ */
+export async function getNewsBySlug(slug: string, opts: ReadOptions = {}): Promise<News | null> {
   const payload = await payloadClient();
   const result = await payload.find({
     collection: 'news',
-    where: { and: [{ slug: { equals: slug } }, PUBLISHED] },
+    where: opts.preview ? { slug: { equals: slug } } : { and: [{ slug: { equals: slug } }, PUBLISHED] },
+    draft: Boolean(opts.preview),
     limit: 1,
     depth: 1, // 020 R8 — populate `heroImage`
     overrideAccess: true,

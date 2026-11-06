@@ -1,6 +1,8 @@
 import { requireSession } from '@/auth/require-session';
+import { PreviewBanner } from '@/components/PreviewBanner';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
+import { getPreviewState } from '@/lib/preview';
 import { ThemedHtml } from '../themed-html';
 
 /**
@@ -9,12 +11,16 @@ import { ThemedHtml } from '../themed-html';
  *
  * 011: the shared CMS-driven chrome mounts here — every employee page gets the site header (and
  * footer) exactly once; pages no longer compose their own header.
+ *
+ * 027: while an editor's preview is active, every page opens with the preview banner (FR-015).
  */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   await requireSession();
+  const { active: preview } = await getPreviewState();
   return (
     <ThemedHtml>
       <div className="portal-shell">
+        {preview ? <PreviewBanner /> : null}
         <SiteHeader />
         {children}
         <SiteFooter />
