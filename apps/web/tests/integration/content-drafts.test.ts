@@ -17,7 +17,8 @@ import { getProjectBySlug } from '@/lib/projects';
  * A1 a never-published draft is invisible to a reader (collection access AND read layer);
  * A3 a reader cannot read version history (it holds draft content);
  * A4 a contributor can list versions, and a draft read returns the latest draft;
- * A5 a contributor can publish, after which the reader sees it.
+ * A5 a contributor can publish, after which the reader sees it;
+ * A6 a preview read at a slug that another document's draft also claims returns the slug's owner.
  */
 let payload: Payload;
 const testId = 'content-drafts-0001';
@@ -211,5 +212,54 @@ describe.each(CASES)('$collection — Payload drafts (027)', ({ collection, data
     });
     expect(asReader.title).toBe(draft.title);
     expect((await bySlug(draft.slug as string))?.title).toBe(draft.title);
+  });
+
+  it("A6: preview prefers the slug's owner when another document's draft claims the same slug", async () => {
+    // `slug` is unique only in the main table, not in `_<collection>_v`, so B's autosave can store A's slug.
+    const owner = await createDraft('Eier');
+    await payload.update({
+      collection,
+      id: owner.id,
+      data: { _status: 'published' } as never,
+      overrideAccess: false,
+      user: users.contributor,
+    });
+    const claimant = await createDraft('Inntrenger');
+    await payload.update({
+      collection,
+      id: claimant.id,
+      data: { slug: owner.slug } as never,
+      draft: true,
+      autosave: true,
+      overrideAccess: false,
+      user: users.contributor,
+    });
+
+    // Precondition: the versions table really holds two latest versions at the owner's slug.
+    const latest = await payload.find({
+      collection,
+      where: { slug: { equals: owner.slug } },
+      draft: true,
+      overrideAccess: true,
+    });
+    expect(latest.docs.map((doc) => doc.id).sort()).toEqual([owner.id, claimant.id].sort());
+
+    expect((await bySlug(owner.slug as string, { preview: true }))?.title).toBe(owner.title);
+    expect((await bySlug(owner.slug as string))?.title).toBe(owner.title);
+
+    // …and with more claimants than any fixed window would hold.
+    for (const n of [1, 2, 3]) {
+      const extra = await createDraft(`Ekstra ${n}`);
+      await payload.update({
+        collection,
+        id: extra.id,
+        data: { slug: owner.slug } as never,
+        draft: true,
+        autosave: true,
+        overrideAccess: false,
+        user: users.contributor,
+      });
+    }
+    expect((await bySlug(owner.slug as string, { preview: true }))?.title).toBe(owner.title);
   });
 });
