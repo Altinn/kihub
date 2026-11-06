@@ -12,6 +12,10 @@ export function PreviewBanner() {
       <Alert data-color="warning" role="status">
         <strong>Forhåndsvisning.</strong> Du ser upubliserte endringer. Andre ansatte ser bare
         publiserte versjoner.{' '}
+        {/* A plain <a>, never <Link>: this is a route handler with a side effect (it disables draft
+            mode), and <Link> would prefetch it. The lint rule only fires since US3's catch-all
+            `(app)/[slug]` page exists, which it wrongly matches against this API path. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a href="/api/preview/exit" className="kihub-link">
           Avslutt forhåndsvisning
         </a>

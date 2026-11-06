@@ -11,6 +11,7 @@ import * as migration_20260924_080748_news_hero_media from './20260924_080748_ne
 import * as migration_20261022_072807_frontpage_digdir_defaults from './20261022_072807_frontpage_digdir_defaults';
 import * as migration_20261102_121653 from './20261102_121653';
 import * as migration_20261105_122923_drafts from './20261105_122923_drafts';
+import * as migration_20261106_090856_pages from './20261106_090856_pages';
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20261105_122923_drafts.up,
     down: migration_20261105_122923_drafts.down,
     name: '20261105_122923_drafts',
+  },
+  {
+    up: migration_20261106_090856_pages.up,
+    down: migration_20261106_090856_pages.down,
+    name: '20261106_090856_pages'
   },
 ];

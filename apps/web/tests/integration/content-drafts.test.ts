@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { getEventBySlug } from '@/lib/events';
 import { getLearningPageBySlug } from '@/lib/learning';
 import { getNewsBySlug } from '@/lib/news';
+import { getPageBySlug } from '@/lib/pages';
 import type { ReadOptions } from '@/lib/payload-queries';
 import { getProjectBySlug } from '@/lib/projects';
 
@@ -24,7 +25,7 @@ type Doc = { id: number; role: Role };
 const users: Record<'reader' | 'contributor', Doc> = {} as never;
 let categoryId: number;
 
-type Slug = 'news' | 'projects' | 'events' | 'learning-pages';
+type Slug = 'news' | 'projects' | 'events' | 'learning-pages' | 'pages';
 
 function lexical(text: string) {
   return {
@@ -66,6 +67,8 @@ const CASES: {
     data: (title) => ({ title, body: lexical(title), category: categoryId }),
     bySlug: getLearningPageBySlug,
   },
+  // 027 US3 (T036)
+  { collection: 'pages', data: (title) => ({ title, body: lexical(title) }), bySlug: getPageBySlug },
 ];
 
 async function makeUser(role: Doc['role']): Promise<Doc> {
