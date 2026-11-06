@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import { LearningBody } from '@/components/LearningBody';
 import { getPageBySlug } from '@/lib/pages';
 import { getPreviewState } from '@/lib/preview';
@@ -17,8 +18,11 @@ import { getPreviewState } from '@/lib/preview';
  */
 type Params = { params: Promise<{ slug: string }> };
 
-async function loadPage(params: Params['params']) {
-  const { slug } = await params;
+/**
+ * Memoised per request (keyed on the raw segment): `generateMetadata` and the page both need the
+ * page, and without `cache()` each would query the database.
+ */
+const loadPage = cache(async (slug: string) => {
   let decoded: string;
   try {
     decoded = decodeURIComponent(slug);
@@ -27,15 +31,15 @@ async function loadPage(params: Params['params']) {
   }
   const { active: preview } = await getPreviewState();
   return getPageBySlug(decoded, { preview });
-}
+});
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  const page = await loadPage(params);
+  const page = await loadPage((await params).slug);
   return page ? { title: `${page.title} · KI Hub` } : {};
 }
 
 export default async function CmsPage({ params }: Params) {
-  const page = await loadPage(params);
+  const page = await loadPage((await params).slug);
   if (!page) notFound();
 
   return (

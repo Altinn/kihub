@@ -11,6 +11,8 @@
  * without being added here.
  */
 
+import { slugify } from './slug';
+
 /** One segment of lowercase a–z, digits and single hyphens, no leading/trailing hyphen. */
 export const PAGE_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -45,6 +47,12 @@ export const RESERVED_PAGE_SLUGS: ReadonlySet<string> = new Set([
   'favicon.ico',
   'robots.txt',
   'sitemap.xml',
+  // Next metadata image routes (`icon.tsx`, `opengraph-image.tsx`, …) serve extension-less
+  // top-level addresses; none exist yet, so reserve them before one is added.
+  'icon',
+  'apple-icon',
+  'opengraph-image',
+  'twitter-image',
 ]);
 
 export const PAGE_SLUG_PATTERN_MESSAGE =
@@ -61,13 +69,27 @@ export function normalizePageSlug(value: string): string {
 
 /**
  * `true` when `value` is a usable page address, else the Norwegian message Payload shows the editor.
- * The reserved check runs on the NORMALISED value first, so case/slash variants of a built-in
- * address get the clearer «reservert» message rather than the generic pattern one.
+ *
+ * Both checks run on the NORMALISED value, because that is what the collection hook stores: the
+ * admin form validates what the editor typed WITHOUT running the hook, so `Om-KI-Hub` or
+ * `/om-ki-hub/` must pass here (they are saved as `om-ki-hub`). The reserved check runs first, so
+ * case/slash variants of a built-in address get the clearer «reservert» message.
  */
 export function validatePageSlug(value: unknown): true | string {
-  const raw = typeof value === 'string' ? value : '';
-  const normalized = normalizePageSlug(raw);
+  const normalized = normalizePageSlug(typeof value === 'string' ? value : '');
   if (RESERVED_PAGE_SLUGS.has(normalized)) return reservedPageSlugMessage(normalized);
-  if (!PAGE_SLUG_PATTERN.test(raw)) return PAGE_SLUG_PATTERN_MESSAGE;
+  if (!PAGE_SLUG_PATTERN.test(normalized)) return PAGE_SLUG_PATTERN_MESSAGE;
   return true;
+}
+
+/**
+ * The address a page will be saved on: the normalised `slug` when one is given, else the one derived
+ * from `title` (`lib/slug.ts`). Shared by the collection's hook (which stores it) and its field
+ * validation (which checks it), so a blank address is judged by what it WILL become: the admin form
+ * validates before the hook has filled it in.
+ */
+export function resolvePageSlug(slug: unknown, title: unknown): string {
+  const given = typeof slug === 'string' ? normalizePageSlug(slug) : '';
+  if (given) return given;
+  return typeof title === 'string' && title.trim() ? slugify(title) : '';
 }

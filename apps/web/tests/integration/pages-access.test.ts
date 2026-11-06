@@ -194,6 +194,21 @@ describe('pages — visibility (FR-022/025)', () => {
 
     expect((await getPageBySlug(slug))?.id).toBe(owner.id);
     expect((await getPageBySlug(slug, { preview: true }))?.id).toBe(owner.id);
+
+    // …and with more claimants than any fixed window would hold.
+    for (const n of [1, 2, 3]) {
+      const extra = await createPage({ title: `Ekstra ${n} ${testId}` }, users.contributor, { draft: true });
+      await payload.update({
+        collection: 'pages',
+        id: extra.id,
+        data: { slug },
+        draft: true,
+        autosave: true,
+        overrideAccess: false,
+        user: users.contributor,
+      });
+    }
+    expect((await getPageBySlug(slug, { preview: true }))?.id).toBe(owner.id);
   });
 
   it('the read layer rejects addresses no page could have, without querying', async () => {
@@ -261,6 +276,39 @@ describe('pages — addresses (FR-019–FR-021, FR-024)', () => {
       }),
       RESERVED('events'),
     );
+  });
+
+  it('a blank address is derived from the title', async () => {
+    const page = await createPage(
+      { title: `Avledet ${testId}`, slug: '', _status: 'published' },
+      users.contributor,
+    );
+    expect(page.slug).toBe(`avledet-${testId}`);
+  });
+
+  it('a title-only update keeps the stored address (links to it keep working)', async () => {
+    const page = await createPage({ title: `Stabil ${testId}`, _status: 'published' }, users.contributor);
+    const renamed = await payload.update({
+      collection: 'pages',
+      id: page.id,
+      data: { title: `Nytt navn ${testId}` },
+      overrideAccess: false,
+      user: users.contributor,
+    });
+    expect(renamed.title).toBe(`Nytt navn ${testId}`);
+    expect(renamed.slug).toBe(page.slug);
+  });
+
+  it('an explicitly cleared address is re-derived from the title', async () => {
+    const page = await createPage({ title: `Tømt ${testId}`, _status: 'published' }, users.contributor);
+    const cleared = await payload.update({
+      collection: 'pages',
+      id: page.id,
+      data: { title: `Ny adresse ${testId}`, slug: '' },
+      overrideAccess: false,
+      user: users.contributor,
+    });
+    expect(cleared.slug).toBe(`ny-adresse-${testId}`);
   });
 
   it('refuses a duplicate address', async () => {

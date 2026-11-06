@@ -37,11 +37,13 @@ export async function getPageBySlug(slug: string, opts: ReadOptions = {}): Promi
     return (result.docs[0] as Page) ?? null;
   }
 
+  // Every draft claiming the address, not a fixed window: with three or more claimants the owner
+  // could otherwise fall outside it. Normally this is one row.
   const drafts = await payload.find({
     collection: 'pages',
     where: bySlug,
     draft: true,
-    limit: 2,
+    pagination: false,
     overrideAccess: true,
   });
   if (drafts.docs.length <= 1) return (drafts.docs[0] as Page) ?? null;

@@ -1,9 +1,8 @@
 import type { CollectionConfig } from 'payload';
 import { articleEditor } from '../lib/article-editor';
 import { CONTENT_VERSIONS, contentAccess } from '../lib/content-versions';
-import { normalizePageSlug, validatePageSlug } from '../lib/page-slug';
+import { resolvePageSlug, validatePageSlug } from '../lib/page-slug';
 import { previewUrl } from '../lib/preview-paths';
-import { slugify } from '../lib/slug';
 
 /**
  * 027 US3 — Side: a standalone information page («Om KI Hub», «Kontakt», …) served to employees at
@@ -27,22 +26,27 @@ export const Page: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
     // «Forhåndsvis»: opens the latest draft at its real address for editors (lib/preview-paths.ts).
-    preview: (doc) => previewUrl('pages', doc?.slug as string | undefined),
+    // Drafts skip field validation, so a draft can sit on a reserved or malformed address; its
+    // preview would open a built-in section or a 404, so the button is hidden until it is valid.
+    preview: (doc) =>
+      validatePageSlug(doc?.slug) === true ? previewUrl('pages', doc.slug as string) : null,
   },
   access: contentAccess,
   versions: CONTENT_VERSIONS,
   hooks: {
     beforeValidate: [
-      ({ data }) => {
+      ({ data, originalDoc }) => {
         if (!data) return data;
-        // Normalise what the editor typed (`/Om-KI-Hub/` → `om-ki-hub`) so a reserved address is
-        // caught in any spelling and the stored value is exactly what the route matches.
-        if (typeof data.slug === 'string') data.slug = normalizePageSlug(data.slug);
-        // Derive from the title when blank, and keep an explicit slug stable across title edits
-        // (News/Project precedent). A title «News» therefore derives `news` and is refused.
-        if (!data.slug && typeof data.title === 'string' && data.title.trim()) {
-          data.slug = slugify(data.title);
-        }
+        // A partial update that does not send `slug` (e.g. `PATCH { title }` through the API) keeps
+        // the stored address: re-deriving it from the new title would move a published page and
+        // break every menu/footer link to it.
+        if (data.slug === undefined && originalDoc?.slug) return data;
+        // Otherwise store the normalised address (`/Om-KI-Hub/` → `om-ki-hub`), or derive it from
+        // the title when blank (News/Project precedent). A title «News» therefore derives `news`
+        // and is refused. An explicitly cleared address is re-derived on the next save.
+        const slug = resolvePageSlug(data.slug, data.title ?? originalDoc?.title);
+        if (slug) data.slug = slug;
+        else if (data.slug !== undefined) data.slug = null; // never '' — the column is unique
         return data;
       },
     ],
@@ -75,7 +79,10 @@ export const Page: CollectionConfig = {
       unique: true,
       index: true,
       label: 'Adresse',
-      validate: (value: string | null | undefined) => validatePageSlug(value),
+      // Judged by the address it WILL be saved on: the admin form validates what the editor typed
+      // before the hook runs, so a blank field is checked as the address derived from the title.
+      validate: (value: string | null | undefined, { siblingData }: { siblingData: Partial<{ title: string }> }) =>
+        validatePageSlug(resolvePageSlug(value, siblingData?.title)),
       admin: {
         description:
           'Sidens adresse: /<adresse>. Utledes fra tittelen når feltet står tomt. Kan ikke være en adresse KI Hub allerede bruker.',
