@@ -1,40 +1,29 @@
 <!--
 Sync Impact Report
-Version change: 3.2.0 → 3.3.0
-Bump rationale: MINOR. ADDS **Pages** as a sixth Product Module (alongside Registry, News,
-  Calendar/Events, Learning and Projects) for specs/027-drafts-preview-pages US3: editor-authored
-  standalone information pages («Om KI Hub», «Kontakt») served at `/<slug>`. Purely additive: no
-  principle is removed or redefined, the Registry principles' substance is untouched, and the
-  Design System constraint is unchanged. A materially expanded enumeration ⇒ MINOR (same precedent
-  as 3.1.0 Learning and 3.2.0 Projects).
-Modified principles:
-  - I. Git is the Source of Truth — scoping sentence now excludes Pages alongside the other native
-    content
-  - II. Payload Owns Enterprise Context and Native Content — native-content clause now names Pages,
-    and records that native content uses Payload's built-in drafts and version history (027
-    clarification, not a new rule)
-  - III. Every AI Asset is an Artifact — scoping sentence now states Pages are NOT artifacts
-  - VIII. Two Surfaces — employee-app bullet adds reading Pages; back-office bullet adds authoring
-    Pages
+Version change: 3.3.0 → 3.4.0
+Bump rationale: MINOR. Materially expands the **Pages** module guidance for
+  specs/028-docs-navigation: Pages may form a hierarchy of at most three levels, served at nested
+  addresses (`/<parent>/<slug>`), with a section menu of published Pages. Replaces «flat,
+  one-segment address». No principle is removed or redefined, and the Registry principles are
+  untouched. Expanded module guidance ⇒ MINOR (same policy as 3.1.0–3.3.0).
+Modified principles: none
 Modified sections:
-  - Opening summary — standalone information Pages added
-  - Product Modules — new **Pages** bullet (flat, one-segment addresses; built-in sections always
-    win; native content; Registry principles I, III, IV, V, VI do not apply)
-  - Security, Governance & Compliance → Data ownership — Pages named as native Payload-owned data
-  - Development Workflow & Quality Gates → Testing — Pages added to the new-module testing gate
-Added sections: none (the Pages module is a bullet within existing Product Modules)
+  - Product Modules — **Pages** bullet: hierarchy (≤ 3 levels), nested addresses whose last segment
+    is unique and identifies the page, old and moved addresses redirect to the current one, section
+    menu of published Pages; built-in sections still always win, reserved addresses still refused
+Added sections: none
 Removed sections: none
 Notes on constraints deliberately NOT changed:
-  - No new storage/media constraint: Pages reuse the existing `media` collection via the shared
-    article editor.
-  - Design System constraint unchanged; Pages render with existing components on kihub tokens.
+  - Learning keeps its flat `/laering/<slug>` addresses and its own navigation.
+  - Principle VII (Start Simple): addresses are computed from the hierarchy, not stored; no new
+    dependency, collection or global.
 Templates requiring updates:
-  ✅ .specify/templates/plan-template.md (Constitution Check references gates generically — compatible)
-  ✅ .specify/templates/spec-template.md (no mandatory-section conflict)
-  ✅ .specify/templates/tasks-template.md (task categories compatible)
-  ⚠ CLAUDE.md / README.md — updated when 027 is closed out (tasks T059)
+  ✅ .specify/templates/plan-template.md (generic gates — compatible)
+  ✅ .specify/templates/spec-template.md (compatible)
+  ✅ .specify/templates/tasks-template.md (compatible)
+  ⚠ CLAUDE.md — Spec Kit active-feature block updated when 028 is implemented (tasks T035)
 Follow-up TODOs: none
-Previous: 3.1.0 → 3.2.0 (2026-09-11) added Projects as the fifth Product Module (016).
+Previous: 3.2.0 → 3.3.0 (2026-11-06) added Pages as the sixth Product Module (027).
 -->
 
 # KI Hub Constitution
@@ -67,9 +56,13 @@ admin back-office for a small set of editors and admins (see Principle VIII).
   Digdir"), each with a title, summary, and rich-text description. First-class native platform
   content (Principle II); not an "artifact" and unrelated to the Registry's `Artifact` model, and
   the Registry principles (I, III, IV, V, VI) do not apply to it.
-- **Pages** — standalone information pages («Om KI Hub», «Kontakt») authored by editors and served
-  at a flat, one-segment address (`/<slug>`); built-in sections always win their address, and
-  reserved addresses are refused. Editors link them from the site menu/footer (Site Chrome).
+- **Pages** — standalone information and guide pages («Om KI Hub», «Kom i gang») authored by
+  editors. A page may have a parent page, forming a hierarchy of at most three levels, and is served
+  at the address built from its ancestors' segments and its own (`/<slug>` or `/<parent>/<slug>`).
+  Each page's own segment is unique, so old or moved addresses redirect to the current one. Pages in
+  a hierarchy show a section menu of its published Pages. Built-in sections always win their
+  address, and reserved addresses are refused. Editors link top-level pages from the site
+  menu/footer (Site Chrome).
   First-class native platform content (Principle II); not an "artifact", and the Registry
   principles (I, III, IV, V, VI) do not apply to it.
 
@@ -282,4 +275,4 @@ Versioning policy (semantic):
 Compliance: Plans and reviews MUST check against these principles. Use `CLAUDE.md` and `.specify/`
 templates for runtime development guidance.
 
-**Version**: 3.3.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-11-06
+**Version**: 3.4.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-11-09
