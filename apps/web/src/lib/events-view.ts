@@ -5,6 +5,8 @@
  * in Oslo as 'YYYY-MM-DD', which is the DST/UTC-boundary-safe grouping unit.
  */
 
+import type { Color, SeverityColors } from '@digdir/designsystemet-types';
+
 const OSLO_TZ = 'Europe/Oslo';
 
 /* ---------- Event type / format enums (single source for values, labels, filters) ---------- */
@@ -18,6 +20,16 @@ export const EVENT_TYPE_LABELS: Record<EventTypeValue, string> = {
   kurs: 'Kurs',
   konferanse: 'Konferanse',
   internt: 'Internt',
+};
+
+/** 026 R10 — Designsystemet `data-color` for each type's `ds-tag` (the 012 categorical encoding).
+ * The type name is always in the tag's text; the colour only reinforces it. */
+export const EVENT_TYPE_COLORS: Record<EventTypeValue, Color | SeverityColors> = {
+  webinar: 'info',
+  verksted: 'warning',
+  kurs: 'success',
+  konferanse: 'danger',
+  internt: 'neutral',
 };
 
 export const EVENT_FORMATS = ['digitalt', 'oppmote', 'hybrid'] as const;
@@ -237,16 +249,18 @@ export function formatMonthTitle(year: number, month: number): string {
   return capitalize(text);
 }
 
-/** Monday-first weekday headers: MAN TIR ONS TOR FRE LØR SØN. */
-export function weekdayHeaders(): string[] {
-  const fmt = new Intl.DateTimeFormat('nb-NO', { timeZone: OSLO_TZ, weekday: 'short' });
+/**
+ * Monday-first weekday headers. 026: sentence case ("Man") for the visible column header, plus the
+ * full name ("mandag") for screen readers, instead of the uppercase MAN–SØN.
+ */
+export function weekdayHeaders(): { short: string; long: string }[] {
+  const short = new Intl.DateTimeFormat('nb-NO', { timeZone: OSLO_TZ, weekday: 'short' });
+  const long = new Intl.DateTimeFormat('nb-NO', { timeZone: OSLO_TZ, weekday: 'long' });
   // 2026-08-03 is a Monday; format seven consecutive days from it.
-  return Array.from({ length: 7 }, (_, i) =>
-    fmt
-      .format(new Date(Date.UTC(2026, 7, 3 + i, 12)))
-      .replace(/\.$/, '')
-      .toUpperCase(),
-  );
+  return Array.from({ length: 7 }, (_, i) => {
+    const day = new Date(Date.UTC(2026, 7, 3 + i, 12));
+    return { short: capitalize(short.format(day).replace(/\.$/, '')), long: long.format(day) };
+  });
 }
 
 /* ---------- Search-param contract (FR-001/005/006/018) ---------- */

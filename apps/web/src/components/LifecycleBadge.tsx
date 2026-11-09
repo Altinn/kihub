@@ -1,43 +1,20 @@
-import { Tag } from '@digdir/designsystemet-react';
 import type { Governance } from '@/lib/governance';
+import { lifecycleTags } from '@/lib/registry-view';
 
-const LABELS: Record<Governance['lifecycleState'], string> = {
-  draft: 'Draft',
-  experimental: 'Experimental',
-  'in-review': 'In Review',
-  approved: 'Approved',
-  recommended: 'Recommended',
-  deprecated: 'Deprecated',
-  archived: 'Archived',
-};
-
-const COLORS: Record<Governance['lifecycleState'], 'neutral' | 'info' | 'success' | 'warning' | 'danger'> = {
-  draft: 'neutral',
-  experimental: 'info',
-  'in-review': 'info',
-  approved: 'success',
-  recommended: 'success',
-  deprecated: 'warning',
-  archived: 'danger',
-};
-
-/** Lifecycle state + approved/recommended indicator (FR-011). */
+/**
+ * Lifecycle state + approved/recommended indicator (FR-011).
+ *
+ * 026: Norwegian labels and plain `ds-tag`s; `lifecycleTags` never repeats a label, so an approved
+ * artifact no longer shows "Approved" twice.
+ */
 export function LifecycleBadge({ governance }: { governance: Governance }) {
   return (
-    <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-      <Tag data-color={COLORS[governance.lifecycleState]} data-size="sm">
-        {LABELS[governance.lifecycleState]}
-      </Tag>
-      {governance.approvalState === 'approved' ? (
-        <Tag data-color="success" data-size="sm">
-          Approved
-        </Tag>
-      ) : null}
-      {governance.recommended ? (
-        <Tag data-color="success" data-size="sm">
-          Recommended
-        </Tag>
-      ) : null}
-    </div>
+    <span className="app-cluster app-cluster--tight">
+      {lifecycleTags(governance).map((tag) => (
+        <span key={tag.label} className="ds-tag" data-color={tag.color}>
+          {tag.label}
+        </span>
+      ))}
+    </span>
   );
 }

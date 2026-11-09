@@ -6,7 +6,7 @@ import { getPageBySlug } from '@/lib/pages';
 import { getPreviewState } from '@/lib/preview';
 
 /**
- * 027 US3 — a standalone CMS page at `/<slug>` (contracts/pages.md §C).
+ * 026/027 US3 — a standalone CMS page at `/<slug>` (contracts/pages.md §C).
  *
  * Next matches the static sections (`/news`, `/laering`, …) before this dynamic segment, so a
  * built-in route always wins (FR-021); `lib/page-slug.ts` refuses those addresses at save time.
@@ -43,12 +43,18 @@ export default async function CmsPage({ params }: Params) {
   if (!page) notFound();
 
   return (
-    <main className="kihub-container">
-      <article className="kihub-section cms-page">
-        <h1 className="kihub-h2 cms-page__title">{page.title}</h1>
-        {page.summary ? <p className="kihub-lead cms-page__summary">{page.summary}</p> : null}
+    <div className="app-container">
+      <article className="app-section app-article">
+        <h1 className="ds-heading" data-size="xl">
+          {page.title}
+        </h1>
+        {page.summary ? (
+          <p className="ds-paragraph app-learning-page__summary" data-size="lg">
+            {page.summary}
+          </p>
+        ) : null}
         <LearningBody body={page.body} />
       </article>
-    </main>
+    </div>
   );
 }

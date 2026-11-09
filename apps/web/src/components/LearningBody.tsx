@@ -3,6 +3,7 @@ import type { JSXConvertersFunction } from '@payloadcms/richtext-lexical/react';
 import { LearningCodeBlock, type LearningCodeBlockNode } from '@/components/LearningCodeBlock';
 import { LearningImage, type LearningImageNode } from '@/components/LearningImage';
 import { LearningVideo, type LearningVideoNode } from '@/components/LearningVideo';
+import { dsConverterOverrides } from '@/lib/ds-richtext-converters';
 import type { LearningPage } from '@/payload-types';
 
 /**
@@ -15,9 +16,13 @@ import type { LearningPage } from '@/payload-types';
  * Note these converters are SYNCHRONOUS — the converter type returns `React.ReactNode`, not a promise
  * (research §3). That is precisely why the highlighter is shiki's synchronous core: no async component
  * and no Suspense boundary is introduced per code block.
+ *
+ * 026: text nodes go through the shared Designsystemet converters (`ds-heading` / `ds-paragraph` /
+ * `ds-list` / `ds-link` / `ds-table`, content headings clamped to h2+ under the page h1).
  */
 const converters: JSXConvertersFunction = ({ defaultConverters }) => ({
   ...defaultConverters,
+  ...dsConverterOverrides(defaultConverters),
   upload: ({ node }) => <LearningImage node={node as unknown as LearningImageNode} />,
   blocks: {
     // The `blocks` map is indexed by block slug and typed loosely, so `node` needs an explicit
@@ -32,7 +37,7 @@ const converters: JSXConvertersFunction = ({ defaultConverters }) => ({
 
 export function LearningBody({ body }: { body: LearningPage['body'] }) {
   return (
-    <div className="lp-page__body kihub-prose">
+    <div className="app-richtext app-learning-page__body">
       <RichText data={body} converters={converters} />
     </div>
   );
