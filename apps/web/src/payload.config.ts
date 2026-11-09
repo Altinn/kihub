@@ -15,6 +15,7 @@ import { LearningPage } from './collections/LearningPage';
 import { LearningSubcategory } from './collections/LearningSubcategory';
 import { Media } from './collections/Media';
 import { News } from './collections/News';
+import { Page } from './collections/Page';
 import { Project } from './collections/Project';
 import { Review } from './collections/Review';
 import { Users } from './collections/Users';
@@ -60,6 +61,8 @@ export default buildConfig({
     LearningSubcategory,
     LearningPage,
     Media,
+    // 027 US3: standalone CMS pages at `/<slug>`.
+    Page,
   ],
   // 014: media storage is env-selected (MEDIA_STORAGE_MODE) — empty in `disk` mode, the Azure Blob
   // adapter in `azure` mode, throwing at startup when that mode is misconfigured (FR-024/025).

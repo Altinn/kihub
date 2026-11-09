@@ -4,8 +4,9 @@ import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { LearningBody } from '@/components/LearningBody';
 import { LearningShell } from '@/components/LearningShell';
-import { getPublishedLearningPageBySlug, readLearningLibrary } from '@/lib/learning';
+import { getLearningPageBySlug, readLearningLibrary } from '@/lib/learning';
 import { buildLearningTree, formatLearningUpdated } from '@/lib/learning-view';
+import { getPreviewState } from '@/lib/preview';
 import type { LearningCategory, LearningSubcategory, User } from '@/payload-types';
 
 /**
@@ -15,6 +16,8 @@ import type { LearningCategory, LearningSubcategory, User } from '@/payload-type
  * are flat (`/laering/<slug>`), so reorganising the library never breaks a shared link (FR-010).
  *
  * A draft or unknown handle resolves to `null` → 404, so drafts never leak (FR-012/FR-032).
+ * 027: an editor in preview gets the latest version instead; the sidebar tree stays published-only,
+ * so a never-published page is simply not highlighted in it.
  *
  * The byline (#140) mirrors the News detail page: name if set, else email, else omitted — so a
  * colleague reading a page can tell who to contact about it.
@@ -28,7 +31,10 @@ function relationTitle(
   return value && typeof value === 'object' ? value.title : '';
 }
 
-const loadPage = cache((slug: string) => getPublishedLearningPageBySlug(slug));
+const loadPage = cache(async (slug: string) => {
+  const { active: preview } = await getPreviewState();
+  return getLearningPageBySlug(slug, { preview });
+});
 
 export async function generateMetadata({
   params,

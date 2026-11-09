@@ -7,7 +7,7 @@ import { cache } from 'react';
 import { EventTypeBadge } from '@/components/EventTypeBadge';
 import { dsConverters } from '@/lib/ds-richtext-converters';
 import { formatEventWhen } from '@/lib/event-dates';
-import { getPublishedEventBySlug } from '@/lib/events';
+import { getEventBySlug } from '@/lib/events';
 import {
   EVENT_FORMAT_LABELS,
   placeText,
@@ -15,6 +15,7 @@ import {
   type EventFormatValue,
   type EventTypeValue,
 } from '@/lib/events-view';
+import { getPreviewState } from '@/lib/preview';
 
 /**
  * 012 US4 (FR-013/014) — the event detail page, Norwegian copy: type badge, when + organizer,
@@ -28,7 +29,10 @@ import {
  * own `<title>`.
  */
 
-const loadEvent = cache((slug: string) => getPublishedEventBySlug(decodeURIComponent(slug)));
+const loadEvent = cache(async (slug: string) => {
+  const { active: preview } = await getPreviewState();
+  return getEventBySlug(decodeURIComponent(slug), { preview });
+});
 
 const bodyConverters = dsConverters();
 

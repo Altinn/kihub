@@ -84,6 +84,25 @@ Active feature: **026-designsystemet-alignment** (DONE — specify + plan + task
 - **Plan files.** `specs/026-designsystemet-alignment/plan.md` (`research.md` R1–R14,
   `contracts/`, `quickstart.md`, and `tasks.md` with per-slice implementation records).
 
+Prior (merged from main): **027-drafts-preview-pages** (specify + plan + tasks 2026-11-05; MVP T001–T030 implemented, uncommitted).
+Turns on Payload's built-in versions + drafts (autosave 2s, maxPerDoc 50; NO scheduled publishing) for
+news, learning-pages, projects and events. This REPLACES the hand-rolled `status` select with
+`_status`. The migration copies status → _status, then backfills ONE `latest` version row per
+existing doc, otherwise `find({ draft: true })` cannot see old content, then drops `status`.
+Shared `lib/content-versions.ts` holds the config, and its `contentAccess` adds
+`readVersions: isEditor`; without it the REST API leaks draft bodies. A «Forhåndsvis» button
+(`admin.preview`) goes to `/api/preview?path=…`. That route requires an Entra session plus a
+FRESH contributor+ role lookup (the JWT role is stale) and has no shared secret.
+`isSafeInternalPath` blocks open redirects. It enables Next draftMode with a 60-min cookie.
+`getPreviewState()` (React cache, fail closed) feeds the by-slug reads `{ preview }` and a
+Designsystemet `Alert` banner. Listings NEVER show drafts. A new flat `pages` collection is
+served at `(app)/[slug]`: static routes win, and `RESERVED_PAGE_SLUGS` has a route-tree drift
+test. The editor is extracted from LearningPage into `lib/article-editor.ts`, and pages reuse
+`LearningBody`. Scheduled publishing was DROPPED during implementation (2026-11-05): no job runner
+and no `payload_jobs` table. Generate migrations/types in `MEDIA_STORAGE_MODE=azure`, otherwise
+they drop `media._objectkey`.
+Constitution → 3.3.0 on main (Pages module), 4.2.0 after merging with 026. Plan: `specs/027-drafts-preview-pages/plan.md`
+(research R1–R15, data-model, contracts ×3, quickstart).
 Prior: **025-inter-brand-colors** (DONE — specify + plan + tasks + implement 2026-10-19).
 (1) **Inter everywhere**: the local override `styles/kihub-fonts.css` points
 `--kihub-font-display` at the Inter `next/font` variable and makes `.kihub-h1`–`h4` and

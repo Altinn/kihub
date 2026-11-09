@@ -4,17 +4,22 @@ import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { dsConverters } from '@/lib/ds-richtext-converters';
-import { getPublishedProjectBySlug } from '@/lib/projects';
+import { getPreviewState } from '@/lib/preview';
+import { getProjectBySlug } from '@/lib/projects';
 
 /**
  * 016 — a single project's page: title, full rich-text description, and a link back to the
- * list. A draft or unknown slug resolves to `null` → 404 (no draft leaks, FR-009).
+ * list. A draft or unknown slug resolves to `null` → 404 (no draft leaks, FR-009). 027: an editor in
+ * preview gets the latest version instead.
  *
  * 026: the /news article patterns — Designsystemet markup, rich text through the Designsystemet
  * converters, and its own `<title>`.
  */
 
-const loadProject = cache((slug: string) => getPublishedProjectBySlug(decodeURIComponent(slug)));
+const loadProject = cache(async (slug: string) => {
+  const { active: preview } = await getPreviewState();
+  return getProjectBySlug(decodeURIComponent(slug), { preview });
+});
 
 const bodyConverters = dsConverters();
 

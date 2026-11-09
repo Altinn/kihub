@@ -1445,3 +1445,9 @@ main :not(pre) > code {
     top: 0;
   }
 }
+
+/* 027 preview banner — shown above the site header while an editor previews drafts
+ * (components/PreviewBanner.tsx). */
+.app-preview-banner {
+  padding-block: var(--ds-size-3);
+}

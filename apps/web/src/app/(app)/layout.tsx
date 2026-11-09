@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { requireSession } from '@/auth/require-session';
+import { PreviewBanner } from '@/components/PreviewBanner';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
+import { getPreviewState } from '@/lib/preview';
 import { ThemedHtml, SITE_TITLE } from '../themed-html';
 
 /** 026: every page gets a descriptive `<title>` (WCAG 2.4.2) — "Page · KI Hub", or "KI Hub". */
@@ -15,12 +17,16 @@ export const metadata: Metadata = SITE_TITLE;
  * footer) exactly once; pages no longer compose their own header.
  * 026: the layout owns the single `<main>` landmark — the skip link's target — so pages render
  * their content without one.
+ *
+ * 027: while an editor's preview is active, every page opens with the preview banner (FR-015).
  */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   await requireSession();
+  const { active: preview } = await getPreviewState();
   return (
     <ThemedHtml>
       <div className="app-shell">
+        {preview ? <PreviewBanner /> : null}
         <SiteHeader />
         <main id="main-content" tabIndex={-1}>
           {children}

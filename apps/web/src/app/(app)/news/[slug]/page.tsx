@@ -4,13 +4,14 @@ import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { dsConverters } from '@/lib/ds-richtext-converters';
-import { getPublishedNewsBySlug } from '@/lib/news';
+import { getNewsBySlug } from '@/lib/news';
 import { formatNewsDate, pickArticleImage, resolveHeroSource } from '@/lib/news-view';
+import { getPreviewState } from '@/lib/preview';
 
 /**
  * 013 US3 (FR-014) — the article page, Norwegian copy: title, byline + Oslo-correct date, tags,
  * hero image, rich-text body, and a link back to "Nyheter". A draft or unknown slug resolves to
- * `null` → 404 (no draft leaks, FR-012).
+ * `null` → 404 (no draft leaks, FR-012). 027: an editor in preview gets the latest version instead.
  *
  * 020 — an uploaded hero is shown WHOLE at reading width with its media alt text (`pickArticleImage`,
  * never a 16:10 card crop, FR-006/007); a legacy `heroImageUrl` renders exactly as before.
@@ -21,7 +22,10 @@ import { formatNewsDate, pickArticleImage, resolveHeroSource } from '@/lib/news-
  */
 
 // One lookup per request, shared by `generateMetadata` and the page.
-const loadArticle = cache((slug: string) => getPublishedNewsBySlug(decodeURIComponent(slug)));
+const loadArticle = cache(async (slug: string) => {
+  const { active: preview } = await getPreviewState();
+  return getNewsBySlug(decodeURIComponent(slug), { preview });
+});
 
 const bodyConverters = dsConverters();
 
