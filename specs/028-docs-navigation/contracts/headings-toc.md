@@ -1,6 +1,6 @@
 # Contract: heading anchors and «På denne siden» (US1)
 
-Research: R1–R5. Spec: FR-001–FR-008.
+Research: R1–R5. Spec: FR-001–FR-008. Baseline: `main` after 026 (Designsystemet converters, `app.css`).
 
 ## A. `lib/headings.ts` (pure)
 
@@ -9,7 +9,9 @@ export type HeadingLevel = 2 | 3 | 4;
 export type Heading = { node: object; level: HeadingLevel; text: string; id: string };
 
 /** Identifiers the portal layout uses; an anchor equal to one of these gets a suffix. */
-export const RESERVED_ANCHORS: ReadonlySet<string>; // 'hovedinnhold', 'site-nav-list'
+export const RESERVED_ANCHORS: ReadonlySet<string>;
+// 'main-content', 'site-menu', 'site-menu-heading', 'user-menu', 'sign-out-form',
+// 'footer-links-heading', 'footer-contacts-heading'
 
 /** Every h2–h4 heading of a Lexical body, in document order, with unique anchors. */
 export function extractHeadings(body: unknown): Heading[];
@@ -22,7 +24,9 @@ export function toTocTree(headings: Heading[]): TocItem[];
 ### A1. Walk
 
 Depth-first over `root.children` and every node's `children`. A node is a heading when
-`type === 'heading'` and `tag` is `h2`, `h3` or `h4`; other tags are ignored (the editor allows none).
+`type === 'heading'`; its `level` is the rendered level, `richTextHeading(Number(tag.slice(1))).tag`
+(`lib/ds-richtext.ts`, minimum level 2), and only levels 2–4 are kept. So the extractor and the
+converter agree on the level even if an h1 node ever reaches the body.
 `node` is the object itself (used as a `WeakMap` key by the renderer).
 
 ### A2. Text
@@ -44,66 +48,85 @@ Examples:
 - «`agentctl new`» (inline code) → `agentctl-new`
 - «—» → `avsnitt`; a second «🙂» → `avsnitt-2`
 - «Steg», «Steg 2», «Steg» → `steg`, `steg-2`, `steg-3`
-- «Hovedinnhold» → `hovedinnhold-2`
+- «Main content» → `main-content-2`
 
 ### A4. Tree
 
 h2 starts a top-level item. h3 nests under the latest h2 (or is top-level if none). h4 nests under the
 latest h3 after the latest h2, else under the latest h2, else top-level.
 
-## B. Renderer (`components/LearningBody.tsx`)
+## B. Renderer
 
-- `LearningBody({ body, headings? })`: computes `headings = extractHeadings(body)` when not given, and a
-  `WeakMap` from node to id.
-- Converter `heading` (h2–h4):
+### B1. `lib/ds-richtext-converters.tsx`
+
+`DsRichTextOptions` gains `headingIds?: WeakMap<object, { id: string; text: string }>`. When the
+heading node is in the map, the `heading` override renders:
 
 ```tsx
-<div className="kihub-heading">
-  <Tag id={id}>{children}</Tag>
-  <a className="kihub-heading__anchor kihub-focusable" href={`#${id}`}
+<div className="app-heading">
+  <Tag id={id} className="ds-heading" data-size={size}>{children}</Tag>
+  <a className="ds-link app-heading__anchor" href={`#${id}`}
      aria-label={`Lenke til avsnittet «${text}»`}>#</a>
 </div>
 ```
 
-  A heading without an id in the map (should not happen) falls back to the plain tag.
+Otherwise (no option, or a node not in the map) the output is exactly today's
+`<Tag className="ds-heading" data-size={size}>`. News, projects, events, dialogs and READMEs pass no
+map and do not change.
+
+### B2. `components/LearningBody.tsx`
+
+- `LearningBody({ body, headings? })`: computes `headings = extractHeadings(body)` when not given,
+  builds the map, and creates its converters inside the component (they are a module constant today)
+  with `dsConverterOverrides(defaultConverters, { headingIds })`.
 - Callers that also render a TOC compute `extractHeadings` once and pass it to both.
 
 ## C. `components/PageToc.tsx` (server)
 
 - Props: `{ headings: Heading[] }`. Renders nothing when `headings.length < 2`.
-- Markup:
+- Markup (Designsystemet details; no Designsystemet TOC component exists):
 
 ```tsx
-<details className="page-toc">
-  <summary className="page-toc__title kihub-focusable">På denne siden</summary>
-  <nav aria-label="Innhold på siden" className="page-toc__nav">
-    <ol className="page-toc__list">{/* TocItem → <li><a href="#id">text</a>{children && <ol>…</ol>}</li> */}</ol>
+<details className="ds-details app-toc" data-color="neutral">
+  <summary>På denne siden</summary>
+  <nav aria-label="Innhold på siden" className="app-toc__nav">
+    <ol className="app-toc__list">{/* TocItem → <li><a className="ds-link" href="#id">text</a>{children && <ol>…</ol>}</li> */}</ol>
   </nav>
 </details>
 ```
 
-- Placed inside the article between the header (title, meta, summary) and `LearningBody`, on both the
-  CMS page route and the KI Læring page route.
+- Placed inside `.app-article` between the header (breadcrumbs, kicker, title, meta, summary) and
+  `LearningBody`, on both the CMS page route and the KI Læring page route.
 
-## D. CSS (`portal.css`, «028» section, tokens only)
+## D. CSS (`styles/app.css`, new «028» section)
 
-- `.kihub-heading`: relative wrapper; `.kihub-heading__anchor` visually hidden until
-  `.kihub-heading:hover` or `:focus-visible`; minimum 24×24px target (WCAG 2.5.8).
-- `.kihub-prose :is(h2, h3, h4)[id]`: `scroll-margin-top: var(--kihub-space-6)`.
+Only `--ds-*` tokens and plain layout widths; no custom properties of the app's own (constitution
+Design System §3).
+
+- `.app-heading`: relative wrapper; `.app-heading__anchor` visually hidden until `.app-heading:hover`
+  or `:focus-visible`; minimum 24×24px target (WCAG 2.5.8).
+- The rich-text rhythm rules that select `.ds-heading` as a direct child (`:not(:first-child)` and
+  `+ *`) also select `.app-heading`: `:is(.ds-heading, .app-heading)`.
+- `.app-richtext :is(h2, h3, h4)[id]`: `scroll-margin-top: var(--ds-size-6)`.
 - `:target` heading: a visible marker (left border or background in an accent token), no animation.
 - `@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth } }` only; never
   unconditional.
-- `.lp-page`, `.cms-page` (article): at `min-width: 1200px`, `display: grid;
-  grid-template-columns: minmax(0, 1fr) 13rem; column-gap: var(--kihub-space-10)`; header and body in
-  column 1; `.page-toc` in column 2, `grid-row: 1 / span 99`, `position: sticky; top: var(--kihub-space-6);
-  max-height: calc(100vh - 2 * var(--kihub-space-6)); overflow: auto`; summary hidden and details forced
-  open (same two rules as `.lp-shell__disclosure`).
-- Below 1200px: `.page-toc` is a bordered collapsed disclosure styled like `.lp-shell__disclosure-title`.
+- `.app-article:has(> .app-toc)` at `width >= 75rem`: `display: grid; grid-template-columns:
+  minmax(0, 1fr) 13rem; column-gap: var(--ds-size-10)`; every other child in column 1; `.app-toc` in
+  column 2, `grid-row: 1 / span 99`, `position: sticky; top: var(--ds-size-6); max-height: calc(100vh -
+  2 * var(--ds-size-6)); overflow: auto`; summary hidden and details forced open (the two rules
+  `.app-learning__disclosure` uses).
+- Narrower: `.app-toc` is the default collapsed `ds-details`.
 
 ## E. Tests
 
-- Unit `headings.test.ts`: A1–A4 examples above; formatting and links; skipped levels; reserved
-  anchors; empty body; `null` body.
+- Unit `headings.test.ts`: A1–A4 examples above; formatting and links; skipped levels; an h1 node
+  counted as h2; reserved anchors; empty body; `null` body.
+- Unit `reserved-anchors.test.ts`: reads `app/themed-html.tsx`, `app/(app)/layout.tsx` and the
+  components they render (`SiteHeader`, `SiteNav`, `UserMenu`, `SiteFooter`, `PreviewBanner`), collects
+  `id="…"` literals and string constants named `*_ID` (plus their `${…}-heading` forms), and fails if
+  one is missing from `RESERVED_ANCHORS`.
 - Unit render test (`*.test.ts`, `react-dom/server`, no JSX: vitest includes only `tests/**/*.test.ts`
   in a `node` environment): `LearningBody` + `PageToc` from one fixture; every TOC `href` equals `#` +
-  an existing heading `id`; ids are unique.
+  an existing heading `id`; ids are unique; without `headingIds`, `dsConverterOverrides` output is
+  unchanged (existing `ds-richtext.test.ts` keeps passing).

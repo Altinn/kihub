@@ -59,16 +59,17 @@ An editor opens the page «Koble til agenten fra en app» in the CMS, sets «Ove
 6. **Given** a page without a parent, **When** this feature is rolled out, **Then** its address is exactly what it was before.
 7. **Given** an editor previews a draft child page whose parent is set in the draft, **When** they choose «Forhåndsvis», **Then** the draft opens at its future nested address.
 8. **Given** an editor deletes a parent page, **When** an employee opens a child's nested address, **Then** they are sent to the child's new one-segment address.
+9. **Given** a published child whose parent has never been published, **When** a reader opens `/<parent>/<child>` or `/<child>`, **Then** they get the child at `/<child>`, and nothing on the page names the parent.
 
 ---
 
 ### User Story 3 - Move between the pages of a section with a menu (Priority: P2)
 
-An employee on `/kom-i-gang/gjor-repoet-klart-for-agenter` sees a menu on the left titled «Kom i gang» that lists the section's pages in the editor's order, with the current page marked. They click the next page in the list. On a phone the menu is a collapsed control at the top of the page. Keyboard users can skip the menus and go straight to the content.
+An employee on `/kom-i-gang/gjor-repoet-klart-for-agenter` sees a menu on the left titled «Kom i gang» that lists the section's pages in the editor's order, with the current page marked. They click the next page in the list. On a phone the menu is a collapsed control at the top of the page. The menu sits where KI Læring's «Utforsk innhold» menu sits, so the page works like the KI Læring pages employees already know.
 
 **Why this priority**: It completes the documentation experience, but depends on US2's hierarchy, and readers can already get by with the landing page and US1's table of contents.
 
-**Independent Test**: With a published root page and three published children (orders 30, 10, 20) and one draft child, open a child page as a reader. Confirm the menu shows the root and the three published children in order 10, 20, 30, marks the current page, omits the draft, collapses on a phone, works without JavaScript, and that «Hopp til hovedinnhold» moves focus past it.
+**Independent Test**: With a published root page and three published children (orders 30, 10, 20) and one draft child, open a child page as a reader. Confirm the menu shows the root and the three published children in order 10, 20, 30, marks the current page, omits the draft, collapses on a phone, and works without JavaScript.
 
 **Acceptance Scenarios**:
 
@@ -78,7 +79,7 @@ An employee on `/kom-i-gang/gjor-repoet-klart-for-agenter` sees a menu on the le
 4. **Given** two children with the same order, **When** the menu is shown, **Then** they are sorted alphabetically by title.
 5. **Given** a page that has no parent and no children (for example «Om KI Hub»), **When** it is shown, **Then** it has no section menu and looks as it does today.
 6. **Given** a phone-width screen, **When** a page in a section is opened, **Then** the menu is collapsed above the content and can be opened and closed with keyboard, touch and without JavaScript.
-7. **Given** a keyboard user on any portal page, **When** they press Tab once after the page loads, **Then** a «Hopp til hovedinnhold» link appears, and following it moves focus to the start of the main content, past the site header and any section menu.
+7. **Given** a keyboard or screen-reader user on a page in a section, **When** they use the existing «Hopp til hovedinnhold» link (026), **Then** focus moves to the main content area, where the section menu is a named navigation landmark they can tab through or jump past, as on KI Læring pages.
 8. **Given** a section root that is not published, **When** an employee opens a published child, **Then** the child is shown without a section menu.
 
 ---
@@ -88,7 +89,7 @@ An employee on `/kom-i-gang/gjor-repoet-klart-for-agenter` sees a menu on the le
 - **Headings without letters or digits** (for example only «—» or an emoji) get the anchor `avsnitt`, and duplicates of that get `avsnitt-2`, `avsnitt-3`.
 - **Heading text with formatting** (bold, inline code, a link) produces the anchor from the plain text only; the table of contents shows the plain text.
 - **Anchors change when heading text changes.** A deep link to an old anchor then opens the top of the page. This is accepted (it is how docs.altinn.studio and GitHub behave) and editors are told so.
-- **Anchors never collide with identifiers the portal layout itself uses** (for example the site menu list); a heading whose anchor would collide gets a suffix.
+- **Anchors never collide with identifiers the portal layout itself uses** (for example `main-content`, the skip link's target); a heading whose anchor would collide gets a suffix.
 - **Skipped heading levels** (an h4 directly under an h2) are listed under the nearest higher heading in the table of contents, not left out.
 - **A very long table of contents** scrolls on its own and never covers the page content; at high zoom it switches to the collapsed variant.
 - **Addresses with an unknown or misspelt prefix** (`/feil/koble-til-agenten-fra-en-app`) send the reader to the page's current address, because the last segment identifies the page.
@@ -96,7 +97,7 @@ An employee on `/kom-i-gang/gjor-repoet-klart-for-agenter` sees a menu on the le
 - **More than three segments, or a segment that is not a valid address**, gives the normal "not found" without revealing anything.
 - **Changing a page's own address segment** breaks links to the old address, as it does today (only moves are redirected).
 - **Moving a page and moving it back** must not produce a redirect loop in browsers that cached an earlier redirect.
-- **A parent that is unpublished or a draft**: its published children stay reachable at their full address (which uses the parent's address segment), but readers see no section menu until the root is published.
+- **A parent that is unpublished or a draft**: its published children stay reachable, but at their one-segment address `/<segment>`, so no address a reader sees contains the segment of a page they cannot see (FR-011). Readers see no section menu until the root is published. Once the whole chain is published, the one-segment address redirects to the nested one (FR-013). In preview the page opens at its nested address (FR-016).
 - **A parent deleted**: its children become top-level pages, and their old nested addresses redirect to the new ones.
 - **Concurrent edits** that would together create a cycle (two editors setting each other's pages as parent) are refused by the save that would close the cycle.
 - **A child's address segment equal to a reserved word** (`news`) stays refused, so that any page can later become top-level without colliding with a built-in section.
@@ -121,7 +122,7 @@ An employee on `/kom-i-gang/gjor-repoet-klart-for-agenter` sees a menu on the le
 
 - **FR-009**: A page MUST be able to have an optional parent page («Overordnet side») and a number for its position among its siblings («Rekkefølge», default 100; lower first, equal values alphabetical by title), editable in the CMS.
 - **FR-010**: The hierarchy MUST be at most three levels deep (a top-level page, its children and their children). A page MUST NOT be its own parent or a descendant of itself. Violations MUST be refused with a Norwegian message, on the CMS form and on the API path.
-- **FR-011**: A page's address MUST be its ancestors' address segments followed by its own, separated by `/` (for example `/kom-i-gang/koble-til-agenten-fra-en-app`). A page without a parent keeps its address `/<segment>`.
+- **FR-011**: A page's address MUST be its ancestors' address segments followed by its own, separated by `/` (for example `/kom-i-gang/koble-til-agenten-fra-en-app`). A page without a parent keeps its address `/<segment>`. For readers, an address MUST NOT contain the segment of a page that is not published: when any ancestor of a published page is unpublished, readers get the page at `/<segment>`.
 - **FR-012**: A page's own address segment MUST stay unique across all pages and keep the existing rules (one segment; lowercase a–z, digits and hyphens; derived from the title when blank; reserved addresses refused), regardless of where the page sits in the hierarchy.
 - **FR-013**: When a request names a published page by its last segment but the path before it differs from the page's current address (an old flat address, a page that has moved, a misspelt prefix), the portal MUST send the reader to the current address with a temporary redirect, keeping any query and letting the browser keep the `#anchor`.
 - **FR-014**: The portal MUST answer with the normal "not found" when the address has more than three segments, any segment is not a valid address segment, the first segment is a reserved address, or the last segment does not name a published page (for readers) or any page (for editors in preview). It MUST NOT reveal whether a draft exists.
@@ -137,7 +138,7 @@ An employee on `/kom-i-gang/gjor-repoet-klart-for-agenter` sees a menu on the le
 - **FR-021**: The section menu MUST list CMS Pages only, and only published ones; drafts never appear in it, also not in preview.
 - **FR-022**: The section menu MUST be a navigation landmark named after the section's top-level page, sit beside the content and stay visible while scrolling on wide screens, and be a collapsed control above the content on narrow screens; both MUST work without JavaScript.
 - **FR-023**: When the section's top-level page is not published, readers MUST see the page without a section menu.
-- **FR-024**: Every portal page MUST start with a «Hopp til hovedinnhold» link that is the first focusable element, is visible when focused and moves focus to the start of the main content.
+- **FR-024**: The section menu MUST sit inside the page's main content area, before the article, as KI Læring's navigation does (026): the portal keeps exactly one main landmark and the existing «Hopp til hovedinnhold» link (026, every employee-site page) needs no change.
 - **FR-025**: Pages without a parent and without children MUST render as they do today, apart from US1's anchors and table of contents.
 
 **Scope and governance**
@@ -190,3 +191,8 @@ Not yet confirmed (defaults chosen by the spec author; change here if the team d
 - KI Læring pages also get anchors and a table of contents, and their navigation is otherwise unchanged (FR-026).
 - Headings get a visible link to themselves in the first version (FR-006).
 - The table of contents is shown from two headings (FR-004).
+
+### Review 2026-11-09 (Altinn/kihub#181)
+
+- Spec rebased on `main` after the Designsystemet redesign (026, #169): rich-text headings now come from the shared Designsystemet converters, the layout owns the single `<main id="main-content">` and a skip link already exists on every employee-site page. FR-024 now only requires the section menu to follow KI Læring's landmark pattern; the skip-link work is removed from US3.
+- A published child under an unpublished parent: readers get the one-segment address, so the parent's segment never leaks (FR-011, edge cases). Chosen over accepting the leak because it keeps FR-014's «reveal nothing about drafts» without exceptions.

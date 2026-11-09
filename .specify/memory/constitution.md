@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report
-Version change: 3.3.0 → 3.4.0
+Version change: 4.2.0 → 4.3.0
 Bump rationale: MINOR. Materially expands the **Pages** module guidance for
   specs/028-docs-navigation: Pages may form a hierarchy of at most three levels, served at nested
   addresses (`/<parent>/<slug>`), with a section menu of published Pages. Replaces «flat,
   one-segment address». No principle is removed or redefined, and the Registry principles are
-  untouched. Expanded module guidance ⇒ MINOR (same policy as 3.1.0–3.3.0).
+  untouched. Expanded module guidance ⇒ MINOR (same policy as 3.1.0–4.2.0).
 Modified principles: none
 Modified sections:
   - Product Modules — **Pages** bullet: hierarchy (≤ 3 levels), nested addresses whose last segment
@@ -17,13 +17,16 @@ Notes on constraints deliberately NOT changed:
   - Learning keeps its flat `/laering/<slug>` addresses and its own navigation.
   - Principle VII (Start Simple): addresses are computed from the hierarchy, not stored; no new
     dependency, collection or global.
+  - Design System (4.1.0/4.2.0) unchanged: the table of contents, heading links and section menu
+    use Designsystemet components and `--ds-*` tokens only, and reuse the existing skip link.
 Templates requiring updates:
   ✅ .specify/templates/plan-template.md (generic gates — compatible)
   ✅ .specify/templates/spec-template.md (compatible)
   ✅ .specify/templates/tasks-template.md (compatible)
   ⚠ CLAUDE.md — Spec Kit active-feature block updated when 028 is implemented (tasks T035)
 Follow-up TODOs: none
-Previous: 3.2.0 → 3.3.0 (2026-11-06) added Pages as the sixth Product Module (027).
+Previous: 4.1.0 → 4.2.0 (2026-11-09) merged 026 Designsystemet alignment (4.1.0) with 027 Pages
+  (3.3.0).
 -->
 
 # KI Hub Constitution
@@ -175,8 +178,8 @@ KI Hub MUST be built as exactly two surfaces with distinct audiences:
 1. **Employee-facing web app** — for ALL employees. Browsing and reading News, the Calendar,
    Learning content, Projects, Pages, and the Registry, plus light interaction (search, filters, copy
    install commands and code samples, view governance state).
-   This surface MUST be built on the Designsystemet foundation with the KI Hub theme (see
-   Technology & Architecture Constraints).
+   This surface MUST be built on the Designsystemet foundation with Digdir's official
+   Designsystemet theme, and MUST meet WCAG 2.2 AA (see Technology & Architecture Constraints).
 
 2. **Editor back-office (Payload admin)** — for a small set of editors and admins. Authoring News,
    creating calendar Events, curating Learning content and its media assets, authoring Projects
@@ -199,26 +202,31 @@ lets each optimize for its audience, and leverages Payload's admin instead of re
   the two surfaces of this one application. Shared logic lives in `packages/` (e.g.
   `artifact-schema`, `discovery-core`, `github-client`, `governance-core`).
 - **Design System (MANDATORY foundation for the employee-facing app)**: All **employee-facing**
-  UI MUST build on Digdir's Designsystemet (https://github.com/digdir/designsystemet), used the
-  way Designsystemet itself prescribes (designsystemet.no): as a shared foundation that an
-  organization layers its own visual identity and components on top of. Concretely:
-  1. **Theme**: KI Hub's visual profile MUST be defined through Designsystemet's official theming
-     pipeline — `apps/web/designsystemet.config.json` → generated design tokens + theme CSS
-     (regenerate with `pnpm --filter web theme:build`). The app loads the generated KI Hub theme,
-     not the default digdir theme. Brand values in the config are pinned to (and kept in sync
-     with) the "KIHub Design System" design project.
-  2. **Token layer**: the kihub token/component layer (`apps/web/src/styles/kihub/`, synced from
-     the design project) is the styling API for KI Hub's own components. Its color tokens MUST
-     resolve through the generated Designsystemet theme (the `kihub-ds-bridge.css` mapping), so
-     Designsystemet components and KI Hub components provably share one palette with one value
-     source.
-  3. **Components**: custom presentational components are sanctioned and MUST style themselves
-     exclusively via the shared token layer (`--kihub-*` / `--ds-*` tokens — no hardcoded colors,
-     type, or spacing values). Designsystemet React components remain the default choice for
-     behavioral/interactive primitives (form controls, dialogs, complex widgets) unless the
-     approved design requires a custom treatment.
-  4. Restyling or forking Designsystemet primitives remains **PROHIBITED** — when a primitive
-     cannot express the approved design, build a custom component on the tokens instead.
+  UI MUST build on Digdir's Designsystemet (https://github.com/digdir/designsystemet, documented at
+  designsystemet.no) and follow Digdir's visual profile (design.digdir.no). Concretely:
+  1. **Theme**: the visual profile MUST be Digdir's official Designsystemet theme, defined in
+     `apps/web/designsystemet.config.json` and generated through Designsystemet's own pipeline
+     (`pnpm --filter web theme:build`). Its values follow Digdir's profile — accent `#0062BA`,
+     brand1 Rød `#F45F63`, brand2 Gul `#E5AA20`, brand3 Blå `#1E98F5`, neutral Blåsvart `#1E2B3C` —
+     with no hand-pinned overrides unless a documented reason exists. The full-strength Digdir
+     graphic colours (brand1–3 `base-*`) MUST be used only as graphics, never as a text colour or
+     behind text. Their light generated tints (`background-tinted`, `surface-tinted`,
+     `surface-hover`) MAY be surfaces behind Blåsvart text, as digdir.no uses them.
+  2. **Components**: where Designsystemet provides a component or pattern, it MUST be used. By
+     default it is rendered as native HTML with Designsystemet's CSS classes and data attributes
+     (`ds-*`), in Server Components; Designsystemet's React wrappers are used only where they add
+     behaviour native HTML cannot. `@digdir/designsystemet-web` provides progressive enhancement;
+     the UI MUST keep working without client-side scripting wherever the platform allows.
+  3. **Custom components** are allowed only where Designsystemet has no equivalent (for example
+     the site header and footer, the event calendar, code highlighting). They — and all app CSS —
+     MUST style themselves exclusively with `--ds-*` tokens: no hard-coded colour, type, spacing,
+     radius or shadow values, no custom properties of the app's own (only Designsystemet tokens and
+     documented `--dsc-*` variables), and no inline visual styles except genuinely per-item data.
+  4. Restyling or forking Designsystemet primitives remains **PROHIBITED**, except through their
+     documented `--dsc-*` component variables.
+  5. **Accessibility**: the employee-facing UI MUST meet WCAG 2.2 AA — including a skip link to
+     the single main landmark, one h1 and no skipped heading levels per page, visible focus on
+     every surface, text that scales with the user's font size, and reflow at 320 CSS px.
   The **Payload admin back-office is explicitly EXEMPT** from this requirement (Principle VIII);
   it uses Payload's own admin UI.
 - **Repositories**: Two-repo model — `kihub` (this platform) and `ai-artifacts` (AI-artifact
@@ -258,6 +266,8 @@ lets each optimize for its audience, and leverages Payload's admin instead of re
   state-transition rules MUST have automated tests. Integration tests cover manifest parsing and
   Payload write paths. New modules (News, Events, Learning, Projects, Pages) MUST test their access
   control and any state/validation rules.
+- **Accessibility**: Changes to the employee-facing UI MUST pass an automated WCAG 2.2 AA check
+  (axe) with no violations on the affected routes, plus a keyboard pass, before they ship.
 - **Reviews**: All PRs MUST verify constitution compliance; any added complexity MUST be justified
   against a concrete phase requirement.
 
@@ -275,4 +285,4 @@ Versioning policy (semantic):
 Compliance: Plans and reviews MUST check against these principles. Use `CLAUDE.md` and `.specify/`
 templates for runtime development guidance.
 
-**Version**: 3.4.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-11-09
+**Version**: 4.3.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-11-09

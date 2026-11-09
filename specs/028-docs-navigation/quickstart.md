@@ -32,6 +32,9 @@ In the CMS, create and publish:
 8. In another page's body, add a link `/om-ki-hub#kontakt`, publish, follow it: it lands on «Kontakt».
 9. Open a KI Læring page with several headings: same anchors and TOC, beside «Utforsk innhold».
 10. At 1280px and 400% zoom: the TOC is the collapsed variant and covers nothing.
+11. Compare with `main`: spacing above and below headings is unchanged, also for a heading first in the
+    body and two headings in a row.
+12. Run axe on `/kom-i-gang` and a KI Læring page: no violations.
 
 ## 2. US2 — hierarchy and nested addresses
 
@@ -54,8 +57,12 @@ In the CMS, create and publish:
    on `/kom-i-gang/...` with no redirect loop.
 9. Delete «Agenter» (after moving the page back): no orphan errors; any child of it is now top-level.
 10. «Om KI Hub» is still at `/om-ki-hub` and looks as before (apart from US1).
+11. Create a page «Utkast-seksjon» saved as **draft only**, and publish a page «Barn» with it as parent.
+    As a reader, open `/utkast-seksjon/barn`: redirected to `/barn`, and nothing on the page names
+    «Utkast-seksjon». As editor in preview, «Forhåndsvis» on «Barn» opens `/utkast-seksjon/barn`.
+    Publish «Utkast-seksjon»; as a reader, `/barn` now redirects to `/utkast-seksjon/barn`.
 
-## 3. US3 — section menu and skip link
+## 3. US3 — section menu
 
 1. As a reader on `/kom-i-gang/gjor-repoet-klart-for-agenter`: a menu titled «Kom i gang» lists «Kom i
    gang», then «Kom i gang med agentctl», «Koble til agenten fra en app», «Gjør repoet klart for
@@ -64,8 +71,9 @@ In the CMS, create and publish:
 3. At 375px: the menu is a closed control above the content; works with keyboard, touch and without JS.
 4. As an editor in preview of the draft: the page renders, and the menu still lists published pages only.
 5. Unpublish «Kom i gang»: as a reader, its children render without a menu (and stay reachable).
-6. On `/`, `/news`, `/laering/<page>` and a section page, press Tab once: «Hopp til hovedinnhold»
-   appears; Enter moves focus past the header (and the section menu) to the content.
+6. On a section page, press Tab once: the existing «Hopp til hovedinnhold» (026) appears; Enter moves
+   focus to the main content, where the section menu comes first, as on a KI Læring page. With
+   VoiceOver, the landmarks list shows the section menu named «Kom i gang» and «Innhold på siden».
 7. Run axe (browser extension or `@axe-core/cli`) on a section page and a KI Læring page: no new
    violations compared with `main`.
 

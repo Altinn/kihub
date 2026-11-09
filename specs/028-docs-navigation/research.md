@@ -1,23 +1,34 @@
 # Research: Documentation Navigation for Pages
 
-Feature: [spec.md](./spec.md). Baseline: `main` at `0e95ae6` (2026-11-06), Payload 3.92.1, Next.js 16.4.1.
+Feature: [spec.md](./spec.md). Baseline: `main` at `f6f72d0` (2026-11-09, after the 026 Designsystemet redesign, #169), Payload 3.92.1,
+Next.js 16.4.1. The spec was first written against `0e95ae6` and rebased in review; R1, R2, R4, R5 and R12
+changed with it.
 
 ## R1 — Headings have no `id` today
 
-**Finding**: `components/LearningBody.tsx` passes `defaultConverters` through for headings. In
-`@payloadcms/richtext-lexical@3.92.1` the heading converter
-(`dist/features/converters/lexicalToJSX/converter/converters/heading.js`) is
-`<NodeTag>{children}</NodeTag>`: no attributes. Pages (`[slug]/page.tsx`) and KI Læring pages
-(`laering/[slug]/page.tsx`) both render through `LearningBody`, so neither has anchors.
+**Finding**: `components/LearningBody.tsx` composes Payload's `defaultConverters` with
+`dsConverterOverrides` from `lib/ds-richtext-converters.tsx` (026 R9). Its `heading` converter renders
+`<Tag className="ds-heading" data-size={size}>`, where `richTextHeading` (`lib/ds-richtext.ts`) clamps
+the level below the page's h1 and picks the Designsystemet size. No `id`. Pages (`[slug]/page.tsx`)
+and KI Læring pages (`laering/[slug]/page.tsx`) both render through `LearningBody`, so neither has
+anchors. The same overrides serve news, projects, events, subscriptions dialogs and READMEs.
 
-**Decision**: override `heading` in `LearningBody`'s converters (R3). One change covers both content types.
+**Decision**: give `dsConverterOverrides` an optional `headingIds` option (a `WeakMap` from Lexical
+node to `{ id, text }`, R3). When it is present, the heading converter adds the `id` and the self-link
+(R4); when it is absent, output is unchanged, so only `LearningBody` (Pages and KI Læring) gets anchors
+in this feature. The rendered tag still comes from `richTextHeading`, and `extractHeadings` uses the
+same function for its levels, so the table of contents nests by the levels readers actually get.
 
 ## R2 — Anchor format: ASCII via `slugify`
 
 **Decision**: anchors come from `lib/slug.ts`'s `slugify` (æ → ae, ø → o, å → a, NFKD without marks,
 non-alphanumeric runs → `-`, trimmed). Duplicates get `-2`, `-3`, … in document order. Empty result
-→ `avsnitt`. A small reserved set (`RESERVED_ANCHORS`, today `site-nav-list` and `hovedinnhold`)
-gets a suffix too.
+→ `avsnitt`. A small reserved set (`RESERVED_ANCHORS`: the fixed `id`s the employee-site layout
+renders, today `main-content`, `site-menu`, `site-menu-heading`, `user-menu`, `sign-out-form`,
+`footer-links-heading` and `footer-contacts-heading`) gets a suffix too. Ids from React's `useId`
+(`ColorSchemeSwitch`) contain characters `slugify` never produces, so they cannot collide. A unit test scans the layout
+components for `id` literals and `*_ID` constants and fails when one is missing from the set, so the
+list cannot drift (review note 4).
 
 **Rationale**:
 
@@ -45,8 +56,8 @@ gets a suffix too.
 Lexical JSON depth-first and returns `{ node, level, text, id }[]` for every `heading` node with tag
 `h2`–`h4`. `text` is the concatenation of descendant `text` nodes (so bold, inline code and link text
 count), with `linebreak` as a space, whitespace collapsed and trimmed. `LearningBody` calls it once per
-render, builds a `WeakMap<node, id>`, and passes a heading converter that looks the node up. The
-table of contents receives the same list.
+render, builds a `WeakMap` from node to `{ id, text }`, and passes it to `dsConverterOverrides` (R1),
+whose heading converter looks the node up. The table of contents receives the same list.
 
 **Rationale**: the converter and the TOC cannot disagree, because both read the ids computed from the
 same objects in the same order. A `WeakMap` keyed on node identity needs no counters inside the
@@ -67,12 +78,12 @@ of the per-render map, created inside the component.
 ## R4 — Heading self-links
 
 **Decision**: the converter renders the heading followed by a sibling link, wrapped in a
-`div.kihub-heading`:
+`div.app-heading`:
 
 ```html
-<div class="kihub-heading">
-  <h2 id="for-du-starter">Før du starter</h2>
-  <a class="kihub-heading__anchor" href="#for-du-starter" aria-label="Lenke til avsnittet «Før du starter»">#</a>
+<div class="app-heading">
+  <h2 id="for-du-starter" class="ds-heading" data-size="md">Før du starter</h2>
+  <a class="ds-link app-heading__anchor" href="#for-du-starter" aria-label="Lenke til avsnittet «Før du starter»">#</a>
 </div>
 ```
 
@@ -83,23 +94,33 @@ screen readers («Før du starter, lenke, #»). A sibling keeps the heading clea
 reachable. docs.altinn.studio uses a non-focusable `<span>` with a clipboard script, which keyboard
 users cannot reach; a plain link works without JavaScript and can be copied with the context menu.
 
+**Consequence for the rich-text CSS** (review note 3): `app.css` spaces rich text with child and
+sibling selectors (`.app-richtext > * + *`, `> .ds-heading:not(:first-child)`, `> .ds-heading + *`).
+With the wrapper, the heading is no longer a direct child, so the two heading rules must also match
+`.app-heading` (`:is(.ds-heading, .app-heading)`). US1 checks the vertical rhythm before and after on a
+page with every heading level, a heading first in the body and two headings in a row.
+
 **Alternative**: a copy button (`CopyButton` exists). Needs client JS per heading; can be added later.
 
 ## R5 — Table of contents layout without duplicate markup
 
-**Decision**: `components/PageToc.tsx` (server) renders one
-`<details class="page-toc"><summary>På denne siden</summary><nav aria-label="Innhold på siden">…</nav></details>`,
-placed in the article between the header (title, meta, summary) and the body. The list is nested
-`<ol>`s: h3 under the preceding h2, h4 under the preceding h3 (or h2 when no h3 precedes it).
+**Decision**: `components/PageToc.tsx` (server) renders one Designsystemet details element,
+`<details class="ds-details app-toc" data-color="neutral"><summary>På denne siden</summary><nav aria-label="Innhold på siden">…</nav></details>`,
+placed in the article between the header (breadcrumbs, title, meta, summary) and the body. The list is
+nested `<ol>`s of `ds-link`s: h3 under the preceding h2, h4 under the preceding h3 (or h2 when no h3
+precedes it). Designsystemet has no table-of-contents component; the `/bidra` guide's hand-written
+`app-guide__toc` (026 slice 6) is the visual precedent.
 
-- **≥ 1200px**: the article is a two-column grid (`minmax(0, 1fr) 13rem`); the TOC is placed in
-  column 2 spanning all rows, `position: sticky`, `max-height: calc(100vh - <space>)`, `overflow: auto`.
-  The `<details>` is forced open and its `<summary>` hidden, the same two-rule technique `LearningShell`
-  uses (`::details-content` and the child display rule).
-- **< 1200px**: single column; the collapsed `<details>` sits where it is in the DOM, before the body.
+- **Wide screens** (`width >= 75rem`): the article is a two-column grid (`minmax(0, 1fr) 13rem`); the
+  TOC is placed in column 2 spanning all rows, `position: sticky`, with a `max-height` and its own
+  scrolling. The `<details>` is forced open and its `<summary>` hidden, the same two-rule technique
+  `.app-learning__disclosure` uses (`::details-content` and the child display rule).
+- **Narrower**: single column; the collapsed `<details>` sits where it is in the DOM, before the body.
 
-The 1200px breakpoint follows from the widths: container 1200px, section menu 15rem, gap 2.5rem,
-TOC 13rem and gap leave about 660px for text, close to `--kihub-prose-width` (640px).
+The breakpoint follows from the widths: `.app-container` is at most 75rem of content, KI Læring's
+menu takes 15rem plus a `--ds-size-10` gap, and the TOC 13rem plus a gap, leaving about 40rem for text,
+the reading measure `app.css` already uses. All values are `--ds-*` tokens or plain rem layout widths
+(constitution Design System §3: no app-defined custom properties).
 
 **Rationale**: one emission means one landmark for assistive technology and no hidden duplicate. DOM
 order (title → TOC → body) is also a sensible reading order on wide screens.
@@ -157,6 +178,12 @@ nested-docs plugin uses the same field name, so it is an established convention.
 back B → A, a cached 308 from A to B plus a fresh redirect from B to A would loop until the cache is
 cleared. A temporary redirect costs one extra request per old link and cannot loop.
 
+**Unpublished ancestors** (review note 1): for readers the chain is read published-only, so an
+unpublished ancestor is missing from it. `pageAddress` then returns the flat `/<slug>` instead of a path
+with that ancestor's segment, so no address reveals a draft (FR-011, FR-014). When the ancestor is
+published later, `/<slug>` stops being canonical and redirects to the nested address. In preview the
+chain is read from the latest versions, so editors see the nested address.
+
 **Cost**: global uniqueness of slugs means two sections cannot both have `oversikt` (spec
 Assumptions). A changed slug (as opposed to a move) still breaks old links, exactly as today.
 
@@ -197,6 +224,11 @@ state; two concurrent drafts can in theory combine into a cycle at publish, so t
 publish (it is a `beforeValidate` hook and runs on every save). The renderer additionally stops
 walking after 3 steps (R7), so a corrupt cycle can never hang a request.
 
+**Cost** (review note 5): the hook also runs on every autosave (every 2 seconds while an editor types).
+It does nothing when `parent` is empty, and otherwise costs at most about five indexed reads (up to three
+ancestors, up to two rounds of descendants). That is fine for tens of pages and a handful of editors. If
+it ever matters, skip the walk when `parent` is unchanged from `originalDoc`.
+
 ## R10 — Preview needs no new address logic
 
 **Decision**: keep `admin.preview` as `previewUrl('pages', slug)` → `/api/preview?path=/<slug>`.
@@ -220,8 +252,9 @@ build the section tree in a pure `buildPageSection(pages, rootId, currentId)` in
 `lib/page-tree.ts` (sorting by `order`, then `title`, like `byOrderThenTitle` in `learning-view.ts`).
 Returns `null` when the root is unpublished or the section has only the root.
 
-The menu reuses `LearningNav`'s markup and CSS pattern (`lp-nav__list`, `aria-current="page"`), in a
-new `components/SectionNav.tsx` with `<nav aria-label="<root title>">`. All levels are expanded.
+The menu reuses `LearningNav`'s markup and CSS (`app-learning-nav__list`, `app-learning-nav__link
+ds-link`, `aria-current="page"`), in a new `components/SectionNav.tsx` with
+`<nav aria-label="<root title>">`. All levels are expanded.
 
 **Why read all published pages**: the collection is small (tens of pages), the query is one indexed
 read, and it avoids a recursive query per level. `pages.ts`'s comment «There is deliberately NO listing
@@ -230,24 +263,26 @@ function» is updated: the listing exists for the section menu only, never as a 
 **Rejected**: generalising `buildLearningTree` to serve both. Learning's tree has categories and
 subcategories that are not pages; a separate 40-line builder is clearer than a shared abstraction.
 
-## R12 — A shared shell and a skip link
+## R12 — A shared shell; the skip link already exists
+
+**Finding** (after 026): `app/themed-html.tsx` renders `<a class="ds-skip-link" href="#main-content">`
+as the first focusable element of every route group, and `(app)/layout.tsx` owns the single
+`<main id="main-content" tabIndex={-1}>`; pages render no `<main>` of their own. KI Læring's menu is
+inside `<main>`, before the article (`LearningShell`: `.app-container > .app-learning[data-nav]` with
+an aside holding a `ds-details` disclosure, and a content column).
 
 **Decision**:
 
-- `components/DocShell.tsx` (new, server) takes `nav?` and `children`. It renders the
-  `kihub-container` with the existing `.lp-shell` grid and the phone `<details>` disclosure, with the
-  content column as `<main id="hovedinnhold" tabIndex={-1}>`. `LearningShell` becomes a thin wrapper
-  that passes `LearningNav` and the «Utforsk innhold» label, so KI Læring's markup and CSS stay as they
-  are.
-- `(app)/layout.tsx` gets `<a class="kihub-skip-link" href="#hovedinnhold">Hopp til hovedinnhold</a>`
-  as its first child, before the preview banner and the header.
-- Every route under `(app)` that renders its own `<main>` gets `id="hovedinnhold" tabIndex={-1}` (10
-  files today, listed in plan.md; the CMS page route moves to `DocShell`). A unit test fails if a `page.tsx` under `(app)` renders `<main` without it or
-  without using `DocShell`/`LearningShell`.
+- `components/DocShell.tsx` (new, server) takes `nav?`, `navLabel` and `children` and renders exactly
+  `LearningShell`'s markup and classes. `LearningShell` becomes a thin wrapper that passes `LearningNav`
+  and «Utforsk innhold», so KI Læring's markup and CSS stay as they are.
+- The CMS page route renders `DocShell` with `SectionNav` when the page is in a section.
+- No skip-link change and no `<main>` change. The first draft of this spec added both; 026 shipped them
+  first.
 
-**Rationale**: the menu sits outside `<main>`, so the skip link lands past it (spec FR-024) and the
-landmarks are correct (`nav` beside `main`, not inside it). There is no skip link anywhere in the
-portal today; WCAG 2.4.1 needs one once a menu precedes the content.
+**Rationale**: the section menu follows the landmark pattern 026 chose for KI Læring (a labelled `nav`
+inside the single `main`), so screen-reader users can jump past it by landmark and the skip link stays
+one shared element. A second pattern for Pages only would be inconsistent.
 
 ## R13 — Site menu highlighting comes for free
 
@@ -277,10 +312,10 @@ in `MEDIA_STORAGE_MODE=azure` (CLAUDE.md gotcha: otherwise the diff drops `media
 
 ## R16 — Constitution
 
-**Decision**: MINOR 3.3.0 → 3.4.0. The **Pages** bullet changes from «served at a flat, one-segment
+**Decision**: MINOR 4.2.0 → 4.3.0 (first drafted as 3.3.0 → 3.4.0, renumbered after 026 merged). The **Pages** bullet changes from «served at a flat, one-segment
 address (`/<slug>`)» to a hierarchy of at most three levels served at nested addresses, the last
 segment unique, old paths redirected, with a section menu of published Pages. Materially expanded
-module guidance ⇒ MINOR (same policy as 3.1.0–3.3.0). Principle VII (Start Simple) is satisfied: no
+module guidance ⇒ MINOR (same policy as 3.1.0–4.2.0). Principle VII (Start Simple) is satisfied: no
 new dependency, no stored paths, no new collection.
 
 ## Out of scope (recorded so they are not lost)

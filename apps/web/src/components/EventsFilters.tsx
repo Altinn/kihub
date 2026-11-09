@@ -9,20 +9,16 @@ import {
 } from '@/lib/events-view';
 
 /**
- * 012 FR-005 — the list view's filter sidebar. URL-param driven server component in the
- * CatalogFilters pattern: every control is a link that re-renders the page with the next
- * filter state, so it works with client-side scripting disabled (SC-004). Rows are STYLED as
- * checkboxes (TYPE, multi) and radios (FORM, single) but are anchors carrying `aria-pressed`.
+ * 012 FR-005 — the list view's filter sidebar.
+ *
+ * 026 R6: a real GET form instead of links carrying `aria-pressed`. Each group is a named
+ * `fieldset`/`legend`, each option a native checkbox (type, multi) or radio (form, single) inside a
+ * Designsystemet chip, so role, group name and checked state are announced natively and the
+ * checked state is shown by a check mark and border, not by colour alone. Submitting rebuilds the
+ * same `?type=…&form=…` URL the page already parses (`parseEventsSearchParams`), so it works without
+ * client-side scripting (012 SC-004) and stays shareable. No auto-submit on change: a context change
+ * on input would fail WCAG 3.2.2.
  */
-
-function filtersHref(types: EventTypeValue[], form?: EventFormatValue): string {
-  const sp = new URLSearchParams();
-  for (const t of types) sp.append('type', t);
-  if (form) sp.set('form', form);
-  const qs = sp.toString();
-  return qs ? `/events?${qs}` : '/events';
-}
-
 export function EventsFilters({
   activeTypes,
   activeForm,
@@ -33,76 +29,57 @@ export function EventsFilters({
   const hasActive = activeTypes.length > 0 || Boolean(activeForm);
 
   return (
-    <nav aria-label="Filtrer arrangementer" className="ev-filters">
-      <div>
-        <p className="kihub-eyebrow">Type</p>
-        <ul className="ev-filter-list">
-          {EVENT_TYPES.map((type) => {
-            const isActive = activeTypes.includes(type);
-            const nextTypes = isActive
-              ? activeTypes.filter((t) => t !== type)
-              : [...activeTypes, type];
-            return (
-              <li key={type}>
-                <Link
-                  href={filtersHref(nextTypes, activeForm)}
-                  aria-pressed={isActive}
-                  className="ev-filter kihub-focusable"
-                >
-                  <span
-                    className={`ev-filter__box${isActive ? ' ev-filter__box--on' : ''}`}
-                    aria-hidden="true"
-                  />
-                  {EVENT_TYPE_LABELS[type]}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-
-      <div>
-        <p className="kihub-eyebrow">Form</p>
-        <ul className="ev-filter-list">
-          <li>
-            <Link
-              href={filtersHref(activeTypes, undefined)}
-              aria-pressed={!activeForm}
-              className="ev-filter kihub-focusable"
-            >
-              <span
-                className={`ev-filter__box ev-filter__box--round${!activeForm ? ' ev-filter__box--on' : ''}`}
-                aria-hidden="true"
+    <form method="get" action="/events" className="app-filters" aria-label="Filtrer arrangementer">
+      <fieldset className="ds-fieldset">
+        <legend className="ds-label">Type</legend>
+        <div className="app-chip-group">
+          {EVENT_TYPES.map((type) => (
+            <label key={type} className="ds-chip">
+              <input
+                className="ds-input"
+                type="checkbox"
+                name="type"
+                value={type}
+                defaultChecked={activeTypes.includes(type)}
               />
-              Alle
-            </Link>
-          </li>
-          {EVENT_FORMATS.map((format) => {
-            const isActive = activeForm === format;
-            return (
-              <li key={format}>
-                <Link
-                  href={filtersHref(activeTypes, format)}
-                  aria-pressed={isActive}
-                  className="ev-filter kihub-focusable"
-                >
-                  <span
-                    className={`ev-filter__box ev-filter__box--round${isActive ? ' ev-filter__box--on' : ''}`}
-                    aria-hidden="true"
-                  />
-                  {EVENT_FORMAT_LABELS[format]}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+              {EVENT_TYPE_LABELS[type]}
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
-      {hasActive ? (
-        <Link href="/events" className="kihub-link ev-filters__reset">
-          Nullstill filtre
-        </Link>
-      ) : null}
-    </nav>
+      <fieldset className="ds-fieldset">
+        <legend className="ds-label">Form</legend>
+        <div className="app-chip-group">
+          <label className="ds-chip">
+            <input className="ds-input" type="radio" name="form" value="" defaultChecked={!activeForm} />
+            Alle
+          </label>
+          {EVENT_FORMATS.map((format) => (
+            <label key={format} className="ds-chip">
+              <input
+                className="ds-input"
+                type="radio"
+                name="form"
+                value={format}
+                defaultChecked={activeForm === format}
+              />
+              {EVENT_FORMAT_LABELS[format]}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <div className="app-cluster">
+        <button type="submit" className="ds-button" data-size="sm">
+          Bruk filter
+        </button>
+        {hasActive ? (
+          <Link href="/events" className="ds-link">
+            Nullstill filtre
+          </Link>
+        ) : null}
+      </div>
+    </form>
   );
 }
