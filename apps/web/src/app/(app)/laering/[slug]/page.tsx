@@ -3,10 +3,12 @@ import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { LearningBody } from '@/components/LearningBody';
+import { PageToc } from '@/components/PageToc';
 import { LearningShell } from '@/components/LearningShell';
 import { getLearningPageBySlug, readLearningLibrary } from '@/lib/learning';
 import { buildLearningTree, formatLearningUpdated } from '@/lib/learning-view';
 import { getPreviewState } from '@/lib/preview';
+import { extractHeadings } from '@/lib/headings';
 import type { LearningCategory, LearningSubcategory, User } from '@/payload-types';
 
 /**
@@ -58,6 +60,7 @@ export default async function LearningPageRoute({
     readLearningLibrary(),
   ]);
   if (!page) notFound();
+  const headings = extractHeadings(page.body);
 
   const tree = buildLearningTree(library, decoded);
   const updated = formatLearningUpdated(page.updatedAt);
@@ -102,7 +105,8 @@ export default async function LearningPageRoute({
           </p>
         ) : null}
 
-        <LearningBody body={page.body} />
+        <PageToc headings={headings} />
+        <LearningBody body={page.body} headings={headings} />
       </article>
     </LearningShell>
   );

@@ -17,7 +17,7 @@ const ROUTES = [
   'laering/[slug]/page.tsx',
   'prosjekter/[slug]/page.tsx',
   'events/[slug]/page.tsx',
-  '[slug]/page.tsx', // 027 US3 CMS pages
+  '[...path]/page.tsx', // 027 US3 / 028 US2 CMS pages
 ];
 
 const FORBIDDEN = [

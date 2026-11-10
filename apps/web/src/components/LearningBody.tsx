@@ -3,7 +3,9 @@ import type { JSXConvertersFunction } from '@payloadcms/richtext-lexical/react';
 import { LearningCodeBlock, type LearningCodeBlockNode } from '@/components/LearningCodeBlock';
 import { LearningImage, type LearningImageNode } from '@/components/LearningImage';
 import { LearningVideo, type LearningVideoNode } from '@/components/LearningVideo';
+import type { HeadingIdMap } from '@/lib/ds-richtext';
 import { dsConverterOverrides } from '@/lib/ds-richtext-converters';
+import { extractHeadings, headingIdMap, type Heading } from '@/lib/headings';
 import type { LearningPage } from '@/payload-types';
 
 /**
@@ -20,25 +22,40 @@ import type { LearningPage } from '@/payload-types';
  * 026: text nodes go through the shared Designsystemet converters (`ds-heading` / `ds-paragraph` /
  * `ds-list` / `ds-link` / `ds-table`, content headings clamped to h2+ under the page h1).
  */
-const converters: JSXConvertersFunction = ({ defaultConverters }) => ({
-  ...defaultConverters,
-  ...dsConverterOverrides(defaultConverters),
-  upload: ({ node }) => <LearningImage node={node as unknown as LearningImageNode} />,
-  blocks: {
-    // The `blocks` map is indexed by block slug and typed loosely, so `node` needs an explicit
-    // annotation — without it TypeScript infers `any` here, which only `next build`'s type check
-    // catches (vitest and eslint both pass).
-    Code: ({ node }: { node: unknown }) => (
-      <LearningCodeBlock node={node as LearningCodeBlockNode} />
-    ),
-    youtube: ({ node }: { node: unknown }) => <LearningVideo node={node as LearningVideoNode} />,
-  },
-});
+function learningConverters(headingIds: HeadingIdMap): JSXConvertersFunction {
+  return ({ defaultConverters }) => ({
+    ...defaultConverters,
+    ...dsConverterOverrides(defaultConverters, { headingIds }),
+    upload: ({ node }) => <LearningImage node={node as unknown as LearningImageNode} />,
+    blocks: {
+      // The `blocks` map is indexed by block slug and typed loosely, so `node` needs an explicit
+      // annotation — without it TypeScript infers `any` here, which only `next build`'s type check
+      // catches (vitest and eslint both pass).
+      Code: ({ node }: { node: unknown }) => (
+        <LearningCodeBlock node={node as LearningCodeBlockNode} />
+      ),
+      youtube: ({ node }: { node: unknown }) => <LearningVideo node={node as LearningVideoNode} />,
+    },
+  });
+}
 
-export function LearningBody({ body }: { body: LearningPage['body'] }) {
+/**
+ * 028 US1: every h2–h4 gets an anchor and a self-link. A caller that also renders `PageToc` passes the
+ * same `headings` it gave the table of contents, so both read one list (research R3); otherwise the
+ * body extracts them itself. The converters are built per render because they close over the
+ * node → anchor map.
+ */
+export function LearningBody({
+  body,
+  headings,
+}: {
+  body: LearningPage['body'];
+  headings?: readonly Heading[];
+}) {
+  const headingIds = headingIdMap(headings ?? extractHeadings(body));
   return (
     <div className="app-richtext app-learning-page__body">
-      <RichText data={body} converters={converters} />
+      <RichText data={body} converters={learningConverters(headingIds)} />
     </div>
   );
 }

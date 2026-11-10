@@ -150,6 +150,6 @@ describe('RESERVED_PAGE_SLUGS covers every built-in top-level segment', () => {
   );
 
   it('the catch-all page route itself exists at the (app) root', () => {
-    expect(dirs(`${APP}(app)`)).toContain('[slug]');
+    expect(dirs(`${APP}(app)`)).toContain('[...path]');
   });
 });

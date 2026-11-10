@@ -662,10 +662,12 @@ main :not(pre) > code {
 }
 
 /* Rich text rhythm: more air before a heading than after it. */
-:where(.app-richtext, .app-richtext > .payload-richtext) > .ds-heading:not(:first-child) {
+/* 028: a heading with an anchor is wrapped in .app-heading (heading + self-link), so the wrapper
+ * takes the heading's place in these rules. */
+:where(.app-richtext, .app-richtext > .payload-richtext) > :is(.ds-heading, .app-heading):not(:first-child) {
   margin-block-start: var(--ds-size-8);
 }
-:where(.app-richtext, .app-richtext > .payload-richtext) > .ds-heading + * {
+:where(.app-richtext, .app-richtext > .payload-richtext) > :is(.ds-heading, .app-heading) + * {
   margin-block-start: var(--ds-size-2);
 }
 .app-richtext img {
@@ -1450,4 +1452,133 @@ main :not(pre) > code {
  * (components/PreviewBanner.tsx). */
 .app-preview-banner {
   padding-block: var(--ds-size-3);
+}
+
+/* ==================== Heading anchors and «På denne siden» (028 US1) ==================== */
+/* contracts/headings-toc.md §D. The heading and its «#» self-link are siblings, so the link never
+ * joins the heading's accessible name. */
+.app-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--ds-size-2);
+}
+.app-heading__anchor.ds-link {
+  /* WCAG 2.5.8: at least 24 × 24 CSS px. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  color: var(--ds-color-neutral-text-subtle);
+  text-decoration-line: none;
+  opacity: 0;
+}
+.app-heading:hover > .app-heading__anchor,
+.app-heading__anchor:focus-visible {
+  opacity: 1;
+}
+/* No hover on touch screens: keep the link faintly visible instead of never. */
+@media (hover: none) {
+  .app-heading__anchor.ds-link {
+    opacity: 1;
+  }
+}
+/* A followed #anchor lands with air above it, and the target heading is marked (tint + rule, with a
+ * negative margin so the text does not move). */
+.app-richtext .ds-heading[id] {
+  scroll-margin-top: var(--ds-size-6);
+}
+.app-richtext .ds-heading[id]:target {
+  margin-inline-start: calc(-1 * var(--ds-size-3));
+  padding-inline-start: var(--ds-size-3);
+  border-radius: var(--ds-border-radius-sm);
+  background: var(--ds-color-accent-surface-tinted);
+  box-shadow: inset var(--ds-border-width-focus) 0 0 var(--ds-color-accent-base-default);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* The table of contents: a collapsed ds-details before the body text on narrow screens… */
+.app-toc {
+  align-self: stretch;
+}
+.app-toc__list {
+  display: grid;
+  gap: var(--ds-size-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--ds-body-sm-font-size);
+}
+.app-toc__list .app-toc__list {
+  margin-block-start: var(--ds-size-2);
+  padding-inline-start: var(--ds-size-4);
+}
+.app-toc__link.ds-link {
+  overflow-wrap: anywhere;
+}
+/* …and a standing list in the article's right column on wide screens. Rows have no gap (children
+ * carry their own top margin) so the TOC can span every row without empty rows adding height. */
+@media (width >= 75rem) {
+  .app-article:has(> .app-toc) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 13rem;
+    column-gap: var(--ds-size-10);
+    row-gap: 0;
+    align-items: start;
+  }
+  .app-article:has(> .app-toc) > * {
+    grid-column: 1;
+  }
+  .app-article:has(> .app-toc) > * + * {
+    margin-block-start: var(--ds-size-4);
+  }
+  .app-article > .app-toc {
+    grid-column: 2;
+    grid-row: 1 / span 99;
+    align-self: start; /* not stretched to the article's height, or sticky has no room to stick */
+    position: sticky;
+    top: var(--ds-size-6);
+    max-height: calc(100vh - 2 * var(--ds-size-6));
+    margin: 0;
+    overflow: auto;
+  }
+  .app-toc > summary {
+    display: none;
+  }
+  .app-toc.ds-details {
+    border: 0;
+    background: none;
+  }
+  .app-toc > .app-toc__nav {
+    display: block;
+    margin: 0;
+  }
+  .app-toc::details-content {
+    content-visibility: visible;
+    block-size: auto;
+  }
+  /* The summary is hidden here, so the list gets a visible title of its own. */
+  .app-toc__nav::before {
+    content: 'På denne siden' / ''; /* decorative: the nav's own label names it */
+    display: block;
+    margin-bottom: var(--ds-size-2);
+    font-size: var(--ds-body-sm-font-size);
+    font-weight: var(--ds-font-weight-medium);
+    color: var(--ds-color-neutral-text-subtle);
+  }
+}
+
+/* ==================== Section menu for Pages (028 US3) ==================== */
+/* SectionNav reuses KI Læring's nav classes; only the nesting is new. Deeper levels step in, like
+ * KI Læring's grouped links. */
+.app-section-nav__sublist .app-learning-nav__link.ds-link {
+  padding-inline-start: var(--ds-size-5);
+}
+.app-section-nav__sublist .app-section-nav__sublist .app-learning-nav__link.ds-link {
+  padding-inline-start: var(--ds-size-7);
 }

@@ -1,5 +1,32 @@
 <!-- SPECKIT START -->
-Active feature: **026-designsystemet-alignment** (DONE — specify + plan + tasks + implement
+Active feature: **028-docs-navigation** (specify + plan + tasks + implement 2026-11-10; spec PR
+Altinn/kihub#181 carries the implementation too). Documentation-style navigation for Pages
+(`specs/028-docs-navigation/`, research R1–R16, contracts ×2, constitution 4.3.0).
+- **US1 anchors + TOC (Pages and KI Læring):** `lib/headings.ts` (`extractHeadings`, `toTocTree`,
+  `RESERVED_ANCHORS`) walks the Lexical body once; `LearningBody` passes a node → anchor `WeakMap`
+  as `headingIds` to `dsConverterOverrides`, whose heading converter then renders
+  `div.app-heading > hN[id] + a.app-heading__anchor` (other surfaces pass no map, unchanged).
+  `PageToc` is one `ds-details` («På denne siden»), forced open in a right column at `width >= 75rem`.
+- **US2 hierarchy:** `pages.parent` + `order`; `validatePageParent` (`lib/page-hierarchy.ts`,
+  beforeValidate) refuses self/cycle/4th level with `APIError` 400. Route `(app)/[...path]`
+  resolves by the LAST segment (slugs stay globally unique) and `redirect()`s (307) to
+  `pageAddress()` (`lib/page-tree.ts`); addresses are computed, never stored.
+- **US3 section menu:** `getPageSection` (published-only, also in preview) → `SectionNav` inside
+  `DocShell`, which is `LearningShell`'s markup lifted out (no `<main>`; the 026 layout owns it).
+- **Gotchas:**
+  - Our field is `_pages_v.version_parent_id`; `_pages_v.parent_id` is Payload's own "version of
+    which doc" column.
+  - 307, never 308: a cached permanent redirect loops after a move and a move back.
+  - Anchors are ASCII (`slugify`) because Payload's link validator only takes `[\w-]` after `#`.
+  - Readers get the FLAT address under an unpublished ancestor (`pageAddress({ publishedOnly })`),
+    so a draft's slug never leaks; preview walks the ancestors' latest versions instead.
+  - A layout `id` added later must go into `RESERVED_ANCHORS` (`reserved-anchors.test.ts` fails).
+  - vitest cannot parse JSX, so the heading/TOC markup is verified in the browser, not in a render
+    test; the pure parts are unit-tested.
+  - Generate migrations, types AND `importMap.js` with `MEDIA_STORAGE_MODE=azure` (the dev server
+    in disk mode rewrites `importMap.js` without the Azure upload handler).
+
+Prior: **026-designsystemet-alignment** (DONE — specify + plan + tasks + implement
 2026-10-21; tasks 76/76; unit 267/267, lint + `tsc` clean, `next build` green).
 - **What it did.** Rebuilt the employee-facing UI on Designsystemet and Digdir's profile.
   - **Theme:** `designsystemet.config.json` is Digdir's official theme with NO overrides: accent
