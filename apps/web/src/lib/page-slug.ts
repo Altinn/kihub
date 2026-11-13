@@ -2,10 +2,12 @@
  * 027 US3 — address rules for CMS pages served at `/<slug>` (research R12, contracts/pages.md §B).
  *
  * Pure, so the collection's `validate`, the read layer's cheap reject and the unit tests all share
- * one definition. Pages are flat: one lowercase segment, exactly what `lib/slug.ts`'s `slugify`
- * produces, so no `/` and therefore no nested addresses.
+ * one definition. A slug is one lowercase segment, exactly what `lib/slug.ts`'s `slugify` produces,
+ * so no `/`. 028: a page with a parent is served at a nested address built from its ancestors' slugs
+ * (`lib/page-tree.ts`); each slug stays unique across all pages, so the last segment still identifies
+ * the page. A child's slug is held to the same reserved list, so any page can later become top-level.
  *
- * Built-in sections always win (Next matches static segments before `[slug]`, FR-021), so a page on a
+ * Built-in sections always win (Next matches static segments before `[...path]`, FR-021), so a page on a
  * reserved address could never be reached. The list is guarded by a drift test
  * (`tests/unit/page-slug.test.ts`) that fails when a new top-level route or `public/` entry lands
  * without being added here.

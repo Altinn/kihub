@@ -394,6 +394,32 @@ and an editor-controlled `order`.
 
 One additive schema migration; no existing Registry, News, Events or Learning data is touched.
 
+### Sider (Pages)
+
+Pages are standalone information and guide pages («Om KI Hub», «Kom i gang») authored in `/cms`
+under **Sider** by Contributor+ editors (027), with documentation-style navigation since 028
+([`specs/028-docs-navigation/`](specs/028-docs-navigation), Constitution v4.3.0).
+
+- **Addresses.** A page without a parent lives at `/<adresse>`. Set **«Overordnet side»** to place
+  it in a section: it then lives at `/<overordnet>/<adresse>`, at most three levels deep. Each
+  page's own **«Adresse»** must still be unique across all pages, because the last segment is what
+  identifies the page: any older or misspelt path that ends in it (the flat address, the address
+  before a move) is sent on to the current one, `#anker` included. Changing the «Adresse» itself
+  does break old links. The sidebar field **«Adresse på nettstedet»** shows the address to link to
+  (after saving). A published page under a parent that is not published yet is shown at its flat
+  address until the parent is published.
+- **Order.** **«Rekkefølge»** sorts pages with the same parent: low first, equal values
+  alphabetically.
+- **Section menu.** A page in a section shows a menu on the left, like KI Læring: the top-level
+  page, then its children and grandchildren. Only published pages are listed, also in preview.
+  The site menu item linking to the top-level page is marked as current on every page below it;
+  adding that item is a Site Chrome edit.
+- **Anchors and «På denne siden».** Every h2–h4 heading on a page or KI Læring page gets an
+  anchor from its text with the address rules (`Før du starter` → `#for-du-starter`, a repeat →
+  `#for-du-starter-2`) and a «#» link to copy. With two or more headings, «På denne siden» lists
+  them in the right margin (collapsed above the text on narrow screens). Link to a section with
+  `/adresse#anker`. Anchors follow the heading text, so renaming a heading breaks links to it.
+
 ## Scripts
 
 | Command | What it does |

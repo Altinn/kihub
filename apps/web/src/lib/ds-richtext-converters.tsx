@@ -26,16 +26,35 @@ function withClass(element: ReactNode, className: string): ReactNode {
  */
 export function dsConverterOverrides(
   defaultConverters: JSXConverters,
-  { minHeadingLevel = 2 }: DsRichTextOptions = {},
+  { minHeadingLevel = 2, headingIds }: DsRichTextOptions = {},
 ): JSXConverters {
   return {
     heading: ({ node, nodesToJSX }) => {
       const level = Number(String(node.tag).slice(1));
       const { tag: Tag, size } = richTextHeading(level, minHeadingLevel);
+      const anchor = headingIds?.get(node);
+      if (!anchor) {
+        return (
+          <Tag className="ds-heading" data-size={size}>
+            {nodesToJSX({ nodes: node.children })}
+          </Tag>
+        );
+      }
+      // 028 US1 (contracts/headings-toc.md §B1): the self-link is a SIBLING of the heading, so its
+      // «#» never becomes part of the heading's accessible name; app.css reveals it on hover/focus.
       return (
-        <Tag className="ds-heading" data-size={size}>
-          {nodesToJSX({ nodes: node.children })}
-        </Tag>
+        <div className="app-heading">
+          <Tag id={anchor.id} className="ds-heading" data-size={size}>
+            {nodesToJSX({ nodes: node.children })}
+          </Tag>
+          <a
+            className="ds-link app-heading__anchor"
+            href={`#${anchor.id}`}
+            aria-label={`Lenke til avsnittet «${anchor.text}»`}
+          >
+            #
+          </a>
+        </div>
       );
     },
     paragraph: (args) => {

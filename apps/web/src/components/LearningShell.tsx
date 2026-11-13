@@ -1,3 +1,4 @@
+import { DocShell } from '@/components/DocShell';
 import { LearningNav } from '@/components/LearningNav';
 import type { LearningTree } from '@/lib/learning-view';
 
@@ -11,9 +12,7 @@ import type { LearningTree } from '@/lib/learning-view';
  * open the right group server-side (FR-004). Each route therefore reads the library and renders this
  * shell with its own `currentSlug`.
  *
- * The phone-level disclosure is a native `<details>` here too, so the whole navigation collapses
- * above the content with no JavaScript (FR-006). 026: it is a Designsystemet `ds-details`; on
- * wide screens app.css hides its summary and forces it open, so the navigation simply stands.
+ * 028: the markup lives in `DocShell`, which CMS pages in a section share.
  */
 export function LearningShell({
   tree,
@@ -22,24 +21,9 @@ export function LearningShell({
   tree: LearningTree;
   children: React.ReactNode;
 }) {
-  const hasNav = tree.length > 0;
-
   return (
-    <div className="app-container">
-      <div className="app-learning" data-nav={hasNav || undefined}>
-        {hasNav ? (
-          <div className="app-learning__aside">
-            {/* Desktop: the navigation stands open. Phone: this <details> collapses it (CSS swaps
-                which of the two is shown, so the markup is emitted once). */}
-            <details className="ds-details app-learning__disclosure" data-color="neutral">
-              <summary>Utforsk innhold</summary>
-              <LearningNav tree={tree} />
-            </details>
-          </div>
-        ) : null}
-
-        <div className="app-learning__content">{children}</div>
-      </div>
-    </div>
+    <DocShell nav={tree.length > 0 ? <LearningNav tree={tree} /> : null} navLabel="Utforsk innhold">
+      {children}
+    </DocShell>
   );
 }

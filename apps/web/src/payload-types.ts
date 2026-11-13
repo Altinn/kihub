@@ -641,7 +641,7 @@ export interface Page {
   id: number;
   title: string;
   /**
-   * Sidens adresse: /<adresse>. Utledes fra tittelen når feltet står tomt. Kan ikke være en adresse KI Hub allerede bruker.
+   * Sidens eget adresseledd. Uten overordnet side er adressen /<adresse>, ellers /<overordnet>/<adresse>. Må være unikt blant alle sider, også i andre seksjoner. Utledes fra tittelen når feltet står tomt. Kan ikke være en adresse KI Hub allerede bruker.
    */
   slug?: string | null;
   /**
@@ -663,6 +663,14 @@ export interface Page {
     };
     [k: string]: unknown;
   };
+  /**
+   * Valgfritt. Siden havner under denne i adressen og i menyen til venstre. Høyst tre nivåer.
+   */
+  parent?: (number | null) | Page;
+  /**
+   * Lav verdi først blant sidene med samme overordnede side; like verdier sorteres alfabetisk.
+   */
+  order?: number | null;
   author?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
@@ -1131,6 +1139,8 @@ export interface PagesSelect<T extends boolean = true> {
   slug?: T;
   summary?: T;
   body?: T;
+  parent?: T;
+  order?: T;
   author?: T;
   updatedAt?: T;
   createdAt?: T;

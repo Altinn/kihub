@@ -18,7 +18,15 @@ export function richTextHeading(level: number, minHeadingLevel = 2): { tag: Head
   return { tag: `h${effective}` as HeadingTag, size: SIZE_BY_LEVEL[effective] };
 }
 
+/** 028: Lexical heading node → its anchor and plain text (built by `lib/headings.ts`). */
+export type HeadingIdMap = WeakMap<object, { id: string; text: string }>;
+
 export interface DsRichTextOptions {
   /** Lowest heading level content may use; default 2 (under the page h1). */
   minHeadingLevel?: number;
+  /**
+   * 028 US1: headings found in this map get their anchor as `id` and a self-link. Without it (news,
+   * projects, events, dialogs, READMEs) headings render exactly as before.
+   */
+  headingIds?: HeadingIdMap;
 }
