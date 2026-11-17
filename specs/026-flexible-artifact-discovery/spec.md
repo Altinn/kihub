@@ -150,7 +150,7 @@ If any file in the artifact directory changes—even when the author forgets to 
 
 ## Assumptions
 
-- `kihub.yaml` is the only filename in v1; `.yml`, JSON, globs, excludes, and per-artifact path declarations are intentionally deferred.
+- `kihub.yaml` is the only filename in v1; `.yml`, JSON, globs, excludes, and per-artifact path declarations are intentionally deferred. (Per-type artifact directories were added later by [spec 028](../028-per-type-artifact-dirs/spec.md); globs, excludes and per-artifact paths remain deferred.)
 - Explicit roots solve the known Altinn Studio layouts without needing an unbounded crawler.
 - Each artifact's governed content is the complete Git content below its artifact directory (`source.path`). Content elsewhere in the repository is outside that artifact revision.
 - Git blob object IDs are stable inputs for byte content, including symlink blobs; directory digest aggregation uses SHA-256.

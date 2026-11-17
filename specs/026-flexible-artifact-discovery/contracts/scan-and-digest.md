@@ -1,5 +1,7 @@
 # Contract: Configured Scan, Source Validation & Content Digest
 
+> **Extended by 028:** enumeration now goes through a resolved layout of containers, so typed `artifactDirs` directories share the rules below; see [`specs/028-per-type-artifact-dirs/contracts/scan-and-conflicts.md`](../../028-per-type-artifact-dirs/contracts/scan-and-conflicts.md). Digest, tree-snapshot and truncation behaviour are unchanged.
+
 ## Public surface
 
 ```ts

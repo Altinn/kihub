@@ -9,7 +9,14 @@ stores their content (that lives in the sibling [`ai-artifacts`](../ai-artifacts
 News, Calendar, Learning and Projects are native platform content, authored directly in KI Hub
 with no Git source.
 
-> **Status**: Flexible artifact discovery and revision-bound governance (026). Artifact repositories
+> **Status**: Per-type artifact directories (028, stacked on 026). A repository no longer needs to
+> move folders to be discovered: `kihub.yaml` can name, per artifact type, the directories that hold
+> the artifacts (`artifactDirs`, for example `skill: [agents/_skills]`), alone or together with
+> `artifactRoots`. Each artifact folder just gets an `artifact.yaml` next to its content. Conflicting
+> or missing directories fail the whole scan before the catalog changes, and the `/bidra` guide
+> explains it all in Norwegian. See [`specs/028-per-type-artifact-dirs/`](specs/028-per-type-artifact-dirs/).
+>
+> Previously — flexible artifact discovery and revision-bound governance (026). Artifact repositories
 > may now declare strict, repository-owned roots in a root-level `kihub.yaml`, so artifacts can live
 > at paths such as `src/skills/<slug>` while retaining the predictable `<type>/<slug>` layout.
 > Discovery validates the manifest's real path and repository, records config provenance, refuses an
@@ -111,6 +118,7 @@ specs/013-news-page-redesign/ Spec-kit artifacts — news page redesign
 specs/014-learning-pages/     Spec-kit artifacts — learning pages (KI Læring)
 specs/015-multi-source-agents/ Spec-kit artifacts — source-scoped discovery + agent artifacts
 specs/026-flexible-artifact-discovery/ Spec-kit artifacts — configurable roots + revision-bound governance
+specs/028-per-type-artifact-dirs/ Spec-kit artifacts — per-type artifact directories in kihub.yaml
 .specify/                     Spec-kit config + constitution
 ```
 
@@ -211,8 +219,12 @@ and surfaced to Admins. Required env: see the
 `Automated discovery (Phase 4)` block in `apps/web/.env.example`. Secrets (the GitHub token via env,
 each source's webhook secret) never appear in run records or the UI.
 
-Repositories without configuration keep the original root layout. To keep artifacts beside source
-code, commit this exact root-level file on the source's configured ref:
+Repositories without configuration keep the original root layout. A repository with its own folder
+names or with artifacts beside its code does not have to move anything: commit one root-level
+`kihub.yaml` on the source's configured ref and add an `artifact.yaml` inside each artifact folder.
+`artifactRoots` lists folders that contain the standard `<type>/<slug>/` layout; `artifactDirs` names,
+per artifact type, the folders whose immediate subfolders are artifacts, whatever those folders are
+called. They can be combined.
 
 ```yaml
 schemaVersion: 1
@@ -220,16 +232,22 @@ discovery:
   artifactRoots:
     - src
     - services/forms
+  artifactDirs:
+    skill:
+      - agents/_skills
 ```
 
-Each root is scanned only at `<root>/<type>/<slug>/artifact.yaml`; discovery is deliberately not an
-arbitrary recursive search. Every manifest's `source.path` must equal its actual repository-relative
-directory and `source.repository` must match the registered `owner/repo`. Invalid config, a missing
-root, a truncated GitHub tree, or source mismatch fails safely before catalog mutation. If a source
-that already owns active artifacts unexpectedly yields zero valid unique artifacts, reconcile also
-fails without writes. An Admin can arm `allowDestructiveReconcile` on that source for one intentional
-empty run; it resets only after success. Full contract and operating notes are in
-[`documentation/artifact-discovery.md`](documentation/artifact-discovery.md).
+Only what the file lists is scanned. A root is scanned at `<root>/<type>/<slug>/artifact.yaml`, a listed
+directory at `<dir>/<slug>/artifact.yaml`; discovery is deliberately not an arbitrary recursive
+search. Every manifest's `type` must match what its folder is configured for, its `source.path` must
+equal its actual repository-relative directory, and `source.repository` must match the registered
+`owner/repo`. Invalid config, a missing root or directory, one directory configured for two types, nested
+artifact folders, a truncated GitHub tree, or source mismatch fails safely before catalog mutation. If a
+source that already owns active artifacts unexpectedly yields zero valid unique artifacts, reconcile
+also fails without writes. An Admin can arm `allowDestructiveReconcile` on that source for one
+intentional empty run; it resets only after success. Full contract and operating notes are in
+[`documentation/artifact-discovery.md`](documentation/artifact-discovery.md); the employee-facing
+Norwegian guide is `/bidra`.
 
 The local-checkout CLI remains available as a fallback:
 
@@ -414,8 +432,9 @@ One additive schema migration; no existing Registry, News, Events or Learning da
 ## Validating artifacts
 
 The `artifact.yaml` schema and docs live in [`packages/artifact-schema`](packages/artifact-schema).
-The manifest's `source.path` is the full repository-relative artifact directory, including any root
-declared in `kihub.yaml`; `source.repository` must match the configured discovery source.
+The manifest's `source.path` is the full repository-relative artifact directory, including any root or
+`artifactDirs` directory declared in `kihub.yaml`; `source.repository` must match the configured
+discovery source.
 Validate seeded examples in the sibling repo:
 
 ```bash

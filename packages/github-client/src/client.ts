@@ -1,9 +1,11 @@
 import {
   artifactDirectoryDigest,
   comparePaths,
-  normalizeArtifactRoot,
+  type DiscoveryLayout,
+  layoutForRoots,
+  matchArtifactDirs,
+  missingDirMessage,
   type RepoReader,
-  TYPE_DIRS,
 } from '@kihub/discovery-core';
 
 export interface GithubRepoReaderOptions {
@@ -34,8 +36,6 @@ interface GitTreeEntry {
   type: string;
   sha?: string;
 }
-
-const TYPE_DIR_SET = new Set<string>(TYPE_DIRS);
 
 /** One pass over the tree: each blob joins every enclosing known artifact directory. */
 function groupBlobsByArtifactDir(
@@ -105,43 +105,23 @@ export function createGithubRepoReader(opts: GithubRepoReaderOptions): RepoReade
   }
 
   return {
-    async listArtifactDirs(artifactRoots = ['.']) {
-      const roots = artifactRoots.map(normalizeArtifactRoot);
+    async listArtifactDirs(layout: DiscoveryLayout = layoutForRoots()) {
       const tree = (await loadTree()).entries;
-      for (const root of roots) {
-        if (root === '.') continue;
-        const prefix = `${root}/`;
+      for (const dir of layout.requiredDirs) {
+        const prefix = `${dir}/`;
         const exists = tree.some(
-          (entry) => (entry.path === root && entry.type === 'tree') || entry.path.startsWith(prefix),
+          (entry) => (entry.path === dir && entry.type === 'tree') || entry.path.startsWith(prefix),
         );
-        if (!exists) {
-          throw new GithubClientError(
-            `Configured artifact root does not exist in ${repo}@${ref}: ${root}`,
-          );
-        }
+        if (!exists) throw new GithubClientError(missingDirMessage(dir, `${repo}@${ref}`));
       }
 
-      const dirs = new Set<string>();
-      for (const entry of tree) {
-        if (entry.type !== 'blob' || !entry.path.endsWith('/artifact.yaml')) continue;
-        for (const root of roots) {
-          const prefix = root === '.' ? '' : `${root}/`;
-          if (!entry.path.startsWith(prefix)) continue;
-          const remainder = entry.path.slice(prefix.length);
-          const pathParts = remainder.split('/');
-          if (
-            pathParts.length === 3 &&
-            TYPE_DIR_SET.has(pathParts[0] ?? '') &&
-            Boolean(pathParts[1]) &&
-            pathParts[2] === 'artifact.yaml'
-          ) {
-            dirs.add(`${prefix}${pathParts[0]}/${pathParts[1]}`);
-          }
-        }
-      }
+      // Enumeration, type and conflict rules live in discovery-core's layout module, shared with the
+      // local reader, so the two readers cannot disagree about which folders count.
+      const manifestPaths = tree.filter((entry) => entry.type === 'blob').map((entry) => entry.path);
+      const dirs = matchArtifactDirs(layout, manifestPaths);
       for (const dir of dirs) knownArtifactDirs.add(dir);
       blobsByDir = undefined;
-      return [...dirs].sort(comparePaths);
+      return dirs;
     },
 
     async readFile(relPath) {

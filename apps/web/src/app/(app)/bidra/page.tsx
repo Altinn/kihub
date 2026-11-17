@@ -8,7 +8,10 @@ import {
   COMMON_MISTAKES,
   EXAMPLE_AGENT_CARD,
   EXAMPLE_AGENT_MANIFEST,
+  EXAMPLE_CUSTOM_LAYOUT_MANIFEST,
+  EXAMPLE_CUSTOM_LAYOUT_TREE,
   EXAMPLE_KIHUB_CONFIG,
+  EXAMPLE_KIHUB_DIRS_CONFIG,
   EXAMPLE_MINIMAL_MANIFEST,
   EXAMPLE_NESTED_REPO_TREE,
   EXAMPLE_README,
@@ -240,7 +243,7 @@ export default function ContributeGuidePage() {
             <div className="bidra-note">
               <strong>Hva leser KI Hub?</strong> Bare <code>artifact.yaml</code>,{' '}
               <code>README.md</code>, for agenter <code>agent-card.json</code>, og{' '}
-              <code>kihub.yaml</code> hvis dere har en. Selve innholdet, som koden, SKILL.md eller
+              <code>kihub.yaml</code> hvis dere har en (den sier hvor artefaktene ligger, så ingen mapper må flyttes). Selve innholdet, som koden, SKILL.md eller
               promptene, blir liggende hos dere. Av de andre filene i mappen lagrer KI Hub bare et
               fingeravtrykk, slik at det synes når innholdet endres. KI Hub lenker til kilden.
             </div>
@@ -252,7 +255,7 @@ export default function ContributeGuidePage() {
               id="typer"
               eyebrow="Typer"
               title="Hva kan dere dele?"
-              lede="Hver artefakt har én type. Typen bestemmer hvilken mappe den skal ligge i. Det er den vanligste feilen, så sjekk tabellen."
+              lede="Hver artefakt har én type. Typen må stemme med mappen den ligger i: typemappen i standardoppsettet, eller typen mappen er oppført for i kihub.yaml. Det er den vanligste feilen, så sjekk tabellen."
             />
             <div className="bidra-types">
               {GUIDE_ARTIFACT_TYPES.map((t) => (
@@ -286,17 +289,61 @@ export default function ContributeGuidePage() {
                   <h3 className="kihub-h3">Lag mappestrukturen</h3>
                   <p>
                     Lag en mappe for hver artefakt under riktig typemappe i roten av repoet. Mappenavnet
-                    er fritt, men bruk små bokstaver og bindestrek. Strukturen må være nøyaktig{' '}
-                    <code>&lt;typemappe&gt;/&lt;navn&gt;/artifact.yaml</code>: to nivåer, verken mer eller
-                    mindre.
+                    er fritt, men bruk små bokstaver og bindestrek. Uten <code>kihub.yaml</code> må
+                    strukturen være nøyaktig <code>&lt;typemappe&gt;/&lt;navn&gt;/artifact.yaml</code>: to
+                    nivåer, verken mer eller mindre.
                   </p>
                   <Code code={EXAMPLE_REPO_TREE} language="plaintext" />
+                  <div className="bidra-tip" id="egne-mapper">
+                    <strong>Har dere egne mapper? Dere trenger ikke flytte noe.</strong> Legg en{' '}
+                    <code>kihub.yaml</code> i roten av repoet og skriv hvilken mappe som inneholder hvilken
+                    type. Se de to variantene under.
+                  </div>
+                  <details className="bidra-details">
+                    <summary>
+                      Har dere egne mapper, for eksempel agents/_skills/? Slik beholder dere dem
+                    </summary>
+                    <p>
+                      Under <code>artifactDirs</code> knytter dere en <strong>type</strong> til mappene
+                      der den ligger. Typen skrives i entall, som i <code>type:</code> i artifact.yaml:{' '}
+                      <code>skill</code>, <code>prompt</code>, <code>workflow</code>, <code>mcp</code>,{' '}
+                      <code>template</code>, <code>policy</code>, <code>playbook</code> eller{' '}
+                      <code>agent</code>. Hver oppførte mappe inneholder én mappe per artefakt, med en{' '}
+                      <code>artifact.yaml</code> ved siden av innholdet.
+                    </p>
+                    <Code code={EXAMPLE_KIHUB_DIRS_CONFIG} language="yaml" />
+                    <Code code={EXAMPLE_CUSTOM_LAYOUT_TREE} language="plaintext" />
+                    <p>
+                      Manifestet for en slik skill ser ut som alle andre, men{' '}
+                      <code>source.path</code> er hele stien til mappen, og <code>type</code> er typen
+                      mappen er oppført for:
+                    </p>
+                    <Code code={EXAMPLE_CUSTOM_LAYOUT_MANIFEST} language="yaml" />
+                    <ul className="bidra-sublist">
+                      <li>
+                        KI Hub leter bare <strong>rett under</strong> mappene som er oppført (
+                        <code>&lt;mappe&gt;/&lt;navn&gt;/artifact.yaml</code>), aldri dypere og aldri med
+                        jokertegn. Mapper uten <code>artifact.yaml</code> hoppes over.
+                      </li>
+                      <li>
+                        Bare det som står i <code>kihub.yaml</code> leses. Står det kun{' '}
+                        <code>artifactDirs</code>, leses ikke <code>skills/</code> og{' '}
+                        <code>agents/</code> i roten.
+                      </li>
+                      <li>
+                        Mappene kan ikke være <code>.</code>, og hver mappe kan bare gjelde for én type.
+                        Maks 32 mapper til sammen.
+                      </li>
+                    </ul>
+                  </details>
                   <details className="bidra-details">
                     <summary>Vil dere ha artefaktene sammen med koden, for eksempel under src/?</summary>
                     <p>
-                      Legg en <code>kihub.yaml</code> i roten av repoet og list mappene artefaktene ligger
-                      under. Inne i hver av dem gjelder den samme strukturen. KI Hub leter da bare i
+                      Med <code>artifactRoots</code> lister dere mappene artefaktene ligger under. Inne i
+                      hver av dem gjelder standardstrukturen med typemapper. KI Hub leter da bare i
                       mappene i listen, så ta med <code>.</code> hvis dere også har artefakter i roten.
+                      Dere kan bruke <code>artifactRoots</code> og <code>artifactDirs</code> sammen i
+                      samme fil.
                     </p>
                     <Code code={EXAMPLE_KIHUB_CONFIG} language="yaml" />
                     <Code code={EXAMPLE_NESTED_REPO_TREE} language="plaintext" />
@@ -570,6 +617,17 @@ export default function ContributeGuidePage() {
                   <p className="bidra-mistake__fix">
                     <span aria-hidden="true">→</span> {mistake.fix}
                   </p>
+                  {mistake.errors && mistake.errors.length > 0 ? (
+                    <p className="bidra-mistake__errors">
+                      Slik kan feilen se ut i skanningsrapporten:{' '}
+                      {mistake.errors.map((fragment, i) => (
+                        <span key={fragment}>
+                          {i > 0 ? ' · ' : ''}
+                          <code>{fragment}</code>
+                        </span>
+                      ))}
+                    </p>
+                  ) : null}
                 </article>
               ))}
             </div>

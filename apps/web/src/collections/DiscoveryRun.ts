@@ -32,6 +32,15 @@ export const DiscoveryRun: CollectionConfig = {
     { name: 'configDigest', type: 'text', admin: { readOnly: true } },
     { name: 'artifactRoots', type: 'text', hasMany: true, admin: { readOnly: true } },
     {
+      name: 'artifactDirs',
+      type: 'json',
+      admin: {
+        readOnly: true,
+        description:
+          'Resolved per-type directories (type → directories) when kihub.yaml uses artifactDirs; empty otherwise.',
+      },
+    },
+    {
       name: 'summary',
       type: 'group',
       fields: [

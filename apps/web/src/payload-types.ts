@@ -340,6 +340,18 @@ export interface DiscoveryRun {
   configPath?: string | null;
   configDigest?: string | null;
   artifactRoots?: string[] | null;
+  /**
+   * Resolved per-type directories (type → directories) when kihub.yaml uses artifactDirs; empty otherwise.
+   */
+  artifactDirs?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   summary?: {
     created?: number | null;
     updated?: number | null;
@@ -934,6 +946,7 @@ export interface DiscoveryRunsSelect<T extends boolean = true> {
   configPath?: T;
   configDigest?: T;
   artifactRoots?: T;
+  artifactDirs?: T;
   summary?:
     | T
     | {

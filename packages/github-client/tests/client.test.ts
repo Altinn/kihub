@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { artifactDirectoryDigest, gitBlobOid } from '@kihub/discovery-core';
+import { artifactDirectoryDigest, gitBlobOid, layoutForRoots } from '@kihub/discovery-core';
 import { createGithubRepoReader, GithubClientError } from '../src/client';
 
 const TREE = {
@@ -39,7 +39,7 @@ describe('createGithubRepoReader', () => {
     const fetchImpl = vi.fn(async (_url: string | URL | Request) => jsonResponse(TREE));
     const reader = createGithubRepoReader({ repo: 'digdir/ai-artifacts', token: 't', fetchImpl });
 
-    expect(await reader.listArtifactDirs(['src'])).toEqual(['src/skills/nested']);
+    expect(await reader.listArtifactDirs(layoutForRoots(['src']))).toEqual(['src/skills/nested']);
     expect(await reader.artifactDigest?.('src/skills/nested')).toBe(
       artifactDirectoryDigest([{ path: 'artifact.yaml', blobOid: gitBlobOid('nested') }]),
     );
@@ -78,7 +78,7 @@ describe('createGithubRepoReader', () => {
   it('rejects a configured root missing from the tree', async () => {
     const fetchImpl = vi.fn(async () => jsonResponse(TREE));
     const reader = createGithubRepoReader({ repo: 'digdir/ai-artifacts', token: 't', fetchImpl });
-    await expect(reader.listArtifactDirs(['missing'])).rejects.toThrow('does not exist');
+    await expect(reader.listArtifactDirs(layoutForRoots(['missing']))).rejects.toThrow('does not exist');
   });
 
   it('fails closed when GitHub reports a truncated recursive tree', async () => {
@@ -131,7 +131,7 @@ describe('createGithubRepoReader', () => {
       token: 't',
       fetchImpl: vi.fn(async () => jsonResponse(tree)),
     });
-    await reader.listArtifactDirs(['.', 'skills/outer']);
+    await reader.listArtifactDirs(layoutForRoots(['.', 'skills/outer']));
     expect(await reader.artifactDigest?.('skills/outer')).toBe(
       artifactDirectoryDigest([
         { path: 'artifact.yaml', blobOid: gitBlobOid('outer') },

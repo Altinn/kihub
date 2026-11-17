@@ -23,21 +23,19 @@ import {
   type ResolvedDiscoveryConfig,
 } from './config';
 import { artifactDirectoryDigest, comparePaths, digestKnownFiles, gitBlobOid } from './digest';
+import {
+  type ArtifactLocation,
+  assertNoNestedArtifacts,
+  buildLayout,
+  type DiscoveryLayout,
+  layoutForRoots,
+  listedArtifactDirs,
+  locateArtifact,
+  repoJoin,
+} from './layout';
+import { missingDirMessage } from './messages';
 
-/** Type directories walked below every configured artifact root. */
-export const TYPE_DIRS = [
-  'skills',
-  'prompts',
-  'workflows',
-  'mcp',
-  'templates',
-  'policies',
-  'playbooks',
-  'agents',
-] as const;
-
-type TypeDir = (typeof TYPE_DIRS)[number];
-const TYPE_DIR_SET = new Set<string>(TYPE_DIRS);
+export { TYPE_DIRS } from './types';
 
 export interface RawArtifact {
   /** Actual repository-relative folder, e.g. "src/skills/security-review". */
@@ -66,60 +64,22 @@ export interface DetailedScanResult {
 
 /** A source of artifact bytes, independent of local checkout vs remote Git repository. */
 export interface RepoReader {
-  /** Actual repo-relative artifact directories beneath the supplied exact roots. */
-  listArtifactDirs(artifactRoots?: readonly string[]): Promise<string[]>;
+  /**
+   * Actual repo-relative artifact folders (`<container>/<slug>`, one level) for a resolved layout.
+   * Must fail when a required directory is missing. Omitted layout means the repository root.
+   */
+  listArtifactDirs(layout?: DiscoveryLayout): Promise<string[]>;
   /** File contents for a repo-relative path; undefined when absent. */
   readFile(relPath: string): Promise<string | undefined>;
   /** Optimized complete directory digest. Production local/GitHub readers implement this. */
   artifactDigest?(relPath: string): Promise<string>;
 }
 
-/** The type directory each artifact type must live under (015 manifest contract rule 4). */
-const DIR_FOR_TYPE: Record<ArtifactManifest['type'], TypeDir> = {
-  skill: 'skills',
-  prompt: 'prompts',
-  workflow: 'workflows',
-  mcp: 'mcp',
-  template: 'templates',
-  policy: 'policies',
-  playbook: 'playbooks',
-  agent: 'agents',
-};
-
-interface ArtifactLocation {
-  path: string;
-  root: string;
-  typeDir: TypeDir;
-}
-
-function repoJoin(...parts: string[]): string {
-  return parts.filter((part) => part && part !== '.').join('/');
-}
-
-function locationFor(relPath: string, artifactRoots: readonly string[]): ArtifactLocation {
-  if (relPath.startsWith('/') || relPath.includes('\\') || relPath.includes('\0')) {
-    throw new DiscoveryConfigError(`Reader returned unsafe artifact directory ${JSON.stringify(relPath)}`);
-  }
-  for (const root of artifactRoots) {
-    const prefix = root === '.' ? '' : `${root}/`;
-    if (!relPath.startsWith(prefix)) continue;
-    const remainder = relPath.slice(prefix.length);
-    const parts = remainder.split('/');
-    if (parts.length === 2 && TYPE_DIR_SET.has(parts[0] ?? '') && Boolean(parts[1])) {
-      return { path: relPath, root, typeDir: parts[0] as TypeDir };
-    }
-  }
-  throw new DiscoveryConfigError(
-    `Reader returned artifact directory outside the configured <root>/<type>/<slug> layout: ${relPath}`,
-  );
-}
-
 function sourceErrors(manifest: ArtifactManifest, location: ArtifactLocation, options: ScanOptions): string[] {
   const errors: string[] = [];
-  const expectedDir = DIR_FOR_TYPE[manifest.type];
-  if (location.typeDir !== expectedDir) {
+  if (location.expectedType !== manifest.type) {
     errors.push(
-      `type: type '${manifest.type}' does not match directory '${location.typeDir}/' (expected '${expectedDir}/')`,
+      `type: type '${manifest.type}' does not match the type '${location.expectedType}' configured for '${location.containerDir}'`,
     );
   }
   if (manifest.source.path !== location.path) {
@@ -219,33 +179,35 @@ function readCheckedRegularFile(absolute: string, relPath: string, checked: Stat
   }
 }
 
-function validateLocalRoot(rootPath: string, root: string): string {
+/** Resolve a required directory inside the checkout; it must be a real directory that stays inside. */
+function validateLocalDir(rootPath: string, dir: string): string {
   const baseReal = realpathSync(rootPath);
-  const absolute = containedPath(rootPath, root);
+  const absolute = containedPath(rootPath, dir);
   if (!existsSync(absolute) || !statSync(absolute).isDirectory()) {
-    throw new DiscoveryConfigError(`Configured artifact root does not exist or is not a directory: ${root}`);
+    throw new DiscoveryConfigError(missingDirMessage(dir));
   }
-  const rootReal = realpathSync(absolute);
-  const relative = path.relative(baseReal, rootReal);
+  const dirReal = realpathSync(absolute);
+  const relative = path.relative(baseReal, dirReal);
   if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
-    throw new DiscoveryConfigError(`Configured artifact root escapes repository through a symlink: ${root}`);
+    throw new DiscoveryConfigError(`Configured artifact directory escapes repository through a symlink: ${dir}`);
   }
   return absolute;
 }
 
-function listLocalArtifactDirs(rootPath: string, artifactRoots: readonly string[]): string[] {
+function listLocalArtifactDirs(rootPath: string, layout: DiscoveryLayout): string[] {
+  const required = new Set(layout.requiredDirs);
+  for (const dir of layout.requiredDirs) validateLocalDir(rootPath, dir);
   const dirs: string[] = [];
-  for (const root of artifactRoots) {
-    const absoluteRoot = validateLocalRoot(rootPath, root);
-    for (const typeDir of TYPE_DIRS) {
-      const absoluteTypeDir = path.join(absoluteRoot, typeDir);
-      if (!existsSync(absoluteTypeDir) || !lstatSync(absoluteTypeDir).isDirectory()) continue;
-      for (const entry of readdirSync(absoluteTypeDir, { withFileTypes: true })) {
-        if (!entry.isDirectory()) continue;
-        const artifactDir = path.join(absoluteTypeDir, entry.name);
-        if (!existsSync(path.join(artifactDir, 'artifact.yaml'))) continue;
-        dirs.push(repoJoin(root, typeDir, entry.name));
-      }
+  for (const container of layout.containers) {
+    // A configured directory was validated above; a root-layout type directory is optional and, as
+    // in 026, ignored when absent or when it is a symlink.
+    const absoluteContainer = containedPath(rootPath, container.dir);
+    if (!existsSync(absoluteContainer)) continue;
+    if (!required.has(container.dir) && !lstatSync(absoluteContainer).isDirectory()) continue;
+    for (const entry of readdirSync(absoluteContainer, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      if (!existsSync(path.join(absoluteContainer, entry.name, 'artifact.yaml'))) continue;
+      dirs.push(repoJoin(container.dir, entry.name));
     }
   }
   return [...new Set(dirs)].sort(comparePaths);
@@ -333,10 +295,13 @@ function localArtifactDigest(
 
 function scanLocalDetailed(rootPath: string, options: ScanOptions = {}): DetailedScanResult {
   const config = resolveDiscoveryConfig(readLocalRepoFile(rootPath, DISCOVERY_CONFIG_PATH));
+  const layout = buildLayout(config);
   const tracked = gitTrackedFiles(rootPath);
   const artifacts: RawArtifact[] = [];
-  for (const relPath of listLocalArtifactDirs(rootPath, config.artifactRoots)) {
-    const location = locationFor(relPath, config.artifactRoots);
+  const dirs = listLocalArtifactDirs(rootPath, layout);
+  assertNoNestedArtifacts(dirs, listedArtifactDirs(layout, dirs));
+  for (const relPath of dirs) {
+    const location = locateArtifact(layout, relPath);
     const manifestText = readLocalRepoFile(rootPath, `${relPath}/artifact.yaml`);
     if (manifestText === undefined) continue;
     const readme = readLocalRepoFile(rootPath, `${relPath}/README.md`);
@@ -357,8 +322,8 @@ export function scan(rootPath: string, options: ScanOptions = {}): RawArtifact[]
 export function createLocalReader(rootPath: string): RepoReader {
   let tracked: string[] | undefined | null = null;
   return {
-    async listArtifactDirs(artifactRoots = ['.']) {
-      return listLocalArtifactDirs(rootPath, artifactRoots);
+    async listArtifactDirs(layout = layoutForRoots()) {
+      return listLocalArtifactDirs(rootPath, layout);
     },
     async readFile(relPath) {
       return readLocalRepoFile(rootPath, relPath);
@@ -376,10 +341,12 @@ export async function scanRepoDetailed(
   options: ScanOptions = {},
 ): Promise<DetailedScanResult> {
   const config = resolveDiscoveryConfig(await reader.readFile(DISCOVERY_CONFIG_PATH));
+  const layout = buildLayout(config);
   const artifacts: RawArtifact[] = [];
-  const dirs = [...new Set(await reader.listArtifactDirs(config.artifactRoots))].sort(comparePaths);
+  const dirs = [...new Set(await reader.listArtifactDirs(layout))].sort(comparePaths);
+  assertNoNestedArtifacts(dirs, listedArtifactDirs(layout, dirs));
   for (const relPath of dirs) {
-    const location = locationFor(relPath, config.artifactRoots);
+    const location = locateArtifact(layout, relPath);
     const manifestText = await reader.readFile(`${relPath}/artifact.yaml`);
     if (manifestText === undefined) continue;
     const readme = await reader.readFile(`${relPath}/README.md`);

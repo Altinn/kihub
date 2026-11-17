@@ -1651,6 +1651,8 @@ a.news-pagination__btn:hover {
 .bidra-mistake__fix { margin-top: var(--kihub-space-3) !important; padding-top: var(--kihub-space-3); border-top: 1px solid var(--kihub-border-subtle); }
 .bidra-mistake__symptom span { color: var(--kihub-warning); }
 .bidra-mistake__fix span { color: var(--kihub-success); font-weight: var(--kihub-weight-semibold); }
+.bidra-mistake__errors { margin-top: var(--kihub-space-3) !important; font-size: 13px !important; color: var(--kihub-text-subtle); }
+.bidra-mistake__errors code { overflow-wrap: anywhere; }
 
 /* ---------- FAQ ---------- */
 .bidra-faq { border-top: 1px solid var(--kihub-border-subtle); }

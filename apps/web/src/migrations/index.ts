@@ -11,6 +11,7 @@ import * as migration_20260924_080748_news_hero_media from './20260924_080748_ne
 import * as migration_20261022_072807_frontpage_digdir_defaults from './20261022_072807_frontpage_digdir_defaults';
 import * as migration_20261102_121653 from './20261102_121653';
 import * as migration_20261103_080248_artifact_revision_governance from './20261103_080248_artifact_revision_governance';
+import * as migration_20261117_095513_discovery_run_artifact_dirs from './20261117_095513_discovery_run_artifact_dirs';
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20261103_080248_artifact_revision_governance.up,
     down: migration_20261103_080248_artifact_revision_governance.down,
     name: '20261103_080248_artifact_revision_governance',
+  },
+  {
+    up: migration_20261117_095513_discovery_run_artifact_dirs.up,
+    down: migration_20261117_095513_discovery_run_artifact_dirs.down,
+    name: '20261117_095513_discovery_run_artifact_dirs'
   },
 ];
