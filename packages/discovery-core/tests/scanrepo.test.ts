@@ -151,8 +151,9 @@ describe('scanRepo', () => {
       .replace('path: skills/security-review', 'path: wrong/path');
     const rootsSeen: string[][] = [];
     const reader: RepoReader = {
-      async listArtifactDirs(artifactRoots) {
-        rootsSeen.push([...(artifactRoots ?? [])]);
+      async listArtifactDirs(layout) {
+        // 028: the reader receives the resolved layout; its required dirs are the configured roots.
+        rootsSeen.push([...(layout?.requiredDirs ?? [])]);
         return ['src/skills/nested'];
       },
       async readFile(relPath) {

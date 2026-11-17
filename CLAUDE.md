@@ -1,5 +1,25 @@
 <!-- SPECKIT START -->
-Active feature: **028-docs-navigation** (specify + plan + tasks + implement 2026-11-10; spec PR
+Active feature: **028-per-type-artifact-dirs** (DONE — specify + plan + tasks + implement 2026-11-17,
+PR Altinn/kihub#185 stacked on 026 / PR #176; tasks 48/48; discovery-core 146,
+github-client 23, web unit 261, web integration 187, lint + `tsc` clean, `next build` green).
+Adds optional `discovery.artifactDirs` to `kihub.yaml`: a map from manifest type (`skill`, `agent`, …) to
+directories that directly contain `<slug>/artifact.yaml`, so teams keep their own folder layout (first
+case: Altinn Studio `agents/_skills/`) and only add `kihub.yaml` + one small `artifact.yaml` per artifact.
+`artifactRoots` and `artifactDirs` can be combined; only listed locations are scanned (no implicit `.` when
+only `artifactDirs` is given). Durable facts: everything is a **container** `{dir, type, listed}` built by
+the pure `layout.ts` (`buildLayout`, `matchArtifactDirs`, `locateArtifact`, `assertNoNestedArtifacts`) that
+the scanner AND both readers share, so local/GitHub parity is structural; `RepoReader.listArtifactDirs`
+now takes a layout. `.` is rejected as an `artifactDirs` entry; type keys are singular (plural gets a
+"did you mean" hint). Same dir under two types, or a dir the root layout reads as another type, fails the
+whole scan, as do a missing listed dir and nested artifact folders when one was found through
+`artifactDirs` (root-layout nesting stays allowed as in 026). Roots-only configs resolve (no
+`artifactDirs` key) and hash exactly as in 026. Failure texts live in `discovery-core/src/messages.ts`
+(`MARKERS`); the `/bidra` guide quotes them via `COMMON_MISTAKES[].errors` and a unit test fails if a marker
+has no entry. `discovery-runs` gained a json `artifactDirs` (migration `20261117_155625_…`, verified
+up/down/up). Docs updated: documentation/artifact-discovery.md, artifact-manifest.md, README, `/bidra`.
+Plan: `specs/028-per-type-artifact-dirs/plan.md` (tasks.md Notes hold the implementation record).
+
+Prior: **028-docs-navigation** (specify + plan + tasks + implement 2026-11-10; spec PR
 Altinn/kihub#181 carries the implementation too). Documentation-style navigation for Pages
 (`specs/028-docs-navigation/`, research R1–R16, contracts ×2, constitution 4.3.0).
 - **US1 anchors + TOC (Pages and KI Læring):** `lib/headings.ts` (`extractHeadings`, `toTocTree`,

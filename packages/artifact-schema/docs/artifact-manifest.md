@@ -44,7 +44,7 @@ lifecycle:
 | `owner.contact` | ✅ | email | Contact address. |
 | `source.provider` | ✅ | `github` | Only value this phase. |
 | `source.repository` | ✅ | string | e.g. `digdir/ai-artifacts`. On remote scans it must name the repository registered as the discovery source (compared as case-insensitive `owner/repo`); a mismatch makes the manifest invalid. |
-| `source.path` | ✅ | string | Repository-relative directory of the artifact, e.g. `skills/security-review` or `src/skills/security-review`. Must equal the actual discovered directory exactly (no `./`, no trailing `/`); a mismatch makes the manifest invalid. |
+| `source.path` | ✅ | string | Repository-relative directory of the artifact, e.g. `skills/security-review`, `src/skills/security-review` or `agents/_skills/tekstforfatter-docs`. Must equal the actual discovered directory exactly (no `./`, no trailing `/`); a mismatch makes the manifest invalid. |
 | `install.apm.package` | ⬜ | string | APM package id (Principle V). The `install` block and its `apm` are optional. |
 | `tags` | ⬜ | string[] (lowercase kebab) | Optional keywords. |
 | `visibility` | ✅ | `internal` \| `public` \| `restricted` | Only `internal` is used in Phase 1; others reserved. |
@@ -55,35 +55,69 @@ Unknown/extra fields are rejected (the schema is strict) — this catches typos 
 
 ## Type directories
 
-Discovery only looks at exactly `<root>/<type-dir>/<slug>/artifact.yaml`, where `<root>` is the
-repository root unless `kihub.yaml` says otherwise (see below). Manifests at any other depth are
+By default discovery only looks at exactly `<root>/<type-dir>/<slug>/artifact.yaml`, where `<root>` is
+the repository root unless `kihub.yaml` says otherwise (see below). Manifests at any other depth are
 invisible. The manifest's `type` must match the directory it lives under — a mismatch (e.g.
 `type: agent` under `skills/`) is reported as an invalid manifest and not registered:
 
 `skills/` → `skill` · `prompts/` → `prompt` · `workflows/` → `workflow` · `mcp/` → `mcp` ·
 `templates/` → `template` · `policies/` → `policy` · `playbooks/` → `playbook` · `agents/` → `agent`
 
-## Artifact roots (`kihub.yaml`)
+A repository with its own folder names does not have to rename anything: `artifactDirs` in
+`kihub.yaml` (below) says which folders hold which type, and then `type` must match the type the
+folder is listed under.
 
-A repository that keeps artifacts next to its code commits one `kihub.yaml` at the repository root
-(same Git ref as the artifacts):
+## Where artifacts live (`kihub.yaml`)
+
+A repository that keeps artifacts next to its code, or under its own folder names, commits one
+`kihub.yaml` at the repository root (same Git ref as the artifacts). Nothing has to move; each
+artifact folder just gets an `artifact.yaml` next to its content. Two keys, usable together:
 
 ```yaml
 schemaVersion: 1
 discovery:
+  # Folders that contain the standard <type-dir>/<slug>/ layout
   artifactRoots:
     - .
     - src
     - services/forms
+  # Folders that directly contain <slug>/artifact.yaml, per artifact type
+  artifactDirs:
+    skill:
+      - agents/_skills
+    agent:
+      - custom/bots
 ```
 
 - Without the file, the only root is `.` (the repository root), so existing repositories need no
-  change. With it, **only** the listed roots are scanned, so list `.` explicitly to keep root-level
-  artifacts.
-- The file is strict: only these keys, `schemaVersion` must be `1`, and 1–32 unique roots written as
-  plain relative paths (`src`, not `/src`, `./src` or `src/`). Every root must exist at the ref.
-- An invalid `kihub.yaml` or a missing root fails the whole scan before anything in the catalog
-  changes.
+  change. With it, **only** the listed roots and directories are scanned: list `.` under
+  `artifactRoots` to keep root-level artifacts, and note that a file with only `artifactDirs` does
+  not read the root layout.
+- **`artifactRoots`**: 1–32 unique roots written as plain relative paths (`src`, not `/src`, `./src`
+  or `src/`); `.` is the repository root. Inside a root: `<type-dir>/<slug>/artifact.yaml`.
+- **`artifactDirs`**: keys are the singular manifest types (`skill`, `prompt`, `workflow`, `mcp`,
+  `template`, `policy`, `playbook`, `agent`), values are non-empty lists of directories (same path
+  rules as roots, but `.` is not allowed), at most 32 entries in total. Inside a listed directory:
+  `<slug>/artifact.yaml`, exactly one level, never deeper.
+- At least one of the two keys is required. The file is strict: only these keys, `schemaVersion` must
+  be `1`.
+- Every listed root and directory must exist at the ref. An invalid `kihub.yaml`, a missing
+  directory, the same directory listed for two types (or read as another type by a root layout), or
+  an artifact folder nested inside another one (when found through `artifactDirs`) fails the whole
+  scan before anything in the catalog changes.
+
+Example: skills in `agents/_skills/<slug>/SKILL.md` stay where they are; each gets
+
+```yaml
+# agents/_skills/tekstforfatter-docs/artifact.yaml
+id: digdir.tekstforfatter-docs
+type: skill
+# …
+source:
+  provider: github
+  repository: Altinn/altinn-studio
+  path: agents/_skills/tekstforfatter-docs
+```
 
 Full rules: [`documentation/artifact-discovery.md`](../../../documentation/artifact-discovery.md).
 

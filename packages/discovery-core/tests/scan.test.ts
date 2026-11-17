@@ -3,8 +3,15 @@ import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { DiscoveryConfigError } from '../src/config';
 import { artifactDirectoryDigest, gitBlobOid } from '../src/digest';
 import { scan } from '../src/scan';
+import {
+  ARTIFACT_DIRS_FAILURE_FIXTURES,
+  ARTIFACT_DIRS_FIXTURES,
+  FIXTURE_REPOSITORY,
+  writeCheckout,
+} from './fixtures/artifact-dirs-fixtures';
 
 let root: string;
 
@@ -94,11 +101,11 @@ describe('scan', () => {
     const results = scan(root);
     const misplacedAgent = results.find((r) => r.path === 'skills/misplaced-agent');
     expect(misplacedAgent?.valid).toBe(false);
-    expect(misplacedAgent?.errors?.some((e) => e.includes("'agent'") && e.includes("'skills/'"))).toBe(true);
+    expect(misplacedAgent?.errors?.some((e) => e.includes("'agent'") && e.includes("configured for 'skills'"))).toBe(true);
 
     const misplacedSkill = results.find((r) => r.path === 'agents/misplaced-skill');
     expect(misplacedSkill?.valid).toBe(false);
-    expect(misplacedSkill?.errors?.some((e) => e.includes("'skill'") && e.includes("'agents/'"))).toBe(true);
+    expect(misplacedSkill?.errors?.some((e) => e.includes("'skill'") && e.includes("configured for 'agents'"))).toBe(true);
   });
 });
 
@@ -252,5 +259,77 @@ describe('configured local scan', () => {
         ]),
       );
     });
+  });
+});
+
+describe('artifactDirs local scan (028)', () => {
+  it.each(ARTIFACT_DIRS_FIXTURES.map((f) => [f.name, f] as const))('%s', (_name, fixture) => {
+    const repo = writeCheckout(fixture.files);
+    try {
+      const results = scan(repo, { expectedRepository: FIXTURE_REPOSITORY });
+      expect(results.map((r) => r.path)).toEqual(fixture.expected.map((e) => e.path));
+      for (const expected of fixture.expected) {
+        const actual = results.find((r) => r.path === expected.path)!;
+        expect(actual.valid, expected.path).toBe(expected.valid);
+        if (expected.type) expect(actual.manifest?.type).toBe(expected.type);
+        for (const fragment of expected.errors ?? []) {
+          expect(actual.errors?.join('\n'), expected.path).toContain(fragment);
+        }
+        // the digest covers the whole artifact folder (content file + README), not just the manifest
+        expect(actual.contentDigest).toMatch(/^sha256:[a-f0-9]{64}$/);
+      }
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps governed content per folder: sibling skills have independent digests', () => {
+    const fixture = ARTIFACT_DIRS_FIXTURES[0]!;
+    const before = writeCheckout(fixture.files);
+    const changed = writeCheckout({
+      ...fixture.files,
+      'agents/_skills/beta/CONTENT.md': '# beta changed\n',
+    });
+    try {
+      const a = scan(before, { expectedRepository: FIXTURE_REPOSITORY });
+      const b = scan(changed, { expectedRepository: FIXTURE_REPOSITORY });
+      const digest = (rs: typeof a, p: string) => rs.find((r) => r.path === p)?.contentDigest;
+      expect(digest(a, 'agents/_skills/alpha')).toBe(digest(b, 'agents/_skills/alpha'));
+      expect(digest(a, 'agents/_skills/beta')).not.toBe(digest(b, 'agents/_skills/beta'));
+    } finally {
+      rmSync(before, { recursive: true, force: true });
+      rmSync(changed, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('artifactDirs whole-scan failures (028 US2)', () => {
+  it.each(ARTIFACT_DIRS_FAILURE_FIXTURES.map((f) => [f.name, f] as const))('local scan refuses: %s', (_name, fixture) => {
+    const repo = writeCheckout(fixture.files);
+    try {
+      let message = '';
+      try {
+        scan(repo, { expectedRepository: FIXTURE_REPOSITORY });
+      } catch (error) {
+        expect(error).toBeInstanceOf(DiscoveryConfigError);
+        message = (error as Error).message;
+      }
+      expect(message, 'scan must throw').not.toBe('');
+      for (const fragment of fixture.fragments) expect(message).toContain(fragment);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps a bad manifest per-artifact: siblings are still discovered', () => {
+    const fixture = ARTIFACT_DIRS_FIXTURES.find((f) => f.name.startsWith('manifest type'))!;
+    const repo = writeCheckout(fixture.files);
+    try {
+      const results = scan(repo, { expectedRepository: FIXTURE_REPOSITORY });
+      expect(results.filter((r) => r.valid).map((r) => r.path)).toEqual(['agents/_skills/good']);
+      expect(results.filter((r) => !r.valid)).toHaveLength(1);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
   });
 });

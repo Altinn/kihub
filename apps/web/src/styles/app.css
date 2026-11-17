@@ -1425,6 +1425,10 @@ main :not(pre) > code {
   grid-template-columns: minmax(0, 1fr);
   gap: var(--ds-size-4);
 }
+.app-guide__errors code {
+  overflow-wrap: anywhere;
+}
+
 .app-guide__checklist {
   margin: 0;
 }

@@ -1,4 +1,5 @@
 import { ARTIFACT_TYPES } from '@kihub/artifact-schema';
+import { DISCOVERY_MARKERS } from '@kihub/discovery-core';
 import { ARTIFACT_TYPE_LABELS, type ArtifactTypeValue } from '@/lib/registry-view';
 
 /**
@@ -83,6 +84,53 @@ export const EXAMPLE_NESTED_REPO_TREE = `team-repo/
 │   └── artifact.yaml      ← source.path: src/skills/skjemahjelp
 └── services/skjema/agents/innsendingshjelp/
     └── artifact.yaml      ← source.path: services/skjema/agents/innsendingshjelp`;
+
+/**
+ * 028 — a repository with its OWN folder layout. `kihub.yaml` says which folder holds which type of
+ * artifact; nothing has to move. Tested against the real parser and matcher in
+ * `tests/unit/contribute-guide.test.ts`: the `source.path:` annotations below are the folders KI Hub
+ * must find, and the `ignoreres:` annotation is a manifest it must NOT find.
+ */
+export const EXAMPLE_KIHUB_DIRS_CONFIG = `schemaVersion: 1
+discovery:
+  artifactDirs:
+    skill:
+      - agents/_skills
+`;
+
+export const EXAMPLE_CUSTOM_LAYOUT_TREE = `team-repo/
+├── kihub.yaml                    ← NY: sier hvor skillene ligger
+└── agents/
+    ├── home/                     ← står ikke i kihub.yaml, blir ikke lest
+    └── _skills/                  ← oppført i kihub.yaml som skill
+        ├── tekstredaktor/
+        │   ├── SKILL.md          ← innholdet deres, ligger som før
+        │   └── artifact.yaml     ← NY: source.path: agents/_skills/tekstredaktor
+        ├── klarsprak-sjekk/
+        │   ├── SKILL.md
+        │   └── artifact.yaml     ← NY: source.path: agents/_skills/klarsprak-sjekk
+        ├── fellesfiler/
+        │   └── terminologi.md    ← ingen artifact.yaml, hoppes over
+        └── gruppe/
+            └── dyp/
+                └── artifact.yaml ← ignoreres: agents/_skills/gruppe/dyp (ligger for dypt)`;
+
+export const EXAMPLE_CUSTOM_LAYOUT_MANIFEST = `id: digdir.tekstredaktor
+type: skill
+name: Tekstredaktør
+version: 1.0.0
+description: Norsk tekstredaktør som gir klarspråk, fjerner KI-markører og ser etter anglisismer.
+owner:
+  team: Team Tekst
+  contact: team-tekst@digdir.no
+source:
+  provider: github
+  repository: Altinn/team-tekst
+  path: agents/_skills/tekstredaktor
+visibility: internal
+lifecycle:
+  status: experimental
+`;
 
 export const EXAMPLE_SKILL_MANIFEST = `# yaml-language-server: $schema=${MANIFEST_SCHEMA_URL}
 id: digdir.klarsprak-sjekk
@@ -310,13 +358,19 @@ export interface CommonMistake {
   title: string;
   symptom: string;
   fix: string;
+  /**
+   * Fixed fragments of the (English) scan error this entry explains. Shown as code so a team can
+   * recognise the message in the scan report; a unit test requires every whole-scan fragment that
+   * discovery-core can produce to be quoted by some entry.
+   */
+  errors?: string[];
 }
 
 export const COMMON_MISTAKES: CommonMistake[] = [
   {
     title: 'Feil mappedybde',
     symptom: 'Artefakten dukker aldri opp, og ingen feilmelding vises.',
-    fix: 'Filen må ligge nøyaktig to nivåer under roten av repoet, eller under en mappe som står i kihub.yaml: agents/tilgangsveileder/artifact.yaml. agents/artifact.yaml blir ikke funnet.',
+    fix: 'Uten kihub.yaml må filen ligge nøyaktig to nivåer under roten av repoet: agents/tilgangsveileder/artifact.yaml. agents/artifact.yaml blir ikke funnet. Har dere egne mapper med artifactDirs, må artifact.yaml ligge rett under mappen som er oppført for typen: med agents/_skills i kihub.yaml er agents/_skills/mitt-verktoy/artifact.yaml riktig, mens agents/_skills/gruppe/mitt-verktoy/artifact.yaml ikke blir funnet.',
   },
   {
     title: 'Mellomrom eller feil filnavn',
@@ -325,13 +379,15 @@ export const COMMON_MISTAKES: CommonMistake[] = [
   },
   {
     title: 'type passer ikke med mappen',
-    symptom: 'Manifestet blir avvist som ugyldig.',
-    fix: 'type: agent må ligge under agents/, type: skill under skills/ og så videre. Se tabellen over typer.',
+    symptom: 'Manifestet blir avvist med en feil som type: type \'agent\' does not match the type \'skill\' configured for ….',
+    fix: 'type i manifestet må være samme type som mappen gjelder for. Uten oppsett i kihub.yaml betyr det type: agent under agents/, type: skill under skills/ og så videre (se tabellen over typer). Med artifactDirs er det typen i listen som gjelder: ligger mappen under skill: i kihub.yaml, må manifestet ha type: skill.',
+    errors: ['does not match the type'],
   },
   {
     title: 'source.path stemmer ikke med mappen',
     symptom: 'Manifestet blir avvist med en feil som source.path: … does not match discovered path ….',
-    fix: 'Skriv hele stien fra roten av repoet, nøyaktig som mappen heter: src/skills/skjemahjelp, ikke skills/skjemahjelp, ./src/skills/skjemahjelp eller src/skills/skjemahjelp/. Flytter dere mappen, må source.path endres samtidig.',
+    fix: 'Skriv hele stien fra roten av repoet, nøyaktig som mappen heter: src/skills/skjemahjelp eller agents/_skills/tekstredaktor, ikke skills/skjemahjelp, ./src/skills/skjemahjelp eller src/skills/skjemahjelp/. Flytter dere mappen, må source.path endres samtidig.',
+    errors: ['does not match discovered path'],
   },
   {
     title: 'Feil repo i source.repository',
@@ -341,7 +397,39 @@ export const COMMON_MISTAKES: CommonMistake[] = [
   {
     title: 'Feil i kihub.yaml',
     symptom: 'Ingenting i repoet blir oppdatert, verken nye eller endrede artefakter, fordi hele skanningen stopper.',
-    fix: 'Filen kan bare ha schemaVersion: 1 og discovery.artifactRoots, og hver mappe i listen må finnes på grenen KI Hub leser. Skriv mappene som src eller services/skjema, ikke /src, ./src eller src/.',
+    fix: 'Filen kan bare ha schemaVersion: 1 og under discovery enten artifactRoots, artifactDirs eller begge. artifactRoots er en liste med mapper (src, services/skjema), og artifactDirs knytter en type til en liste med mapper: skill: [agents/_skills]. Skriv mappene uten / først eller sist, uten ./ og uten . som artifactDirs-mappe (bruk artifactRoots for roten). Hver type skal ha minst én mappe, hver mappe bare én gang, og til sammen er maks 32 mapper tillatt. Hver mappe må finnes på grenen KI Hub leser.',
+    errors: [
+      DISCOVERY_MARKERS.emptyDiscovery,
+      DISCOVERY_MARKERS.notAList,
+      DISCOVERY_MARKERS.unsafeDir,
+      DISCOVERY_MARKERS.dotNotAllowed,
+      DISCOVERY_MARKERS.duplicateDir,
+      DISCOVERY_MARKERS.tooMany,
+    ],
+  },
+  {
+    title: 'Ukjent type i kihub.yaml',
+    symptom: 'Skanningen stopper med en feil som artifactDirs: unknown type "skills" (valid: skill, prompt, …).',
+    fix: 'Nøklene under artifactDirs er typenavnene i artifact.yaml, i entall: skill, prompt, workflow, mcp, template, policy, playbook og agent. Ikke skills eller agents, som er navnet på mappene i standardoppsettet. Feilmeldingen foreslår riktig navn.',
+    errors: [DISCOVERY_MARKERS.unknownType],
+  },
+  {
+    title: 'Mappen i kihub.yaml finnes ikke',
+    symptom: 'Skanningen stopper med en feil som Configured artifact directory does not exist: ….',
+    fix: 'Alle mapper i kihub.yaml må finnes på grenen KI Hub leser, og være mapper, ikke filer. Sjekk stavemåten og at grenen i KI Hub er den dere har pushet til. Slett mappen fra kihub.yaml hvis den ikke skal brukes lenger.',
+    errors: [DISCOVERY_MARKERS.missingDir],
+  },
+  {
+    title: 'Samme mappe er oppført for to typer',
+    symptom: 'Skanningen stopper med en feil som \'agents/_skills\' is listed for both \'agent\' and \'skill\', eller … but the root layout reads it as ….',
+    fix: 'En mappe kan bare gjelde for én type, og KI Hub velger aldri selv. Fjern den fra den ene typen. Bruker dere artifactRoots i tillegg, tolker KI Hub mapper som skills, agents og så videre under hver rot som den typen, så en mappe som heter skills kan ikke oppføres som agent.',
+    errors: [DISCOVERY_MARKERS.twoTypes, DISCOVERY_MARKERS.rootClash],
+  },
+  {
+    title: 'Artefaktmapper ligger inni hverandre',
+    symptom: 'Skanningen stopper med en feil som Artifact folders overlap: … contains ….',
+    fix: 'En artefaktmappe kan ikke ligge inni en annen artefaktmappe, for da ville fingeravtrykkene overlappe, og en endring i den indre ville gjort godkjenningen av den ytre utdatert. Flytt den ene, eller fjern en av mappene fra kihub.yaml.',
+    errors: [DISCOVERY_MARKERS.nested],
   },
   {
     title: 'Ukjente eller feilstavede felt',
@@ -382,9 +470,24 @@ export const FAQ: FaqItem[] = [
       'Ja. Hver mappe med en artifact.yaml blir én artefakt. Dere kan blande typer, for eksempel både skills/ og agents/.',
   },
   {
+    question: 'Må vi flytte mapper?',
+    answer:
+      'Nei. Legg en kihub.yaml i roten av repoet og skriv hvilken mappe som inneholder hvilken type, for eksempel artifactDirs med skill: [agents/_skills] hvis skillene deres ligger der. Så legger dere en liten artifact.yaml i hver artefaktmappe, ved siden av innholdet (for eksempel SKILL.md). Ingenting flyttes, gis nytt navn eller kopieres.',
+  },
+  {
     question: 'Kan artefaktene ligge sammen med koden, for eksempel under src/?',
     answer:
-      'Ja. Legg en kihub.yaml i roten av repoet og list mappene artefaktene ligger under. Inne i hver av dem gjelder den samme strukturen, <typemappe>/<navn>/artifact.yaml. KI Hub leter da bare i mappene i listen, så ta med . hvis dere også har artefakter i roten. Uten kihub.yaml leter KI Hub bare i roten.',
+      'Ja. Legg en kihub.yaml i roten av repoet. Med artifactRoots lister dere mapper som inneholder <typemappe>/<navn>/artifact.yaml, for eksempel src. Med artifactDirs peker dere rett på mappen for hver type, uansett hva den heter. KI Hub leter bare på stedene som står i filen, så ta med . under artifactRoots hvis dere også har artefakter i roten. Uten kihub.yaml leter KI Hub bare i roten.',
+  },
+  {
+    question: 'Kan vi blande mapper og roter?',
+    answer:
+      'Ja. artifactRoots og artifactDirs kan stå i samme kihub.yaml. KI Hub leter bare på de stedene som er oppført, og finner hver artefakt én gang. Står bare artifactDirs i filen, leses ikke standardoppsettet i roten (skills/, agents/ og så videre).',
+  },
+  {
+    question: 'Hvorfor finner ikke KI Hub mappen min?',
+    answer:
+      'Sjekk tre ting: at mappen er oppført i kihub.yaml for riktig type, at artifact.yaml ligger rett under den oppførte mappen (<mappe>/<navn>/artifact.yaml, ikke ett nivå dypere), og at filen heter nøyaktig artifact.yaml. KI Hub leter ikke i undermapper og bruker ikke jokertegn. Står noe feil i kihub.yaml, stopper hele skanningen, og feilen vises i skanningsrapporten.',
   },
   {
     question: 'Hva skjer med godkjenningen når vi endrer artefakten?',
@@ -421,9 +524,10 @@ export const FAQ: FaqItem[] = [
 /** The checklist at the bottom of the page — one line per thing a team must have done. */
 export const CHECKLIST: string[] = [
   'Mappen ligger under riktig typemappe, for eksempel skills/mitt-verktoy/, i roten eller under en mappe i kihub.yaml',
+  'Har dere egne mapper: kihub.yaml oppfører mappen for riktig type under artifactDirs, og mappen finnes på grenen KI Hub leser',
   'Filen heter nøyaktig artifact.yaml',
   'id er unik, med små bokstaver, på formen organisasjon.navn',
-  'type stemmer med mappen',
+  'type stemmer med mappen, eller med typen mappen er oppført for i kihub.yaml',
   'source.path er hele stien fra roten av repoet, nøyaktig som mappen heter',
   'source.repository er repoet som er koblet til KI Hub',
   'Alle påkrevde felt er fylt ut, og ingen ukjente felt er med',

@@ -135,6 +135,8 @@ async function runLocked(
         configPath: scanned.config.configPath,
         configDigest: scanned.config.configDigest,
         artifactRoots: scanned.config.artifactRoots,
+        // 028: only present when kihub.yaml uses artifactDirs; null keeps roots-only runs unchanged.
+        artifactDirs: scanned.config.artifactDirs ?? null,
         summary: {
           created: report.created.length,
           updated: report.updated.length,

@@ -1,5 +1,7 @@
 # Contract: Repository `kihub.yaml` v1
 
+> **Extended by 028:** `discovery.artifactDirs` (per-type directories) and an optional `artifactRoots` are specified in [`specs/028-per-type-artifact-dirs/contracts/discovery-config-v1-artifactdirs.md`](../../028-per-type-artifact-dirs/contracts/discovery-config-v1-artifactdirs.md). Everything below is unchanged for roots-only files, including the config digest.
+
 ## Location and fallback
 
 - Exact filename: `/kihub.yaml` at repository root.
