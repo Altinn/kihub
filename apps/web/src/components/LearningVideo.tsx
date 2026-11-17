@@ -26,8 +26,8 @@ export function LearningVideo({ node }: { node: LearningVideoNode }) {
   const src = youtubeEmbedUrl(id, { start: parseYouTubeStart(url) });
 
   return (
-    <figure className="lp-video">
-      <div className="lp-video__frame">
+    <figure className="app-video">
+      <div className="app-video__frame">
         <iframe
           src={src}
           title={title}
@@ -37,7 +37,11 @@ export function LearningVideo({ node }: { node: LearningVideoNode }) {
           allowFullScreen
         />
       </div>
-      {caption ? <figcaption className="lp-video__caption">{caption}</figcaption> : null}
+      {caption ? (
+        <figcaption className="ds-paragraph app-meta" data-size="sm">
+          {caption}
+        </figcaption>
+      ) : null}
     </figure>
   );
 }

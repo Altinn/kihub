@@ -66,6 +66,204 @@
         "$value": "{kihub.accent.16}"
       }
     },
+    "brand1": {
+      "1": {
+        "$type": "color",
+        "$value": "{kihub.brand1.1}"
+      },
+      "2": {
+        "$type": "color",
+        "$value": "{kihub.brand1.2}"
+      },
+      "3": {
+        "$type": "color",
+        "$value": "{kihub.brand1.3}"
+      },
+      "4": {
+        "$type": "color",
+        "$value": "{kihub.brand1.4}"
+      },
+      "5": {
+        "$type": "color",
+        "$value": "{kihub.brand1.5}"
+      },
+      "6": {
+        "$type": "color",
+        "$value": "{kihub.brand1.6}"
+      },
+      "7": {
+        "$type": "color",
+        "$value": "{kihub.brand1.7}"
+      },
+      "8": {
+        "$type": "color",
+        "$value": "{kihub.brand1.8}"
+      },
+      "9": {
+        "$type": "color",
+        "$value": "{kihub.brand1.9}"
+      },
+      "10": {
+        "$type": "color",
+        "$value": "{kihub.brand1.10}"
+      },
+      "11": {
+        "$type": "color",
+        "$value": "{kihub.brand1.11}"
+      },
+      "12": {
+        "$type": "color",
+        "$value": "{kihub.brand1.12}"
+      },
+      "13": {
+        "$type": "color",
+        "$value": "{kihub.brand1.13}"
+      },
+      "14": {
+        "$type": "color",
+        "$value": "{kihub.brand1.14}"
+      },
+      "15": {
+        "$type": "color",
+        "$value": "{kihub.brand1.15}"
+      },
+      "16": {
+        "$type": "color",
+        "$value": "{kihub.brand1.16}"
+      }
+    },
+    "brand2": {
+      "1": {
+        "$type": "color",
+        "$value": "{kihub.brand2.1}"
+      },
+      "2": {
+        "$type": "color",
+        "$value": "{kihub.brand2.2}"
+      },
+      "3": {
+        "$type": "color",
+        "$value": "{kihub.brand2.3}"
+      },
+      "4": {
+        "$type": "color",
+        "$value": "{kihub.brand2.4}"
+      },
+      "5": {
+        "$type": "color",
+        "$value": "{kihub.brand2.5}"
+      },
+      "6": {
+        "$type": "color",
+        "$value": "{kihub.brand2.6}"
+      },
+      "7": {
+        "$type": "color",
+        "$value": "{kihub.brand2.7}"
+      },
+      "8": {
+        "$type": "color",
+        "$value": "{kihub.brand2.8}"
+      },
+      "9": {
+        "$type": "color",
+        "$value": "{kihub.brand2.9}"
+      },
+      "10": {
+        "$type": "color",
+        "$value": "{kihub.brand2.10}"
+      },
+      "11": {
+        "$type": "color",
+        "$value": "{kihub.brand2.11}"
+      },
+      "12": {
+        "$type": "color",
+        "$value": "{kihub.brand2.12}"
+      },
+      "13": {
+        "$type": "color",
+        "$value": "{kihub.brand2.13}"
+      },
+      "14": {
+        "$type": "color",
+        "$value": "{kihub.brand2.14}"
+      },
+      "15": {
+        "$type": "color",
+        "$value": "{kihub.brand2.15}"
+      },
+      "16": {
+        "$type": "color",
+        "$value": "{kihub.brand2.16}"
+      }
+    },
+    "brand3": {
+      "1": {
+        "$type": "color",
+        "$value": "{kihub.brand3.1}"
+      },
+      "2": {
+        "$type": "color",
+        "$value": "{kihub.brand3.2}"
+      },
+      "3": {
+        "$type": "color",
+        "$value": "{kihub.brand3.3}"
+      },
+      "4": {
+        "$type": "color",
+        "$value": "{kihub.brand3.4}"
+      },
+      "5": {
+        "$type": "color",
+        "$value": "{kihub.brand3.5}"
+      },
+      "6": {
+        "$type": "color",
+        "$value": "{kihub.brand3.6}"
+      },
+      "7": {
+        "$type": "color",
+        "$value": "{kihub.brand3.7}"
+      },
+      "8": {
+        "$type": "color",
+        "$value": "{kihub.brand3.8}"
+      },
+      "9": {
+        "$type": "color",
+        "$value": "{kihub.brand3.9}"
+      },
+      "10": {
+        "$type": "color",
+        "$value": "{kihub.brand3.10}"
+      },
+      "11": {
+        "$type": "color",
+        "$value": "{kihub.brand3.11}"
+      },
+      "12": {
+        "$type": "color",
+        "$value": "{kihub.brand3.12}"
+      },
+      "13": {
+        "$type": "color",
+        "$value": "{kihub.brand3.13}"
+      },
+      "14": {
+        "$type": "color",
+        "$value": "{kihub.brand3.14}"
+      },
+      "15": {
+        "$type": "color",
+        "$value": "{kihub.brand3.15}"
+      },
+      "16": {
+        "$type": "color",
+        "$value": "{kihub.brand3.16}"
+      }
+    },
     "neutral": {
       "1": {
         "$type": "color",
@@ -130,138 +328,6 @@
       "16": {
         "$type": "color",
         "$value": "{kihub.neutral.16}"
-      }
-    },
-    "pink": {
-      "1": {
-        "$type": "color",
-        "$value": "{kihub.pink.1}"
-      },
-      "2": {
-        "$type": "color",
-        "$value": "{kihub.pink.2}"
-      },
-      "3": {
-        "$type": "color",
-        "$value": "{kihub.pink.3}"
-      },
-      "4": {
-        "$type": "color",
-        "$value": "{kihub.pink.4}"
-      },
-      "5": {
-        "$type": "color",
-        "$value": "{kihub.pink.5}"
-      },
-      "6": {
-        "$type": "color",
-        "$value": "{kihub.pink.6}"
-      },
-      "7": {
-        "$type": "color",
-        "$value": "{kihub.pink.7}"
-      },
-      "8": {
-        "$type": "color",
-        "$value": "{kihub.pink.8}"
-      },
-      "9": {
-        "$type": "color",
-        "$value": "{kihub.pink.9}"
-      },
-      "10": {
-        "$type": "color",
-        "$value": "{kihub.pink.10}"
-      },
-      "11": {
-        "$type": "color",
-        "$value": "{kihub.pink.11}"
-      },
-      "12": {
-        "$type": "color",
-        "$value": "{kihub.pink.12}"
-      },
-      "13": {
-        "$type": "color",
-        "$value": "{kihub.pink.13}"
-      },
-      "14": {
-        "$type": "color",
-        "$value": "{kihub.pink.14}"
-      },
-      "15": {
-        "$type": "color",
-        "$value": "{kihub.pink.15}"
-      },
-      "16": {
-        "$type": "color",
-        "$value": "{kihub.pink.16}"
-      }
-    },
-    "yellow": {
-      "1": {
-        "$type": "color",
-        "$value": "{kihub.yellow.1}"
-      },
-      "2": {
-        "$type": "color",
-        "$value": "{kihub.yellow.2}"
-      },
-      "3": {
-        "$type": "color",
-        "$value": "{kihub.yellow.3}"
-      },
-      "4": {
-        "$type": "color",
-        "$value": "{kihub.yellow.4}"
-      },
-      "5": {
-        "$type": "color",
-        "$value": "{kihub.yellow.5}"
-      },
-      "6": {
-        "$type": "color",
-        "$value": "{kihub.yellow.6}"
-      },
-      "7": {
-        "$type": "color",
-        "$value": "{kihub.yellow.7}"
-      },
-      "8": {
-        "$type": "color",
-        "$value": "{kihub.yellow.8}"
-      },
-      "9": {
-        "$type": "color",
-        "$value": "{kihub.yellow.9}"
-      },
-      "10": {
-        "$type": "color",
-        "$value": "{kihub.yellow.10}"
-      },
-      "11": {
-        "$type": "color",
-        "$value": "{kihub.yellow.11}"
-      },
-      "12": {
-        "$type": "color",
-        "$value": "{kihub.yellow.12}"
-      },
-      "13": {
-        "$type": "color",
-        "$value": "{kihub.yellow.13}"
-      },
-      "14": {
-        "$type": "color",
-        "$value": "{kihub.yellow.14}"
-      },
-      "15": {
-        "$type": "color",
-        "$value": "{kihub.yellow.15}"
-      },
-      "16": {
-        "$type": "color",
-        "$value": "{kihub.yellow.16}"
       }
     },
     "info": {

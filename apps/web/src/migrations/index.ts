@@ -10,8 +10,11 @@ import * as migration_20260923_081558_footer_contacts from './20260923_081558_fo
 import * as migration_20260924_080748_news_hero_media from './20260924_080748_news_hero_media';
 import * as migration_20261022_072807_frontpage_digdir_defaults from './20261022_072807_frontpage_digdir_defaults';
 import * as migration_20261102_121653 from './20261102_121653';
-import * as migration_20261103_080248_artifact_revision_governance from './20261103_080248_artifact_revision_governance';
-import * as migration_20261117_095513_discovery_run_artifact_dirs from './20261117_095513_discovery_run_artifact_dirs';
+import * as migration_20261105_122923_drafts from './20261105_122923_drafts';
+import * as migration_20261106_090856_pages from './20261106_090856_pages';
+import * as migration_20261110_081248_pages_hierarchy from './20261110_081248_pages_hierarchy';
+import * as migration_20261117_154755_artifact_revision_governance from './20261117_154755_artifact_revision_governance';
+import * as migration_20261117_155625_discovery_run_artifact_dirs from './20261117_155625_discovery_run_artifact_dirs';
 
 export const migrations = [
   {
@@ -75,13 +78,28 @@ export const migrations = [
     name: '20261102_121653',
   },
   {
-    up: migration_20261103_080248_artifact_revision_governance.up,
-    down: migration_20261103_080248_artifact_revision_governance.down,
-    name: '20261103_080248_artifact_revision_governance',
+    up: migration_20261105_122923_drafts.up,
+    down: migration_20261105_122923_drafts.down,
+    name: '20261105_122923_drafts',
   },
   {
-    up: migration_20261117_095513_discovery_run_artifact_dirs.up,
-    down: migration_20261117_095513_discovery_run_artifact_dirs.down,
-    name: '20261117_095513_discovery_run_artifact_dirs'
+    up: migration_20261106_090856_pages.up,
+    down: migration_20261106_090856_pages.down,
+    name: '20261106_090856_pages',
+  },
+  {
+    up: migration_20261110_081248_pages_hierarchy.up,
+    down: migration_20261110_081248_pages_hierarchy.down,
+    name: '20261110_081248_pages_hierarchy',
+  },
+  {
+    up: migration_20261117_154755_artifact_revision_governance.up,
+    down: migration_20261117_154755_artifact_revision_governance.down,
+    name: '20261117_154755_artifact_revision_governance',
+  },
+  {
+    up: migration_20261117_155625_discovery_run_artifact_dirs.up,
+    down: migration_20261117_155625_discovery_run_artifact_dirs.down,
+    name: '20261117_155625_discovery_run_artifact_dirs',
   },
 ];

@@ -8,6 +8,12 @@
     "incremental": true,
     "declaration": false,
     "plugins": [{ "name": "next" }],
+    "types": [
+      "node",
+      "@digdir/designsystemet-web",
+      "@digdir/designsystemet-types",
+      "./design-tokens-build/types.d.ts"
+    ],
     "paths": {
       "@/*": ["./src/*"],
       "@payload-config": ["./src/payload.config.ts"]

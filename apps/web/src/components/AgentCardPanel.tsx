@@ -1,10 +1,12 @@
-import { Card, Heading, Paragraph, Tag } from '@digdir/designsystemet-react';
-
 /**
  * 015 US3 — read-only rendering of an agent's stored A2A agent card (FR-013). Server component,
  * zero client JS. KI Hub's own labels are Norwegian; card CONTENT (names, descriptions, examples)
  * renders verbatim as authored. Groups with no data are omitted; the whole panel is omitted by
  * the caller when no card is stored.
+ *
+ * 026: plain Designsystemet card/tag/list markup with no inline styles, and a `headingLevel`
+ * (default 2) so the panel keeps a correct outline where it is embedded — the /bidra guide shows
+ * it under an h3 step. Group headings are one level below the panel heading.
  */
 
 interface AgentSkill {
@@ -42,17 +44,21 @@ const CAPABILITY_LABELS: Record<string, string> = {
 
 const asArray = <T,>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
 
-function GroupHeading({ children }: { children: string }) {
-  return (
-    <Heading level={3} data-size="2xs" style={{ marginTop: '1rem', marginBottom: '0.35rem' }}>
-      {children}
-    </Heading>
-  );
+/** The provider link's visible text; a malformed URL in a card falls back to the raw value. */
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
 }
 
-export function AgentCardPanel({ card }: { card: unknown }) {
+export function AgentCardPanel({ card, headingLevel = 2 }: { card: unknown; headingLevel?: 2 | 3 | 4 }) {
   if (!card || typeof card !== 'object' || Array.isArray(card)) return null;
   const c = card as AgentCardShape;
+
+  const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
+  const GroupHeading = `h${headingLevel + 1}` as 'h3' | 'h4' | 'h5';
 
   const provider = c.provider ?? {};
   const providerName = provider.name ?? provider.organization ?? '';
@@ -64,66 +70,81 @@ export function AgentCardPanel({ card }: { card: unknown }) {
   const inputModes = asArray<string>(c.defaultInputModes);
   const outputModes = asArray<string>(c.defaultOutputModes);
   const securitySchemes = Object.entries(c.securitySchemes ?? {});
+  const summary = [c.name, c.version ? `v${c.version}` : null, providerName].filter(Boolean).join(' · ');
 
   return (
-    <Card style={{ marginTop: '1.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <Heading level={2} data-size="xs">
+    <section className="ds-card app-panel" data-color="neutral" aria-label="Agentkort">
+      <div className="app-panel__head">
+        <Heading className="ds-heading" data-size="xs">
           Agentkort
         </Heading>
-        <span style={{ fontSize: '0.85rem', color: 'var(--ds-color-neutral-text-subtle)' }}>
-          {[c.name, c.version ? `v${c.version}` : null, providerName].filter(Boolean).join(' · ')}
-          {provider.url ? (
-            <>
-              {' · '}
-              <a href={provider.url}>{new URL(provider.url).hostname}</a>
-            </>
-          ) : null}
-        </span>
+        {summary || provider.url ? (
+          <p className="ds-paragraph app-meta" data-size="sm">
+            {summary}
+            {provider.url ? (
+              <>
+                {summary ? ' · ' : ''}
+                <a href={provider.url} className="ds-link">
+                  {hostOf(provider.url)}
+                </a>
+              </>
+            ) : null}
+          </p>
+        ) : null}
       </div>
       {c.description ? (
-        <Paragraph data-size="sm" style={{ marginTop: '0.5rem' }}>
+        <p className="ds-paragraph" data-size="sm">
           {c.description}
-        </Paragraph>
+        </p>
       ) : null}
 
       {capabilities.length ? (
         <>
-          <GroupHeading>Egenskaper</GroupHeading>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+          <GroupHeading className="ds-heading" data-size="2xs">
+            Egenskaper
+          </GroupHeading>
+          <ul className="app-tag-list">
             {capabilities.map(([key]) => (
-              <Tag key={key} data-color="info" data-size="sm">
-                {CAPABILITY_LABELS[key]}
-              </Tag>
+              <li key={key}>
+                <span className="ds-tag" data-color="info">
+                  {CAPABILITY_LABELS[key]}
+                </span>
+              </li>
             ))}
-          </div>
+          </ul>
         </>
       ) : null}
 
       {skills.length ? (
         <>
-          <GroupHeading>Ferdigheter</GroupHeading>
-          <dl style={{ margin: 0, display: 'grid', gap: '0.6rem' }}>
+          <GroupHeading className="ds-heading" data-size="2xs">
+            Ferdigheter
+          </GroupHeading>
+          <dl className="app-skill-list">
             {skills.map((skill, i) => (
               <div key={skill.id ?? skill.name ?? i}>
-                <dt style={{ fontWeight: 600 }}>{skill.name}</dt>
-                <dd style={{ margin: 0 }}>
+                <dt className="ds-paragraph" data-size="sm">
+                  {skill.name}
+                </dt>
+                <dd>
                   {skill.description ? (
-                    <Paragraph data-size="sm" style={{ margin: '0.15rem 0' }}>
+                    <p className="ds-paragraph" data-size="sm">
                       {skill.description}
-                    </Paragraph>
+                    </p>
                   ) : null}
                   {skill.tags?.length ? (
-                    <span style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.2rem' }}>
+                    <ul className="app-tag-list">
                       {skill.tags.map((t) => (
-                        <Tag key={t} data-color="neutral" data-size="sm">
-                          {t}
-                        </Tag>
+                        <li key={t}>
+                          <span className="ds-tag" data-color="neutral">
+                            {t}
+                          </span>
+                        </li>
                       ))}
-                    </span>
+                    </ul>
                   ) : null}
                   {skill.examples?.length ? (
-                    <ul style={{ margin: '0.3rem 0 0', paddingLeft: '1.25rem', fontSize: '0.85rem' }}>
+                    <ul className="ds-list" data-size="sm">
                       {skill.examples.map((example) => (
                         <li key={example}>{example}</li>
                       ))}
@@ -138,11 +159,17 @@ export function AgentCardPanel({ card }: { card: unknown }) {
 
       {interfaces.length ? (
         <>
-          <GroupHeading>Grensesnitt</GroupHeading>
-          <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
+          <GroupHeading className="ds-heading" data-size="2xs">
+            Grensesnitt
+          </GroupHeading>
+          <ul className="ds-list" data-size="sm">
             {interfaces.map((iface, i) => (
-              <li key={iface.url ?? i} style={{ fontSize: '0.9rem' }}>
-                {iface.protocol ? <Tag data-color="neutral" data-size="sm" style={{ marginRight: '0.4rem' }}>{iface.protocol}</Tag> : null}
+              <li key={iface.url ?? i}>
+                {iface.protocol ? (
+                  <span className="ds-tag" data-color="neutral">
+                    {iface.protocol}
+                  </span>
+                ) : null}{' '}
                 <code>{iface.url}</code>
                 {iface.version ? ` (v${iface.version})` : ''}
               </li>
@@ -153,34 +180,40 @@ export function AgentCardPanel({ card }: { card: unknown }) {
 
       {inputModes.length || outputModes.length ? (
         <>
-          <GroupHeading>Inn-/utdataformater</GroupHeading>
-          <Paragraph data-size="sm" style={{ margin: 0 }}>
+          <GroupHeading className="ds-heading" data-size="2xs">
+            Inn-/utdataformater
+          </GroupHeading>
+          <p className="ds-paragraph" data-size="sm">
             {[
               inputModes.length ? `Inn: ${inputModes.join(', ')}` : null,
               outputModes.length ? `Ut: ${outputModes.join(', ')}` : null,
             ]
               .filter(Boolean)
               .join(' · ')}
-          </Paragraph>
+          </p>
         </>
       ) : null}
 
       {securitySchemes.length ? (
         <>
-          <GroupHeading>Autentisering</GroupHeading>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+          <GroupHeading className="ds-heading" data-size="2xs">
+            Autentisering
+          </GroupHeading>
+          <ul className="app-tag-list">
             {securitySchemes.map(([name, scheme]) => {
               const type =
                 scheme && typeof scheme === 'object' && 'type' in scheme ? String((scheme as { type: unknown }).type) : '';
               return (
-                <Tag key={name} data-color="warning" data-size="sm">
-                  {type && type !== name ? `${name} (${type})` : name}
-                </Tag>
+                <li key={name}>
+                  <span className="ds-tag" data-color="warning">
+                    {type && type !== name ? `${name} (${type})` : name}
+                  </span>
+                </li>
               );
             })}
-          </div>
+          </ul>
         </>
       ) : null}
-    </Card>
+    </section>
   );
 }

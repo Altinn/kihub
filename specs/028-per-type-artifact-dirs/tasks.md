@@ -193,7 +193,7 @@ green against a freshly migrated scratch DB with `AUTH_MODE=entra` (the first ru
 security-advisory check for Next 16.4.1, which is unrelated to this work; a rerun compiled and generated
 all 13 pages).
 
-**Migration (T021–T023)**: `20261117_095513_discovery_run_artifact_dirs` — one `ADD COLUMN IF NOT EXISTS
+**Migration (T021–T023)**: `20261117_155625_discovery_run_artifact_dirs (regenerated after 026 was merged with main; first generated as `20261117_095513_…`)` — one `ADD COLUMN IF NOT EXISTS
 "artifact_dirs" jsonb`, `down` with `DROP COLUMN IF EXISTS`. Generated in `MEDIA_STORAGE_MODE=azure`
 (dummy Azure env, generation only). The whole chain was verified up → down → up on a fresh scratch DB
 (column present, absent, present). `payload-types.ts` was generated in azure mode too, but its extra

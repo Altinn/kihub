@@ -2,7 +2,7 @@ import type { Role } from '@kihub/governance-core';
 import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { getPublishedProjectBySlug, listPublishedProjects } from '@/lib/projects';
+import { getProjectBySlug, listPublishedProjects } from '@/lib/projects';
 import type { Project } from '@/payload-types';
 
 /**
@@ -46,7 +46,7 @@ function lexical(text: string): Project['body'] {
 }
 
 function createProject(
-  data: { title: string; body: Project['body']; slug?: string; status?: 'draft' | 'published' },
+  data: { title: string; body: Project['body']; slug?: string; _status?: 'draft' | 'published' },
   user?: Doc,
 ) {
   return payload.create({
@@ -101,7 +101,7 @@ beforeAll(async () => {
   users.contributor = await makeUser('contributor');
 
   const published = await createProject(
-    { title: `Published ${testId}`, body: lexical('published body'), status: 'published' },
+    { title: `Published ${testId}`, body: lexical('published body'), _status: 'published' },
     users.contributor,
   );
   publishedId = published.id;
@@ -134,11 +134,11 @@ describe('Projects authoring access + visibility (T006/T012)', () => {
     const published = await payload.update({
       collection: 'projects',
       id: created.id,
-      data: { status: 'published' },
+      data: { _status: 'published' },
       overrideAccess: false,
       user: users.contributor,
     });
-    expect(published.status).toBe('published');
+    expect(published._status).toBe('published');
 
     await payload.delete({
       collection: 'projects',
@@ -174,7 +174,7 @@ describe('Projects authoring access + visibility (T006/T012)', () => {
       user: users.reader,
     });
     expect(asReader.docs.length).toBeGreaterThan(0);
-    expect(asReader.docs.every((d) => d.status === 'published')).toBe(true);
+    expect(asReader.docs.every((d) => d._status === 'published')).toBe(true);
     expect(asReader.docs.some((d) => d.id === draftId)).toBe(false);
 
     const bySlug = await payload.find({
@@ -192,11 +192,11 @@ describe('Projects authoring access + visibility (T006/T012)', () => {
     expect(list.some((p) => p.id === draftId)).toBe(false);
     expect(list.some((p) => p.id === publishedId)).toBe(true);
 
-    const byDraftSlug = await getPublishedProjectBySlug(draftSlug);
+    const byDraftSlug = await getProjectBySlug(draftSlug);
     expect(byDraftSlug).toBeNull();
 
     const published = await payload.findByID({ collection: 'projects', id: publishedId, overrideAccess: true });
-    const byPublishedSlug = await getPublishedProjectBySlug(published.slug ?? '');
+    const byPublishedSlug = await getProjectBySlug(published.slug ?? '');
     expect(byPublishedSlug?.id).toBe(publishedId);
   });
 });

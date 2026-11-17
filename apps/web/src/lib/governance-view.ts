@@ -132,6 +132,7 @@ export function lifecycleBadgeView(governance: Governance) {
     !governance.approvalCurrent &&
     (governance.lifecycleState === 'approved' || governance.lifecycleState === 'recommended');
   return {
+    lifecycleStale: staleGovernedLifecycle,
     lifecycleColor: staleGovernedLifecycle ? ('warning' as const) : COLORS[governance.lifecycleState],
     lifecycleLabel: staleGovernedLifecycle
       ? `${LABELS[governance.lifecycleState]} (outdated)`

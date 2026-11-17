@@ -1,3 +1,4 @@
+import { ArrowRightIcon } from '@navikt/aksel-icons';
 import Link from 'next/link';
 import { ContributeBanner } from '@/components/ContributeBanner';
 import { EventsTimeline } from '@/components/EventsTimeline';
@@ -18,6 +19,9 @@ import { getFrontpageContent } from '@/lib/site-content';
  * strictly chronologically via `frontpage-select` — unlike the featured-first /events and /news
  * pages. Gated by `(app)/layout.tsx` `requireSession()`; content is read-only via
  * `lib/site-content.ts` (seeded defaults guarantee a complete first render).
+ *
+ * 026: Designsystemet headings, links and cards; section headings carry the meaning on their own
+ * (the uppercase eyebrows are gone), and the outline is h1 → h2 sections → h3 cards.
  */
 export default async function FrontPage() {
   const [content, upcomingEvents, publishedNews] = await Promise.all([
@@ -29,51 +33,48 @@ export default async function FrontPage() {
   const latestNews = selectLatestNews(publishedNews);
 
   return (
-    <main className="kihub-container">
+    <div className="app-container app-frontpage">
       <FrontpageHero hero={content.hero} />
 
-      <section aria-label="Snarveier" className="kihub-grid-2">
-        {content.tiles.map((tile) => (
-          <FrontpageTile key={tile.title} tile={tile} />
-        ))}
+      <section aria-labelledby="fp-shortcuts-heading">
+        <h2 id="fp-shortcuts-heading" className="ds-sr-only">
+          Snarveier
+        </h2>
+        <div className="app-tiles">
+          {content.tiles.map((tile) => (
+            <FrontpageTile key={tile.title} tile={tile} />
+          ))}
+        </div>
       </section>
 
-      <div style={{ marginTop: 'var(--kihub-space-8)' }}>
-        <SubscriptionsBanner subscriptions={content.subscriptions} />
-      </div>
+      <SubscriptionsBanner subscriptions={content.subscriptions} />
 
-      <div style={{ marginTop: 'var(--kihub-space-6)' }}>
-        <ContributeBanner />
-      </div>
+      <ContributeBanner />
 
-      <section className="kihub-section" aria-labelledby="fp-events-heading">
-        <div className="fp-section-head">
-          <div>
-            <p className="kihub-eyebrow kihub-eyebrow--accent" style={{ margin: 0 }}>
-              Arrangementer
-            </p>
-            <h2 id="fp-events-heading" className="kihub-h2">
-              Hva skjer i Digdir
-            </h2>
-          </div>
-          <Link href="/events" className="kihub-btn kihub-btn--tertiary">
-            Se kalender →
+      <section className="app-section" aria-labelledby="fp-events-heading">
+        <div className="app-section-head">
+          <h2 id="fp-events-heading" className="ds-heading" data-size="lg">
+            Hva skjer i Digdir
+          </h2>
+          <Link href="/events" className="ds-link">
+            <span>Se kalender</span>
+            <ArrowRightIcon aria-hidden />
           </Link>
         </div>
         {nextEvent ? (
-          <div className="fp-events">
+          <div className="app-fp-events">
             <NextEventCard event={nextEvent} />
             {timeline.length ? (
               <EventsTimeline events={timeline} />
             ) : (
-              <div className="kihub-card fp-empty">
-                <p className="kihub-prose">Ingen flere planlagte arrangementer akkurat nå.</p>
+              <div className="ds-card" data-color="neutral">
+                <p className="ds-paragraph">Ingen flere planlagte arrangementer akkurat nå.</p>
               </div>
             )}
           </div>
         ) : (
-          <div className="kihub-card fp-empty">
-            <p className="kihub-prose">
+          <div className="ds-card" data-color="neutral">
+            <p className="ds-paragraph">
               Ingen kommende arrangementer akkurat nå. Ta en titt i kalenderen senere.
             </p>
           </div>
@@ -81,31 +82,27 @@ export default async function FrontPage() {
       </section>
 
       <section aria-labelledby="fp-news-heading">
-        <div className="fp-section-head">
-          <div>
-            <p className="kihub-eyebrow kihub-eyebrow--accent" style={{ margin: 0 }}>
-              Aktuelt
-            </p>
-            <h2 id="fp-news-heading" className="kihub-h2">
-              Siste nytt
-            </h2>
-          </div>
-          <Link href="/news" className="kihub-btn kihub-btn--tertiary">
-            Alle nyheter →
+        <div className="app-section-head">
+          <h2 id="fp-news-heading" className="ds-heading" data-size="lg">
+            Siste nytt
+          </h2>
+          <Link href="/news" className="ds-link">
+            <span>Alle nyheter</span>
+            <ArrowRightIcon aria-hidden />
           </Link>
         </div>
         {latestNews.length ? (
-          <div className="fp-news">
+          <div className="app-fp-news">
             {latestNews.map((article) => (
               <NewsCard key={article.id} article={article} headingLevel={3} />
             ))}
           </div>
         ) : (
-          <div className="kihub-card fp-empty">
-            <p className="kihub-prose">Ingen publiserte nyheter ennå. Kom tilbake snart.</p>
+          <div className="ds-card" data-color="neutral">
+            <p className="ds-paragraph">Ingen publiserte nyheter ennå. Kom tilbake snart.</p>
           </div>
         )}
       </section>
-    </main>
+    </div>
   );
 }

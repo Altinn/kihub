@@ -1,14 +1,16 @@
 'use client';
 
-import { Button } from '@digdir/designsystemet-react';
 import { useState } from 'react';
 
 /**
  * Copy the given text to the clipboard, with brief feedback.
  *
- * 014: the confirmation label is now a prop. It was hardcoded English ('Copied'), which was fine
- * while the only caller was the English artifact page, but the learning code block needs Norwegian
- * (FR-036). Both labels default to the previous English values so existing call sites are unchanged.
+ * 014: the confirmation label is a prop. Both labels default to the previous English values so
+ * existing call sites are unchanged.
+ *
+ * 026: a plain `ds-button` (Designsystemet CSS) instead of the React `Button` wrapper. The
+ * confirmation is also announced: the button's own label change is not reliably read out, so a
+ * visually hidden `role="status"` live region repeats it for screen readers.
  */
 export function CopyButton({
   text,
@@ -32,8 +34,13 @@ export function CopyButton({
   }
 
   return (
-    <Button type="button" variant="secondary" data-size="sm" onClick={copy}>
-      {copied ? copiedLabel : label}
-    </Button>
+    <>
+      <button type="button" className="ds-button" data-variant="secondary" data-size="sm" onClick={copy}>
+        {copied ? copiedLabel : label}
+      </button>
+      <span role="status" className="ds-sr-only">
+        {copied ? copiedLabel : ''}
+      </span>
+    </>
   );
 }

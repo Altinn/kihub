@@ -1,7 +1,7 @@
 import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { getPublishedLearningPageBySlug, readLearningLibrary } from '@/lib/learning';
+import { getLearningPageBySlug, readLearningLibrary } from '@/lib/learning';
 import { buildLearningTree } from '@/lib/learning-view';
 import type { LearningPage } from '@/payload-types';
 
@@ -45,7 +45,7 @@ function createPage(data: {
   title: string;
   category: number;
   subcategory?: number;
-  status?: 'draft' | 'published';
+  _status?: 'draft' | 'published';
   order?: number;
 }) {
   return payload.create({
@@ -91,9 +91,9 @@ beforeAll(async () => {
   });
   subcategoryId = subcategory.id;
 
-  await createPage({ title: `Publisert A ${testId}`, category: categoryId, order: 1, status: 'published' });
-  await createPage({ title: `Publisert B ${testId}`, category: categoryId, subcategory: subcategoryId, order: 2, status: 'published' });
-  await createPage({ title: `Utkast ${testId}`, category: categoryId, order: 3, status: 'draft' });
+  await createPage({ title: `Publisert A ${testId}`, category: categoryId, order: 1, _status: 'published' });
+  await createPage({ title: `Publisert B ${testId}`, category: categoryId, subcategory: subcategoryId, order: 2, _status: 'published' });
+  await createPage({ title: `Utkast ${testId}`, category: categoryId, order: 3, _status: 'draft' });
 });
 
 afterAll(async () => {
@@ -147,8 +147,8 @@ describe('readLearningLibrary — query cost (A2, SC-010)', () => {
 
       // Add more pages; the query count must not move.
       calls.length = 0;
-      await createPage({ title: `Ekstra 1 ${testId}`, category: categoryId, status: 'published' });
-      await createPage({ title: `Ekstra 2 ${testId}`, category: categoryId, subcategory: subcategoryId, status: 'published' });
+      await createPage({ title: `Ekstra 1 ${testId}`, category: categoryId, _status: 'published' });
+      await createPage({ title: `Ekstra 2 ${testId}`, category: categoryId, subcategory: subcategoryId, _status: 'published' });
       calls.length = 0;
       await readLearningLibrary();
       expect(calls.length).toBe(before);
@@ -193,11 +193,11 @@ describe('buildLearningTree against real data (US1 end to end)', () => {
   });
 });
 
-describe('getPublishedLearningPageBySlug (FR-012, FR-032)', () => {
+describe('getLearningPageBySlug (FR-012, FR-032)', () => {
   it('returns a published page by its handle', async () => {
     const library = await readLearningLibrary();
     const slug = library.pages.find((p) => p.title === `Publisert A ${testId}`)!.slug!;
-    const page = await getPublishedLearningPageBySlug(slug);
+    const page = await getLearningPageBySlug(slug);
     expect(page?.title).toBe(`Publisert A ${testId}`);
   });
 
@@ -210,22 +210,22 @@ describe('getPublishedLearningPageBySlug (FR-012, FR-032)', () => {
     });
     const slug = (draft.docs[0] as LearningPage).slug!;
     expect(slug).toBeTruthy();
-    expect(await getPublishedLearningPageBySlug(slug)).toBeNull();
+    expect(await getLearningPageBySlug(slug)).toBeNull();
   });
 
   it('returns null for an unknown handle', async () => {
-    expect(await getPublishedLearningPageBySlug('finnes-ikke-i-det-hele-tatt')).toBeNull();
+    expect(await getLearningPageBySlug('finnes-ikke-i-det-hele-tatt')).toBeNull();
   });
 });
 
 describe('slug derivation against the database (FR-011)', () => {
   it('derives a handle from the title, mapping Norwegian letters', async () => {
-    const page = await createPage({ title: `Få dybde og størrelse ${testId}`, category: categoryId, status: 'published' });
+    const page = await createPage({ title: `Få dybde og størrelse ${testId}`, category: categoryId, _status: 'published' });
     expect(page.slug).toBe(`fa-dybde-og-storrelse-${testId}`);
   });
 
   it('keeps the handle stable when the title changes', async () => {
-    const created = await createPage({ title: `Opprinnelig tittel ${testId}`, category: categoryId, status: 'published' });
+    const created = await createPage({ title: `Opprinnelig tittel ${testId}`, category: categoryId, _status: 'published' });
     const updated = await payload.update({
       collection: 'learning-pages',
       id: created.id,

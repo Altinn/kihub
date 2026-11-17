@@ -1,3 +1,4 @@
+import { ChevronLeftIcon, ChevronRightIcon } from '@navikt/aksel-icons';
 import Link from 'next/link';
 import { EventsDayList } from '@/components/EventsDayList';
 import { EventsFilters } from '@/components/EventsFilters';
@@ -21,6 +22,9 @@ import {
  * client-side scripting disabled (SC-004). Liste: published upcoming events, grouped per Oslo
  * day, filtered server-side (FR-002/005). Kalender: the displayed month's full 6-week grid,
  * past-in-month included (FR-006/007). Access is gated by `(app)/layout.tsx` `requireSession()`.
+ *
+ * 026: Designsystemet heading and button links; month navigation is tertiary icon buttons with
+ * spoken names, and the month heading (h2) exists in the calendar view only, above its table.
  */
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -28,6 +32,8 @@ type SearchParams = Record<string, string | string[] | undefined>;
 function monthHref(year: number, month: number): string {
   return `/events?view=kalender&month=${year}-${String(month).padStart(2, '0')}`;
 }
+
+export const metadata = { title: 'Arrangementer' };
 
 export default async function EventsPage({
   searchParams,
@@ -37,10 +43,12 @@ export default async function EventsPage({
   const state = parseEventsSearchParams(await searchParams);
 
   return (
-    <main className="kihub-container">
-      <div className="kihub-section">
-        <div className="ev-head">
-          <h1 className="kihub-h1">Arrangementer</h1>
+    <div className="app-container">
+      <div className="app-section">
+        <div className="app-page-head">
+          <h1 className="ds-heading" data-size="xl">
+            Arrangementer
+          </h1>
           <EventsViewToggle view={state.view} />
         </div>
 
@@ -50,7 +58,7 @@ export default async function EventsPage({
           <ListView types={state.types} form={state.form} />
         )}
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -69,7 +77,7 @@ async function ListView({
   const hasActiveFilters = types.length > 0 || Boolean(form);
 
   return (
-    <div className="ev-layout">
+    <div className="app-sidebar-layout">
       <EventsFilters activeTypes={types} activeForm={form} />
       <EventsDayList events={events} hasActiveFilters={hasActiveFilters} />
     </div>
@@ -84,21 +92,27 @@ async function CalendarView({ year, month }: { year: number; month: number }) {
 
   return (
     <div>
-      <div className="ev-monthnav">
+      <div className="app-monthnav">
         <Link
           href={monthHref(prev.year, prev.month)}
           aria-label="Forrige måned"
-          className="ev-monthnav__btn kihub-focusable"
+          className="ds-button"
+          data-variant="tertiary"
+          data-icon="true"
         >
-          ‹
+          <ChevronLeftIcon aria-hidden />
         </Link>
-        <h2 className="kihub-h3 ev-monthnav__title">{formatMonthTitle(year, month)}</h2>
+        <h2 className="ds-heading" data-size="md">
+          {formatMonthTitle(year, month)}
+        </h2>
         <Link
           href={monthHref(next.year, next.month)}
           aria-label="Neste måned"
-          className="ev-monthnav__btn kihub-focusable"
+          className="ds-button"
+          data-variant="tertiary"
+          data-icon="true"
         >
-          ›
+          <ChevronRightIcon aria-hidden />
         </Link>
       </div>
       <EventsMonthCalendar

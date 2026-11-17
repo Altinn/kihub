@@ -1,4 +1,3 @@
-import { Card, Heading, Paragraph, Tag } from '@digdir/designsystemet-react';
 import Link from 'next/link';
 import type { Governance } from '@/lib/governance';
 import { artifactTypeLabel } from '@/lib/registry-view';
@@ -12,7 +11,13 @@ export interface ArtifactCardData {
   tags?: string[];
 }
 
-/** Listing card for one artifact (Designsystemet). Links to the detail page. */
+/**
+ * Listing card for one artifact. Links to the detail page.
+ *
+ * 026 R5: a Designsystemet card whose name is the one link (`h2 > a`), with
+ * `data-clickdelegatefor` forwarding clicks anywhere on the card to it; type, lifecycle and tags
+ * are plain `ds-tag`s with Norwegian labels.
+ */
 export function ArtifactCard({
   artifact,
   governance,
@@ -20,31 +25,36 @@ export function ArtifactCard({
   artifact: ArtifactCardData;
   governance?: Governance | null;
 }) {
+  const linkId = `artifact-${artifact.artifactId}`;
   return (
-    <Card>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
-        <Heading level={2} data-size="xs">
-          <Link href={`/artifacts/${encodeURIComponent(artifact.artifactId)}`}>{artifact.name}</Link>
-        </Heading>
-        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-          <Tag data-color="neutral" data-size="sm">
-            {artifactTypeLabel(artifact.type)}
-          </Tag>
-          {governance ? <LifecycleBadge governance={governance} /> : null}
-        </div>
-      </div>
-      <Paragraph data-size="sm" style={{ marginTop: '0.5rem' }}>
+    <article className="ds-card app-content-card" data-color="neutral" data-clickdelegatefor={linkId}>
+      {/* The heading is a direct child of the card, so Designsystemet's link-card CSS styles its
+          link (no ds-link: the whole card is the hover/focus target). */}
+      <h2 className="ds-heading" data-size="xs">
+        <Link id={linkId} href={`/artifacts/${encodeURIComponent(artifact.artifactId)}`}>
+          {artifact.name}
+        </Link>
+      </h2>
+      <span className="app-cluster app-cluster--tight">
+        <span className="ds-tag" data-color="neutral" data-variant="outline">
+          {artifactTypeLabel(artifact.type)}
+        </span>
+        {governance ? <LifecycleBadge governance={governance} /> : null}
+      </span>
+      <p className="ds-paragraph" data-size="sm">
         {artifact.description}
-      </Paragraph>
+      </p>
       {artifact.tags?.length ? (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.75rem' }}>
+        <ul className="app-tag-list" aria-label="Emneord">
           {artifact.tags.map((t) => (
-            <Tag key={t} data-color="info" data-size="sm">
-              {t}
-            </Tag>
+            <li key={t}>
+              <span className="ds-tag" data-color="info">
+                {t}
+              </span>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null}
-    </Card>
+    </article>
   );
 }
