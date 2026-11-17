@@ -1,19 +1,18 @@
-import { Alert, Button, Card, Heading, Paragraph } from '@digdir/designsystemet-react';
 import { signIn } from '@/auth';
 
 const AUTH_MODE = process.env.AUTH_MODE ?? 'mock';
 
 const PERSONAS: { id: string; label: string; hint: string }[] = [
-  { id: 'member', label: 'Ada Employee (Reader)', hint: 'Allowed — reaches the shell' },
-  { id: 'contributor', label: 'Cara Contributor', hint: 'Allowed — edit metadata, submit for review' },
-  { id: 'reviewer', label: 'Rita Reviewer', hint: 'Allowed — record typed reviews' },
-  { id: 'approver', label: 'Aksel Approver', hint: 'Allowed — approve/reject, set lifecycle' },
-  { id: 'admin', label: 'Aria Admin', hint: 'Allowed — everything, incl. role management' },
-  { id: 'guest', label: 'Guest Consultant (guest account)', hint: 'Denied — not an employee' },
+  { id: 'member', label: 'Ada Employee (leser)', hint: 'Tillatt — kommer inn i portalen' },
+  { id: 'contributor', label: 'Cara Contributor', hint: 'Tillatt — redigere metadata, sende til vurdering' },
+  { id: 'reviewer', label: 'Rita Reviewer', hint: 'Tillatt — registrere vurderinger' },
+  { id: 'approver', label: 'Aksel Approver', hint: 'Tillatt — godkjenne/avvise, sette livsløp' },
+  { id: 'admin', label: 'Aria Admin', hint: 'Tillatt — alt, inkludert rolleadministrasjon' },
+  { id: 'guest', label: 'Guest Consultant (gjestekonto)', hint: 'Avvist — ikke ansatt' },
   {
     id: 'foreign-tenant',
-    label: 'Other Tenant User (different tenant)',
-    hint: 'Denied — foreign tenant',
+    label: 'Other Tenant User (annen tenant)',
+    hint: 'Avvist — annen organisasjon',
   },
 ];
 
@@ -28,6 +27,15 @@ async function signInEntra() {
   await signIn('microsoft-entra-id', { redirectTo: '/' });
 }
 
+export const metadata = { title: 'Logg inn' };
+
+/**
+ * Sign-in (outside the protected group, so it renders its own `main` — the skip-link target).
+ *
+ * 026: Norwegian copy, plain Designsystemet markup (no React wrappers, no inline styles), and each
+ * mock persona's hint is tied to its button with `aria-describedby`, so it is read with the button.
+ * The persona NAMES stay as-is: they are the fixed mock identities the tests and docs refer to.
+ */
 export default async function SignInPage({
   searchParams,
 }: {
@@ -36,49 +44,62 @@ export default async function SignInPage({
   const { error } = await searchParams;
 
   return (
-    <main style={{ maxWidth: '520px', margin: '0 auto', padding: '3rem 1rem' }}>
-      <Heading level={1} data-size="lg" style={{ marginBottom: '0.5rem' }}>
-        Sign in to KI Hub
-      </Heading>
-      <Paragraph data-size="sm" style={{ marginBottom: '1.5rem' }}>
-        Only employees may access KI Hub.
-      </Paragraph>
+    <main id="main-content" tabIndex={-1} className="app-signin">
+      <h1 className="ds-heading" data-size="lg">
+        Logg inn på KI Hub
+      </h1>
+      <p className="ds-paragraph" data-size="sm">
+        Bare ansatte har tilgang til KI Hub.
+      </p>
 
       {error ? (
-        <Alert data-color="danger" style={{ marginBottom: '1.5rem' }}>
-          Access denied. That identity is not an employee of the organization.
-        </Alert>
+        <div className="ds-alert" data-color="danger" role="alert">
+          <p className="ds-paragraph">
+            Ingen tilgang. Denne identiteten er ikke ansatt i organisasjonen.
+          </p>
+        </div>
       ) : null}
 
       {AUTH_MODE === 'entra' ? (
         <form action={signInEntra}>
-          <Button type="submit" data-size="md">
-            Sign in with Microsoft
-          </Button>
+          <button type="submit" className="ds-button">
+            Logg inn med Microsoft
+          </button>
         </form>
       ) : (
-        <Card>
-          <Heading level={2} data-size="xs" style={{ marginBottom: '0.75rem' }}>
-            Development sign-in (mock)
-          </Heading>
-          <Paragraph data-size="sm" style={{ marginBottom: '1rem' }}>
-            AUTH_MODE=mock — choose a persona. These emit the same claims a real Entra sign-in
-            would, so the employee gate behaves identically.
-          </Paragraph>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {PERSONAS.map((p) => (
-              <form key={p.id} action={signInMock}>
-                <input type="hidden" name="persona" value={p.id} />
-                <Button type="submit" variant="secondary" data-size="sm" style={{ width: '100%' }}>
-                  {p.label}
-                </Button>
-                <Paragraph data-size="xs" style={{ marginTop: '0.25rem' }}>
-                  {p.hint}
-                </Paragraph>
-              </form>
-            ))}
+        <section className="ds-card app-stack" data-color="neutral" aria-labelledby="mock-heading">
+          <h2 id="mock-heading" className="ds-heading" data-size="xs">
+            Utviklerinnlogging (mock)
+          </h2>
+          <div className="ds-alert" data-color="info">
+            <p className="ds-paragraph" data-size="sm">
+              <code>AUTH_MODE=mock</code> — velg en persona. De gir de samme claims som en ekte
+              Entra-innlogging, så ansattsjekken oppfører seg likt.
+            </p>
           </div>
-        </Card>
+          <ul className="app-persona-list">
+            {PERSONAS.map((p) => (
+              <li key={p.id}>
+                <form action={signInMock}>
+                  <input type="hidden" name="persona" value={p.id} />
+                  <button
+                    type="submit"
+                    className="ds-button"
+                    data-variant="secondary"
+                    data-size="sm"
+                    data-fullwidth="true"
+                    aria-describedby={`persona-${p.id}-hint`}
+                  >
+                    {p.label}
+                  </button>
+                  <p id={`persona-${p.id}-hint`} className="ds-paragraph app-meta" data-size="xs">
+                    {p.hint}
+                  </p>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </main>
   );

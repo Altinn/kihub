@@ -1,5 +1,137 @@
 <!-- SPECKIT START -->
-Active feature: **026-flexible-artifact-discovery** (DONE — specify + plan + tasks + implement
+Active feature: **028-docs-navigation** (specify + plan + tasks + implement 2026-11-10; spec PR
+Altinn/kihub#181 carries the implementation too). Documentation-style navigation for Pages
+(`specs/028-docs-navigation/`, research R1–R16, contracts ×2, constitution 4.3.0).
+- **US1 anchors + TOC (Pages and KI Læring):** `lib/headings.ts` (`extractHeadings`, `toTocTree`,
+  `RESERVED_ANCHORS`) walks the Lexical body once; `LearningBody` passes a node → anchor `WeakMap`
+  as `headingIds` to `dsConverterOverrides`, whose heading converter then renders
+  `div.app-heading > hN[id] + a.app-heading__anchor` (other surfaces pass no map, unchanged).
+  `PageToc` is one `ds-details` («På denne siden»), forced open in a right column at `width >= 75rem`.
+- **US2 hierarchy:** `pages.parent` + `order`; `validatePageParent` (`lib/page-hierarchy.ts`,
+  beforeValidate) refuses self/cycle/4th level with `APIError` 400. Route `(app)/[...path]`
+  resolves by the LAST segment (slugs stay globally unique) and `redirect()`s (307) to
+  `pageAddress()` (`lib/page-tree.ts`); addresses are computed, never stored.
+- **US3 section menu:** `getPageSection` (published-only, also in preview) → `SectionNav` inside
+  `DocShell`, which is `LearningShell`'s markup lifted out (no `<main>`; the 026 layout owns it).
+- **Gotchas:**
+  - Our field is `_pages_v.version_parent_id`; `_pages_v.parent_id` is Payload's own "version of
+    which doc" column.
+  - 307, never 308: a cached permanent redirect loops after a move and a move back.
+  - Anchors are ASCII (`slugify`) because Payload's link validator only takes `[\w-]` after `#`.
+  - Readers get the FLAT address under an unpublished ancestor (`pageAddress({ publishedOnly })`),
+    so a draft's slug never leaks; preview walks the ancestors' latest versions instead.
+  - A layout `id` added later must go into `RESERVED_ANCHORS` (`reserved-anchors.test.ts` fails).
+  - vitest cannot parse JSX, so the heading/TOC markup is verified in the browser, not in a render
+    test; the pure parts are unit-tested.
+  - Generate migrations, types AND `importMap.js` with `MEDIA_STORAGE_MODE=azure` (the dev server
+    in disk mode rewrites `importMap.js` without the Azure upload handler).
+
+Prior: **026-designsystemet-alignment** (DONE — specify + plan + tasks + implement
+2026-10-21; tasks 76/76; unit 267/267, lint + `tsc` clean, `next build` green).
+- **What it did.** Rebuilt the employee-facing UI on Designsystemet and Digdir's profile.
+  - **Theme:** `designsystemet.config.json` is Digdir's official theme with NO overrides: accent
+    `#0062BA`, brand1 Rød `#F45F63`, brand2 Gul `#E5AA20`, brand3 Blå `#1E98F5`, neutral Blåsvart
+    `#1E2B3C`. Full-strength brand1–3 are graphics only. Their light tints are card surfaces
+    behind Blåsvart text (`.app-tint`), as on digdir.no: its card colours are exactly these
+    tokens, e.g. `#F8E7C1` = brand2 `surface-tinted` (constitution v4.1.0).
+  - **Markup:** plain HTML with `ds-*` classes in Server Components. `@digdir/designsystemet-react`
+    is REMOVED: in 1.18 every wrapper is `'use client'`, even `Heading`. `@digdir/designsystemet-web`
+    is loaded once (`components/DesignsystemetWeb.tsx`) for the Invoker Commands polyfill and
+    `data-clickdelegatefor`.
+  - **Removed:** the kihub layer, bridge, `kihub-fonts.css` and `portal.css`. The only app
+    stylesheet is `styles/app.css`, on `--ds-*` tokens only. It defines NO custom properties of
+    its own (the `--app-*` ones were removed): only `--ds-font-family`, `--dsc-*` and shiki's
+    variables.
+  - **Header:** Designsystemet's own site-header behaviour. There is no breakpoint: `SiteNav`
+    switches to a hamburger when the nav list wraps; the panel is a Designsystemet right-hand drawer
+    (`dialog.ds-dialog[data-placement=right]`, `command="show-modal"`, `closedby="any"`), with 50px hysteresis
+    (`lib/header-view.ts`).
+  - **Breadcrumbs:** `components/Breadcrumbs.tsx` renders the `<ds-breadcrumbs>` web component.
+    It manages role, label and `aria-current` by viewport. The server renders those too, with
+    `suppressHydrationWarning`.
+  - **User menu:** `components/UserMenu.tsx`: a `ds-button` with a `ds-avatar` (Entra photo, else
+    initials) and the name opens a Designsystemet Dropdown (`div.ds-dropdown[popover]` via
+    `popoverTarget`) with Admin (contributor+), a "Mørk modus" `ds-field` switch
+    (`ColorSchemeSwitch`, client) and "Logg ut" (submit tied by `form=` to a hidden server-action
+    form). The switch sets `data-color-scheme` on `<html>` and the `kihub-color-scheme` cookie;
+    `ThemedHtml` (now async) reads it, light by default (`lib/user-menu-view.ts`). The photo needs
+    the Entra `User.Read` scope, now requested with `profilePhotoSize: 64`. It only appears after a
+    fresh sign-in, and only if the tenant grants `User.Read`. Dark mode: the header logo is
+    white-filtered and the footer gets a tinted ground plus top border. 0 axe violations on 14
+    URLs in dark.
+  - **Pagination:** `components/NewsPagination.tsx` renders the `<ds-pagination>` web component
+    with our own server-rendered `ds-button` links and NO `data-current`/`data-total` (those make
+    the element fill empty links client-side). It only adds `role="navigation"` and the label
+    "Bla i sider", which the server renders too.
+  - **Types:** `apps/web/tsconfig.json` `types` lists `@digdir/designsystemet-web` (JSX types for its
+    elements, e.g. `<ds-breadcrumbs>`), `@digdir/designsystemet-types` (devDependency) and the
+    generated `design-tokens-build/types.d.ts`, per designsystemet.no's setup guide. Computed
+    `data-color` values are typed `Color`/`SeverityColors`, so a colour missing from the theme fails
+    `tsc`. Listing `types` stops automatic `@types` inclusion, so `node` is listed too.
+    `types/dom-invoker-commands.d.ts` stays: neither `@types/react` 19.2 nor Designsystemet types
+    `command`/`commandfor`.
+  - **Icons:** `@navikt/aksel-icons`, imported as React components. They are `'use client'`; no
+    hand-made glyphs or SVGs remain.
+  - **Footer:** digdir.no style, on a Blåsvart ground (`neutral-base-default`) with a TRANSPARENT
+    dark-scheme inner wrapper for light text and focus tokens, plus chevron link lists.
+  - **Constitution:** v4.1.0 (Design System constraint rewritten with a WCAG 2.2 AA gate in 4.0.0;
+    4.1.0 allows the brand tints).
+- **Verified:** 0 axe violations (incl. best-practice) and 0px overflow at 320px on 18 URLs. Each
+  page has a skip link to `main#main-content`, which lives in `(app)/layout.tsx`.
+- **Durable rules and gotchas:**
+  - **Colour context.** `<html data-color="accent">`, so unprefixed `--ds-color-text-*` resolve to
+    ACCENT (navy/blue). Neutral surfaces (content cards, nav, empty states) MUST set
+    `data-color="neutral"`, and meta text uses `--ds-color-neutral-text-subtle`.
+  - **Card spacing.** A `ds-card` spaces its children with `>*+*` margins, so never set `margin: 0`
+    on a card child list; use `margin-inline: 0; margin-block-end: 0`.
+  - **Grid sizing.** Grids holding code need `grid-template-columns: minmax(0, 1fr)`, and auto-fit
+    grid items need `min-width: 0`.
+  - **Body font.** Designsystemet does NOT set the body `font-family`; app.css does.
+  - **Dark surfaces.** Use `data-color-scheme="dark"` (footer, subscriptions card), never
+    hand-written rgba.
+  - **Rich text** goes through `lib/ds-richtext-converters.tsx`. The pure heading clamp lives in
+    `lib/ds-richtext.ts`, because vitest cannot parse JSX. Payload wraps output in
+    `div.payload-richtext`.
+  - **Scroll wrappers** for code and tables are `role="group"`, not `region`: axe requires unique
+    landmark names. `.app-scroll-region` is positioned, so `ds-sr-only` captions are contained.
+  - **Filters and search** are GET forms. Parsers: `parseEventsSearchParams`,
+    `parseRegistrySearchParams`.
+  - **Turbopack.** A parse error caught mid-edit, or deleting an imported CSS file, leaves it
+    serving stale modules (hydration mismatch or a 500). Restart `next dev`.
+  - **Animation.** Designsystemet animates `ds-details` opening over 0.4s, so screenshots taken
+    right after a click look closed.
+- **Local env (2026-10-21):**
+  - Docker container `kihub-postgres` (postgres:16, `localhost:55432`, volume `kihub-pgdata`), with
+    DB `kihub` (push mode, seeded with scratchpad sample data) and `kihub_build` (migrated, for
+    `next build`).
+  - `apps/web/.env` uses `AUTH_MODE=mock` with generated secrets.
+  - axe: inject axe 4.10.2 from jsdelivr into the dev page.
+- **SC-007 accepted at −36%** (2,070 → 1,330 lines) by the user, 2026-10-21; recorded in spec.md.
+- **Not done:** real screen-reader and non-Chromium testing.
+- **Plan files.** `specs/026-designsystemet-alignment/plan.md` (`research.md` R1–R14,
+  `contracts/`, `quickstart.md`, and `tasks.md` with per-slice implementation records).
+
+Prior (merged from main): **027-drafts-preview-pages** (specify + plan + tasks 2026-11-05; MVP T001–T030 implemented, uncommitted).
+Turns on Payload's built-in versions + drafts (autosave 2s, maxPerDoc 50; NO scheduled publishing) for
+news, learning-pages, projects and events. This REPLACES the hand-rolled `status` select with
+`_status`. The migration copies status → _status, then backfills ONE `latest` version row per
+existing doc, otherwise `find({ draft: true })` cannot see old content, then drops `status`.
+Shared `lib/content-versions.ts` holds the config, and its `contentAccess` adds
+`readVersions: isEditor`; without it the REST API leaks draft bodies. A «Forhåndsvis» button
+(`admin.preview`) goes to `/api/preview?path=…`. That route requires an Entra session plus a
+FRESH contributor+ role lookup (the JWT role is stale) and has no shared secret.
+`isSafeInternalPath` blocks open redirects. It enables Next draftMode with a 60-min cookie.
+`getPreviewState()` (React cache, fail closed) feeds the by-slug reads `{ preview }` and a
+Designsystemet `Alert` banner. Listings NEVER show drafts. A new flat `pages` collection is
+served at `(app)/[slug]`: static routes win, and `RESERVED_PAGE_SLUGS` has a route-tree drift
+test. The editor is extracted from LearningPage into `lib/article-editor.ts`, and pages reuse
+`LearningBody`. Scheduled publishing was DROPPED during implementation (2026-11-05): no job runner
+and no `payload_jobs` table. Generate migrations/types in `MEDIA_STORAGE_MODE=azure`, otherwise
+they drop `media._objectkey`.
+Constitution → 3.3.0 on main (Pages module), 4.2.0 after merging with 026. Plan: `specs/027-drafts-preview-pages/plan.md`
+(research R1–R15, data-model, contracts ×3, quickstart).
+
+Prior: **026-flexible-artifact-discovery** (DONE — specify + plan + tasks + implement
 2026-11-03). Repositories may commit strict root-level `kihub.yaml` v1 with 1–32 exact artifact
 roots; absent config preserves `.`. Discovery still requires `<root>/<type>/<slug>/artifact.yaml`,
 validates the manifest's actual repo-relative `source.path` and registered `owner/repo`, rejects
@@ -14,7 +146,7 @@ preserved, but stale/legacy approval is not current: green Approved/Recommended 
 effective recommendation are suppressed, governed lifecycle badges become warnings, and promotion
 or recommendation requires a current approval. Approver/Admin can use the virtual one-shot
 `reapproveCurrentRevision` control to stamp the same Approved state for new content; it is audited
-and role-enforced. Migration: `20261103_080248_artifact_revision_governance` (additive fields only;
+and role-enforced. Migration: `20261117_154755_artifact_revision_governance` (regenerated on top of main when 026 was merged with it; first generated as `20261103_080248_...`) (additive fields only;
 virtual reapproval needs no column), verified full-chain up→down→up on scratch DB
 `kihub_026_flexible_discovery`. Gates: packages **118/118** (artifact-schema 17, discovery-core 75,
 github-client 9, governance-core 17); web unit **251/251 across 22 files** and integration

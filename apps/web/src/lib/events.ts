@@ -1,6 +1,7 @@
 import config from '@payload-config';
 import { getPayload } from 'payload';
 import type { EventFormatValue, EventTypeValue } from '@/lib/events-view';
+import { PUBLISHED, type ReadOptions } from '@/lib/payload-queries';
 import type { Event } from '@/payload-types';
 
 /**
@@ -8,7 +9,7 @@ import type { Event } from '@/payload-types';
  * events by construction (mirroring `lib/news.ts`), so the employee pages can never render a draft —
  * the collection's `read` access rule is the second line of defense for the API path (research §2).
  * `listUpcomingEvents` additionally hides past events (a list-only concern, FR-004);
- * `getPublishedEventBySlug` does NOT, so a published past event stays reachable by direct URL.
+ * `getEventBySlug` does NOT, so a published past event stays reachable by direct URL.
  */
 async function payloadClient() {
   return getPayload({ config });
@@ -29,7 +30,7 @@ export async function listUpcomingEvents(filters?: {
     collection: 'events',
     where: {
       and: [
-        { status: { equals: 'published' } },
+        PUBLISHED,
         // Upcoming = not yet ended: end in the future, or (no end set) start in the future.
         // Mirrors `isUpcoming` in lib/event-dates.ts: (endDateTime ?? startDateTime) >= now.
         {
@@ -69,7 +70,7 @@ export async function listEventsInRange(fromIso: string, toIso: string): Promise
     collection: 'events',
     where: {
       and: [
-        { status: { equals: 'published' } },
+        PUBLISHED,
         { startDateTime: { less_than_equal: toIso } },
         {
           or: [
@@ -91,12 +92,17 @@ export async function listEventsInRange(fromIso: string, toIso: string): Promise
   return result.docs as Event[];
 }
 
-/** A single published event by slug, or `null` (draft/unknown → the page returns 404) (FR-005/006). */
-export async function getPublishedEventBySlug(slug: string): Promise<Event | null> {
+/**
+ * A single published event by slug, or `null` (draft/unknown → the page returns 404) (FR-005/006).
+ * 027: `{ preview: true }` returns the latest version (draft or not) for an editor's preview; the
+ * `.ics` download never passes it.
+ */
+export async function getEventBySlug(slug: string, opts: ReadOptions = {}): Promise<Event | null> {
   const payload = await payloadClient();
   const result = await payload.find({
     collection: 'events',
-    where: { and: [{ slug: { equals: slug } }, { status: { equals: 'published' } }] },
+    where: opts.preview ? { slug: { equals: slug } } : { and: [{ slug: { equals: slug } }, PUBLISHED] },
+    draft: Boolean(opts.preview),
     limit: 1,
     overrideAccess: true,
   });

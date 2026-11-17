@@ -30,7 +30,7 @@ export function LearningImage({ node }: { node: LearningImageNode }) {
   const decorative = Boolean(node.fields?.decorative);
 
   return (
-    <figure className="lp-figure">
+    <figure className="app-figure">
       {/* eslint-disable-next-line @next/next/no-img-element -- Payload serves uploads from its own
           route; next/image would add a second optimisation layer over sizes sharp already generated. */}
       <img

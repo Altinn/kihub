@@ -48,6 +48,26 @@ export interface NewsPagination {
   label: string;
   /** False when the whole archive fits on one page — the control bar renders nothing (FR-009). */
   visible: boolean;
+  /** 026: the numbered page links for Designsystemet's pagination; `null` marks an ellipsis gap. */
+  items: (PageItem | null)[];
+}
+
+export interface PageItem {
+  page: number;
+  href: string;
+  current: boolean;
+}
+
+/**
+ * 026 — which page numbers to show: all of them up to 7 pages, otherwise first, last, and the
+ * current page with one neighbour each side, with `null` gaps between (Designsystemet's pattern).
+ */
+export function pageNumbers(page: number, totalPages: number): (number | null)[] {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+  const start = Math.max(2, Math.min(page - 1, totalPages - 4));
+  const end = Math.min(totalPages - 1, Math.max(page + 1, 5));
+  const middle = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  return [1, ...(start > 2 ? [null] : []), ...middle, ...(end < totalPages - 1 ? [null] : []), totalPages];
 }
 
 /** Page 1 is the canonical `/news` with no query string, so a shared link stays clean. */
@@ -73,6 +93,9 @@ export function buildPagination(
     ...(hasNext ? { nextHref: pageHref(page + 1) } : {}),
     label: `Side ${page} av ${Math.max(totalPages, 1)}`,
     visible: totalPages > 1,
+    items: pageNumbers(page, totalPages).map((n) =>
+      n === null ? null : { page: n, href: pageHref(n), current: n === page },
+    ),
   };
 }
 

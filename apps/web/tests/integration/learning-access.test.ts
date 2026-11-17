@@ -2,7 +2,7 @@ import type { Role } from '@kihub/governance-core';
 import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { getPublishedLearningPageBySlug, readLearningLibrary } from '@/lib/learning';
+import { getLearningPageBySlug, readLearningLibrary } from '@/lib/learning';
 import type { LearningPage } from '@/payload-types';
 
 /**
@@ -117,7 +117,7 @@ beforeAll(async () => {
     data: {
       title: `Publisert ${testId}`,
       category: categoryId,
-      status: 'published',
+      _status: 'published',
       body: lexical('publisert innhold'),
     } as never,
     overrideAccess: true,
@@ -129,7 +129,7 @@ beforeAll(async () => {
     data: {
       title: `Utkast ${testId}`,
       category: categoryId,
-      status: 'draft',
+      _status: 'draft',
       body: lexical('hemmelig utkast'),
     } as never,
     overrideAccess: true,
@@ -296,8 +296,8 @@ describe('FR-032 — drafts never leak to non-editors', () => {
 
   it('keeps the read layer published-only regardless of role (defence in depth)', async () => {
     // The second line of defence: even if an access rule regressed, lib/learning.ts filters.
-    expect(await getPublishedLearningPageBySlug(draftSlug)).toBeNull();
-    expect(await getPublishedLearningPageBySlug(publishedSlug)).not.toBeNull();
+    expect(await getLearningPageBySlug(draftSlug)).toBeNull();
+    expect(await getLearningPageBySlug(publishedSlug)).not.toBeNull();
 
     const library = await readLearningLibrary();
     expect(library.pages.map((p) => p.title)).not.toContain(`Utkast ${testId}`);
@@ -322,7 +322,7 @@ describe('FR-031 — media access', () => {
       data: {
         title: `Bruker bilde ${testId}`,
         category: categoryId,
-        status: 'published',
+        _status: 'published',
         body: lexical('med bilde'),
       } as never,
       overrideAccess: true,
@@ -330,7 +330,7 @@ describe('FR-031 — media access', () => {
     await payload.update({
       collection: 'learning-pages',
       id: page.id,
-      data: { status: 'draft' },
+      data: { _status: 'draft' },
       overrideAccess: true,
     });
 

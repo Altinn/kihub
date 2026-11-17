@@ -1,31 +1,15 @@
-import type { Role } from '@kihub/governance-core';
-import {
-  BlockquoteFeature,
-  BlocksFeature,
-  BoldFeature,
-  CodeBlock,
-  HeadingFeature,
-  HorizontalRuleFeature,
-  InlineCodeFeature,
-  ItalicFeature,
-  LinkFeature,
-  OrderedListFeature,
-  ParagraphFeature,
-  UnorderedListFeature,
-  UploadFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical';
 import { APIError, type CollectionConfig } from 'payload';
-import { LEARNING_CODE_LANGUAGES } from '../lib/learning-view';
+import { articleEditor } from '../lib/article-editor';
+import { CONTENT_VERSIONS, contentAccess } from '../lib/content-versions';
+import { previewUrl } from '../lib/preview-paths';
 import { slugify } from '../lib/slug';
-import { parseYouTubeId } from '../lib/youtube';
 
 /**
  * 014 — Læringsside, the unit employees read at `/laering/<slug>`.
  *
  * Access is copied from `News.ts` rather than reinvented (FR-031/032): Contributor+ reads everything
  * including drafts, everyone else is constrained to `published`. That access rule is the SECOND line
- * of defence — `lib/learning.ts` also filters `status: published` in every query — so a draft cannot
+ * of defence — `lib/learning.ts` also filters `_status: published` in every query — so a draft cannot
  * leak through either the employee pages or the REST/GraphQL path (research §7, the 007 posture).
  *
  * Addresses are flat: `/laering/<slug>`, with the category NOT in the URL, so moving a page between
@@ -33,25 +17,23 @@ import { parseYouTubeId } from '../lib/youtube';
  *
  * "Sist oppdatert" (FR-018) uses Payload's built-in `updatedAt`; there is deliberately no
  * `publishDate` field, because nothing on the surface asks a second date question (data-model.md).
+ *
+ * 027: Payload's built-in drafts (`lib/content-versions.ts`) replaced the hand-rolled `status`
+ * select; `readVersions` keeps version history (which holds draft content) editor-only.
  */
-function isEditor(user: { role?: unknown } | null | undefined): boolean {
-  return Boolean(user) && (user?.role as Role) !== 'reader';
-}
 
 export const LearningPage: CollectionConfig = {
   slug: 'learning-pages',
   labels: { singular: 'Læringsside', plural: 'Læringssider' },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'status', 'category', 'order', 'updatedAt'],
+    defaultColumns: ['title', '_status', 'category', 'order', 'updatedAt'],
+    // 027 — «Forhåndsvis»: opens the latest draft on the employee site for editors (lib/preview-paths.ts).
+    preview: (doc) => previewUrl('learning-pages', doc?.slug as string | undefined),
     group: 'KI Læring',
   },
-  access: {
-    read: ({ req }) => (isEditor(req.user) ? true : { status: { equals: 'published' } }),
-    create: ({ req }) => isEditor(req.user),
-    update: ({ req }) => isEditor(req.user),
-    delete: ({ req }) => isEditor(req.user),
-  },
+  access: contentAccess,
+  versions: CONTENT_VERSIONS,
   hooks: {
     beforeValidate: [
       ({ data }) => {
@@ -166,103 +148,8 @@ export const LearningPage: CollectionConfig = {
       type: 'richText',
       required: true,
       label: 'Innhold',
-      /**
-       * FIELD-level editor, deliberately not the global `editor:` in payload.config.ts — changing
-       * that would alter the News editor as a side effect (contracts/learning-editor.md §A).
-       *
-       * `h1` is excluded: the page's own title is the h1, so an editor-authored h1 would break the
-       * document outline.
-       */
-      editor: lexicalEditor({
-        features: () => [
-          ParagraphFeature(),
-          HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-          BoldFeature(),
-          ItalicFeature(),
-          InlineCodeFeature(),
-          UnorderedListFeature(),
-          OrderedListFeature(),
-          LinkFeature(),
-          BlockquoteFeature(),
-          HorizontalRuleFeature(),
-          // Inline images (FR-020/021). `alt` lives on the media document — entered once, reused
-          // everywhere; `decorative` is per-PLACEMENT, because the same asset can be meaningful on
-          // one page and decoration on another (research §5).
-          UploadFeature({
-            collections: {
-              media: {
-                fields: [
-                  {
-                    name: 'decorative',
-                    type: 'checkbox',
-                    label: 'Dekorativt bilde (tom alt-tekst)',
-                  },
-                ],
-              },
-            },
-          }),
-          // Code samples (FR-026). Payload's premade block supplies the language dropdown and the
-          // code editor; we only supply the curated language map, whose ids are valid for BOTH
-          // Monaco (this editor) and shiki (the employee surface), so no id translation exists to
-          // drift (research §2).
-          BlocksFeature({
-            blocks: [
-              CodeBlock({
-                languages: LEARNING_CODE_LANGUAGES,
-                defaultLanguage: 'shell',
-              }),
-              // 022 — an embedded YouTube video. Stored inside the lexical JSON, so it needs no
-              // migration. The URL is validated with the SAME parser the renderer uses, so
-              // whatever the editor accepts is exactly what plays.
-              {
-                slug: 'youtube',
-                interfaceName: 'LearningYouTubeBlock',
-                labels: { singular: 'YouTube-video', plural: 'YouTube-videoer' },
-                fields: [
-                  {
-                    name: 'url',
-                    type: 'text',
-                    required: true,
-                    label: 'YouTube-lenke',
-                    admin: {
-                      description:
-                        'Lim inn lenken fra «Del» på YouTube, f.eks. https://youtu.be/… Undertekster slås på automatisk, med norsk som foretrukket språk dersom videoen har et norsk undertekstspor.',
-                    },
-                    validate: (value: string | null | undefined) =>
-                      parseYouTubeId(value) ? true : 'Ikke en gyldig YouTube-videolenke.',
-                  },
-                  {
-                    name: 'title',
-                    type: 'text',
-                    required: true,
-                    label: 'Tittel på videoen',
-                    admin: {
-                      description:
-                        'Leses opp av skjermlesere og vises ikke på siden. Beskriv hva videoen handler om.',
-                    },
-                  },
-                  {
-                    name: 'caption',
-                    type: 'text',
-                    label: 'Bildetekst (valgfri)',
-                  },
-                ],
-              },
-            ],
-          }),
-        ],
-      }),
-    },
-    {
-      name: 'status',
-      type: 'select',
-      required: true,
-      defaultValue: 'draft',
-      label: 'Status',
-      options: [
-        { label: 'Utkast', value: 'draft' },
-        { label: 'Publisert', value: 'published' },
-      ],
+      // 027 — shared with CMS pages (`lib/article-editor.ts`): h2–h4, lists, links, images, code, YouTube.
+      editor: articleEditor,
     },
     {
       name: 'order',

@@ -1,4 +1,3 @@
-import { Heading, Tag } from '@digdir/designsystemet-react';
 import Link from 'next/link';
 import { artifactTypeLabel } from '@/lib/registry-view';
 
@@ -7,79 +6,88 @@ interface CatalogFiltersProps {
   availableTags: string[];
   activeType?: string;
   activeTags: string[];
-  /** Catalog route the filter links point at (default `/registry`, where the catalog lives). */
+  /** The active search query, carried along so filtering keeps the search. */
+  query?: string;
+  /** Catalog route the form submits to (default `/registry`, where the catalog lives). */
   basePath?: string;
 }
 
-/** Build a catalog URL toggling one filter value while preserving the others. */
-function toggleHref(basePath: string, params: { type?: string; tags: string[] }): string {
-  const sp = new URLSearchParams();
-  if (params.type) sp.set('type', params.type);
-  for (const t of params.tags) sp.append('tag', t);
-  const qs = sp.toString();
-  return qs ? `${basePath}?${qs}` : basePath;
-}
-
 /**
- * URL-param-driven catalog filters (server component — link-based, no client JS).
- * Type filter (also the type-derived category facet) and tag filters combine (AND).
+ * URL-param-driven catalog filters. Type (single — also the type-derived category facet) and tags
+ * (multi) combine (AND).
+ *
+ * 026 R6: a real GET form instead of `Tag`s wrapped in links carrying `aria-pressed`. Each group is
+ * a named fieldset; type options are radios and tags are checkboxes, each inside a Designsystemet
+ * chip, so role, group and checked state are announced natively and the selection is shown by a
+ * check mark and border, not colour alone. Submitting rebuilds the same `?type=&tag=…&q=` URL the
+ * page parses (`parseRegistrySearchParams`); works without client-side scripting.
  */
 export function CatalogFilters({
   availableTypes,
   availableTags,
   activeType,
   activeTags,
+  query,
   basePath = '/registry',
 }: CatalogFiltersProps) {
   const hasActive = Boolean(activeType) || activeTags.length > 0;
 
   return (
-    <section aria-label="Filters" style={{ display: 'grid', gap: '0.75rem' }}>
-      <div>
-        <Heading level={2} data-size="2xs" style={{ marginBottom: '0.35rem' }}>
-          Type
-        </Heading>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-          {availableTypes.map((t) => {
-            const isActive = activeType === t;
-            const href = toggleHref(basePath, { type: isActive ? undefined : t, tags: activeTags });
-            return (
-              <Link key={t} href={href} aria-pressed={isActive}>
-                <Tag data-color={isActive ? 'accent' : 'neutral'} data-size="sm">
-                  {artifactTypeLabel(t)}
-                </Tag>
-              </Link>
-            );
-          })}
+    <form method="get" action={basePath} className="app-filters" aria-label="Filtrer verktøy og ressurser">
+      {query ? <input type="hidden" name="q" value={query} /> : null}
+
+      <fieldset className="ds-fieldset">
+        <legend className="ds-label">Type</legend>
+        <div className="app-chip-group">
+          <label className="ds-chip">
+            <input className="ds-input" type="radio" name="type" value="" defaultChecked={!activeType} />
+            Alle
+          </label>
+          {availableTypes.map((t) => (
+            <label key={t} className="ds-chip">
+              <input
+                className="ds-input"
+                type="radio"
+                name="type"
+                value={t}
+                defaultChecked={activeType === t}
+              />
+              {artifactTypeLabel(t)}
+            </label>
+          ))}
         </div>
-      </div>
+      </fieldset>
 
       {availableTags.length > 0 ? (
-        <div>
-          <Heading level={2} data-size="2xs" style={{ marginBottom: '0.35rem' }}>
-            Tags
-          </Heading>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-            {availableTags.map((tag) => {
-              const isActive = activeTags.includes(tag);
-              const nextTags = isActive
-                ? activeTags.filter((x) => x !== tag)
-                : [...activeTags, tag];
-              return (
-                <Link key={tag} href={toggleHref(basePath, { type: activeType, tags: nextTags })} aria-pressed={isActive}>
-                  <Tag data-color={isActive ? 'accent' : 'info'} data-size="sm">
-                    {tag}
-                  </Tag>
-                </Link>
-              );
-            })}
+        <fieldset className="ds-fieldset">
+          <legend className="ds-label">Emneord</legend>
+          <div className="app-chip-group">
+            {availableTags.map((tag) => (
+              <label key={tag} className="ds-chip">
+                <input
+                  className="ds-input"
+                  type="checkbox"
+                  name="tag"
+                  value={tag}
+                  defaultChecked={activeTags.includes(tag)}
+                />
+                {tag}
+              </label>
+            ))}
           </div>
-        </div>
+        </fieldset>
       ) : null}
 
-      {hasActive ? (
-        <Link href={basePath}>Clear filters</Link>
-      ) : null}
-    </section>
+      <div className="app-cluster">
+        <button type="submit" className="ds-button" data-size="sm">
+          Bruk filter
+        </button>
+        {hasActive ? (
+          <Link href={query ? `${basePath}?q=${encodeURIComponent(query)}` : basePath} className="ds-link">
+            Nullstill filtre
+          </Link>
+        ) : null}
+      </div>
+    </form>
   );
 }

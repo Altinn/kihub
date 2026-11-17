@@ -48,7 +48,7 @@ function lexical(text: string): LearningPage['body'] {
 function createPage(data: { title: string; category: number; subcategory?: number }) {
   return payload.create({
     collection: 'learning-pages',
-    data: { ...data, body: lexical(data.title), status: 'published' } as never,
+    data: { ...data, body: lexical(data.title), _status: 'published' } as never,
     overrideAccess: true,
   });
 }

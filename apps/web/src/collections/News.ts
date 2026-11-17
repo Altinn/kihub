@@ -1,5 +1,6 @@
-import type { Role } from '@kihub/governance-core';
 import type { CollectionConfig } from 'payload';
+import { CONTENT_VERSIONS, contentAccess } from '../lib/content-versions';
+import { previewUrl } from '../lib/preview-paths';
 import { slugify } from '../lib/slug';
 
 /**
@@ -11,26 +12,25 @@ import { slugify } from '../lib/slug';
  * Authoring is gated to Contributor+ (the same posture as the Phase 6 admin gate); News is
  * intentionally NOT wired into `@kihub/governance-core`'s Registry permission matrix (research §3).
  * Employees only ever see `published` articles — enforced both here (the `read` access rule
- * constrains non-editors) and in `lib/news.ts` (the read queries filter `status: published`).
+ * constrains non-editors) and in `lib/news.ts` (the read queries filter `_status: published`).
+ *
+ * 027: Payload's built-in drafts (`lib/content-versions.ts`) replaced the hand-rolled `status`
+ * select — Save draft / Publish / Unpublish, version history, autosave and scheduled publishing.
+ * Saving a draft of a published article no longer changes what employees see until it is published.
  */
-function isEditor(user: { role?: unknown } | null | undefined): boolean {
-  return Boolean(user) && (user?.role as Role) !== 'reader';
-}
 
 export const News: CollectionConfig = {
   slug: 'news',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'status', 'publishDate', 'featured', 'author'],
+    defaultColumns: ['title', '_status', 'publishDate', 'featured', 'author'],
+    // 027 — «Forhåndsvis»: opens the latest draft on the employee site for editors (lib/preview-paths.ts).
+    preview: (doc) => previewUrl('news', doc?.slug as string | undefined),
   },
-  access: {
-    // Contributor+ read everything (drafts + published) in the back-office/API; everyone else is
-    // constrained to published — API-path defense in depth for the "no draft leaks" invariant (US3).
-    read: ({ req }) => (isEditor(req.user) ? true : { status: { equals: 'published' } }),
-    create: ({ req }) => isEditor(req.user),
-    update: ({ req }) => isEditor(req.user),
-    delete: ({ req }) => isEditor(req.user),
-  },
+  // Contributor+ read everything (drafts + published, and version history) in the back-office/API;
+  // everyone else is constrained to published — API-path defense in depth for "no draft leaks".
+  access: contentAccess,
+  versions: CONTENT_VERSIONS,
   hooks: {
     beforeValidate: [
       ({ data }) => {
@@ -49,7 +49,9 @@ export const News: CollectionConfig = {
           data.author = req.user.id;
         }
         // Stamp the publish date on first publish so the list can order newest-first (FR-004/010).
-        if (data.status === 'published' && !data.publishDate) {
+        // 027: `_status` is set by Publish and by the scheduled-publish job alike; draft saves and
+        // autosaves carry `_status: 'draft'` and leave the date alone (spec FR-009).
+        if (data._status === 'published' && !data.publishDate) {
           data.publishDate = new Date().toISOString();
         }
         return data;
@@ -74,13 +76,6 @@ export const News: CollectionConfig = {
     },
     { name: 'body', type: 'richText', required: true },
     { name: 'author', type: 'relationship', relationTo: 'users' },
-    {
-      name: 'status',
-      type: 'select',
-      required: true,
-      defaultValue: 'draft',
-      options: ['draft', 'published'],
-    },
     { name: 'publishDate', type: 'date' },
     { name: 'tags', type: 'text', hasMany: true },
     {

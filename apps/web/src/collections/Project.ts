@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload';
-import { isEditor } from '../lib/access';
+import { CONTENT_VERSIONS, contentAccess } from '../lib/content-versions';
+import { previewUrl } from '../lib/preview-paths';
 import { slugify } from '../lib/slug';
 
 /**
@@ -11,20 +12,21 @@ import { slugify } from '../lib/slug';
  * Contributor+ read everything (drafts + published); everyone else is constrained to `published`
  * — the second line of defence alongside `lib/projects.ts`'s own status filter, so a draft cannot
  * leak through the employee pages or the REST/GraphQL path.
+ *
+ * 027: Payload's built-in drafts (`lib/content-versions.ts`) replaced the hand-rolled `status`
+ * select; `readVersions` keeps version history (which holds draft content) editor-only.
  */
 export const Project: CollectionConfig = {
   slug: 'projects',
   labels: { singular: 'Prosjekt', plural: 'Prosjekter' },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'status', 'order'],
+    defaultColumns: ['title', '_status', 'order'],
+    // 027 — «Forhåndsvis»: opens the latest draft on the employee site for editors (lib/preview-paths.ts).
+    preview: (doc) => previewUrl('projects', doc?.slug as string | undefined),
   },
-  access: {
-    read: ({ req }) => (isEditor(req.user) ? true : { status: { equals: 'published' } }),
-    create: ({ req }) => isEditor(req.user),
-    update: ({ req }) => isEditor(req.user),
-    delete: ({ req }) => isEditor(req.user),
-  },
+  access: contentAccess,
+  versions: CONTENT_VERSIONS,
   hooks: {
     beforeValidate: [
       ({ data }) => {
@@ -68,17 +70,6 @@ export const Project: CollectionConfig = {
       admin: { description: 'Kort ingress vist i prosjektlisten.' },
     },
     { name: 'body', type: 'richText', required: true, label: 'Beskrivelse' },
-    {
-      name: 'status',
-      type: 'select',
-      required: true,
-      defaultValue: 'draft',
-      label: 'Status',
-      options: [
-        { label: 'Utkast', value: 'draft' },
-        { label: 'Publisert', value: 'published' },
-      ],
-    },
     {
       name: 'order',
       type: 'number',

@@ -123,7 +123,7 @@ describe('news → media relationship (A3.5, FR-008, FR-010)', () => {
       data: {
         title: `Toppbilde ${testId}`,
         body: lexical('brødtekst'),
-        status: 'published',
+        _status: 'published',
         heroImage: hero.id,
         heroImageUrl: legacyUrl,
       } as never,

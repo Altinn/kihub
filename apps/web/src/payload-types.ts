@@ -81,6 +81,7 @@ export interface Config {
     'learning-subcategories': LearningSubcategory;
     'learning-pages': LearningPage;
     media: Media;
+    pages: Page;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -102,6 +103,7 @@ export interface Config {
     'learning-subcategories': LearningSubcategoriesSelect<false> | LearningSubcategoriesSelect<true>;
     'learning-pages': LearningPagesSelect<false> | LearningPagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -405,7 +407,6 @@ export interface News {
     [k: string]: unknown;
   };
   author?: (number | null) | User;
-  status: 'draft' | 'published';
   publishDate?: string | null;
   tags?: string[] | null;
   /**
@@ -419,6 +420,7 @@ export interface News {
   featured?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Bilder brukt i nyheter og KI Læring. Fokuspunkt og beskjæring gjelder overalt der bildet brukes.
@@ -508,13 +510,13 @@ export interface Project {
     };
     [k: string]: unknown;
   };
-  status: 'draft' | 'published';
   /**
    * Lav verdi vises først; like verdier sorteres etter opprettelsesdato.
    */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -582,11 +584,11 @@ export interface Event {
    * Seats already taken (maintained editorially — no registration flow). Never above capacity.
    */
   seatsTaken?: number | null;
-  status: 'draft' | 'published';
   tags?: string[] | null;
   featured?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -656,7 +658,6 @@ export interface LearningPage {
     };
     [k: string]: unknown;
   };
-  status: 'draft' | 'published';
   /**
    * Lav verdi først innenfor kategorien/underkategorien; like verdier alfabetisk.
    */
@@ -664,6 +665,50 @@ export interface LearningPage {
   author?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  /**
+   * Sidens eget adresseledd. Uten overordnet side er adressen /<adresse>, ellers /<overordnet>/<adresse>. Må være unikt blant alle sider, også i andre seksjoner. Utledes fra tittelen når feltet står tomt. Kan ikke være en adresse KI Hub allerede bruker.
+   */
+  slug?: string | null;
+  /**
+   * Kort ingress øverst på siden (valgfri).
+   */
+  summary?: string | null;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Valgfritt. Siden havner under denne i adressen og i menyen til venstre. Høyst tre nivåer.
+   */
+  parent?: (number | null) | Page;
+  /**
+   * Lav verdi først blant sidene med samme overordnede side; like verdier sorteres alfabetisk.
+   */
+  order?: number | null;
+  author?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -744,6 +789,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -980,7 +1029,6 @@ export interface NewsSelect<T extends boolean = true> {
   summary?: T;
   body?: T;
   author?: T;
-  status?: T;
   publishDate?: T;
   tags?: T;
   heroImage?: T;
@@ -988,6 +1036,7 @@ export interface NewsSelect<T extends boolean = true> {
   featured?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -998,10 +1047,10 @@ export interface ProjectsSelect<T extends boolean = true> {
   slug?: T;
   summary?: T;
   body?: T;
-  status?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1021,11 +1070,11 @@ export interface EventsSelect<T extends boolean = true> {
   channel?: T;
   capacity?: T;
   seatsTaken?: T;
-  status?: T;
   tags?: T;
   featured?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1060,11 +1109,11 @@ export interface LearningPagesSelect<T extends boolean = true> {
   subcategory?: T;
   summary?: T;
   body?: T;
-  status?: T;
   order?: T;
   author?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1127,6 +1176,22 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  body?: T;
+  parent?: T;
+  order?: T;
+  author?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

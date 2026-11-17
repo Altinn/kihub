@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   EVENT_FORMAT_LABELS,
+  EVENT_TYPE_COLORS,
   EVENT_TYPE_LABELS,
   EVENT_TYPES,
   buildMonthGrid,
@@ -10,8 +11,8 @@ import {
   gridRange,
   groupEventsByDay,
   nextMonth,
-  osloDayKey,
   parseEventsSearchParams,
+  osloDayKey,
   placeText,
   prevMonth,
   seatsText,
@@ -166,7 +167,17 @@ describe('nb-NO formatting', () => {
   });
 
   it('yields Monday-first Norwegian weekday headers', () => {
-    expect(weekdayHeaders()).toEqual(['MAN', 'TIR', 'ONS', 'TOR', 'FRE', 'LØR', 'SØN']);
+    // 026: sentence case for the visible header, the full name for screen readers.
+    expect(weekdayHeaders().map((d) => d.short)).toEqual(['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn']);
+    expect(weekdayHeaders().map((d) => d.long)).toEqual([
+      'mandag',
+      'tirsdag',
+      'onsdag',
+      'torsdag',
+      'fredag',
+      'lørdag',
+      'søndag',
+    ]);
   });
 });
 
@@ -273,5 +284,39 @@ describe('enums', () => {
     expect(EVENT_TYPES).toHaveLength(5);
     expect(EVENT_TYPE_LABELS.konferanse).toBe('Konferanse');
     expect(EVENT_FORMAT_LABELS.oppmote).toBe('Oppmøte');
+  });
+});
+
+describe('EVENT_TYPE_COLORS (026 R10)', () => {
+  it('gives every event type a Designsystemet status/neutral colour, never a brand colour', () => {
+    for (const type of EVENT_TYPES) {
+      expect(['info', 'warning', 'success', 'danger', 'neutral']).toContain(EVENT_TYPE_COLORS[type]);
+    }
+  });
+
+  it('keeps the five types visually distinct', () => {
+    expect(new Set(EVENT_TYPES.map((t) => EVENT_TYPE_COLORS[t])).size).toBe(EVENT_TYPES.length);
+  });
+});
+
+describe('parseEventsSearchParams — the 026 GET filter form', () => {
+  it('reads repeated checkbox params as the type list, deduplicated', () => {
+    const state = parseEventsSearchParams({ type: ['webinar', 'kurs', 'webinar'] });
+    expect(state.types).toEqual(['webinar', 'kurs']);
+  });
+
+  it('treats the "Alle" radio (empty form value) as no form filter', () => {
+    expect(parseEventsSearchParams({ form: '' }).form).toBeUndefined();
+    expect(parseEventsSearchParams({ type: 'kurs', form: '' })).toMatchObject({
+      view: 'liste',
+      types: ['kurs'],
+      form: undefined,
+    });
+  });
+
+  it('ignores unknown values a hand-edited URL might carry', () => {
+    const state = parseEventsSearchParams({ type: ['webinar', 'party'], form: 'teleport' });
+    expect(state.types).toEqual(['webinar']);
+    expect(state.form).toBeUndefined();
   });
 });

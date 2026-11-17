@@ -1,6 +1,7 @@
 import config from '@payload-config';
 import { getPayload } from 'payload';
 import type { LearningLibrary } from '@/lib/learning-view';
+import { PUBLISHED, type ReadOptions } from '@/lib/payload-queries';
 import type { LearningPage } from '@/payload-types';
 
 /**
@@ -13,8 +14,6 @@ import type { LearningPage } from '@/payload-types';
 async function payloadClient() {
   return getPayload({ config });
 }
-
-const PUBLISHED = { status: { equals: 'published' } } as const;
 
 /**
  * Upper bound for a single read. The library is expected to reach ~100 pages (plan.md Scale/Scope);
@@ -89,12 +88,18 @@ export async function readLearningLibrary(): Promise<LearningLibrary> {
 /**
  * One published page by handle, or `null` (draft/unknown → the route calls `notFound()`, FR-012).
  * Default depth, so the body's upload nodes arrive populated and images can render.
+ *
+ * 027: `{ preview: true }` returns the latest version (draft or not) for an editor's preview.
  */
-export async function getPublishedLearningPageBySlug(slug: string): Promise<LearningPage | null> {
+export async function getLearningPageBySlug(
+  slug: string,
+  opts: ReadOptions = {},
+): Promise<LearningPage | null> {
   const payload = await payloadClient();
   const result = await payload.find({
     collection: 'learning-pages',
-    where: { and: [{ slug: { equals: slug } }, PUBLISHED] },
+    where: opts.preview ? { slug: { equals: slug } } : { and: [{ slug: { equals: slug } }, PUBLISHED] },
+    draft: Boolean(opts.preview),
     limit: 1,
     overrideAccess: true,
   });
