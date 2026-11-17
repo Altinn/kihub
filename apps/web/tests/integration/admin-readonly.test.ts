@@ -100,6 +100,7 @@ beforeAll(async () => {
       name: 'Read-only matrix test artifact',
       description: 'Fixture for T008.',
       version: '1.0.0',
+      contentDigest: 'sha256:admin-readonly-fixture',
       active: true,
     },
     overrideAccess: true,

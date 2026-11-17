@@ -46,6 +46,7 @@ describe('discovery-source create', () => {
       overrideAccess: true,
     });
     expect(stored.webhookSecret).toMatch(/^[0-9a-f]{64}$/);
+    expect(stored.allowDestructiveReconcile).toBe(false);
 
     // Collection access still refuses a non-admin read outright (research §5 unchanged).
     const visible = await payload.findByID({

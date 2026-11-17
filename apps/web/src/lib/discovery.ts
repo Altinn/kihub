@@ -1,4 +1,4 @@
-import { type IndexReport, reconcile, type RepoReader, scanRepo } from '@kihub/discovery-core';
+import { type IndexReport, reconcile, type RepoReader, scanRepoDetailed } from '@kihub/discovery-core';
 import { createGithubRepoReader } from '@kihub/github-client';
 import type { Role } from '@kihub/governance-core';
 import type { DiscoverySource, User } from '@/payload-types';
@@ -114,10 +114,14 @@ async function runLocked(
   });
 
   try {
-    const scanned = await scanRepo(createReader(source));
+    const scanned = await scanRepoDetailed(createReader(source), { expectedRepository: source.repo });
     // Source-scoped reconcile (015): ownership stamped on every upsert, deactivation limited to
     // this source's own artifacts — other sources' and unowned rows are never touched.
-    const report = await reconcile(payload, scanned, { sourceId: source.id });
+    const destructiveOverride = Boolean(source.allowDestructiveReconcile);
+    const report = await reconcile(payload, scanned.artifacts, {
+      sourceId: source.id,
+      allowEmptySource: destructiveOverride,
+    });
 
     const run = await payload.create({
       collection: 'discovery-runs',
@@ -128,6 +132,9 @@ async function runLocked(
         startedAt,
         finishedAt: new Date().toISOString(),
         outcome: 'success',
+        configPath: scanned.config.configPath,
+        configDigest: scanned.config.configDigest,
+        artifactRoots: scanned.config.artifactRoots,
         summary: {
           created: report.created.length,
           updated: report.updated.length,
@@ -137,12 +144,14 @@ async function runLocked(
           adopted: report.adopted.length,
           reassigned: report.reassigned.length,
           cardIssues: report.cardIssues.length,
+          revisionChanged: report.revisionChanged.length,
         },
         createdIds: report.created,
         updatedIds: report.updated,
         deactivatedIds: report.deactivated,
         adoptedIds: report.adopted,
         reassignedIds: report.reassigned,
+        revisionChangedIds: report.revisionChanged,
         skippedInvalid: report.skippedInvalid.map((s) => ({ path: s.path, errors: s.errors })),
         cardIssues: report.cardIssues.map((c) => ({ path: c.path, errors: c.errors })),
       },
@@ -162,6 +171,7 @@ async function runLocked(
           skippedInvalid: report.skippedInvalid.length,
         },
         runningSince: null,
+        ...(destructiveOverride ? { allowDestructiveReconcile: false } : {}),
       },
       overrideAccess: true,
     });

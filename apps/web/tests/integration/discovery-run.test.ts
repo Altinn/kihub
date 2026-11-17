@@ -104,6 +104,10 @@ describe('runDiscovery against live Payload (T011)', () => {
     // 015: ownership accounting is recorded on every run (zero here — fresh creates).
     expect(run.summary?.adopted).toBe(0);
     expect(run.summary?.reassigned).toBe(0);
+    expect(run.summary?.revisionChanged).toBe(0);
+    expect(run.artifactRoots).toEqual(['.']);
+    expect(run.configPath ?? null).toBeNull();
+    expect(run.configDigest ?? null).toBeNull();
     expect(run.adoptedIds ?? []).toEqual([]);
     expect(run.reassignedIds ?? []).toEqual([]);
 
@@ -148,5 +152,41 @@ describe('runDiscovery against live Payload (T011)', () => {
       overrideAccess: true,
     });
     expect(after.totalDocs).toBe(activeBefore); // nothing deactivated by the failure
+  });
+
+  it('protects a non-empty source from an empty scan, then consumes an explicit one-shot override', async () => {
+    const before = await payload.find({
+      collection: 'artifacts',
+      where: { and: [{ active: { equals: true } }, { discoverySource: { equals: sourceId } }] },
+      overrideAccess: true,
+    });
+    expect(before.totalDocs).toBeGreaterThan(0);
+
+    const protectedResult = await runDiscovery(payload, sourceId, 'manual', {
+      createReader: () => fakeReader({}),
+    });
+    expect(protectedResult.outcome).toBe('failure');
+    expect(protectedResult.failureReason).toContain('Refusing empty scan');
+    const stillActive = await payload.find({
+      collection: 'artifacts',
+      where: { and: [{ active: { equals: true } }, { discoverySource: { equals: sourceId } }] },
+      overrideAccess: true,
+    });
+    expect(stillActive.totalDocs).toBe(before.totalDocs);
+
+    await payload.update({
+      collection: 'discovery-sources',
+      id: sourceId,
+      data: { allowDestructiveReconcile: true },
+      overrideAccess: true,
+    });
+    const allowed = await runDiscovery(payload, sourceId, 'manual', {
+      createReader: () => fakeReader({}),
+    });
+    expect(allowed.outcome).toBe('success');
+    expect(allowed.report?.deactivated).toHaveLength(before.totalDocs);
+
+    const source = await payload.findByID({ collection: 'discovery-sources', id: sourceId, overrideAccess: true });
+    expect(source.allowDestructiveReconcile).toBe(false);
   });
 });

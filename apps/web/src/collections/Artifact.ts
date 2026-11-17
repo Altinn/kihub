@@ -51,6 +51,14 @@ export const Artifact: CollectionConfig = {
     { name: 'lifecycleStatus', type: 'select', options: [...LIFECYCLE_STATUSES] },
     { name: 'active', type: 'checkbox', defaultValue: true, index: true },
     { name: 'lastIndexedAt', type: 'date' },
+    {
+      name: 'contentDigest',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        description: 'SHA-256 identity of the current artifact-directory Git content.',
+      },
+    },
     // 015: which discovery source registered/last saw this artifact (ownership-by-last-sighting).
     // Nullable: legacy/unowned rows are excluded from every deactivation and adoptable by any scan.
     // Deliberately NOT named `source` — that group above is the manifest's own source metadata.

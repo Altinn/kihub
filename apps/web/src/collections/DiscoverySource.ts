@@ -53,6 +53,16 @@ export const DiscoverySource: CollectionConfig = {
     },
     { name: 'enabled', type: 'checkbox', defaultValue: true, index: true },
     {
+      name: 'allowDestructiveReconcile',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Allow next scan to deactivate all artifacts',
+      admin: {
+        description:
+          'One-shot safety override. Use only for an intentional emptying of this source; it resets after a successful scan.',
+      },
+    },
+    {
       name: 'runningSince',
       type: 'date',
       admin: { readOnly: true, description: 'Per-source run lock; set while a run is in progress.' },

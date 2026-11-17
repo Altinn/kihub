@@ -22,6 +22,16 @@ with no Git source.
 > - **Constitution:** v4.0.0. No schema or content migration was needed. See
 >   [`specs/026-designsystemet-alignment/`](specs/026-designsystemet-alignment).
 >
+> Previously — flexible artifact discovery and revision-bound governance (026). Artifact repositories
+> may now declare strict, repository-owned roots in a root-level `kihub.yaml`, so artifacts can live
+> at paths such as `src/skills/<slug>` while retaining the predictable `<type>/<slug>` layout.
+> Discovery validates the manifest's real path and repository, records config provenance, refuses an
+> unexpected empty result unless an Admin arms a one-shot override, and computes a portable digest
+> over every Git blob in the artifact directory. Reviews and approvals snapshot that version/digest;
+> after any content change, old decisions remain visible as history but no longer appear current or
+> Recommended. See [`documentation/artifact-discovery.md`](documentation/artifact-discovery.md) and
+> [`specs/026-flexible-artifact-discovery/`](specs/026-flexible-artifact-discovery/).
+>
 > Previously — KI Prosjekter i Digdir (016). Fixed [Altinn/kihub#135](https://github.com/Altinn/kihub/issues/135):
 > the frontpage's "Verktøy" and "KI Prosjekter i Digdir" tiles both linked to `/registry`. KI Hub
 > gained a **fifth** native-content module (Constitution v3.2.0, Principle II): a flat,
@@ -112,6 +122,8 @@ specs/011-frontpage-redesign/ Spec-kit artifacts — frontpage redesign
 specs/012-events-page-redesign/ Spec-kit artifacts — events page redesign
 specs/013-news-page-redesign/ Spec-kit artifacts — news page redesign
 specs/014-learning-pages/     Spec-kit artifacts — learning pages (KI Læring)
+specs/015-multi-source-agents/ Spec-kit artifacts — source-scoped discovery + agent artifacts
+specs/026-flexible-artifact-discovery/ Spec-kit artifacts — configurable roots + revision-bound governance
 .specify/                     Spec-kit config + constitution
 ```
 
@@ -213,6 +225,13 @@ Every action is attributed and audit-logged (visible read-only on the artifact's
 role/action checks are enforced server-side (Payload `access` functions + `@kihub/governance-core`),
 independent of any UI. Admins additionally manage roles at `/admin/roles`.
 
+Review and approval decisions apply to one exact artifact revision: KI Hub records both the manifest
+version and a digest of the full artifact directory. If any governed file changes, the decision and
+review history are preserved, but the employee surface marks the approval/reviews as older and
+suppresses current Approved/Recommended indicators. A fresh approval is required before promoting
+the changed revision to Approved/Recommended or setting `recommended` again; Approver/Admin uses
+the one-shot **reapprove current revision** control when the stored decision is already Approved.
+
 ### Automated discovery (Phase 4)
 
 Discovery is now automated and fetches artifact content **remotely from GitHub** — the manual CLI
@@ -231,9 +250,30 @@ idempotent reconcile, preserving all governance state:
   and click **Run now** (the successor to the CLI).
 
 Every run — webhook, scheduled, or manual — is recorded in `discovery-runs` (trigger, outcome,
-created/updated/deactivated/skipped counts) and surfaced to Admins. Required env: see the
+created/updated/deactivated/skipped/revision-changed counts plus effective root/config provenance)
+and surfaced to Admins. Required env: see the
 `Automated discovery (Phase 4)` block in `apps/web/.env.example`. Secrets (the GitHub token via env,
 each source's webhook secret) never appear in run records or the UI.
+
+Repositories without configuration keep the original root layout. To keep artifacts beside source
+code, commit this exact root-level file on the source's configured ref:
+
+```yaml
+schemaVersion: 1
+discovery:
+  artifactRoots:
+    - src
+    - services/forms
+```
+
+Each root is scanned only at `<root>/<type>/<slug>/artifact.yaml`; discovery is deliberately not an
+arbitrary recursive search. Every manifest's `source.path` must equal its actual repository-relative
+directory and `source.repository` must match the registered `owner/repo`. Invalid config, a missing
+root, a truncated GitHub tree, or source mismatch fails safely before catalog mutation. If a source
+that already owns active artifacts unexpectedly yields zero valid unique artifacts, reconcile also
+fails without writes. An Admin can arm `allowDestructiveReconcile` on that source for one intentional
+empty run; it resets only after success. Full contract and operating notes are in
+[`documentation/artifact-discovery.md`](documentation/artifact-discovery.md).
 
 The local-checkout CLI remains available as a fallback:
 
@@ -444,6 +484,8 @@ under **Sider** by Contributor+ editors (027), with documentation-style navigati
 ## Validating artifacts
 
 The `artifact.yaml` schema and docs live in [`packages/artifact-schema`](packages/artifact-schema).
+The manifest's `source.path` is the full repository-relative artifact directory, including any root
+declared in `kihub.yaml`; `source.repository` must match the configured discovery source.
 Validate seeded examples in the sibling repo:
 
 ```bash
@@ -466,5 +508,7 @@ implement). See [`specs/001-phase1-foundation/`](specs/001-phase1-foundation),
 [`specs/012-events-page-redesign/`](specs/012-events-page-redesign),
 [`specs/013-news-page-redesign/`](specs/013-news-page-redesign),
 [`specs/014-learning-pages/`](specs/014-learning-pages),
+[`specs/015-multi-source-agents/`](specs/015-multi-source-agents/),
+[`specs/026-flexible-artifact-discovery/`](specs/026-flexible-artifact-discovery/),
 [`specs/026-designsystemet-alignment/`](specs/026-designsystemet-alignment), and the
 [constitution](.specify/memory/constitution.md).

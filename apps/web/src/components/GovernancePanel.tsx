@@ -1,5 +1,5 @@
 import { isExpired } from '@kihub/governance-core';
-import { listAuditLog, listReviews, type Governance } from '@/lib/governance';
+import { listAuditLog, listReviews, reviewIsOlderRevision, type Governance } from '@/lib/governance';
 import {
   APPROVAL_LABELS,
   LIFECYCLE_LABELS,
@@ -58,7 +58,25 @@ export async function GovernancePanel({
         </div>
         <div>
           <dt>Godkjenning</dt>
-          <dd>{labelFor(APPROVAL_LABELS, governance.approvalState)}</dd>
+          <dd>
+            {governance.approvalState === 'approved' && !governance.approvalCurrent
+              ? 'Godkjenningen er utdatert — må vurderes på nytt'
+              : labelFor(APPROVAL_LABELS, governance.approvalState)}
+          </dd>
+        </div>
+        <div>
+          <dt>Gjeldende versjon</dt>
+          <dd>
+            {governance.currentArtifactVersion}
+            {governance.currentArtifactDigest ? ` · ${governance.currentArtifactDigest.slice(0, 19)}…` : ' · ikke indeksert'}
+          </dd>
+        </div>
+        <div>
+          <dt>Versjon ved vedtak</dt>
+          <dd>
+            {governance.approvalArtifactVersion ?? '—'}
+            {governance.approvalArtifactDigest ? ` · ${governance.approvalArtifactDigest.slice(0, 19)}…` : ''}
+          </dd>
         </div>
         <div>
           <dt>Forretningseier</dt>
@@ -85,6 +103,7 @@ export async function GovernancePanel({
         <ul className="app-review-list">
           {reviews.map((r) => {
             const expired = r.expiryDate ? isExpired(r.expiryDate, now) : false;
+            const olderRevision = reviewIsOlderRevision(r.artifactDigest, governance.currentArtifactDigest);
             const reviewer = typeof r.reviewer === 'object' && r.reviewer ? r.reviewer.email : r.reviewer;
             const decisionColor =
               r.decision === 'rejected' ? 'danger' : r.decision === 'changes-requested' ? 'warning' : 'success';
@@ -100,6 +119,11 @@ export async function GovernancePanel({
                   {expired ? (
                     <span className="ds-tag" data-color="danger">
                       Utløpt — må fornyes
+                    </span>
+                  ) : null}
+                  {olderRevision ? (
+                    <span className="ds-tag" data-color="warning">
+                      Eldre versjon av artefakten
                     </span>
                   ) : null}
                 </span>

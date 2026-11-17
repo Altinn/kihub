@@ -38,13 +38,13 @@ lifecycle:
 | `id` | ✅ | reverse-DNS `org.slug` | Lowercase, globally unique, **stable** and independent of repository/path. Pattern: `^[a-z0-9]+(-[a-z0-9]+)*\.[a-z0-9]+(-[a-z0-9]+)*$`. Governance history keys off this — never reuse or change it when moving repos. |
 | `type` | ✅ | `skill` \| `prompt` \| `workflow` \| `mcp` \| `template` \| `policy` \| `playbook` \| `agent` | The single generic artifact is differentiated by this field. Must match the type directory the manifest lives under (see below). |
 | `name` | ✅ | string (non-empty) | Human-readable display name. |
-| `version` | ✅ | semver `MAJOR.MINOR.PATCH` | e.g. `1.0.0`. |
+| `version` | ✅ | semver `MAJOR.MINOR.PATCH` | e.g. `1.0.0`. Approvals are bound to version **and** content (see [Revisions and approvals](#revisions-and-approvals)). |
 | `description` | ✅ | string (non-empty) | One-line summary. |
 | `owner.team` | ✅ | string | Owning team. |
 | `owner.contact` | ✅ | email | Contact address. |
 | `source.provider` | ✅ | `github` | Only value this phase. |
-| `source.repository` | ✅ | string | e.g. `digdir/ai-artifacts`. |
-| `source.path` | ✅ | string | Path within the repo, e.g. `skills/security-review`. |
+| `source.repository` | ✅ | string | e.g. `digdir/ai-artifacts`. On remote scans it must name the repository registered as the discovery source (compared as case-insensitive `owner/repo`); a mismatch makes the manifest invalid. |
+| `source.path` | ✅ | string | Repository-relative directory of the artifact, e.g. `skills/security-review` or `src/skills/security-review`. Must equal the actual discovered directory exactly (no `./`, no trailing `/`); a mismatch makes the manifest invalid. |
 | `install.apm.package` | ⬜ | string | APM package id (Principle V). The `install` block and its `apm` are optional. |
 | `tags` | ⬜ | string[] (lowercase kebab) | Optional keywords. |
 | `visibility` | ✅ | `internal` \| `public` \| `restricted` | Only `internal` is used in Phase 1; others reserved. |
@@ -55,12 +55,45 @@ Unknown/extra fields are rejected (the schema is strict) — this catches typos 
 
 ## Type directories
 
-Discovery only looks two levels deep under a fixed set of type directories, and the manifest's
-`type` must match the directory it lives under — a mismatch (e.g. `type: agent` under `skills/`)
-is reported as an invalid manifest and not registered:
+Discovery only looks at exactly `<root>/<type-dir>/<slug>/artifact.yaml`, where `<root>` is the
+repository root unless `kihub.yaml` says otherwise (see below). Manifests at any other depth are
+invisible. The manifest's `type` must match the directory it lives under — a mismatch (e.g.
+`type: agent` under `skills/`) is reported as an invalid manifest and not registered:
 
 `skills/` → `skill` · `prompts/` → `prompt` · `workflows/` → `workflow` · `mcp/` → `mcp` ·
 `templates/` → `template` · `policies/` → `policy` · `playbooks/` → `playbook` · `agents/` → `agent`
+
+## Artifact roots (`kihub.yaml`)
+
+A repository that keeps artifacts next to its code commits one `kihub.yaml` at the repository root
+(same Git ref as the artifacts):
+
+```yaml
+schemaVersion: 1
+discovery:
+  artifactRoots:
+    - .
+    - src
+    - services/forms
+```
+
+- Without the file, the only root is `.` (the repository root), so existing repositories need no
+  change. With it, **only** the listed roots are scanned, so list `.` explicitly to keep root-level
+  artifacts.
+- The file is strict: only these keys, `schemaVersion` must be `1`, and 1–32 unique roots written as
+  plain relative paths (`src`, not `/src`, `./src` or `src/`). Every root must exist at the ref.
+- An invalid `kihub.yaml` or a missing root fails the whole scan before anything in the catalog
+  changes.
+
+Full rules: [`documentation/artifact-discovery.md`](../../../documentation/artifact-discovery.md).
+
+## Revisions and approvals
+
+Every scan records a content digest of all files in the artifact directory (sorted relative paths +
+Git blob ids, so the bytes themselves are never stored). Reviews and approvals snapshot the artifact's
+`version` and digest at decision time. If either changes afterwards — including a file edit without a
+version bump — the approval is shown as applying to an older revision and the artifact needs a new
+review and approval before it shows as Approved or Recommended again. History is kept, keyed by `id`.
 
 ## Agent card (`agent-card.json`) — agents only
 
@@ -89,3 +122,7 @@ pnpm --filter @kihub/artifact-schema validate path/to/artifact.yaml
 ```
 
 Exit code `0` = all valid, `1` = one or more invalid (with per-field errors), `2` = usage error.
+
+The validator checks the manifest on its own. Location checks — `type` vs. type directory,
+`source.path` vs. the actual directory, and `source.repository` vs. the registered source — run
+during discovery.

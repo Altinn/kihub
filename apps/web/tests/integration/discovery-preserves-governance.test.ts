@@ -112,6 +112,7 @@ describe('automated discovery preserves governance (T013)', () => {
     const result = await runDiscovery(payload, sourceId, 'webhook', { createReader: () => reader('2.0.0') });
     expect(result.outcome).toBe('success');
     expect(result.report?.updated).toContain(artifactId);
+    expect(result.report?.revisionChanged).toContain(artifactId);
 
     const after = await payload.findByID({ collection: 'catalog-entries', id: entry.id, overrideAccess: true });
     expect(after.lifecycleState).toBe('in-review');

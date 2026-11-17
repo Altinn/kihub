@@ -1,8 +1,15 @@
-import type { LifecycleState } from '@kihub/governance-core';
 import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 import { auth } from '@/auth';
-import type { Artifact, CatalogEntry, Review, User } from '@/payload-types';
+import type { CatalogEntry, Review, User } from '@/payload-types';
+import { defaultGovernance, toGovernance, type Governance } from './governance-view';
+
+export {
+  isApprovalCurrent,
+  reviewIsOlderRevision,
+  toGovernance,
+  type Governance,
+} from './governance-view';
 
 /**
  * Resolve the acting user's *live* Payload doc (never the JWT-cached session claim) so every
@@ -34,51 +41,6 @@ async function findCatalogEntry(payload: Payload, artifactDocId: number): Promis
   return result.docs[0] ?? null;
 }
 
-/** Governance state for one artifact — either a persisted record, or a computed default (SC-003). */
-export interface Governance {
-  /** `null` when no `catalog-entries` doc has been created yet — a default, not an error. */
-  id: number | null;
-  lifecycleState: LifecycleState;
-  reviewStatus: 'not-submitted' | 'in-review';
-  approvalState: 'not-approved' | 'approved' | 'rejected';
-  recommended: boolean;
-  featured: boolean;
-  businessOwner: string | null;
-  technicalOwner: string | null;
-  riskLevel: 'low' | 'medium' | 'high' | null;
-  internalNotes: string | null;
-}
-
-function toGovernance(entry: CatalogEntry): Governance {
-  return {
-    id: entry.id,
-    lifecycleState: entry.lifecycleState,
-    reviewStatus: entry.reviewStatus ?? 'not-submitted',
-    approvalState: entry.approvalState ?? 'not-approved',
-    recommended: entry.recommended ?? false,
-    featured: entry.featured ?? false,
-    businessOwner: entry.businessOwner ?? null,
-    technicalOwner: entry.technicalOwner ?? null,
-    riskLevel: entry.riskLevel ?? null,
-    internalNotes: entry.internalNotes ?? null,
-  };
-}
-
-function defaultGovernance(artifact: Artifact): Governance {
-  return {
-    id: null,
-    lifecycleState: (artifact.lifecycleStatus as LifecycleState | undefined) ?? 'draft',
-    reviewStatus: 'not-submitted',
-    approvalState: 'not-approved',
-    recommended: false,
-    featured: false,
-    businessOwner: null,
-    technicalOwner: null,
-    riskLevel: null,
-    internalNotes: null,
-  };
-}
-
 /**
  * Read governance state for an artifact, or `null` if the artifact itself is unknown/inactive.
  * Never creates a `catalog-entries` row — a never-governed artifact gets a computed default
@@ -96,7 +58,7 @@ export async function getGovernance(artifactId: string): Promise<Governance | nu
   if (!artifact) return null;
 
   const entry = await findCatalogEntry(payload, artifact.id);
-  return entry ? toGovernance(entry) : defaultGovernance(artifact);
+  return entry ? toGovernance(entry, artifact) : defaultGovernance(artifact);
 }
 
 /** Review history for an artifact, newest first (FR-016 "visible in the artifact's review history"). */

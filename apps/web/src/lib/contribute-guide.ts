@@ -4,8 +4,9 @@ import { ARTIFACT_TYPE_LABELS, type ArtifactTypeValue } from '@/lib/registry-vie
 /**
  * 021 — static content for the "Del verktøyene deres i KI Hub" guide (`/bidra`). Kept as pure
  * data, with no React or Payload, so `tests/unit/contribute-guide.test.ts` can run every example
- * through the REAL `validateManifest` / `validateAgentCard`. If the manifest schema ever changes,
- * the guide's examples fail CI before an external team copies an invalid one.
+ * through the REAL `validateManifest` / `validateAgentCard` (and, since 026, the `kihub.yaml`
+ * example through `resolveDiscoveryConfig`). If the manifest schema ever changes, the guide's
+ * examples fail CI before an external team copies an invalid one.
  */
 
 /** Public raw URL of the generated JSON Schema (Altinn/kihub is a public repo). */
@@ -67,6 +68,21 @@ export const EXAMPLE_REPO_TREE = `team-repo/
         ├── artifact.yaml      ← påkrevd
         ├── agent-card.json    ← valgfritt, kun for agenter
         └── README.md`;
+
+/** 026 — optional root `kihub.yaml` for repositories that keep artifacts next to their code. */
+export const EXAMPLE_KIHUB_CONFIG = `schemaVersion: 1
+discovery:
+  artifactRoots:
+    - src
+    - services/skjema
+`;
+
+export const EXAMPLE_NESTED_REPO_TREE = `team-repo/
+├── kihub.yaml             ← sier hvor artefaktene ligger
+├── src/skills/skjemahjelp/
+│   └── artifact.yaml      ← source.path: src/skills/skjemahjelp
+└── services/skjema/agents/innsendingshjelp/
+    └── artifact.yaml      ← source.path: services/skjema/agents/innsendingshjelp`;
 
 export const EXAMPLE_SKILL_MANIFEST = `# yaml-language-server: $schema=${MANIFEST_SCHEMA_URL}
 id: digdir.klarsprak-sjekk
@@ -205,7 +221,7 @@ export const MANIFEST_FIELDS: ManifestField[] = [
     required: true,
     format: 'organisasjon.navn, med små bokstaver',
     explanation:
-      'Artefaktens faste identitet, for eksempel digdir.klarsprak-sjekk. Endre den aldri, heller ikke hvis dere flytter repo. Historikk og godkjenninger henger på den.',
+      'Artefaktens faste identitet, for eksempel digdir.klarsprak-sjekk. Endre den aldri, heller ikke hvis dere flytter repo. Historikken, med vurderinger og godkjenninger, henger på den.',
   },
   {
     name: 'type',
@@ -218,7 +234,8 @@ export const MANIFEST_FIELDS: ManifestField[] = [
     name: 'version',
     required: true,
     format: 'MAJOR.MINOR.PATCH',
-    explanation: 'For eksempel 1.0.0. Øk versjonen når dere endrer noe som brukerne merker.',
+    explanation:
+      'For eksempel 1.0.0. Øk versjonen når dere endrer noe som brukerne merker. En godkjenning gjelder én bestemt versjon, så en ny versjon må godkjennes på nytt.',
   },
   {
     name: 'description',
@@ -238,13 +255,15 @@ export const MANIFEST_FIELDS: ManifestField[] = [
     name: 'source.repository',
     required: true,
     format: 'eier/repo',
-    explanation: 'Repoet artefakten bor i, for eksempel Altinn/team-tekst.',
+    explanation:
+      'Repoet artefakten bor i, for eksempel Altinn/team-tekst. Må være det samme repoet som er koblet til KI Hub.',
   },
   {
     name: 'source.path',
     required: true,
-    format: 'sti i repoet',
-    explanation: 'Mappen artefakten ligger i, for eksempel skills/klarsprak-sjekk.',
+    format: 'sti fra roten av repoet',
+    explanation:
+      'Hele stien til mappen artefakten ligger i, for eksempel skills/klarsprak-sjekk eller src/skills/skjemahjelp. Må stemme nøyaktig med mappen, uten ./ foran og uten / bak.',
   },
   {
     name: 'install.apm.package',
@@ -297,7 +316,7 @@ export const COMMON_MISTAKES: CommonMistake[] = [
   {
     title: 'Feil mappedybde',
     symptom: 'Artefakten dukker aldri opp, og ingen feilmelding vises.',
-    fix: 'Filen må ligge nøyaktig to nivåer ned: agents/tilgangsveileder/artifact.yaml. agents/artifact.yaml blir ikke funnet.',
+    fix: 'Filen må ligge nøyaktig to nivåer under roten av repoet, eller under en mappe som står i kihub.yaml: agents/tilgangsveileder/artifact.yaml. agents/artifact.yaml blir ikke funnet.',
   },
   {
     title: 'Mellomrom eller feil filnavn',
@@ -308,6 +327,21 @@ export const COMMON_MISTAKES: CommonMistake[] = [
     title: 'type passer ikke med mappen',
     symptom: 'Manifestet blir avvist som ugyldig.',
     fix: 'type: agent må ligge under agents/, type: skill under skills/ og så videre. Se tabellen over typer.',
+  },
+  {
+    title: 'source.path stemmer ikke med mappen',
+    symptom: 'Manifestet blir avvist med en feil som source.path: … does not match discovered path ….',
+    fix: 'Skriv hele stien fra roten av repoet, nøyaktig som mappen heter: src/skills/skjemahjelp, ikke skills/skjemahjelp, ./src/skills/skjemahjelp eller src/skills/skjemahjelp/. Flytter dere mappen, må source.path endres samtidig.',
+  },
+  {
+    title: 'Feil repo i source.repository',
+    symptom: 'Manifestet blir avvist med en feil som source.repository: … does not match discovery source ….',
+    fix: 'Bruk eier/repo for repoet som er koblet til KI Hub. Har dere kopiert et manifest fra et annet repo, må dette feltet endres.',
+  },
+  {
+    title: 'Feil i kihub.yaml',
+    symptom: 'Ingenting i repoet blir oppdatert, verken nye eller endrede artefakter, fordi hele skanningen stopper.',
+    fix: 'Filen kan bare ha schemaVersion: 1 og discovery.artifactRoots, og hver mappe i listen må finnes på grenen KI Hub leser. Skriv mappene som src eller services/skjema, ikke /src, ./src eller src/.',
   },
   {
     title: 'Ukjente eller feilstavede felt',
@@ -335,7 +369,7 @@ export const FAQ: FaqItem[] = [
   {
     question: 'Må koden eller innholdet vårt flyttes til KI Hub?',
     answer:
-      'Nei. Alt blir liggende i deres eget repo, og dere eier det fortsatt. KI Hub leser bare metadata (artifact.yaml), README og eventuelt agentkortet, og lenker til kilden.',
+      'Nei. Alt blir liggende i deres eget repo, og dere eier det fortsatt. KI Hub leser bare metadata (artifact.yaml), README og eventuelt agentkortet, og lenker til kilden. Fra resten av filene i mappen lagres bare et fingeravtrykk, slik at KI Hub ser når innholdet endres.',
   },
   {
     question: 'Hvor lang tid tar det før endringer vises?',
@@ -348,9 +382,24 @@ export const FAQ: FaqItem[] = [
       'Ja. Hver mappe med en artifact.yaml blir én artefakt. Dere kan blande typer, for eksempel både skills/ og agents/.',
   },
   {
+    question: 'Kan artefaktene ligge sammen med koden, for eksempel under src/?',
+    answer:
+      'Ja. Legg en kihub.yaml i roten av repoet og list mappene artefaktene ligger under. Inne i hver av dem gjelder den samme strukturen, <typemappe>/<navn>/artifact.yaml. KI Hub leter da bare i mappene i listen, så ta med . hvis dere også har artefakter i roten. Uten kihub.yaml leter KI Hub bare i roten.',
+  },
+  {
+    question: 'Hva skjer med godkjenningen når vi endrer artefakten?',
+    answer:
+      'En godkjenning gjelder den versjonen og det innholdet som ble godkjent. Endrer dere version eller en hvilken som helst fil i artefaktmappen, viser KI Hub at godkjenningen gjelder en eldre versjon, og artefakten må vurderes og godkjennes på nytt før den vises som godkjent eller anbefalt igjen. Historikken beholdes.',
+  },
+  {
+    question: 'Hva skjer hvis manifestet blir ugyldig etter at artefakten er registrert?',
+    answer:
+      'Artefakten blir stående i katalogen med den siste gyldige versjonen, og Team KITT ser feilen i skanningsrapporten. Den oppdateres igjen når manifestet er gyldig.',
+  },
+  {
     question: 'Hva skjer hvis vi sletter en artefakt fra repoet?',
     answer:
-      'Ved neste skanning merkes den som inaktiv og forsvinner fra katalogen. Historikken beholdes, så den kommer tilbake med samme status hvis dere legger den inn igjen med samme id.',
+      'Ved neste skanning merkes den som inaktiv og forsvinner fra katalogen. Historikken beholdes, så den kommer tilbake med historikken sin hvis dere legger den inn igjen med samme id. Vil dere fjerne alle artefaktene i et repo på én gang, må Team KITT godkjenne det først. Det hindrer at en feil i oppsettet tømmer katalogen.',
   },
   {
     question: 'Kan repoet vårt være privat?',
@@ -371,10 +420,12 @@ export const FAQ: FaqItem[] = [
 
 /** The checklist at the bottom of the page — one line per thing a team must have done. */
 export const CHECKLIST: string[] = [
-  'Mappen ligger under riktig typemappe, for eksempel skills/mitt-verktoy/',
+  'Mappen ligger under riktig typemappe, for eksempel skills/mitt-verktoy/, i roten eller under en mappe i kihub.yaml',
   'Filen heter nøyaktig artifact.yaml',
   'id er unik, med små bokstaver, på formen organisasjon.navn',
   'type stemmer med mappen',
+  'source.path er hele stien fra roten av repoet, nøyaktig som mappen heter',
+  'source.repository er repoet som er koblet til KI Hub',
   'Alle påkrevde felt er fylt ut, og ingen ukjente felt er med',
   'README.md forklarer hva, når, hvordan og begrensninger',
   'Agenter: eventuelt agent-card.json ved siden av artifact.yaml',

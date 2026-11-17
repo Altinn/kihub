@@ -102,6 +102,7 @@ beforeAll(async () => {
       name: 'Governance access test artifact',
       description: 'Fixture for T013.',
       version: '1.0.0',
+      contentDigest: 'sha256:governance-access-v1',
       active: true,
     },
     overrideAccess: true,
@@ -170,6 +171,16 @@ describe('role x action access matrix (T013, SC-001, SC-002)', () => {
         user: users.contributor,
       }),
     ).rejects.toThrow(/role-not-permitted/);
+
+    await expect(
+      payload.update({
+        collection: 'catalog-entries',
+        id,
+        data: { approvalState: 'approved' },
+        overrideAccess: false,
+        user: users.contributor,
+      }),
+    ).rejects.toThrow(/Only an Approver or Admin/);
   });
 
   it('Approver can perform In Review -> Approved', async () => {
@@ -180,6 +191,14 @@ describe('role x action access matrix (T013, SC-001, SC-002)', () => {
       limit: 1,
     });
     const id = entry.docs[0]!.id;
+
+    await payload.update({
+      collection: 'catalog-entries',
+      id,
+      data: { approvalState: 'approved' },
+      overrideAccess: false,
+      user: users.approver,
+    });
 
     const approved = await payload.update({
       collection: 'catalog-entries',

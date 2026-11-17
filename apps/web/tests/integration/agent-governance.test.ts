@@ -87,6 +87,7 @@ beforeAll(async () => {
       name: 'Governed agent fixture',
       description: 'Agent-typed fixture for the governance-parity cycle.',
       version: '1.0.0',
+      contentDigest: 'sha256:agent-gov-v1',
       active: true,
     },
     overrideAccess: true,
@@ -147,6 +148,7 @@ describe('agents get the identical governance cycle (015 T024)', () => {
       user: users.reviewer,
     });
     expect(review.decision).toBe('approved');
+    expect(review.artifactDigest).toBe('sha256:agent-gov-v1');
 
     const approved = await payload.update({
       collection: 'catalog-entries',

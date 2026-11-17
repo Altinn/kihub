@@ -16,3 +16,13 @@ export interface ReadOptions {
   /** Return the latest version, draft or not (an editor previewing). Never set from user input. */
   preview?: boolean;
 }
+
+/** The id of a relationship value, whether Payload hands it over as a scalar or populated `{ id }`. */
+export function relationshipId(value: unknown): number | string | undefined {
+  if (typeof value === 'number' || typeof value === 'string') return value;
+  if (value && typeof value === 'object' && 'id' in value) {
+    const id = (value as { id?: unknown }).id;
+    if (typeof id === 'number' || typeof id === 'string') return id;
+  }
+  return undefined;
+}
