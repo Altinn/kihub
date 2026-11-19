@@ -43,6 +43,9 @@ ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
 # Standalone output is rooted at the workspace root (outputFileTracingRoot).
 COPY --from=builder --chown=node:node /repo/apps/web/.next/standalone ./
 COPY --from=builder --chown=node:node /repo/apps/web/.next/static ./apps/web/.next/static
+# Next's standalone output does NOT include public/ (logo, hero art under /brand/*): copy it explicitly,
+# or those files 404 in production.
+COPY --from=builder --chown=node:node /repo/apps/web/public ./apps/web/public
 USER node
 EXPOSE 3000
 CMD ["node", "apps/web/server.js"]
