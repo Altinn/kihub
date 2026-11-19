@@ -7,7 +7,7 @@
 # (src/instrumentation.ts initializes Payload before traffic). A failed migration
 # fails the boot.
 
-FROM node:22-bookworm-slim AS base
+FROM node:22-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee AS base
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH NEXT_TELEMETRY_DISABLED=1
 RUN corepack enable
 
