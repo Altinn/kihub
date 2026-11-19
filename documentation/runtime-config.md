@@ -55,17 +55,19 @@ Where the files are read from follows `MEDIA_STORAGE_MODE` (`disk` locally, `azu
 
 **Publishing a new version** (owner-run, never by the app; needs the project lead's OK on #183): the
 bundle's entry file must stay `index.html` with relative `assets/…` paths. Upload with the container
-kept private (no anonymous access):
+kept private (no anonymous access). The resources live in the `Altinn-KITT-TestDev` subscription, which
+may not be your `az` default, so always pass `--subscription`:
 
 ```bash
-az storage blob upload-batch --account-name stkihubmedia --auth-mode login \
+az storage blob upload-batch --subscription Altinn-KITT-TestDev \
+  --account-name stkihubmedia --auth-mode key \
   --destination kihub-protected --destination-path retningslinje \
   --source <folder-with-index.html> --overwrite
 ```
 
 No application release is needed to change the deck. **Releasing the feature** = upload the bundle,
-then `az containerapp update -n kihub-web -g rg-kihub-app --set-env-vars GUIDELINE_DECK_ENABLED=true
-GUIDELINE_DECK_CONTAINER=kihub-protected`. The deck gets its own CSP (`security-headers.mjs`:
+then `az containerapp update --subscription Altinn-KITT-TestDev -n kihub-web -g rg-kihub-app
+--set-env-vars GUIDELINE_DECK_ENABLED=true GUIDELINE_DECK_CONTAINER=kihub-protected`. The deck gets its own CSP (`security-headers.mjs`:
 same-origin only, no network from scripts) so it cannot contact external hosts.
 
 ## Dev/tooling only (not set in the container)
