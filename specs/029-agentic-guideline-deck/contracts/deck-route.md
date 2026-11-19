@@ -21,7 +21,8 @@ them exactly as it covers every employee-only page. Store errors other than "not
 
 Input: the decoded `params.path` array. Output: `{ ok: true, key, contentType } | { ok: false }`.
 
-- 1–4 segments; each segment URL-decoded **once** (a second `%2e%2e` stays literal and fails the charset).
+- 1–4 segments, taken as Next provides them (`params.path`, already URL-decoded) and **not decoded again**:
+  `%` is outside the charset below, so no segment can smuggle an encoded separator or `..` through.
 - each segment must match `^[A-Za-z0-9][A-Za-z0-9._-]*$` — rejects `..`, `.`, empty, dotfiles, `/`, `\`,
   NUL, spaces, `%`.
 - last segment's extension (case-insensitive) must be in:
@@ -38,7 +39,7 @@ Input: the decoded `params.path` array. Output: `{ ok: true, key, contentType } 
 | `Content-Type` | from B |
 | `Cache-Control` | `private, no-store` |
 | `X-Robots-Tag` | `noindex, nofollow` |
-| `Content-Security-Policy` (HTML responses only) | `default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'` |
+| `Content-Security-Policy` | `default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'` — set by **`next.config.mjs`** (`DECK_SECURITY_HEADERS` in `security-headers.mjs`, a later entry for `/retningslinje/deck/:path*`), **not by the route**: a config-level header overrides one a route handler sets (found while verifying — the route-set CSP was silently replaced by the global one). Applies to every deck response (harmless on css/js/fonts) |
 | app-wide (`security-headers.mjs`) | HSTS, `nosniff`, `X-Frame-Options: SAMEORIGIN`, Referrer-Policy, Permissions-Policy |
 
 `Content-Length` is set when the store knows it. No `ETag`/`Last-Modified` (no revalidation caching).

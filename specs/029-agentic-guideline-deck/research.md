@@ -58,7 +58,7 @@ from `next.config.mjs`.
 the handler; without a session both the entry and every asset 303 to `/signin`; with one all 9 assets of
 the real deck return 200 and the Inter font loads.
 
-**Path rules** (`resolveDeckPath`, pure): each segment URL-decoded once, then must match
+**Path rules** (`resolveDeckPath`, pure): each segment (as Next provides it — already decoded, never decoded again) must match
 `^[A-Za-z0-9][A-Za-z0-9._-]*$` (no dotfiles, no `..`, no separators, no NUL); at most 4 segments;
 extension whitelist `html css js woff2 svg png jpg jpeg webp gif json txt map?` — **`map` and `md` are
 excluded** (`README.md` must not be served); a bare folder returns 404 (no listing). The final key is
@@ -68,7 +68,7 @@ excluded** (`README.md` must not be served); a bare folder returns 404 (no listi
 (`/retningslinje/deck/` → `/retningslinje/deck` → 404) and the bundle uses relative asset paths
 (`assets/…`), so the entry file name is part of the URL.
 
-**Hardening, verified against the real deck in tasks**: a `Content-Security-Policy` on `.html` responses
+**Hardening, verified against the real deck** (zero violations over all 292 forward steps through the 104 slides): a `Content-Security-Policy`, defined in `security-headers.mjs` and applied through a later `next.config.mjs` entry for `/retningslinje/deck/:path*` (a config header overrides one set in the route handler — a route-set CSP was silently replaced by the global one),
 (`default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'
 data:; font-src 'self'; connect-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'`)
 makes FR-010 (no external requests) a browser-enforced fact rather than a promise. The bundle's README

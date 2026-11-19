@@ -1,5 +1,7 @@
 <!-- SPECKIT START -->
-Active feature: **029-agentic-guideline-deck** (specify + plan 2026-11-19; issue Altinn/kihub#183).
+Active feature: **029-agentic-guideline-deck** (specify + plan + tasks + MVP implemented 2026-11-19; issue Altinn/kihub#183;
+tasks 30/33 — open: Azurite proof of the blob path, hand-removal of the local deck copy, amendment/follow-ups only drafted;
+suite 71 files / 761 tests, lint + `tsc` + `next build` green).
 Shows the project lead's INTERN 104-slide HTML deck «Retningslinje for agentisk KI i Digdir» (v2.2,
 unchanged, own player with `#N` / `#N.b` slide links) to signed-in employees: code-owned frontpage
 banner → page `/retningslinje` (iframe + «Åpne i fullskjerm») → files via a session-checked route
@@ -10,7 +12,12 @@ committed or baked into the image**: it lives in a private blob container (`kihu
 `MEDIA_STORAGE_MODE`. Release gate `GUIDELINE_DECK_ENABLED=true` (default off: card hidden, page and deck
 404) — merging ≠ releasing; release only after Roberto Carrera confirms on #183. `DeckFrame` is the one
 client component (the URL fragment never reaches the server). Reserved slug `retningslinje`. Tests use
-the synthetic `tests/fixtures/deck/`, never the real deck. Side finding, NOT in scope: the Dockerfile does
+the synthetic `tests/fixtures/deck/`, never the real deck. Gotchas: a client component must import `lib/guideline-deck-view.ts`, never `lib/guideline-deck.ts` (node fs + Azure
+SDK → Turbopack panic); a CSP set in a route handler is OVERRIDDEN by `next.config.mjs` headers, so the deck CSP is
+`DECK_SECURITY_HEADERS` in `security-headers.mjs` via a later config entry; Next file tracing followed `process.cwd()`
+and copied a local deck into `.next/standalone`, so `outputFileTracingExcludes` + `.dockerignore` exclude
+`protected-static`; stale pnpm hoisting once broke `next build` (`@floating-ui/react`) — `pnpm install --frozen-lockfile
+--offline --force`. Side finding, NOT in scope: the Dockerfile does
 not copy `public/` (prod `/brand/*` redirects to sign-in). Plan: `specs/029-agentic-guideline-deck/plan.md`.
 Prior: **028-per-type-artifact-dirs** (DONE — specify + plan + tasks + implement 2026-11-17,
 PR Altinn/kihub#185 stacked on 026 / PR #176; tasks 48/48; discovery-core 146,

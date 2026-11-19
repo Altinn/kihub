@@ -22,3 +22,6 @@ apps/web/Dockerfile
 CLAUDE.md
 *.md
 !packages/**/*.md
+
+# 029: INTERN guideline deck (local dev copy) — the image is PUBLIC, never bake it in.
+**/protected-static

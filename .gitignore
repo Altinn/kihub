@@ -31,3 +31,6 @@ Thumbs.db
 # 014: locally uploaded media (MEDIA_STORAGE_MODE=disk). Payload writes uploads and their generated
 # sizes here; in deployed environments they live in Azure Blob Storage instead. Never committed.
 apps/web/media/
+
+# 029: INTERN guideline deck for local dev — never commit (the repo and image are public)
+apps/web/protected-static/

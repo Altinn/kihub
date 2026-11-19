@@ -18,3 +18,27 @@ export const SECURITY_HEADERS = [
     value: "frame-ancestors 'self'; base-uri 'self'; object-src 'none'",
   },
 ];
+
+/**
+ * 029 — extra header for the INTERN guideline deck (`/retningslinje/deck/*`), sent INSTEAD of the global
+ * CSP above (Next's config headers override a header the route handler sets, and a later `headers()`
+ * entry overrides an earlier one with the same key — so this lives here, not in the route).
+ *
+ * It makes «the deck contacts no external host» (FR-010) browser-enforced: scripts and styles allow
+ * `'unsafe-inline'` because the bundle ships one tiny inline script (its README) and a hash would break
+ * on every new export; everything else is same-origin only, `connect-src` is closed, and the deck cannot
+ * be framed by another site. The global directives (`frame-ancestors 'self'`, `base-uri`) are kept.
+ */
+export const DECK_CSP = [
+  "default-src 'none'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'none'",
+  "frame-ancestors 'self'",
+  "base-uri 'none'",
+  "form-action 'none'",
+].join('; ');
+
+export const DECK_SECURITY_HEADERS = [{ key: 'Content-Security-Policy', value: DECK_CSP }];

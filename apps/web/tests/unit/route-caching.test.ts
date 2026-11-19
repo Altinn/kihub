@@ -41,3 +41,22 @@ describe('draft-capable routes stay dynamic', () => {
     }
   });
 });
+
+/**
+ * 029 — the INTERN guideline deck. Not draft-capable (no `getPreviewState()`), but it must never be
+ * statically rendered or cached: the page follows the release switch and the route follows the session.
+ */
+describe('guideline deck routes stay dynamic', () => {
+  it.each(['retningslinje/page.tsx', 'retningslinje/deck/[...path]/route.ts'])(
+    '%s has no static caching',
+    (route) => {
+      const source = readFileSync(`${APP}${route}`, 'utf8');
+      for (const pattern of FORBIDDEN) expect(source).not.toMatch(pattern);
+    },
+  );
+
+  it('the deck route sends private, no-store caching headers', () => {
+    const source = readFileSync(`${APP}retningslinje/deck/[...path]/route.ts`, 'utf8');
+    expect(source).toMatch(/private, no-store/);
+  });
+});

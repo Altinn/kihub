@@ -4,11 +4,13 @@ import { ContributeBanner } from '@/components/ContributeBanner';
 import { EventsTimeline } from '@/components/EventsTimeline';
 import { FrontpageHero } from '@/components/FrontpageHero';
 import { FrontpageTile } from '@/components/FrontpageTile';
+import { GuidelineBanner } from '@/components/GuidelineBanner';
 import { NewsCard } from '@/components/NewsCard';
 import { NextEventCard } from '@/components/NextEventCard';
 import { SubscriptionsBanner } from '@/components/SubscriptionsBanner';
 import { listUpcomingEvents } from '@/lib/events';
 import { selectEventsSection, selectLatestNews } from '@/lib/frontpage-select';
+import { isGuidelineDeckEnabled } from '@/lib/guideline-deck';
 import { listPublishedNews } from '@/lib/news';
 import { getFrontpageContent } from '@/lib/site-content';
 
@@ -48,6 +50,8 @@ export default async function FrontPage() {
       </section>
 
       <SubscriptionsBanner subscriptions={content.subscriptions} />
+
+      {isGuidelineDeckEnabled() ? <GuidelineBanner /> : null}
 
       <ContributeBanner />
 

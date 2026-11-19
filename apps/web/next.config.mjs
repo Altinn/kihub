@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { withPayload } from '@payloadcms/next/withPayload';
 
-import { SECURITY_HEADERS } from './security-headers.mjs';
+import { DECK_SECURITY_HEADERS, SECURITY_HEADERS } from './security-headers.mjs';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -16,8 +16,18 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '*': ['../../node_modules/.pnpm/@img+sharp-libvips-*/**/*'],
   },
+  // 029: the INTERN guideline deck is read from `protected-static/` at runtime (a private blob container
+  // when deployed). Next's file tracing follows `process.cwd()` joins, so without this exclusion a local
+  // copy of the deck would be traced into `.next/standalone` and from there into the PUBLIC image.
+  outputFileTracingExcludes: {
+    '*': ['./protected-static/**/*'],
+  },
   async headers() {
-    return [{ source: '/:path*', headers: SECURITY_HEADERS }];
+    return [
+      { source: '/:path*', headers: SECURITY_HEADERS },
+      // 029: a later entry wins on a key clash, so the deck gets its stricter CSP instead of the global one.
+      { source: '/retningslinje/deck/:path*', headers: DECK_SECURITY_HEADERS },
+    ];
   },
 };
 
