@@ -536,8 +536,8 @@ html.app-deck-lock {
   --dsc-card-background--active: var(--ds-color-accent-surface-active);
   --dsc-card-border-color: var(--ds-color-accent-border-subtle);
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  align-items: start;
   gap: var(--ds-size-8);
   text-decoration: none;
 }
@@ -545,7 +545,7 @@ html.app-deck-lock {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--ds-size-4);
+  gap: var(--ds-size-3); /* the same rhythm as the other banners (ds-size-3) */
 }
 .app-guideline__text .ds-heading,
 .app-guideline__text .ds-paragraph {
@@ -557,16 +557,14 @@ html.app-deck-lock {
 .app-guideline__text .ds-heading {
   font-weight: var(--ds-font-weight-regular);
 }
-.app-guideline__cta {
-  margin-block-start: var(--ds-size-2);
-}
 .app-guideline__slide {
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   aspect-ratio: 16 / 9;
-  padding: var(--ds-size-6);
+  margin: 0; /* ds-card gives a following child a top margin; the cover must start level with the text */
+  padding: var(--ds-size-5);
   overflow: hidden;
   border-radius: var(--ds-border-radius-lg);
   background: var(--ds-color-neutral-base-default);
@@ -643,6 +641,11 @@ html.app-deck-lock {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+/* Card titles are regular weight, like the tiles and the banners (025): this one was left at the
+   design system's default medium, which made it the only bold-looking title on the frontpage. */
+.app-subscriptions.ds-card > .ds-heading {
+  font-weight: var(--ds-font-weight-regular);
 }
 .app-subscriptions__description {
   max-width: 60ch;

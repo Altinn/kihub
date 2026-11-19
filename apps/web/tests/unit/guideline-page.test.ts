@@ -188,6 +188,23 @@ describe('frontpage card styles', () => {
     expect(section).not.toMatch(/letter-spacing/);
   });
 
+  it('is top-aligned with the same 13 px rhythm as the other banners, not vertically centred', () => {
+    // Found by the owner: `align-items: center` pushed the text 60 px down next to the tall cover, while
+    // every other card starts its content at the top.
+    const card = /\.app-guideline\.ds-card\s*\{[^}]*\}/.exec(css)?.[0] ?? '';
+    expect(card).toMatch(/align-items:\s*start/);
+    expect(card).not.toMatch(/align-items:\s*center/);
+    const text = /\.app-guideline__text\s*\{[^}]*\}/.exec(css)?.[0] ?? '';
+    expect(text).toMatch(/gap:\s*var\(--ds-size-3\)/);
+    // ds-card gives a following child a top margin; the cover must start level with the text.
+    const slide = /\.app-guideline__slide\s*\{[^}]*\}/.exec(css)?.[0] ?? '';
+    expect(slide).toMatch(/margin:\s*0/);
+  });
+
+  it('keeps the cover small enough that the card is about as tall as its neighbours', () => {
+    expect(css).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) minmax\(0, 22rem\)/);
+  });
+
   it('draws the cover with the neutral surface and the brand colours as graphics', () => {
     expect(css).toMatch(/\.app-guideline__slide\s*\{[^}]*var\(--ds-color-neutral-base-default\)/);
     expect(css).toMatch(/\.app-guideline__circle\s*\{[^}]*var\(--ds-color-brand1-base-default\)/);
@@ -245,6 +262,19 @@ describe('the deck can never reach git or the public image', () => {
   it('is excluded from Next file tracing (standalone output)', () => {
     const config = readRoot('apps/web/next.config.mjs');
     expect(config).toMatch(/outputFileTracingExcludes:\s*\{\s*'\*':\s*\['\.\/protected-static\/\*\*\/\*'\]/);
+  });
+});
+
+describe('frontpage card titles share one weight', () => {
+  const css = read('styles/app.css');
+
+  it('gives the subscriptions card title the regular weight like the tiles and banners', () => {
+    // It was the only title left at the design system default (medium), so it looked bold next to the rest.
+    expect(css).toMatch(
+      /\.app-subscriptions\.ds-card > \.ds-heading\s*\{\s*font-weight:\s*var\(--ds-font-weight-regular\)/,
+    );
+    expect(css).toMatch(/\.app-solid\.ds-card > \.app-solid__title\s*\{[^}]*font-weight:\s*var\(--ds-font-weight-regular\)/);
+    expect(css).toMatch(/\.app-guideline__text \.ds-heading\s*\{\s*font-weight:\s*var\(--ds-font-weight-regular\)/);
   });
 });
 
