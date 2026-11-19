@@ -553,6 +553,10 @@ html.app-deck-lock {
   text-decoration: none;
   text-wrap: balance;
 }
+/* Same type as the other frontpage cards (tiles, contribute banner): `sm` heading, regular weight. */
+.app-guideline__text .ds-heading {
+  font-weight: var(--ds-font-weight-regular);
+}
 .app-guideline__cta {
   margin-block-start: var(--ds-size-2);
 }
@@ -577,7 +581,7 @@ html.app-deck-lock {
 .app-guideline__title {
   max-inline-size: 70%;
   margin-block-start: var(--ds-size-2);
-  font-size: var(--ds-font-size-6);
+  font-size: var(--ds-font-size-5);
   font-weight: var(--ds-font-weight-semibold);
   line-height: var(--ds-line-height-sm);
   text-wrap: balance;
@@ -630,7 +634,7 @@ html.app-deck-lock {
   }
   .app-guideline__title {
     max-inline-size: 62%;
-    font-size: var(--ds-font-size-5);
+    font-size: var(--ds-font-size-4);
   }
 }
 

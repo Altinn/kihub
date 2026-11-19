@@ -28,10 +28,10 @@ export function GuidelineBanner() {
         <span className="ds-tag" data-color="neutral">
           Opplæring
         </span>
-        <h2 id="fp-guideline-heading" className="ds-heading" data-size="lg">
+        <h2 id="fp-guideline-heading" className="ds-heading" data-size="sm">
           Retningslinje for agentisk KI i Digdir
         </h2>
-        <p className="ds-paragraph" data-size="lg">
+        <p className="ds-paragraph">
           Interaktiv gjennomgang på 104 lysbilder, i ditt eget tempo.
         </p>
         <span className="ds-button app-guideline__cta" data-variant="primary">

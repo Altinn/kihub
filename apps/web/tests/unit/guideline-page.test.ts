@@ -143,6 +143,18 @@ describe('frontpage banner', () => {
     expect(banner).toMatch(/<span className="ds-button app-guideline__cta" data-variant="primary">/);
   });
 
+  it('uses the same type sizes as the other frontpage cards (sm heading, default paragraph)', () => {
+    // Found by the owner: lg/lg made this card's text larger than the tiles and the contribute banner.
+    const contribute = read('components/ContributeBanner.tsx');
+    expect(contribute).toMatch(/className="ds-heading[^"]*" data-size="sm"/);
+    expect(banner).toMatch(/className="ds-heading" data-size="sm"/);
+    expect(banner).not.toMatch(/data-size="(lg|xl|md)"/);
+    expect(banner).toMatch(/<p className="ds-paragraph">/);
+    expect(read('styles/app.css')).toMatch(
+      /\.app-guideline__text \.ds-heading\s*\{\s*font-weight:\s*var\(--ds-font-weight-regular\)/,
+    );
+  });
+
   it('shows a cover preview on the right that is decoration, not an image of the INTERN deck', () => {
     expect(banner).toMatch(/className="app-guideline__slide" aria-hidden="true"/);
     expect(banner).toContain('1 / 104');
