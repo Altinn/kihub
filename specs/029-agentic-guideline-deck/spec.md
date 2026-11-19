@@ -183,7 +183,8 @@ title shows with the page, card and protection unchanged, without redeploying th
   work at once; the close button stays reachable with Tab and Esc closes from anywhere. The page has no
   «open in a new tab» link: the deck is read on the page or in full screen.
 - **FR-004**: The frontpage MUST show a card titled «Retningslinje for agentisk KI i Digdir» that links to
-  the guideline page, in the same visual language as the other frontpage cards. After release the card
+  the guideline page, in the same visual language as the other frontpage cards: a light card with the
+  title, one line, a clearly styled «open» button and a small preview of the presentation's cover. After release the card
   MUST be visible to employees without an editor having to re-save the frontpage; editors MAY later
   reword or reorder it in the back-office where the existing frontpage content model allows.
 - **FR-005**: The deck's entry file and every one of its supporting files MUST be served only to

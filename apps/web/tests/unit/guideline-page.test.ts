@@ -136,6 +136,57 @@ describe('frontpage banner', () => {
   it('is rendered on the frontpage only while the release switch is on', () => {
     expect(frontpage).toMatch(/isGuidelineDeckEnabled\(\) \? <GuidelineBanner \/> : null/);
   });
+
+  it('has a styled «Åpne retningslinjen» button that is NOT a nested interactive element', () => {
+    // The card is the link; the button is a styled span inside it (one tab stop, valid HTML).
+    expect(banner).toContain('Åpne retningslinjen');
+    expect(banner).toMatch(/<span className="ds-button app-guideline__cta" data-variant="primary">/);
+  });
+
+  it('shows a cover preview on the right that is decoration, not an image of the INTERN deck', () => {
+    expect(banner).toMatch(/className="app-guideline__slide" aria-hidden="true"/);
+    expect(banner).toContain('1 / 104');
+    expect(banner).toContain('PlayFillIcon');
+    // The deck is INTERN and `public/` is served to anyone: no <img>, no file reference.
+    expect(banner).not.toMatch(/<img\b|<Image\b|\.(png|jpe?g|webp|svg)\b|\/brand\//i);
+  });
+});
+
+describe('frontpage card styles', () => {
+  const css = read('styles/app.css');
+  // The whole 029 card section of app.css, from its comment to the next section's.
+  const start = css.indexOf('/* 029 — the guideline card');
+  const end = css.indexOf('/* Subscriptions:', start);
+  const section = start >= 0 && end > start ? css.slice(start, end) : '';
+  const NO_RAW_VALUES = /#[0-9a-fA-F]{3,8}\b|\brgb\(|\bhsl\(|\d\s?(px|em)\b/;
+
+  it('finds the card section', () => {
+    expect(section.length).toBeGreaterThan(500);
+    expect(section.match(/\{/g)?.length).toBeGreaterThanOrEqual(12);
+  });
+
+  it('removes the link underline from the card and its heading', () => {
+    const card = /\.app-guideline\.ds-card\s*\{[^}]*\}/.exec(css)?.[0] ?? '';
+    expect(card).toMatch(/text-decoration:\s*none/);
+    expect(css).toMatch(/\.app-guideline__text \.ds-heading,[\s\S]*?text-decoration:\s*none/);
+  });
+
+  it('uses Designsystemet tokens only: no raw colours, no pixel or em values', () => {
+    expect(section).not.toMatch(NO_RAW_VALUES);
+    expect(section).not.toMatch(/letter-spacing/);
+  });
+
+  it('draws the cover with the neutral surface and the brand colours as graphics', () => {
+    expect(css).toMatch(/\.app-guideline__slide\s*\{[^}]*var\(--ds-color-neutral-base-default\)/);
+    expect(css).toMatch(/\.app-guideline__circle\s*\{[^}]*var\(--ds-color-brand1-base-default\)/);
+    expect(css).toMatch(/\.app-guideline__square\s*\{[^}]*var\(--ds-color-brand2-base-default\)/);
+  });
+
+  it('stacks on narrow screens and never clips the cover content on a phone', () => {
+    const narrow = /@media \(max-width: 48rem\)\s*\{[\s\S]*?\n\}\n/.exec(css.slice(css.indexOf('app-guideline')))?.[0] ?? '';
+    expect(narrow).toMatch(/\.app-guideline\.ds-card\s*\{\s*grid-template-columns:\s*minmax\(0, 1fr\)/);
+    expect(narrow).toMatch(/aspect-ratio:\s*auto/);
+  });
 });
 
 describe('frame styles', () => {

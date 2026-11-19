@@ -528,6 +528,112 @@ html.app-deck-lock {
   font-weight: var(--ds-font-weight-medium);
 }
 
+/* 029 — the guideline card: a light accent card, text on the left and a preview of the deck's cover on the
+   right. One link; the cover is decoration drawn from tokens (the deck is INTERN, so no image of it). */
+.app-guideline.ds-card {
+  --dsc-card-background: var(--ds-color-accent-surface-tinted);
+  --dsc-card-background--hover: var(--ds-color-accent-surface-hover);
+  --dsc-card-background--active: var(--ds-color-accent-surface-active);
+  --dsc-card-border-color: var(--ds-color-accent-border-subtle);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--ds-size-8);
+  text-decoration: none;
+}
+.app-guideline__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ds-size-4);
+}
+.app-guideline__text .ds-heading,
+.app-guideline__text .ds-paragraph {
+  margin: 0;
+  text-decoration: none;
+  text-wrap: balance;
+}
+.app-guideline__cta {
+  margin-block-start: var(--ds-size-2);
+}
+.app-guideline__slide {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  aspect-ratio: 16 / 9;
+  padding: var(--ds-size-6);
+  overflow: hidden;
+  border-radius: var(--ds-border-radius-lg);
+  background: var(--ds-color-neutral-base-default);
+  color: var(--ds-color-neutral-base-contrast-default);
+}
+.app-guideline__eyebrow {
+  font-size: var(--ds-font-size-1);
+  font-weight: var(--ds-font-weight-medium);
+  text-transform: uppercase;
+  color: var(--ds-color-neutral-base-contrast-subtle);
+}
+.app-guideline__title {
+  max-inline-size: 70%;
+  margin-block-start: var(--ds-size-2);
+  font-size: var(--ds-font-size-6);
+  font-weight: var(--ds-font-weight-semibold);
+  line-height: var(--ds-line-height-sm);
+  text-wrap: balance;
+}
+.app-guideline__play {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--ds-size-14);
+  block-size: var(--ds-size-14);
+  border-radius: var(--ds-border-radius-full);
+  background: var(--ds-color-neutral-base-contrast-default);
+  color: var(--ds-color-accent-base-default);
+}
+.app-guideline__play svg {
+  inline-size: var(--ds-size-7);
+  block-size: var(--ds-size-7);
+}
+.app-guideline__count {
+  font-size: var(--ds-font-size-1);
+  color: var(--ds-color-neutral-base-contrast-subtle);
+}
+/* Digdir's graphic elements (brand colours are used as graphics only, never behind text). */
+.app-guideline__circle {
+  position: absolute;
+  inset-inline-end: 12%;
+  inset-block-end: -18%;
+  inline-size: 38%;
+  aspect-ratio: 1;
+  border-radius: var(--ds-border-radius-full);
+  background: var(--ds-color-brand1-base-default);
+}
+.app-guideline__square {
+  position: absolute;
+  inset-inline-end: -8%;
+  inset-block-end: 8%;
+  inline-size: 34%;
+  aspect-ratio: 1;
+  transform: rotate(-12deg);
+  background: var(--ds-color-brand2-base-default);
+}
+@media (max-width: 48rem) {
+  .app-guideline.ds-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* On a phone the cover grows with its content instead of clipping it at 16:9. */
+  .app-guideline__slide {
+    aspect-ratio: auto;
+    min-block-size: 13rem;
+    gap: var(--ds-size-4);
+  }
+  .app-guideline__title {
+    max-inline-size: 62%;
+    font-size: var(--ds-font-size-5);
+  }
+}
+
 /* Subscriptions: a dark-scheme card (data-color-scheme="dark" on the element). */
 .app-subscriptions.ds-card {
   display: flex;

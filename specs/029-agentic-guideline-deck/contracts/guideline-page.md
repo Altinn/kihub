@@ -35,12 +35,19 @@ var(--ds-color-neutral-border-subtle); border-radius: var(--ds-border-radius-md)
 ## C. Frontpage card — `GuidelineBanner` (`src/components/GuidelineBanner.tsx`, Server Component)
 
 Rendered by `app/(app)/page.tsx` between `SubscriptionsBanner` and `ContributeBanner` only when
-`isGuidelineDeckEnabled()`. One link (`a.ds-card.app-banner`, no nested interactive elements) to
-`/retningslinje`, accessible name = its heading via `aria-labelledby="fp-guideline-heading"`:
-tag «Retningslinje», `h2` «Retningslinje for agentisk KI i Digdir», one sentence, CTA «Åpne
-retningslinjen» with the existing arrow chip. Tokens/classes reused from `ContributeBanner`; the
-surface is the neutral/tinted card (not the solid accent already used by the contribute banner), so the
-two banners are distinguishable.
+`isGuidelineDeckEnabled()`. One link (`a.ds-card.app-guideline`, `data-color="accent"`) to `/retningslinje`,
+accessible name = its heading via `aria-labelledby="fp-guideline-heading"`; no nested interactive elements.
+
+Left column: tag «Opplæring», `h2` «Retningslinje for agentisk KI i Digdir» (no underline), one line
+«Interaktiv gjennomgang på 104 lysbilder, i ditt eget tempo.», and a styled **«Åpne retningslinjen →» button**
+(a `span.ds-button` inside the link, so still one tab stop). Right column: a **cover preview**
+(`aria-hidden`) — dark neutral panel with «Opplæring · Digdir», «Retningslinje for agentisk KI», a play
+button, «1 / 104», and Digdir's coral circle and yellow square as graphics. It is **drawn from Designsystemet
+tokens, not an image of the real first slide**: the deck is INTERN and anything under `public/` is served to
+anyone. Light accent tint surface (`accent-surface-tinted`, `accent-border-subtle`, via the documented
+`--dsc-card-*` variables). Below 48 rem it stacks to one column and the cover grows with its content instead
+of clipping at 16:9. The design follows the project lead's mockup, minus its extra links and the «Nytt»
+badge (which would go stale).
 
 ## D. Reserved address
 
