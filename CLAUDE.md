@@ -1,5 +1,18 @@
 <!-- SPECKIT START -->
-Active feature: **028-per-type-artifact-dirs** (DONE — specify + plan + tasks + implement 2026-11-17,
+Active feature: **029-agentic-guideline-deck** (specify + plan 2026-11-19; issue Altinn/kihub#183).
+Shows the project lead's INTERN 104-slide HTML deck «Retningslinje for agentisk KI i Digdir» (v2.2,
+unchanged, own player with `#N` / `#N.b` slide links) to signed-in employees: code-owned frontpage
+banner → page `/retningslinje` (iframe + «Åpne i fullskjerm») → files via a session-checked route
+`/retningslinje/deck/<path>` (entry must be `…/index.html`: Next strips trailing slashes, the bundle uses
+relative paths). **The repo AND the `ghcr.io/altinn/kihub-web` image are PUBLIC, so the deck is NEVER
+committed or baked into the image**: it lives in a private blob container (`kihub-protected`, prefix
+`retningslinje/`), local dev uses the gitignored `apps/web/protected-static/retningslinje/`, selected by
+`MEDIA_STORAGE_MODE`. Release gate `GUIDELINE_DECK_ENABLED=true` (default off: card hidden, page and deck
+404) — merging ≠ releasing; release only after Roberto Carrera confirms on #183. `DeckFrame` is the one
+client component (the URL fragment never reaches the server). Reserved slug `retningslinje`. Tests use
+the synthetic `tests/fixtures/deck/`, never the real deck. Side finding, NOT in scope: the Dockerfile does
+not copy `public/` (prod `/brand/*` redirects to sign-in). Plan: `specs/029-agentic-guideline-deck/plan.md`.
+Prior: **028-per-type-artifact-dirs** (DONE — specify + plan + tasks + implement 2026-11-17,
 PR Altinn/kihub#185 stacked on 026 / PR #176; tasks 48/48; discovery-core 146,
 github-client 23, web unit 261, web integration 187, lint + `tsc` clean, `next build` green).
 Adds optional `discovery.artifactDirs` to `kihub.yaml`: a map from manifest type (`skill`, `agent`, …) to
