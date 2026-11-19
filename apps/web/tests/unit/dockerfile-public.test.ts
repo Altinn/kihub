@@ -32,7 +32,7 @@ describe('production image ships public/', () => {
     const refs = new Set<string>();
     for (const file of sourceFiles(SRC)) {
       for (const m of readFileSync(file, 'utf8').matchAll(/['"`(](\/brand\/[A-Za-z0-9._-]+)/g)) {
-        refs.add(m[1]);
+        if (m[1]) refs.add(m[1]);
       }
     }
     expect(refs.size).toBeGreaterThan(0);
