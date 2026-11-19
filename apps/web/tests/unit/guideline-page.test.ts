@@ -25,9 +25,9 @@ describe('guideline page', () => {
     expect(page).not.toMatch(/<h[3-6]\b/);
   });
 
-  it('tells readers about full screen and the zoom limitation', () => {
-    expect(page).toMatch(/fullskjerm/);
-    expect(page).toMatch(/zoom/i);
+  it('does not teach readers with a text block — the usage help is a hover tooltip on the frame', () => {
+    expect(page).not.toMatch(/Slik bruker du presentasjonen/);
+    expect(page).not.toMatch(/data-color="info"/);
   });
 
   it('falls back to a message instead of an empty frame when the deck is missing', () => {
@@ -44,10 +44,22 @@ describe('DeckFrame', () => {
     expect(frame).toMatch(/allowFullScreen/);
   });
 
-  it('keeps a secondary link that opens the deck alone in a new tab that cannot reach the page', () => {
-    expect(frame).toMatch(/target="_blank"/);
-    expect(frame).toMatch(/rel="noopener"/);
-    expect(frame).toContain('Åpne i ny fane');
+  it('has no new-tab link — the deck is read on the page or in full screen', () => {
+    expect(frame).not.toMatch(/target="_blank"/);
+    expect(frame).not.toContain('Åpne i ny fane');
+    expect(frame).not.toContain('Åpne i fullskjerm');
+  });
+
+  it('puts the usage help in a small ⓘ with a Designsystemet tooltip (hover AND keyboard focus)', () => {
+    expect(frame).toMatch(/InformationSquareIcon/);
+    expect(frame).toMatch(/data-tooltip=\{HELP\}/);
+    // A real button, so it is focusable and the tooltip opens on focus; its name is visible to screen readers.
+    expect(frame).toMatch(/<button[^>]*data-icon="true"[^>]*data-tooltip/);
+    expect(frame).toMatch(/ds-sr-only">Slik bruker du presentasjonen/);
+    // The help still says how to move, how to leave, and the zoom limitation (FR-002).
+    expect(frame).toMatch(/pil høyre og venstre/);
+    expect(frame).toMatch(/Esc for å gå ut/);
+    expect(frame).toMatch(/zoom/i);
   });
 
   it('has a Fullskjerm button that asks the browser for real full screen first', () => {
@@ -77,8 +89,16 @@ describe('DeckFrame', () => {
     expect(frame).toMatch(/contentDocument/);
     expect(frame).toContain('Lukk fullskjerm (Esc)');
     expect(frame).toMatch(/openRef\.current\?\.focus\(\)/);
-    expect(frame).toMatch(/closeRef\.current\?\.focus\(\)/);
     expect(frame).toMatch(/app-deck-lock/);
+  });
+
+  it('gives keyboard focus to the DECK when full screen opens, never to the close button', () => {
+    // Found by the owner: with focus on the close button the arrow keys went to the button and the deck
+    // could not be turned. The deck listens on its own document, so the frame must hold focus.
+    expect(frame).toMatch(/frame\.focus\(\)/);
+    expect(frame).toMatch(/frame\.contentWindow\?\.focus\(\)/);
+    expect(frame.match(/focusDeck\(\)/g)?.length).toBeGreaterThanOrEqual(3);
+    expect(frame).not.toMatch(/closeRef/);
   });
 
   it('only ever puts a validated hash into an address', () => {

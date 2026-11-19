@@ -1,16 +1,22 @@
 'use client';
 
+import { InformationSquareIcon } from '@navikt/aksel-icons';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { buildDeckSrc, DECK_ENTRY } from '@/lib/guideline-deck-view';
+import { buildDeckSrc } from '@/lib/guideline-deck-view';
+
+/** Shown on hover / keyboard focus of the ⓘ button (Designsystemet tooltip) instead of a text block. */
+const HELP =
+  'Bla med pil høyre og venstre, eller klikk. Home og End hopper til første og siste lysbilde. ' +
+  'Vises best i fullskjerm (Esc for å gå ut). Nettleserens zoom gjør ikke teksten større.';
 
 /**
- * 029 — the guideline deck inside the page: a «Fullskjerm» button, a secondary «Åpne i ny fane» link and
- * the 16:9 frame.
+ * 029 — the guideline deck inside the page: a «Fullskjerm» button, a small ⓘ with the usage help, and the
+ * 16:9 frame.
  *
  * WHY a client component: the URL fragment (`/retningslinje#53`) never reaches the server, so the
  * only way to open the embedded deck on slide 53 is to read it in the browser. It is the one client
- * island of the feature; the server-rendered page around it (heading, intro, usage note) and the
- * new-tab link work without JavaScript (FR-012), and a `<noscript>` note says what the deck needs.
+ * island of the feature; the server-rendered page around it (heading, intro) works without JavaScript,
+ * and a `<noscript>` note says what the deck needs.
  *
  * The frame is mounted only after the first client render, so the browser performs ONE load of the
  * deck (with the right slide) instead of loading slide 1 and then jumping. A later `hashchange`
@@ -24,20 +30,36 @@ import { buildDeckSrc, DECK_ENTRY } from '@/lib/guideline-deck-view';
  * page (a style change, so the deck is not reloaded and keeps its slide), with a visible close button,
  * Esc to close (also from inside the same-origin frame), a locked page scroll and focus handed back to
  * the button on close.
+ *
+ * KEYBOARD: when full screen opens, focus goes INTO THE DECK, not to the close button — the deck listens
+ * for the arrow keys, Home and End on its own document, so a focused button would swallow them and the
+ * reader could not turn a slide. The close button stays one Tab away (it follows the frame), and Esc
+ * closes from anywhere.
  */
 export function DeckFrame() {
-  // '' on the server and during hydration; the real hash only after mount, so hydration never mismatches.
+  // null on the server and during hydration; the real address only after mount, so hydration never mismatches.
   const [src, setSrc] = useState<string | null>(null);
   const [overlay, setOverlay] = useState(false);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const openRef = useRef<HTMLButtonElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const sync = () => setSrc(buildDeckSrc(window.location.hash));
     sync();
     window.addEventListener('hashchange', sync);
     return () => window.removeEventListener('hashchange', sync);
+  }, []);
+
+  /** Give the deck keyboard focus, so arrows / Home / End reach its own key handler. */
+  const focusDeck = useCallback(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    frame.focus();
+    try {
+      frame.contentWindow?.focus();
+    } catch {
+      // Not reachable (cross-origin): the iframe element itself has focus, which is the best we can do.
+    }
   }, []);
 
   const enterFullscreen = useCallback(async () => {
@@ -53,33 +75,37 @@ export function DeckFrame() {
         ),
         new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), 700)),
       ]);
-      if (outcome === 'ok' || document.fullscreenElement === frame) return;
+      if (outcome === 'ok' || document.fullscreenElement === frame) {
+        focusDeck();
+        return;
+      }
     }
     setOverlay(true);
-  }, []);
+  }, [focusDeck]);
 
   // If native full screen engages after the overlay was already shown (a slow browser), native wins.
   useEffect(() => {
     const onChange = () => {
       if (document.fullscreenElement && document.fullscreenElement === frameRef.current) {
         setOverlay(false);
+        focusDeck();
       }
     };
     document.addEventListener('fullscreenchange', onChange);
     return () => document.removeEventListener('fullscreenchange', onChange);
-  }, []);
+  }, [focusDeck]);
 
   const closeOverlay = useCallback(() => {
     setOverlay(false);
     openRef.current?.focus();
   }, []);
 
-  // Overlay mode: lock the page scroll, move focus to the close button, close on Escape — also when the
+  // Overlay mode: lock the page scroll, hand keyboard focus to the deck, close on Escape — also when the
   // key is pressed inside the (same-origin) deck frame, where the page's own listener never hears it.
   useEffect(() => {
     if (!overlay) return;
     document.documentElement.classList.add('app-deck-lock');
-    closeRef.current?.focus();
+    focusDeck();
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') closeOverlay();
@@ -97,38 +123,38 @@ export function DeckFrame() {
       window.removeEventListener('keydown', onKey);
       frameDoc?.removeEventListener('keydown', onKey);
     };
-  }, [overlay, closeOverlay]);
-
-  const href = src ?? DECK_ENTRY;
+  }, [overlay, closeOverlay, focusDeck]);
 
   return (
     <>
       <div className="app-deck-toolbar">
         {src ? (
-          <button
-            ref={openRef}
-            type="button"
-            className="ds-button"
-            data-variant="primary"
-            onClick={enterFullscreen}
-          >
-            Fullskjerm
-          </button>
-        ) : null}
-        <a className="ds-link" href={href} target="_blank" rel="noopener">
-          Åpne i ny fane
-        </a>
-        {src ? (
-          <span className="ds-paragraph" data-size="sm">
-            Trykk Esc for å gå ut av fullskjerm.
-          </span>
+          <>
+            <button
+              ref={openRef}
+              type="button"
+              className="ds-button"
+              data-variant="primary"
+              onClick={enterFullscreen}
+            >
+              Fullskjerm
+            </button>
+            <button
+              type="button"
+              className="ds-button"
+              data-variant="tertiary"
+              data-icon="true"
+              data-tooltip={HELP}
+            >
+              <InformationSquareIcon aria-hidden />
+              <span className="ds-sr-only">Slik bruker du presentasjonen</span>
+            </button>
+          </>
         ) : null}
       </div>
       <noscript>
         <div className="ds-alert" data-color="info">
-          <p className="ds-paragraph">
-            Presentasjonen krever JavaScript. Bruk «Åpne i ny fane» over for å åpne den alene.
-          </p>
+          <p className="ds-paragraph">Presentasjonen krever JavaScript.</p>
         </div>
       </noscript>
       {src ? (
@@ -143,7 +169,6 @@ export function DeckFrame() {
           />
           {overlay ? (
             <button
-              ref={closeRef}
               type="button"
               className="ds-button app-deck-close"
               data-variant="primary"

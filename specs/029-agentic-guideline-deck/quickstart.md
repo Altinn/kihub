@@ -28,10 +28,10 @@ Confirm `git status` shows nothing under `protected-static/` (gitignored).
 
 1. `/` shows the «Retningslinje for agentisk KI i Digdir» banner between the subscriptions and contribute
    banners; with the switch off it is absent.
-2. Click it → `/retningslinje`; heading, intro, info alert and the deck at slide 1.
+2. Click it → `/retningslinje`; heading, intro, «Fullskjerm» with a small ⓘ (hover or focus it for the usage help) and the deck at slide 1.
 3. Click the frame, press → until slide 104; ← and Home/End work; browser back returns one slide.
 4. `/retningslinje#53` → frame shows «Nødstoppen stanser hele løsningen…»; `#70` → «Vedlegg: kravene
-   ordrett»; `#70.2` → step 2; «Åpne i ny fane» opens a new tab on the same slide. «Fullskjerm» fills the screen on the same slide (native full screen, or the overlay where the browser does not allow it); Esc, or the close button, returns to the page with focus on the button.
+   ordrett»; `#70.2` → step 2; «Fullskjerm» fills the screen on the same slide (native full screen, or the overlay where the browser does not allow it); the arrow keys / Home / End turn slides at once without clicking (focus is in the deck), one Tab reaches the close button, Esc closes from anywhere and returns focus to «Fullskjerm».
 5. DevTools: zero console errors; Network shows requests only to the KI Hub origin; no `Set-Cookie` from
    the deck responses (SC-004).
 6. Axe (`axe-core` from `node_modules`, injected via the browser pane) on `/retningslinje` and `/`: zero

@@ -12,21 +12,18 @@ Structure (one `main`, one `h1`, no skipped levels):
 
 1. `h1` «Retningslinje for agentisk KI i Digdir».
 2. Intro `ds-paragraph` (what it is; deck of 104 slides, main part 1–69 and «Vedlegg» 70–104).
-3. `ds-alert` (info) «Slik bruker du presentasjonen»: arrow keys / click to step, Home/End, back button
-   returns to the previous slide, full screen gives the best reading experience, **browser zoom does not
-   enlarge the text — use full screen and a larger window**, works best on desktop.
-4. `<DeckFrame />` (below).
-5. Short contact line — omitted until Roberto names a contact (open question).
+3. `<DeckFrame />` (below): «Fullskjerm» + the ⓘ help + the frame.
+4. Short contact line — omitted until Roberto names a contact (open question).
 
 ## B. `DeckFrame` (`src/components/DeckFrame.tsx`, `'use client'`)
 
 | Piece | Behaviour |
 |---|---|
 | hash | `useSyncExternalStore` over `hashchange`; server snapshot `''`; accepted only if `/^#\d{1,3}(\.\d{1,2})?$/` |
-| full screen | `<button class="ds-button" data-variant="primary">Fullskjerm</button>` (rendered after mount). Calls `requestFullscreen()` on the iframe, **raced against a 700 ms timeout** (in the Claude desktop pane the promise never settles, so a plain `await` left the button dead). If the frame is not the `fullscreenElement` by then, or the call is refused or unsupported (iPhone Safari), it shows the **overlay**: the SAME iframe gets `app-deck-frame--overlay` (`position: fixed; inset: 0`), so the deck is not reloaded and keeps its slide. A primary close button «Lukk fullskjerm (Esc)» sits fixed top-right; Esc closes it (page and same-origin frame); `html.app-deck-lock` stops page scroll; focus goes to the close button on open and back to «Fullskjerm» on close. If native full screen engages late, native wins and the overlay is dropped |
-| new tab | `<a class="ds-link" href={DECK_ENTRY + hash} target="_blank" rel="noopener">Åpne i ny fane</a>` — present in the server HTML (no hash) and updated after hydration |
+| full screen | `<button class="ds-button" data-variant="primary">Fullskjerm</button>` (rendered after mount). Calls `requestFullscreen()` on the iframe, **raced against a 700 ms timeout** (in the Claude desktop pane the promise never settles, so a plain `await` left the button dead). If the frame is not the `fullscreenElement` by then, or the call is refused or unsupported (iPhone Safari), it shows the **overlay**: the SAME iframe gets `app-deck-frame--overlay` (`position: fixed; inset: 0`), so the deck is not reloaded and keeps its slide. A primary close button «Lukk fullskjerm (Esc)» sits fixed top-right and follows the frame in the DOM, so one Tab from the deck reaches it; Esc closes it (page and same-origin frame); `html.app-deck-lock` stops page scroll; **keyboard focus goes into the deck** on open (`frame.focus()` + `contentWindow.focus()` — a focused button swallowed the arrow keys, found by the owner) and back to «Fullskjerm» on close. If native full screen engages late, native wins and the overlay is dropped |
+| help | a small `<button class="ds-button" data-variant="tertiary" data-icon="true" data-tooltip={HELP}>` with `InformationSquareIcon` and sr-only text «Slik bruker du presentasjonen». Designsystemet's tooltip (`data-tooltip`) opens on hover and on keyboard focus and exposes the text as `aria-description`. HELP: arrows/click to turn, Home/End, best in full screen (Esc to leave), browser zoom does not enlarge text |
 | frame | after mount: `<iframe class="app-deck-frame" src={DECK_ENTRY + hash} title="Retningslinje for agentisk KI i Digdir (presentasjon)" allow="fullscreen" allowFullScreen>` inside `div.app-deck`, the 16:9 box that keeps the page layout stable when the frame is lifted; fragment-only `src` change on `hashchange` |
-| no JS | `<noscript>` `ds-alert`: «Presentasjonen krever JavaScript. Bruk «Åpne i ny fane» over for å åpne den alene.» |
+| no JS | `<noscript>` `ds-alert`: «Presentasjonen krever JavaScript.» |
 | load failure | the deck route answers 404 → the iframe would show the plain «Not found»; to keep FR-012, the page does a cheap server-side `store.exists('index.html')`-style check (HEAD/stat) and, when missing, renders the `ds-alert` «Presentasjonen er ikke tilgjengelig akkurat nå» **instead of** `DeckFrame` |
 
 `DECK_ENTRY = '/retningslinje/deck/index.html'` (exported from `lib/guideline-deck.ts`, also used by the

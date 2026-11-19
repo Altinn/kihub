@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Retningslinje for agentisk KI i Digd
  * 029 — «Retningslinje for agentisk KI i Digdir»: a regular KI Hub page around the project lead's INTERN
  * slide deck (issue #183). The deck keeps its own player, so its animations, keyboard navigation and
  * slide addresses (`#N`, `#N.b`) behave exactly as its author designed them; this page adds the shell,
- * an introduction, a usage note and a full-screen link. Gated by `(app)/layout.tsx` `requireSession()`
+ * an introduction and a «Fullskjerm» button; the usage help is a small ⓘ tooltip, not a text block. Gated by `(app)/layout.tsx` `requireSession()`
  * (employees only) and by the release switch: while it is off the page does not exist (404).
  *
  * The deck files come from the private store through `deck/[...path]/route.ts`, never from `public/`.
@@ -30,17 +30,6 @@ export default async function GuidelinePage() {
           ansvaret. Den har 104 lysbilder: selve retningslinjen er lysbilde 1–69, og «Vedlegg» med
           kravene ordrett er lysbilde 70–104.
         </p>
-
-        <div className="ds-alert" data-color="info">
-          <p className="ds-paragraph">
-            <strong>Slik bruker du presentasjonen.</strong> Klikk i presentasjonen og bruk pil høyre,
-            mellomrom eller klikk for å gå videre, pil venstre for å gå tilbake, og Home/End for å hoppe
-            til første eller siste lysbilde. Tilbake-knappen i nettleseren tar deg til forrige lysbilde.
-            Presentasjonen vises best i fullskjerm: trykk «Fullskjerm» under, og Esc for å gå ut. Merk at
-            nettleserens zoom ikke gjør teksten større, så bruk fullskjerm eller et større vindu. Den
-            fungerer best på datamaskin.
-          </p>
-        </div>
 
         {available ? (
           <DeckFrame />
