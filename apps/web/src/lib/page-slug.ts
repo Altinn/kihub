@@ -32,6 +32,7 @@ export const RESERVED_PAGE_SLUGS: ReadonlySet<string> = new Set([
   'news',
   'prosjekter',
   'registry',
+  'retningslinje',
   // src/app/(auth)
   'signin',
   // src/app/(payload)

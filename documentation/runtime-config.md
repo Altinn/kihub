@@ -40,6 +40,34 @@ is configured with — Azure Container Apps sets these; local dev uses `apps/web
 
 Webhook HMAC secrets are per-source database fields (hidden, Admin-only), not env vars.
 
+## Guideline deck «Retningslinje for agentisk KI i Digdir» (029)
+
+An **INTERN** slide deck (issue #183) shown at `/retningslinje`. **The repository and the
+`ghcr.io/altinn/kihub-web` image are public, so the deck is never committed or baked into the image.**
+
+| Variable | Required | Notes |
+|---|---|---|
+| `GUIDELINE_DECK_ENABLED` | no (default off) | Release switch. Only the exact value `true` turns it on; anything else hides the frontpage card and makes `/retningslinje` and `/retningslinje/deck/*` answer 404 for everyone. Read per request (not `NEXT_PUBLIC_*`). |
+| `GUIDELINE_DECK_CONTAINER` | with `MEDIA_STORAGE_MODE=azure` | Name of the **private** blob container holding the deck (convention: `kihub-protected`), blob prefix `retningslinje/`. Provisioned out of band; the app never creates it and only reads from it. Reuses `AZURE_STORAGE_CONNECTION_STRING`. Missing → the first request fails naming the variable. |
+| `GUIDELINE_DECK_DIR` | no (dev/tests) | With `MEDIA_STORAGE_MODE=disk` (default): folder to read from; default `apps/web/protected-static/retningslinje/` (gitignored). |
+
+Where the files are read from follows `MEDIA_STORAGE_MODE` (`disk` locally, `azure` deployed).
+
+**Publishing a new version** (owner-run, never by the app; needs the project lead's OK on #183): the
+bundle's entry file must stay `index.html` with relative `assets/…` paths. Upload with the container
+kept private (no anonymous access):
+
+```bash
+az storage blob upload-batch --account-name stkihubmedia --auth-mode login \
+  --destination kihub-protected --destination-path retningslinje \
+  --source <folder-with-index.html> --overwrite
+```
+
+No application release is needed to change the deck. **Releasing the feature** = upload the bundle,
+then `az containerapp update -n kihub-web -g rg-kihub-app --set-env-vars GUIDELINE_DECK_ENABLED=true
+GUIDELINE_DECK_CONTAINER=kihub-protected`. The deck gets its own CSP (`security-headers.mjs`:
+same-origin only, no network from scripts) so it cannot contact external hosts.
+
 ## Dev/tooling only (not set in the container)
 
 | Variable | Used by |

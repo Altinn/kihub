@@ -472,6 +472,46 @@ main :not(pre) > code {
   margin-top: auto;
 }
 
+/* 029 — the guideline deck: one 16:9 picture that letterboxes itself to any size. The wrapper keeps the
+   page layout stable when the frame is lifted into the full-screen overlay (the frame is NOT reloaded). */
+.app-deck {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+.app-deck-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--ds-color-neutral-border-subtle);
+  border-radius: var(--ds-border-radius-md);
+}
+.app-deck-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-size-4);
+  margin-block: var(--ds-size-6) var(--ds-size-4);
+}
+/* Overlay fallback for browsers without element full screen (iPhone Safari): above the sticky header. */
+.app-deck-frame--overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: var(--ds-color-neutral-background-default);
+}
+.app-deck-close {
+  position: fixed;
+  inset-block-start: var(--ds-size-4);
+  inset-inline-end: var(--ds-size-4);
+  z-index: 1001;
+}
+html.app-deck-lock {
+  overflow: hidden;
+}
+
 /* Contribute banner: a solid accent link card ending in a "Les veiledningen" cue. */
 .app-banner.ds-card {
   display: flex;
@@ -488,11 +528,124 @@ main :not(pre) > code {
   font-weight: var(--ds-font-weight-medium);
 }
 
+/* 029 — the guideline card: a light accent card, text on the left and a preview of the deck's cover on the
+   right. One link; the cover is decoration drawn from tokens (the deck is INTERN, so no image of it). */
+.app-guideline.ds-card {
+  --dsc-card-background: var(--ds-color-accent-surface-tinted);
+  --dsc-card-background--hover: var(--ds-color-accent-surface-hover);
+  --dsc-card-background--active: var(--ds-color-accent-surface-active);
+  --dsc-card-border-color: var(--ds-color-accent-border-subtle);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  align-items: start;
+  gap: var(--ds-size-8);
+  text-decoration: none;
+}
+.app-guideline__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ds-size-3); /* the same rhythm as the other banners (ds-size-3) */
+}
+.app-guideline__text .ds-heading,
+.app-guideline__text .ds-paragraph {
+  margin: 0;
+  text-decoration: none;
+  text-wrap: balance;
+}
+/* Same type as the other frontpage cards (tiles, contribute banner): `sm` heading, regular weight. */
+.app-guideline__text .ds-heading {
+  font-weight: var(--ds-font-weight-regular);
+}
+.app-guideline__slide {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  aspect-ratio: 16 / 9;
+  margin: 0; /* ds-card gives a following child a top margin; the cover must start level with the text */
+  padding: var(--ds-size-5);
+  overflow: hidden;
+  border-radius: var(--ds-border-radius-lg);
+  background: var(--ds-color-neutral-base-default);
+  color: var(--ds-color-neutral-base-contrast-default);
+}
+.app-guideline__eyebrow {
+  font-size: var(--ds-font-size-1);
+  font-weight: var(--ds-font-weight-medium);
+  text-transform: uppercase;
+  color: var(--ds-color-neutral-base-contrast-subtle);
+}
+.app-guideline__title {
+  max-inline-size: 70%;
+  margin-block-start: var(--ds-size-2);
+  font-size: var(--ds-font-size-5);
+  font-weight: var(--ds-font-weight-semibold);
+  line-height: var(--ds-line-height-sm);
+  text-wrap: balance;
+}
+.app-guideline__play {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--ds-size-14);
+  block-size: var(--ds-size-14);
+  border-radius: var(--ds-border-radius-full);
+  background: var(--ds-color-neutral-base-contrast-default);
+  color: var(--ds-color-accent-base-default);
+}
+.app-guideline__play svg {
+  inline-size: var(--ds-size-7);
+  block-size: var(--ds-size-7);
+}
+.app-guideline__count {
+  font-size: var(--ds-font-size-1);
+  color: var(--ds-color-neutral-base-contrast-subtle);
+}
+/* Digdir's graphic elements (brand colours are used as graphics only, never behind text). */
+.app-guideline__circle {
+  position: absolute;
+  inset-inline-end: 12%;
+  inset-block-end: -18%;
+  inline-size: 38%;
+  aspect-ratio: 1;
+  border-radius: var(--ds-border-radius-full);
+  background: var(--ds-color-brand1-base-default);
+}
+.app-guideline__square {
+  position: absolute;
+  inset-inline-end: -8%;
+  inset-block-end: 8%;
+  inline-size: 34%;
+  aspect-ratio: 1;
+  transform: rotate(-12deg);
+  background: var(--ds-color-brand2-base-default);
+}
+@media (max-width: 48rem) {
+  .app-guideline.ds-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* On a phone the cover grows with its content instead of clipping it at 16:9. */
+  .app-guideline__slide {
+    aspect-ratio: auto;
+    min-block-size: 13rem;
+    gap: var(--ds-size-4);
+  }
+  .app-guideline__title {
+    max-inline-size: 62%;
+    font-size: var(--ds-font-size-4);
+  }
+}
+
 /* Subscriptions: a dark-scheme card (data-color-scheme="dark" on the element). */
 .app-subscriptions.ds-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+/* Card titles are regular weight, like the tiles and the banners (025): this one was left at the
+   design system's default medium, which made it the only bold-looking title on the frontpage. */
+.app-subscriptions.ds-card > .ds-heading {
+  font-weight: var(--ds-font-weight-regular);
 }
 .app-subscriptions__description {
   max-width: 60ch;
