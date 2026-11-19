@@ -8,7 +8,7 @@
 
 Show the project lead's finished 104-slide HTML deck inside KI Hub, **unchanged**, to signed-in employees
 only. A code-owned frontpage banner links to a new regular page `/retningslinje` (portal shell, intro,
-usage note, deck in a 16:9 iframe, «Åpne i fullskjerm»). The deck's files are served by a session-checked
+usage note, deck in a 16:9 iframe, «Fullskjerm» button with an overlay fallback, plus «Åpne i ny fane»). The deck's files are served by a session-checked
 route handler at `/retningslinje/deck/<path>` from a **private Azure Blob container** (local dev: a
 gitignored folder), selected by the existing `MEDIA_STORAGE_MODE` seam.
 

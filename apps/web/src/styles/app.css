@@ -472,11 +472,16 @@ main :not(pre) > code {
   margin-top: auto;
 }
 
-/* 029 — the guideline deck frame: the deck is one 16:9 picture that letterboxes itself to any size. */
+/* 029 — the guideline deck: one 16:9 picture that letterboxes itself to any size. The wrapper keeps the
+   page layout stable when the frame is lifted into the full-screen overlay (the frame is NOT reloaded). */
+.app-deck {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
 .app-deck-frame {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  height: 100%;
   border: 1px solid var(--ds-color-neutral-border-subtle);
   border-radius: var(--ds-border-radius-md);
 }
@@ -486,6 +491,25 @@ main :not(pre) > code {
   align-items: center;
   gap: var(--ds-size-4);
   margin-block: var(--ds-size-6) var(--ds-size-4);
+}
+/* Overlay fallback for browsers without element full screen (iPhone Safari): above the sticky header. */
+.app-deck-frame--overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: var(--ds-color-neutral-background-default);
+}
+.app-deck-close {
+  position: fixed;
+  inset-block-start: var(--ds-size-4);
+  inset-inline-end: var(--ds-size-4);
+  z-index: 1001;
+}
+html.app-deck-lock {
+  overflow: hidden;
 }
 
 /* Contribute banner: a solid accent link card ending in a "Les veiledningen" cue. */

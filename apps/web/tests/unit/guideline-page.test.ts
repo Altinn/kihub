@@ -44,10 +44,41 @@ describe('DeckFrame', () => {
     expect(frame).toMatch(/allowFullScreen/);
   });
 
-  it('opens the full-screen link in a new tab that cannot reach the page', () => {
+  it('keeps a secondary link that opens the deck alone in a new tab that cannot reach the page', () => {
     expect(frame).toMatch(/target="_blank"/);
     expect(frame).toMatch(/rel="noopener"/);
-    expect(frame).toContain('Åpne i fullskjerm');
+    expect(frame).toContain('Åpne i ny fane');
+  });
+
+  it('has a Fullskjerm button that asks the browser for real full screen first', () => {
+    expect(frame).toContain('Fullskjerm');
+    expect(frame).toMatch(/<button[\s\S]*?type="button"[\s\S]*?onClick=\{enterFullscreen\}/);
+    expect(frame).toMatch(/requestFullscreen\(\)/);
+  });
+
+  it('never waits forever on the browser: a hanging fullscreen request still ends in the overlay', () => {
+    // Found in the Claude desktop pane: the request's promise never settles, so a plain `await` left
+    // the button dead. The request must be raced against a timeout.
+    expect(frame).toMatch(/Promise\.race\(/);
+    expect(frame).toMatch(/setTimeout\(\(\) => resolve\('timeout'\), \d+\)/);
+    expect(frame).toMatch(/document\.fullscreenElement === frame/);
+    expect(frame).not.toMatch(/await frame\.requestFullscreen\(\)/);
+  });
+
+  it('falls back to an overlay, restyling the frame instead of reloading it', () => {
+    // Same iframe element, only its class changes — so the deck keeps its slide.
+    expect(frame.match(/<iframe\b/g)).toHaveLength(1);
+    expect(frame).toMatch(/app-deck-frame--overlay/);
+    expect(frame).toMatch(/setOverlay\(true\)/);
+  });
+
+  it('makes the overlay closable and accessible: Esc (also inside the frame), a visible button, focus back', () => {
+    expect(frame).toMatch(/event\.key === 'Escape'/);
+    expect(frame).toMatch(/contentDocument/);
+    expect(frame).toContain('Lukk fullskjerm (Esc)');
+    expect(frame).toMatch(/openRef\.current\?\.focus\(\)/);
+    expect(frame).toMatch(/closeRef\.current\?\.focus\(\)/);
+    expect(frame).toMatch(/app-deck-lock/);
   });
 
   it('only ever puts a validated hash into an address', () => {
@@ -89,13 +120,25 @@ describe('frontpage banner', () => {
 
 describe('frame styles', () => {
   const css = read('styles/app.css');
-  const block = /\.app-deck-frame\s*\{[^}]*\}/.exec(css)?.[0] ?? '';
+  const rule = (selector: string) =>
+    new RegExp(`${selector.replace(/[.\\-]/g, '\\$&')}\\s*\\{[^}]*\\}`).exec(css)?.[0] ?? '';
+  const NO_RAW_VALUES = /#[0-9a-fA-F]{3,8}\b|\brgb\(|\bhsl\(/;
 
-  it('is a 16:9 frame styled with Designsystemet tokens only', () => {
-    expect(block).toMatch(/aspect-ratio:\s*16 \/ 9/);
-    expect(block).toMatch(/var\(--ds-color-neutral-border-subtle\)/);
-    expect(block).toMatch(/var\(--ds-border-radius-md\)/);
-    expect(block).not.toMatch(/#[0-9a-fA-F]{3,8}\b|\brgb\(|\bhsl\(/);
+  it('is a 16:9 box and a frame styled with Designsystemet tokens only', () => {
+    expect(rule('.app-deck')).toMatch(/aspect-ratio:\s*16 \/ 9/);
+    const frame = rule('.app-deck-frame');
+    expect(frame).toMatch(/var\(--ds-color-neutral-border-subtle\)/);
+    expect(frame).toMatch(/var\(--ds-border-radius-md\)/);
+    expect(frame).not.toMatch(NO_RAW_VALUES);
+  });
+
+  it('lifts the frame over the page in the overlay without hard-coded colours', () => {
+    const overlay = rule('.app-deck-frame--overlay');
+    expect(overlay).toMatch(/position:\s*fixed/);
+    expect(overlay).toMatch(/inset:\s*0/);
+    expect(overlay).not.toMatch(NO_RAW_VALUES);
+    expect(rule('.app-deck-close')).not.toMatch(NO_RAW_VALUES);
+    expect(css).toMatch(/html\.app-deck-lock\s*\{\s*overflow:\s*hidden/);
   });
 });
 

@@ -36,8 +36,9 @@ export default async function GuidelinePage() {
             <strong>Slik bruker du presentasjonen.</strong> Klikk i presentasjonen og bruk pil høyre,
             mellomrom eller klikk for å gå videre, pil venstre for å gå tilbake, og Home/End for å hoppe
             til første eller siste lysbilde. Tilbake-knappen i nettleseren tar deg til forrige lysbilde.
-            Presentasjonen vises best i fullskjerm. Merk at nettleserens zoom ikke gjør teksten større,
-            så åpne den i fullskjerm og bruk et større vindu. Den fungerer best på datamaskin.
+            Presentasjonen vises best i fullskjerm: trykk «Fullskjerm» under, og Esc for å gå ut. Merk at
+            nettleserens zoom ikke gjør teksten større, så bruk fullskjerm eller et større vindu. Den
+            fungerer best på datamaskin.
           </p>
         </div>
 

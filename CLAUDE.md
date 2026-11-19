@@ -4,7 +4,7 @@ tasks 30/33 — open: Azurite proof of the blob path, hand-removal of the local 
 suite 71 files / 761 tests, lint + `tsc` + `next build` green).
 Shows the project lead's INTERN 104-slide HTML deck «Retningslinje for agentisk KI i Digdir» (v2.2,
 unchanged, own player with `#N` / `#N.b` slide links) to signed-in employees: code-owned frontpage
-banner → page `/retningslinje` (iframe + «Åpne i fullskjerm») → files via a session-checked route
+banner → page `/retningslinje` (iframe + «Fullskjerm» button — native full screen raced against a 700 ms timeout, overlay fallback; plus «Åpne i ny fane») → files via a session-checked route
 `/retningslinje/deck/<path>` (entry must be `…/index.html`: Next strips trailing slashes, the bundle uses
 relative paths). **The repo AND the `ghcr.io/altinn/kihub-web` image are PUBLIC, so the deck is NEVER
 committed or baked into the image**: it lives in a private blob container (`kihub-protected`, prefix

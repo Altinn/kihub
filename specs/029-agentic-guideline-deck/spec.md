@@ -86,32 +86,35 @@ content. Then repeat as a signed-in employee and confirm everything loads.
 ### User Story 3 - Full screen, new tab and slide links (Priority: P2)
 
 An employee wants the deck bigger than the page allows, or wants to send a colleague a link to one slide
-(for example the emergency-stop scene or the appendix). They use «Åpne i fullskjerm», which opens the deck
-alone in a new tab, and slide links of the form «…/retningslinje#53» open the guideline page already on
-that slide.
+(for example the emergency-stop scene or the appendix). They press «Fullskjerm», which shows the deck
+over the whole screen, or use «Åpne i ny fane», and slide links of the form «…/retningslinje#53» open the
+guideline page already on that slide.
 
 **Why this priority**: The deck is a 16:9 picture that scales to its window, so a large view and
 shareable slide links materially improve reading and were explicitly requested by the owner. The core
 journey still works without them.
 
-**Independent Test**: Click «Åpne i fullskjerm» and confirm the deck opens alone in a new tab; open the
-guideline page with a slide reference and confirm the right slide shows; open the new-tab view with a
-slide reference and confirm the same.
+**Independent Test**: Press «Fullskjerm», confirm the deck fills the screen and Esc returns to the page on
+the same slide; open the guideline page with a slide reference and confirm the right slide shows; use
+«Åpne i ny fane» with a slide reference and confirm the same.
 
 **Acceptance Scenarios**:
 
-1. **Given** the guideline page, **When** the employee activates «Åpne i fullskjerm», **Then** the deck opens
-   alone in a new tab (and the original tab stays on the page), and the new tab cannot control or inspect
-   the originating page.
+1. **Given** the guideline page, **When** the employee presses «Fullskjerm», **Then** the deck fills the
+   screen on the same slide (browser full screen, or an overlay covering the page where full screen is
+   unavailable), and pressing Esc or the close button returns to the page on that slide with focus back on
+   the «Fullskjerm» button.
 2. **Given** a link to the guideline page ending in a slide reference (`#53`, `#70`, `#1`, `#104`), **When**
    a signed-in employee opens it, **Then** the embedded deck shows that slide (53 = the emergency-stop
    scene, 70 = the start of the appendix).
 3. **Given** a slide reference with a build step (`#70.2`), **When** it is opened, **Then** the deck shows
    that slide at that step.
 4. **Given** the guideline page was opened with a slide reference, **When** the employee activates
-   «Åpne i fullskjerm», **Then** the new tab opens on the same slide.
-5. **Given** the new-tab view is opened directly, **When** the employee presses F11 or the deck's own
-   full-screen control, **Then** the deck fills the screen and letterboxes itself to the display.
+   «Åpne i ny fane», **Then** the deck opens alone in a new tab on the same slide, the original tab stays on
+   the page, and the new tab cannot control or inspect the originating page.
+5. **Given** the full-screen view is open, **When** the employee uses the deck's own controls (arrows,
+   Home/End), **Then** they work exactly as on the page, and Esc pressed inside the deck also closes the
+   overlay.
 
 ---
 
@@ -144,7 +147,7 @@ title shows with the page, card and protection unchanged, without redeploying th
 - **JavaScript disabled or blocked**: the deck cannot run; the page says so in Norwegian rather than
   leaving a blank frame. (The rest of the page does not depend on the deck.)
 - **Small screens / phones**: the deck scales as one 16:9 picture, so text is small on narrow screens. The
-  page puts «Åpne i fullskjerm» prominently and tells the reader to use a larger window; the page itself
+  page puts «Fullskjerm» prominently and tells the reader to use a larger window; the page itself
   still reflows at 320 px width.
 - **Browser zoom**: the deck's presentation mode does not enlarge text when the browser zooms (a known
   limitation of the delivered bundle). The page tells readers to use full screen and a larger window; this
@@ -170,9 +173,12 @@ title shows with the page, card and protection unchanged, without redeploying th
 - **FR-002**: The guideline page MUST include a short Norwegian introduction covering what the deck is,
   how to navigate it (arrow keys, click, Home/End), that full screen gives the best reading experience,
   and the known limitation that browser zoom does not enlarge the deck text.
-- **FR-003**: The guideline page MUST offer an «Åpne i fullskjerm» link that opens the deck alone in a new
-  tab, in a way that prevents the new tab from accessing the originating page, and MUST allow the embedded
-  deck itself to go full screen.
+- **FR-003**: The guideline page MUST offer a «Fullskjerm» button that shows the embedded deck over the
+  whole screen and lets the reader leave with Esc or a visible close button, without reloading the deck or
+  losing the current slide. It uses the browser's own full screen where that works and falls back to an
+  overlay on the page where it does not (for example iPhone Safari, or an embedded browser that never
+  answers). The page MUST also offer a secondary «Åpne i ny fane» link that opens the deck alone in a new
+  tab, in a way that prevents the new tab from accessing the originating page.
 - **FR-004**: The frontpage MUST show a card titled «Retningslinje for agentisk KI i Digdir» that links to
   the guideline page, in the same visual language as the other frontpage cards. After release the card
   MUST be visible to employees without an editor having to re-save the frontpage; editors MAY later
@@ -188,7 +194,7 @@ title shows with the page, card and protection unchanged, without redeploying th
   animations, keyboard handling, back-button behaviour and slide addresses (`#N`, `#N.b`) intact — and MUST
   keep working when served from a sub-address of KI Hub (all of its internal references are relative).
 - **FR-008**: Opening the guideline page with a slide reference (`/retningslinje#N` or `#N.b`) MUST show
-  that slide in the embedded deck, and the «Åpne i fullskjerm» link MUST open the deck on that same slide.
+  that slide in the embedded deck, and the «Åpne i ny fane» link MUST open the deck on that same slide.
 - **FR-009**: The deck's responses MUST NOT be stored by shared caches or kept for reuse without a valid
   session, and MUST NOT be indexable by search engines.
 - **FR-010**: Viewing the deck MUST NOT cause the employee's browser to contact any external host (fonts,
@@ -198,7 +204,7 @@ title shows with the page, card and protection unchanged, without redeploying th
   main landmark; no skipped heading levels; the page reflows at 320 px. The deck's own internal markup is
   treated as a delivered third-party bundle and is outside this requirement (see Assumptions).
 - **FR-012**: If the deck cannot be shown (files missing, scripts blocked), the page MUST degrade
-  gracefully with a Norwegian explanation and the «Åpne i fullskjerm» link, never an empty frame.
+  gracefully with a Norwegian explanation and the «Åpne i ny fane» link, never an empty frame.
 - **FR-013**: Replacing the deck with a newer export that keeps the same entry file name and relative
   layout MUST require no change to the page, the card or the access rules and no application release;
   the repository MUST document how to publish a new version and that release needs the project lead's
