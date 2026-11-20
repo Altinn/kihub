@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import path from 'node:path';
@@ -9,6 +10,15 @@ import { type MediaEnv, resolveMediaStorageMode } from './media-storage';
 // The browser-safe pieces live in `guideline-deck-view.ts` (the client component imports them from
 // there); re-exported so server code and tests keep one import path.
 export { DECK_ENTRY, buildDeckSrc, parseDeckHash };
+
+/**
+ * 030 — the key that keeps two people on one browser apart when the deck remembers their place: the first
+ * 16 hex characters of SHA-256 over a fixed prefix and the Entra `oid`. The browser therefore never stores
+ * the raw `oid`, a name or an e-mail. It is pseudonymous, not secret.
+ */
+export function deckUserKey(oid: string): string {
+  return createHash('sha256').update(`kihub-deck-position:${oid}`).digest('hex').slice(0, 16);
+}
 
 /**
  * 029 — «Retningslinje for agentisk KI i Digdir»: the INTERN slide deck delivered with issue #183.
