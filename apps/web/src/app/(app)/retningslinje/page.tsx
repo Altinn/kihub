@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { auth } from '@/auth';
 import { DeckFrame } from '@/components/DeckFrame';
-import { deckIsAvailable, isGuidelineDeckEnabled } from '@/lib/guideline-deck';
+import { deckIsAvailable, deckUserKey, isGuidelineDeckEnabled } from '@/lib/guideline-deck';
 
 export const metadata: Metadata = { title: 'Retningslinje for agentisk KI i Digdir' };
 
@@ -18,6 +19,11 @@ export const metadata: Metadata = { title: 'Retningslinje for agentisk KI i Digd
 export default async function GuidelinePage() {
   if (!isGuidelineDeckEnabled()) notFound();
   const available = await deckIsAvailable();
+  // 030: a pseudonymous per-user key so the browser can remember each reader's place apart. No oid → the
+  // deck still works, it just does not remember.
+  const session = await auth();
+  const oid = (session?.user as { oid?: string } | undefined)?.oid;
+  const userKey = oid ? deckUserKey(oid) : undefined;
 
   return (
     <div className="app-container">
@@ -32,7 +38,7 @@ export default async function GuidelinePage() {
         </p>
 
         {available ? (
-          <DeckFrame />
+          <DeckFrame userKey={userKey} />
         ) : (
           <div className="ds-alert" data-color="warning">
             <p className="ds-paragraph">

@@ -2,7 +2,27 @@
 
 import { InformationSquareIcon } from '@navikt/aksel-icons';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { buildDeckSrc } from '@/lib/guideline-deck-view';
+import {
+  buildDeckSrc,
+  deckPositionStorageKey,
+  parseDeckHash,
+  readDeckPosition,
+  resolveStartHash,
+  writeDeckPosition,
+} from '@/lib/guideline-deck-view';
+
+/** `localStorage`, or null where merely touching it throws (blocked storage, some privacy modes). */
+function localStorageOrNull(): Storage | null {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+function readRemembered(storageKey: string | null): string {
+  return storageKey ? readDeckPosition(localStorageOrNull(), storageKey) : '';
+}
 
 /** Shown on hover / keyboard focus of the ⓘ button (Designsystemet tooltip) instead of a text block. */
 const HELP =
@@ -31,24 +51,67 @@ const HELP =
  * Esc to close (also from inside the same-origin frame), a locked page scroll and focus handed back to
  * the button on close.
  *
+ * 030 — REMEMBERING THE PLACE: the page address never holds the slide (the deck writes it into the FRAME's
+ * address), so a refresh used to restart at slide 1. With a `userKey` (a pseudonymous hash of the signed-in
+ * user, derived on the server) the frame's slide address is saved in `localStorage` as the reader moves,
+ * and read back on the next open — unless the page address carries its own valid `#N`, which wins. Nothing
+ * is sent to a server; blocked storage degrades to the old behaviour silently.
+ *
  * KEYBOARD: when full screen opens, focus goes INTO THE DECK, not to the close button — the deck listens
  * for the arrow keys, Home and End on its own document, so a focused button would swallow them and the
  * reader could not turn a slide. The close button stays one Tab away (it follows the frame), and Esc
  * closes from anywhere.
  */
-export function DeckFrame() {
+export function DeckFrame({ userKey }: { userKey?: string }) {
   // null on the server and during hydration; the real address only after mount, so hydration never mismatches.
   const [src, setSrc] = useState<string | null>(null);
   const [overlay, setOverlay] = useState(false);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const openRef = useRef<HTMLButtonElement>(null);
+  const storageKey = userKey ? deckPositionStorageKey(userKey) : null;
 
   useEffect(() => {
+    // The first sync also consults the remembered place (030); later page-hash changes behave as in 029.
+    const start = () =>
+      setSrc(buildDeckSrc(resolveStartHash(window.location.hash, readRemembered(storageKey))));
     const sync = () => setSrc(buildDeckSrc(window.location.hash));
-    sync();
+    start();
     window.addEventListener('hashchange', sync);
     return () => window.removeEventListener('hashchange', sync);
-  }, []);
+  }, [storageKey]);
+
+  // 030 — remember where the reader is. The deck moves with history.pushState/replaceState, which fire no
+  // event, so the (same-origin) frame's own address is polled, and read once more as the page goes away.
+  const tracking = src !== null && storageKey !== null;
+  useEffect(() => {
+    if (!tracking || !storageKey) return;
+    const storage = localStorageOrNull();
+    if (!storage) return;
+    let last = '';
+    const capture = () => {
+      let hash = '';
+      try {
+        hash = parseDeckHash(frameRef.current?.contentWindow?.location.hash ?? '');
+      } catch {
+        return; // frame not reachable right now
+      }
+      if (!hash || hash === last) return;
+      last = hash;
+      writeDeckPosition(storage, storageKey, hash);
+      // A shared `…#53` only decides where the reader STARTS: once they move on, drop it from the page
+      // address so a refresh does not pull them back. replaceState fires no `hashchange`: no frame reload.
+      const pageHash = parseDeckHash(window.location.hash);
+      if (pageHash && pageHash !== hash) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    };
+    const timer = window.setInterval(capture, 500);
+    window.addEventListener('pagehide', capture);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('pagehide', capture);
+    };
+  }, [tracking, storageKey]);
 
   /** Give the deck keyboard focus, so arrows / Home / End reach its own key handler. */
   const focusDeck = useCallback(() => {

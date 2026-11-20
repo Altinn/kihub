@@ -19,6 +19,13 @@ and copied a local deck into `.next/standalone`, so `outputFileTracingExcludes` 
 `protected-static`; stale pnpm hoisting once broke `next build` (`@floating-ui/react`) — `pnpm install --frozen-lockfile
 --offline --force`. Side finding, NOT in scope: the Dockerfile does
 not copy `public/` (prod `/brand/*` redirects to sign-in). Plan: `specs/029-agentic-guideline-deck/plan.md`.
+Follow-up **030-deck-resume-position** (spec + plan + tasks + implemented 2026-11-20, branch `030-deck-resume-position`
+stacked on 029): a refresh / later visit reopens the deck on the reader's last slide (`#N` / `#N.b`). Stored ONLY in
+`localStorage` (`kihub:deck-position:<16-hex>`, key = `deckUserKey(oid)` computed on the server and passed to
+`DeckFrame` as `userKey`; no server route, DB or migration). The deck moves with `pushState`/`replaceState` (no events),
+so `DeckFrame` polls the same-origin frame's `location.hash` every 500 ms + on `pagehide`. Page `#N` wins at START only,
+and is stripped from the page URL (`replaceState`, no reload) once the reader moves, else a refresh would snap back to it.
+Pure rules in `guideline-deck-view.ts` (`resolveStartHash`, `read/writeDeckPosition`); plan: `specs/030-deck-resume-position/plan.md`.
 Prior: **028-per-type-artifact-dirs** (DONE — specify + plan + tasks + implement 2026-11-17,
 PR Altinn/kihub#185 stacked on 026 / PR #176; tasks 48/48; discovery-core 146,
 github-client 23, web unit 261, web integration 187, lint + `tsc` clean, `next build` green).

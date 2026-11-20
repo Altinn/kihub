@@ -22,3 +22,49 @@ export function parseDeckHash(hash: string): string {
 export function buildDeckSrc(hash: string): string {
   return `${DECK_ENTRY}${parseDeckHash(hash)}`;
 }
+
+/**
+ * 030 — remembering the reader's place. The place is a slide address (`#N` / `#N.b`) in the reader's own
+ * browser storage, one value per signed-in user. Nothing here ever reaches a server.
+ */
+
+/** The minimal slice of `Storage` we use, so tests can pass a fake (or a throwing one). */
+export type DeckPositionStorage = Pick<Storage, 'getItem' | 'setItem'>;
+
+/** One storage entry per user; `userKey` is the pseudonymous key the server derives (`deckUserKey`). */
+export function deckPositionStorageKey(userKey: string): string {
+  return `kihub:deck-position:${userKey}`;
+}
+
+/**
+ * Where the deck STARTS: an explicit, valid page address wins (a shared `…#53` link), else the remembered
+ * place, else the first slide (`''`). Both inputs are validated; neither is ever used as-is.
+ */
+export function resolveStartHash(pageHash: string, remembered: string): string {
+  return parseDeckHash(pageHash) || parseDeckHash(remembered);
+}
+
+/** The remembered place, or `''` when there is none, it is not a slide address, or storage is unusable. */
+export function readDeckPosition(storage: DeckPositionStorage | null, key: string): string {
+  try {
+    return parseDeckHash(storage?.getItem(key) ?? '');
+  } catch {
+    return '';
+  }
+}
+
+/** Remember a place. Returns whether it was written; invalid input and blocked/full storage are ignored. */
+export function writeDeckPosition(
+  storage: DeckPositionStorage | null,
+  key: string,
+  hash: string,
+): boolean {
+  const valid = parseDeckHash(hash);
+  if (!valid || !storage) return false;
+  try {
+    storage.setItem(key, valid);
+    return true;
+  } catch {
+    return false;
+  }
+}
