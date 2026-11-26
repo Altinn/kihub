@@ -24,7 +24,7 @@ export const LearningCategory: CollectionConfig = {
     group: 'KI Læring',
   },
   access: {
-    read: () => true,
+    read: ({ req }) => Boolean(req.user),
     create: ({ req }) => isEditor(req.user),
     update: ({ req }) => isEditor(req.user),
     delete: ({ req }) => isEditor(req.user),

@@ -17,7 +17,7 @@ export const SiteChrome: GlobalConfig = {
   slug: 'site-chrome',
   label: 'Site chrome (header & footer)',
   access: {
-    read: () => true,
+    read: ({ req }) => Boolean(req.user),
     update: ({ req }) => isEditor(req.user),
   },
   fields: [

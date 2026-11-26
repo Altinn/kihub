@@ -36,7 +36,12 @@ export const CONTENT_VERSIONS = {
  * Publishing rights are unchanged (spec FR-010): any contributor+ may publish.
  */
 export const contentAccess = {
-  read: ({ req }) => (isEditor(req.user) ? true : { _status: { equals: 'published' } }),
+  // No user → nothing: `/payload-api` is on the public origin (security audit F-02). The app's
+  // read layers use `overrideAccess: true` with their own PUBLISHED filter and are unaffected.
+  read: ({ req }) => {
+    if (!req.user) return false;
+    return isEditor(req.user) ? true : { _status: { equals: 'published' } };
+  },
   readVersions: ({ req }) => isEditor(req.user),
   create: ({ req }) => isEditor(req.user),
   update: ({ req }) => isEditor(req.user),

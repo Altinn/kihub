@@ -16,7 +16,7 @@ export const Frontpage: GlobalConfig = {
   slug: 'frontpage',
   label: 'Frontpage (hero, tiles, subscriptions)',
   access: {
-    read: () => true,
+    read: ({ req }) => Boolean(req.user),
     update: ({ req }) => isEditor(req.user),
   },
   fields: [
