@@ -15,6 +15,7 @@ import * as migration_20261106_090856_pages from './20261106_090856_pages';
 import * as migration_20261110_081248_pages_hierarchy from './20261110_081248_pages_hierarchy';
 import * as migration_20261117_154755_artifact_revision_governance from './20261117_154755_artifact_revision_governance';
 import * as migration_20261117_155625_discovery_run_artifact_dirs from './20261117_155625_discovery_run_artifact_dirs';
+import * as migration_20261125_121741_audit_log_user_delete from './20261125_121741_audit_log_user_delete';
 
 export const migrations = [
   {
@@ -101,5 +102,10 @@ export const migrations = [
     up: migration_20261117_155625_discovery_run_artifact_dirs.up,
     down: migration_20261117_155625_discovery_run_artifact_dirs.down,
     name: '20261117_155625_discovery_run_artifact_dirs',
+  },
+  {
+    up: migration_20261125_121741_audit_log_user_delete.up,
+    down: migration_20261125_121741_audit_log_user_delete.down,
+    name: '20261125_121741_audit_log_user_delete'
   },
 ];

@@ -48,7 +48,7 @@ export const Event: CollectionConfig = {
 
 | Actor | read | create/update/delete (author, publish, unpublish, delete) |
 |-------|------|-----------------------------------------------------------|
-| Anonymous | published only (and blocked from the back-office by the Phase 6 gate) | **none** |
+| Anonymous | **none** — refused since 2026-11-25 (security audit F-02: `/payload-api` is on the public origin); also blocked from the back-office by the Phase 6 gate | **none** |
 | Reader | published only | **none** |
 | Contributor / Reviewer / Approver / Admin | all (drafts + published) | **allowed** |
 

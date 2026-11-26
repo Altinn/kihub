@@ -311,7 +311,8 @@ export interface Review {
 export interface AuditLog {
   id: number;
   actor: number | User;
-  action: 'metadata-edit' | 'lifecycle-transition' | 'review-recorded' | 'approval-decision' | 'role-change';
+  action:
+    'metadata-edit' | 'lifecycle-transition' | 'review-recorded' | 'approval-decision' | 'role-change' | 'user-delete';
   artifact?: (number | null) | Artifact;
   targetUser?: (number | null) | User;
   details?:

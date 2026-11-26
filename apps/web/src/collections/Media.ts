@@ -34,8 +34,11 @@ export const Media: CollectionConfig = {
       'Bilder brukt i nyheter og KI Læring. Fokuspunkt og beskjæring gjelder overalt der bildet brukes.',
   },
   access: {
-    // An image referenced by a published learning page must be fetchable by every employee.
-    read: () => true,
+    // Every signed-in employee may fetch an image (a published page's image must load), but not
+    // the internet: `/payload-api/media/file/*` sits on the public origin (security audit F-02).
+    // The browser's <img> request carries the session cookie; so does Payload's own re-fetch of
+    // the original when an editor re-frames an image (getExternalFile forwards cookies).
+    read: ({ req }) => Boolean(req.user),
     create: ({ req }) => isEditor(req.user),
     update: ({ req }) => isEditor(req.user),
     delete: ({ req }) => isEditor(req.user),

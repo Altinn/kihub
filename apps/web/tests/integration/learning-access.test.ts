@@ -262,14 +262,15 @@ describe('FR-032 — drafts never leak to non-editors', () => {
     expect(titles).not.toContain(`Utkast ${testId}`);
   });
 
-  it('does not return a draft to an ANONYMOUS reader', async () => {
-    const result = await payload.find({
-      collection: 'learning-pages',
-      where: { title: { like: `%${testId}%` } },
-      limit: 100,
-      overrideAccess: false,
-    });
-    expect(result.docs.map((d) => d.title)).not.toContain(`Utkast ${testId}`);
+  it('refuses an ANONYMOUS reader outright — no drafts, no published pages (audit F-02)', async () => {
+    await expect(
+      payload.find({
+        collection: 'learning-pages',
+        where: { title: { like: `%${testId}%` } },
+        limit: 100,
+        overrideAccess: false,
+      }),
+    ).rejects.toThrow();
   });
 
   it('does not return a draft even when a Reader asks for it BY SLUG', async () => {
